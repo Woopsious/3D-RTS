@@ -23,12 +23,7 @@ public class WeaponSystem : MonoBehaviour
 	}
 	public IEnumerator ShootMainWeapon()
 	{
-		yield return new WaitForSeconds(mainWeaponAttackSpeed);
 
-		if(unit.currentUnitTarget != null || unit.currentBuildingTarget != null)
-		{
-			StartCoroutine(ShootMainWeapon());
-		}
 	}
 	public IEnumerator ShootSecondaryWeapon()
 	{
