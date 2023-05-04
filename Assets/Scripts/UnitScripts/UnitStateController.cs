@@ -167,24 +167,6 @@ public class UnitStateController : MonoBehaviour
 			}
 		}
 	}
-
-	public void ShowUnit()
-	{
-		miniMapRenderObj.layer = 13;
-		//notifiy enemy player when enemy unit is spotted
-	}
-	public void HideUnit()
-	{
-		if (isPlayerOneUnit)
-		{
-			miniMapRenderObj.layer = 11;
-		}
-		else if (!isPlayerOneUnit)
-		{
-			miniMapRenderObj.layer = 12;
-		}
-		//notifiy enemy player when enemy unit is unspotted
-	}
 		
 	//visulization of attack range
 	public void OnDrawGizmosSelected()
@@ -279,6 +261,23 @@ public class UnitStateController : MonoBehaviour
 
 		playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
 		playerController.unitListForPlayer.Remove(this);
+	}
+	public void ShowUnit()
+	{
+		miniMapRenderObj.layer = 13;
+		//notifiy enemy player when enemy unit is spotted
+	}
+	public void HideUnit()
+	{
+		if (isPlayerOneUnit)
+		{
+			miniMapRenderObj.layer = 11;
+		}
+		else if (!isPlayerOneUnit)
+		{
+			miniMapRenderObj.layer = 12;
+		}
+		//notifiy enemy player when enemy unit is unspotted
 	}
 
 	//STATE CHANGE FUNCTIONS

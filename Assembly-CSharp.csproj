@@ -8,8 +8,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <ProjectGuid>{D2940CA3-3CBE-A930-B919-609D2F7C5EE0}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -80,7 +79,11 @@
     <Compile Include="Assets\Scripts\BuildingScripts\BuildingManager.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitProductionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\CapturePointController.cs" />
-    <Compile Include="Assets\Scripts\UnitScripts\UnitTest.cs" />
+    <Compile Include="Assets\Scripts\UnitScripts\WeaponSystem.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Effects\UI\FogOfWar\TestUnlit 1.shader" />
+    <None Include="Assets\Effects\UI\FogOfWar\TestUnlit 2.shader" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
