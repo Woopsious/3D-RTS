@@ -1,17 +1,46 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class WeaponSystem : MonoBehaviour
 {
-	public List<AudioSource> shootingAudioClips = new List<AudioSource>();
-	public List<AudioSource> hitAudioClips = new List<AudioSource>();
+	public UnitStateController unit;
 
-	public List<float> attackSpeedTimer = new List<float>();
-	public List<float> attackSpeed = new List<float>();
+	public AudioSource mainWeaponAudio;
+	public AudioSource mainWeaponHitAudio;
+	public float mainWeaponAttackSpeed;
 
-	public void ShootAtEnemy(UnitStateController unit, UnitStateController targetUnit, BuildingManager targetBuilding)
+	public AudioSource secondaryWeaponAudio;
+	public AudioSource secondaryWeaponHitAudio;
+	public float secondaryWeaponAttackSpeed;
+
+	public bool hasSecondaryWeapon;
+
+	public void ShootAtEnemy(UnitStateController targetUnit, BuildingManager targetBuilding)
 	{
 
+	}
+	public IEnumerator ShootMainWeapon()
+	{
+		yield return new WaitForSeconds(mainWeaponAttackSpeed);
+
+		if(unit.currentUnitTarget != null || unit.currentBuildingTarget != null)
+		{
+			StartCoroutine(ShootMainWeapon());
+		}
+	}
+	public IEnumerator ShootSecondaryWeapon()
+	{
+		if (!hasSecondaryWeapon)
+		{
+			StopCoroutine(ShootSecondaryWeapon());
+		}
+		yield return new WaitForSeconds(secondaryWeaponAttackSpeed);
+
+		if (unit.currentUnitTarget != null || unit.currentBuildingTarget != null)
+		{
+			StartCoroutine(ShootSecondaryWeapon());
+		}
 	}
 }
