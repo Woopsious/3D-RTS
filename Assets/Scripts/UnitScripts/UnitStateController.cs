@@ -110,8 +110,6 @@ public class UnitStateController : MonoBehaviour
 		{
 			ChangeStateIdle();
 		}
-		if (!isCargoShip && currentState != attackState)
-			ScanForTargets();
 
 		if (isSelected)
 		{
@@ -127,8 +125,10 @@ public class UnitStateController : MonoBehaviour
 	public virtual void FixedUpdate()
 	{
 		currentState.UpdatePhysics(this);
+		if (!isCargoShip && currentState != attackState)
+			ScanForTargets();
 	}
-	//scan for targets to switch to attack mode then moving mode once enemy killed or another target is found
+	//grab correct entity types in view range, if entity is in attack range and to tempTargetList then switch to attack state if any found
 	public void ScanForTargets()
 	{
 		//Debug.Log("scanning for targets");
@@ -143,7 +143,7 @@ public class UnitStateController : MonoBehaviour
 				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<UnitStateController>().CenterPoint.transform.position,
 					out RaycastHit hit, ignoreMe);
 
-				if (hit.collider.GetComponent<UnitStateController>() != null)
+				if (hit.collider.GetComponent<UnitStateController>() != null && weaponSystem.CheckIfInAttackRange(hit.collider.transform.position))
 				{
 					targetObjs.Add(target.gameObject);
 				}
@@ -153,7 +153,7 @@ public class UnitStateController : MonoBehaviour
 				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<BuildingManager>().CenterPoint.transform.position,
 					out RaycastHit hit, ignoreMe);
 
-				if (hit.collider.GetComponent<BuildingManager>() != null)
+				if (hit.collider.GetComponent<BuildingManager>() != null && weaponSystem.CheckIfInAttackRange(hit.collider.transform.position))
 				{
 					targetObjs.Add(target.gameObject);
 				}
@@ -170,13 +170,6 @@ public class UnitStateController : MonoBehaviour
 				ChangeStateIdle();
 			}
 		}
-	}
-	//visulization of attack range
-	public void OnDrawGizmosSelected()
-	{
-		Gizmos.color = Color.red;
-		Gizmos.DrawWireSphere(transform.position, attackRange);
-		Gizmos.DrawWireSphere(transform.position, ViewRange);
 	}
 
 	//HEALTH FUNCTIONS
@@ -282,6 +275,12 @@ public class UnitStateController : MonoBehaviour
 			miniMapRenderObj.layer = 12;
 		}
 		//notifiy enemy player when enemy unit is unspotted
+	}
+	public void OnDrawGizmosSelected()
+	{
+		Gizmos.color = Color.red;
+		Gizmos.DrawWireSphere(transform.position, attackRange);
+		Gizmos.DrawWireSphere(transform.position, ViewRange);
 	}
 
 	//STATE CHANGE FUNCTIONS

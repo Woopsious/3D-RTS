@@ -11,6 +11,7 @@ public class WeaponSystem : MonoBehaviour
 	public AudioSource mainWeaponAudio;
 	public AudioSource mainWeaponHitAudio;
 	public ParticleSystem mainWeaponParticles;
+	public ParticleSystem mainWeaponProjectileParticle;
 	public ParticleSystem mainWeaponHitParticles;
 	public int mainWeaponDamage;
 	public float mainWeaponAttackSpeed;
@@ -34,7 +35,7 @@ public class WeaponSystem : MonoBehaviour
 	{
 		unit.unitTargetList.Clear();
 		unit.buildingTargetList.Clear();
-		Collider[] newTargetArray = Physics.OverlapSphere(unit.transform.position, unit.attackRange - 1); //find targets in attack range
+		Collider[] newTargetArray = Physics.OverlapSphere(unit.transform.position, unit.ViewRange - 1); //find targets in attack range
 																									//check what side unit is on, check if unit is already in target list
 		foreach (Collider collider in newTargetArray)
 		{
@@ -86,14 +87,16 @@ public class WeaponSystem : MonoBehaviour
 			StartCoroutine(MainWeaponCooldown());
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
 
-			MainWeaponSFXVFX(unit.currentUnitTarget.transform.position);
+			mainWeaponAudio.Play();
+			mainWeaponParticles.Play();
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 		{
 			StartCoroutine(MainWeaponCooldown());
 			unit.currentBuildingTarget.RecieveDamage(secondaryWeaponDamage);
 
-			MainWeaponSFXVFX(unit.currentUnitTarget.transform.position);
+			mainWeaponAudio.Play();
+			mainWeaponParticles.Play();
 		}
 		else
 		{
@@ -110,33 +113,21 @@ public class WeaponSystem : MonoBehaviour
 			StartCoroutine(SecondaryWeaponCooldown());
 			unit.currentUnitTarget.RecieveDamage(unit.damage);
 
-			SecondaryWeaponSFXVFX(unit.currentBuildingTarget.transform.position);
+			secondaryWeaponAudio.Play();
+			secondaryWeaponParticles.Play();
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 		{
 			StartCoroutine(SecondaryWeaponCooldown());
 			unit.currentBuildingTarget.RecieveDamage(unit.damage);
 
-			SecondaryWeaponSFXVFX(unit.currentBuildingTarget.transform.position);
+			secondaryWeaponAudio.Play();
+			secondaryWeaponParticles.Play();
 		}
 		else
 		{
 			StopCoroutine(MainWeaponCooldown());
 		}
-	}
-	public void MainWeaponSFXVFX(Vector3 targetHitVector)
-	{
-		mainWeaponHitParticles.gameObject.transform.position = new Vector3(targetHitVector.x, targetHitVector.y + 2, targetHitVector.z);
-		mainWeaponAudio.Play();
-		mainWeaponParticles.Play();
-		StartCoroutine(MainWeaponHitDelay());
-	}
-	public void SecondaryWeaponSFXVFX(Vector3 targetHitVector)
-	{
-		secondaryWeaponHitParticles.gameObject.transform.position = new Vector3(targetHitVector.x, targetHitVector.y + 2, targetHitVector.z);
-		secondaryWeaponAudio.Play();
-		secondaryWeaponParticles.Play();
-		StartCoroutine(SecondaryWeaponHitDelay());
 	}
 
 	//Weapon Cooldown Enumerators
@@ -191,7 +182,7 @@ public class WeaponSystem : MonoBehaviour
 		else
 			return false;
 	}
-	//sort targets from closest to furthest, then check if target is in view, once a target is found and in view, return that unit and end loop
+	//sort targets from closest to furthest, then check if target is in view + attack range, once a valid target is found, return that target and end loop
 	public UnitStateController GrabClosestUnit()
 	{
 		/*
@@ -208,7 +199,7 @@ public class WeaponSystem : MonoBehaviour
 			Physics.Linecast(unit.CenterPoint.transform.position, unit.unitTargetList[i].GetComponent<UnitStateController>().CenterPoint.transform.position,
 			out RaycastHit hit, unit.ignoreMe);
 
-			if (hit.collider.GetComponent<UnitStateController>() != null)
+			if (hit.collider.GetComponent<UnitStateController>() != null && CheckIfInAttackRange(hit.collider.transform.position))
 			{
 				hit.collider.GetComponent<UnitStateController>().ShowUnit();
 				return unit.unitTargetList[i];
@@ -224,14 +215,15 @@ public class WeaponSystem : MonoBehaviour
 			if (listedBuilding == null)
 				unit.buildingTargetList.Remove(listedBuilding);
 		}
-		unit.buildingTargetList = unit.buildingTargetList.OrderBy(newtarget => Vector3.Distance(unit.transform.position, newtarget.transform.position)).ToList();
 		*/
+		unit.buildingTargetList = unit.buildingTargetList.OrderBy(newtarget => Vector3.Distance(unit.transform.position, newtarget.transform.position)).ToList();
+
 		for (int i = 0; i < unit.buildingTargetList.Count; i++)
 		{
 			Physics.Linecast(unit.CenterPoint.transform.position, unit.buildingTargetList[i].GetComponent<BuildingManager>().CenterPoint.transform.position,
 			out RaycastHit hit, unit.ignoreMe);
 
-			if (hit.collider.GetComponent<BuildingManager>() != null)
+			if (hit.collider.GetComponent<BuildingManager>() != null && CheckIfInAttackRange(hit.collider.transform.position))
 			{
 				return unit.buildingTargetList[i];
 			}
