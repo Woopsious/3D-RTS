@@ -14,9 +14,12 @@ public class UnitStateController : MonoBehaviour
 	public UnitMovingState movingState = new UnitMovingState();
 	public UnitStateAttacking attackState = new UnitStateAttacking();
 
+	public WeaponSystem weaponSystem = new WeaponSystem();
+
 	[Header("Unit Refs")]
 	public Animator animatorController;
 	public List<AudioSource> audioSFXs = new List<AudioSource>();
+	public AudioSource movingSFX;
 	public NavMeshAgent agentNav;
 	public Rigidbody rb;
 	public GameObject CenterPoint;
@@ -107,7 +110,7 @@ public class UnitStateController : MonoBehaviour
 		{
 			ChangeStateIdle();
 		}
-		if (!isCargoShip)
+		if (!isCargoShip && currentState != attackState)
 			ScanForTargets();
 
 		if (isSelected)
@@ -167,7 +170,6 @@ public class UnitStateController : MonoBehaviour
 			}
 		}
 	}
-		
 	//visulization of attack range
 	public void OnDrawGizmosSelected()
 	{
@@ -175,6 +177,7 @@ public class UnitStateController : MonoBehaviour
 		Gizmos.DrawWireSphere(transform.position, attackRange);
 		Gizmos.DrawWireSphere(transform.position, ViewRange);
 	}
+
 	//HEALTH FUNCTIONS
 	public void RecieveDamage(int dmg)
 	{

@@ -16,7 +16,7 @@ public class UnitMovingState : UnitBaseState
 			unit.animatorController.SetBool("isAttacking", false);
 			unit.animatorController.SetBool("isIdle", false);
 		}
-		unit.audioSFXs[0].Play();
+		unit.movingSFX.Play();
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[2].Stop();

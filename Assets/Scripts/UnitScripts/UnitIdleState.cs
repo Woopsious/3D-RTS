@@ -13,7 +13,7 @@ public class UnitIdleState : UnitBaseState
 			unit.animatorController.SetBool("isAttacking", false);
 			unit.animatorController.SetBool("isIdle", true);
 		}
-		unit.audioSFXs[0].Stop();
+		unit.movingSFX.Stop();
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[1].Stop();
