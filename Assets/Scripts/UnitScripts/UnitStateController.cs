@@ -131,6 +131,7 @@ public class UnitStateController : MonoBehaviour
 	//scan for targets to switch to attack mode then moving mode once enemy killed or another target is found
 	public void ScanForTargets()
 	{
+		//Debug.Log("scanning for targets");
 		//scan for targets
 		Collider[] newTargetArray = Physics.OverlapSphere(transform.position, ViewRange); //find targets in attack range
 

@@ -32,7 +32,9 @@ public class WeaponSystem : MonoBehaviour
 	//grab entities in attack range, if x component exists + is enemy entity + not in list, then add it to list, else ignore it
 	public void GetTargetList()
 	{
-		Collider[] newTargetArray = Physics.OverlapSphere(unit.transform.position, unit.ViewRange); //find targets in attack range
+		unit.unitTargetList.Clear();
+		unit.buildingTargetList.Clear();
+		Collider[] newTargetArray = Physics.OverlapSphere(unit.transform.position, unit.attackRange - 1); //find targets in attack range
 																									//check what side unit is on, check if unit is already in target list
 		foreach (Collider collider in newTargetArray)
 		{
@@ -53,7 +55,11 @@ public class WeaponSystem : MonoBehaviour
 		}
 		unit.currentUnitTarget = GrabClosestUnit();
 		unit.currentBuildingTarget = GrabClosestBuilding();
-
+		if (unit.isPlayerOneUnit)
+		{
+			Debug.Log(unit.currentUnitTarget);
+			Debug.Log(unit.currentBuildingTarget);
+		}
 		//change to idle if no enemy entities are spotted, else restart shooting loop
 		if (!HasBuildingTarget() && !HasUnitTarget())
 		{
@@ -91,6 +97,8 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else
 		{
+			unit.currentUnitTarget = null;
+			unit.currentBuildingTarget = null;
 			StopCoroutine(MainWeaponCooldown());
 			GetTargetList();
 		}
