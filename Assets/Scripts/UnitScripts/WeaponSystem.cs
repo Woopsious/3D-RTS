@@ -15,6 +15,8 @@ public class WeaponSystem : MonoBehaviour
 	public ParticleSystem mainWeaponHitParticles;
 	public int mainWeaponDamage;
 	public float mainWeaponAttackSpeed;
+	//[System.NonSerialized]
+	public float mainWeaponAttackSpeedTimer;
 
 	public AudioSource secondaryWeaponAudio;
 	public AudioSource secondaryWeaponHitAudio;
@@ -22,6 +24,8 @@ public class WeaponSystem : MonoBehaviour
 	public ParticleSystem secondaryWeaponHitParticles;
 	public int secondaryWeaponDamage;
 	public float secondaryWeaponAttackSpeed;
+	//[System.NonSerialized]
+	public float secondaryWeaponAttackSpeedTimer;
 
 	public bool hasSecondaryWeapon;
 
@@ -30,12 +34,12 @@ public class WeaponSystem : MonoBehaviour
 	//3. check if ref is null and target is in attack range after every shot. continue till one is false then loop back to 1.
 	//4. if lists of possible targets are 0 go back to x state
 
-	//grab entities in attack range, if x component exists + is enemy entity + not in list, then add it to list, else ignore it
+	//grab entities in view range - 0.25, if x component exists + is enemy entity + not in list, then add it to list, else ignore it
 	public void GetTargetList()
 	{
 		unit.unitTargetList.Clear();
 		unit.buildingTargetList.Clear();
-		Collider[] newTargetArray = Physics.OverlapSphere(unit.transform.position, unit.ViewRange - 1); //find targets in attack range
+		Collider[] newTargetArray = Physics.OverlapSphere(unit.transform.position, unit.ViewRange - 0.25f); //find targets in attack range
 																									//check what side unit is on, check if unit is already in target list
 		foreach (Collider collider in newTargetArray)
 		{
@@ -54,6 +58,7 @@ public class WeaponSystem : MonoBehaviour
 				}
 			}
 		}
+		//return closest target (see comment above function for more info)
 		unit.currentUnitTarget = GrabClosestUnit();
 		unit.currentBuildingTarget = GrabClosestBuilding();
 		if (unit.isPlayerOneUnit)
@@ -61,21 +66,23 @@ public class WeaponSystem : MonoBehaviour
 			Debug.Log(unit.currentUnitTarget);
 			Debug.Log(unit.currentBuildingTarget);
 		}
-		//change to idle if no enemy entities are spotted, else restart shooting loop
+		//change to idle if no valid enemy entities are returned
 		if (!HasBuildingTarget() && !HasUnitTarget())
 		{
 			unit.ChangeStateIdle();
 		}
+		//else restart shooting loop of weapons (see comment above function for more info)
 		else
 		{
-			if(unit.isPlayerOneUnit)
+			//if(!unit.isPlayerOneUnit)
 			{
 				ShootMainWeapon();
-				//ShootSecondaryWeapon();
+				if (hasSecondaryWeapon)
+					ShootSecondaryWeapon();
 			}
 		}
 	}
-	//check if entity exists + is in attack range, if true shoot it, else stop coroutine and try get new target
+	//check if entity exists + is in attack range, if true shoot it, else stop coroutine and try get new target (ShootMainWeapon function calls GetTargetList again)
 	public void ShootMainWeapon()
 	{
 		if (unit.hasAnimation)
@@ -84,7 +91,7 @@ public class WeaponSystem : MonoBehaviour
 		}
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 		{
-			StartCoroutine(MainWeaponCooldown());
+			//StartCoroutine(MainWeaponCooldown());
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
 
 			mainWeaponAudio.Play();
@@ -92,7 +99,7 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 		{
-			StartCoroutine(MainWeaponCooldown());
+			//StartCoroutine(MainWeaponCooldown());
 			unit.currentBuildingTarget.RecieveDamage(secondaryWeaponDamage);
 
 			mainWeaponAudio.Play();
@@ -102,7 +109,7 @@ public class WeaponSystem : MonoBehaviour
 		{
 			unit.currentUnitTarget = null;
 			unit.currentBuildingTarget = null;
-			StopCoroutine(MainWeaponCooldown());
+			//StopCoroutine(MainWeaponCooldown());
 			GetTargetList();
 		}
 	}
@@ -110,7 +117,7 @@ public class WeaponSystem : MonoBehaviour
 	{
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 		{
-			StartCoroutine(SecondaryWeaponCooldown());
+			//StartCoroutine(SecondaryWeaponCooldown());
 			unit.currentUnitTarget.RecieveDamage(unit.damage);
 
 			secondaryWeaponAudio.Play();
@@ -118,7 +125,7 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 		{
-			StartCoroutine(SecondaryWeaponCooldown());
+			//StartCoroutine(SecondaryWeaponCooldown());
 			unit.currentBuildingTarget.RecieveDamage(unit.damage);
 
 			secondaryWeaponAudio.Play();
@@ -126,34 +133,22 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else
 		{
-			StopCoroutine(MainWeaponCooldown());
+			//StopCoroutine(MainWeaponCooldown());
 		}
 	}
 
 	//Weapon Cooldown Enumerators
 	public IEnumerator MainWeaponCooldown()
 	{
-		yield return new WaitForSeconds(secondaryWeaponAttackSpeed);
+		yield return new WaitForSeconds(mainWeaponAttackSpeed);
 
 		ShootMainWeapon();
-	}
-	public IEnumerator MainWeaponHitDelay()
-	{
-		yield return new WaitForSeconds(0.25f);
-		mainWeaponHitAudio.Play();
-		mainWeaponHitParticles.Play();
 	}
 	public IEnumerator SecondaryWeaponCooldown()
 	{
 		yield return new WaitForSeconds(secondaryWeaponAttackSpeed);
 
 		ShootSecondaryWeapon();
-	}
-	public IEnumerator SecondaryWeaponHitDelay()
-	{
-		yield return new WaitForSeconds(0.25f);
-		secondaryWeaponHitAudio.Play();
-		secondaryWeaponHitParticles.Play();
 	}
 
 	//BOOL CHECKS

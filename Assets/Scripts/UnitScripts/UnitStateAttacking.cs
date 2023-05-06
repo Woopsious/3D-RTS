@@ -14,7 +14,10 @@ public class UnitStateAttacking : UnitBaseState
 	{
 		//Debug.Log("Entered Attacking State");
 		unit.ShowUnit();
-		unit.weaponSystem.GetTargetList();
+		if (unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
+		{
+			unit.weaponSystem.GetTargetList();
+		}
 	}
 	public override void Exit(UnitStateController unit)
 	{
@@ -22,7 +25,23 @@ public class UnitStateAttacking : UnitBaseState
 	}
 	public override void UpdateLogic(UnitStateController unit)
 	{
-
+		unit.weaponSystem.mainWeaponAttackSpeedTimer += Time.deltaTime;
+		if (unit.weaponSystem.mainWeaponAttackSpeedTimer >= unit.weaponSystem.mainWeaponAttackSpeed)
+		{
+			unit.weaponSystem.mainWeaponAttackSpeedTimer++;
+			unit.weaponSystem.mainWeaponAttackSpeedTimer %= unit.weaponSystem.mainWeaponAttackSpeed - 1;
+			unit.weaponSystem.ShootMainWeapon();
+		}
+		if (unit.weaponSystem.hasSecondaryWeapon)
+		{
+			unit.weaponSystem.secondaryWeaponAttackSpeedTimer += Time.deltaTime;
+			if (unit.weaponSystem.secondaryWeaponAttackSpeedTimer >= unit.weaponSystem.secondaryWeaponAttackSpeed)
+			{
+				unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
+				unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
+				unit.weaponSystem.ShootSecondaryWeapon();
+			}
+		}
 	}
 	public override void UpdatePhysics(UnitStateController unit)
 	{
@@ -49,6 +68,7 @@ public class UnitStateAttacking : UnitBaseState
 				unit.movingSFX.Stop();
 		}
 	}
+
 	public void StopAndLookAtTarget(UnitStateController unit)
 	{
 		if (unit.currentUnitTarget != null)
