@@ -68,7 +68,6 @@ public class UnitStateAttacking : UnitBaseState
 				unit.movingSFX.Stop();
 		}
 	}
-
 	public void StopAndLookAtTarget(UnitStateController unit)
 	{
 		if (unit.currentUnitTarget != null)

@@ -19,13 +19,9 @@ public class ParticleCollison : MonoBehaviour
 
 	public void OnParticleCollision(GameObject other)
 	{
-		Debug.Log(other.gameObject + " Collision");
-
 		ParticlePhysicsExtensions.GetCollisionEvents(particle, other, particleCollisionsEvents);
-
 		PlayHitSFXVFX(particleCollisionsEvents[0]);
 	}
-
 	public void PlayHitSFXVFX(ParticleCollisionEvent particleCollision)
 	{
 		WeaponHitParticles.gameObject.transform.position = particleCollision.intersection;

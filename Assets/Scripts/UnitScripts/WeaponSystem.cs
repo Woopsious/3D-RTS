@@ -71,6 +71,7 @@ public class WeaponSystem : MonoBehaviour
 		{
 			unit.ChangeStateIdle();
 		}
+		/* POSSIBLE REDUNDENT CODE
 		//else restart shooting loop of weapons (see comment above function for more info)
 		else
 		{
@@ -81,6 +82,7 @@ public class WeaponSystem : MonoBehaviour
 					ShootSecondaryWeapon();
 			}
 		}
+		*/
 	}
 	//check if entity exists + is in attack range, if true shoot it, else stop coroutine and try get new target (ShootMainWeapon function calls GetTargetList again)
 	public void ShootMainWeapon()
@@ -91,7 +93,6 @@ public class WeaponSystem : MonoBehaviour
 		}
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 		{
-			//StartCoroutine(MainWeaponCooldown());
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
 
 			mainWeaponAudio.Play();
@@ -99,7 +100,6 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 		{
-			//StartCoroutine(MainWeaponCooldown());
 			unit.currentBuildingTarget.RecieveDamage(secondaryWeaponDamage);
 
 			mainWeaponAudio.Play();
@@ -109,7 +109,6 @@ public class WeaponSystem : MonoBehaviour
 		{
 			unit.currentUnitTarget = null;
 			unit.currentBuildingTarget = null;
-			//StopCoroutine(MainWeaponCooldown());
 			GetTargetList();
 		}
 	}
@@ -117,7 +116,6 @@ public class WeaponSystem : MonoBehaviour
 	{
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 		{
-			//StartCoroutine(SecondaryWeaponCooldown());
 			unit.currentUnitTarget.RecieveDamage(unit.damage);
 
 			secondaryWeaponAudio.Play();
@@ -125,30 +123,11 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 		{
-			//StartCoroutine(SecondaryWeaponCooldown());
 			unit.currentBuildingTarget.RecieveDamage(unit.damage);
 
 			secondaryWeaponAudio.Play();
 			secondaryWeaponParticles.Play();
 		}
-		else
-		{
-			//StopCoroutine(MainWeaponCooldown());
-		}
-	}
-
-	//Weapon Cooldown Enumerators
-	public IEnumerator MainWeaponCooldown()
-	{
-		yield return new WaitForSeconds(mainWeaponAttackSpeed);
-
-		ShootMainWeapon();
-	}
-	public IEnumerator SecondaryWeaponCooldown()
-	{
-		yield return new WaitForSeconds(secondaryWeaponAttackSpeed);
-
-		ShootSecondaryWeapon();
 	}
 
 	//BOOL CHECKS
