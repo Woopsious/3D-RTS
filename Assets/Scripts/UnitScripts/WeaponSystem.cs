@@ -9,30 +9,22 @@ public class WeaponSystem : MonoBehaviour
 	public UnitStateController unit;
 
 	public AudioSource mainWeaponAudio;
-	public AudioSource mainWeaponHitAudio;
 	public ParticleSystem mainWeaponParticles;
 	public ParticleSystem mainWeaponProjectileParticle;
-	public ParticleSystem mainWeaponHitParticles;
 	public int mainWeaponDamage;
 	public float mainWeaponAttackSpeed;
-	//[System.NonSerialized]
+	[System.NonSerialized]
 	public float mainWeaponAttackSpeedTimer;
 
 	public AudioSource secondaryWeaponAudio;
-	public AudioSource secondaryWeaponHitAudio;
 	public ParticleSystem secondaryWeaponParticles;
-	public ParticleSystem secondaryWeaponHitParticles;
+	public ParticleSystem secondaryWeaponProjectileParticle;
 	public int secondaryWeaponDamage;
 	public float secondaryWeaponAttackSpeed;
-	//[System.NonSerialized]
+	[System.NonSerialized]
 	public float secondaryWeaponAttackSpeedTimer;
 
 	public bool hasSecondaryWeapon;
-
-	//1. get list of possible units and buildings in visual range, (remove any null refs), loop through sorted list from closest unit, checking Line of sight
-	//2. then return that unit and set it as unit/buildingTarget, and start shooting at it with main weapon and secondary weapon (if it has one)
-	//3. check if ref is null and target is in attack range after every shot. continue till one is false then loop back to 1.
-	//4. if lists of possible targets are 0 go back to x state
 
 	//grab entities in view range - 0.25, if x component exists + is enemy entity + not in list, then add it to list, else ignore it
 	public void GetTargetList()
@@ -71,20 +63,8 @@ public class WeaponSystem : MonoBehaviour
 		{
 			unit.ChangeStateIdle();
 		}
-		/* POSSIBLE REDUNDENT CODE
-		//else restart shooting loop of weapons (see comment above function for more info)
-		else
-		{
-			//if(!unit.isPlayerOneUnit)
-			{
-				ShootMainWeapon();
-				if (hasSecondaryWeapon)
-					ShootSecondaryWeapon();
-			}
-		}
-		*/
 	}
-	//check if entity exists + is in attack range, if true shoot it, else stop coroutine and try get new target (ShootMainWeapon function calls GetTargetList again)
+	//check if entity exists + is in attack range, if true shoot it, else try get new target (ShootMainWeapon function calls GetTargetList again)
 	public void ShootMainWeapon()
 	{
 		if (unit.hasAnimation)
@@ -93,6 +73,7 @@ public class WeaponSystem : MonoBehaviour
 		}
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 		{
+			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
 
 			mainWeaponAudio.Play();
@@ -100,6 +81,7 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 		{
+			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			unit.currentBuildingTarget.RecieveDamage(secondaryWeaponDamage);
 
 			mainWeaponAudio.Play();
@@ -116,18 +98,26 @@ public class WeaponSystem : MonoBehaviour
 	{
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 		{
-			unit.currentUnitTarget.RecieveDamage(unit.damage);
+			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
+			unit.currentUnitTarget.RecieveDamage(secondaryWeaponDamage);
 
 			secondaryWeaponAudio.Play();
 			secondaryWeaponParticles.Play();
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 		{
-			unit.currentBuildingTarget.RecieveDamage(unit.damage);
+			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
+			unit.currentBuildingTarget.RecieveDamage(secondaryWeaponDamage);
 
 			secondaryWeaponAudio.Play();
 			secondaryWeaponParticles.Play();
 		}
+	}
+	//function to shoot projectile at target center
+	public void AimProjectileAtTarget(GameObject particleObject, Vector3 targetPos)
+	{
+		var lookRotation = Quaternion.LookRotation(targetPos - particleObject.transform.position);
+		particleObject.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, 1);
 	}
 
 	//BOOL CHECKS

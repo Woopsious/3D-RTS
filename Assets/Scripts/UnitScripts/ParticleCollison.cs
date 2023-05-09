@@ -9,6 +9,7 @@ public class ParticleCollison : MonoBehaviour
 	private List<ParticleCollisionEvent> particleCollisionsEvents;
 
 	public AudioSource WeaponHitAudio;
+	public GameObject ParticleParentObj;
 	public ParticleSystem WeaponHitParticles;
 
 	public void Start()
@@ -24,7 +25,7 @@ public class ParticleCollison : MonoBehaviour
 	}
 	public void PlayHitSFXVFX(ParticleCollisionEvent particleCollision)
 	{
-		WeaponHitParticles.gameObject.transform.position = particleCollision.intersection;
+		ParticleParentObj.transform.position = particleCollision.intersection;
 		WeaponHitParticles.Play();
 		WeaponHitAudio.Play();
 	}

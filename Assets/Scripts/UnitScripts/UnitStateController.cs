@@ -14,7 +14,7 @@ public class UnitStateController : MonoBehaviour
 	public UnitMovingState movingState = new UnitMovingState();
 	public UnitStateAttacking attackState = new UnitStateAttacking();
 
-	public WeaponSystem weaponSystem = new WeaponSystem();
+	public WeaponSystem weaponSystem;
 
 	[Header("Unit Refs")]
 	public Animator animatorController;
@@ -48,10 +48,6 @@ public class UnitStateController : MonoBehaviour
 	public int maxHealth;
 	public int currentHealth;
 	public int armour;
-	public int damage;
-	[System.NonSerialized]
-	public float attackSpeedTimer;
-	public float attackSpeed;
 	public float attackRange;
 	public float ViewRange;
 
@@ -201,6 +197,13 @@ public class UnitStateController : MonoBehaviour
 	}
 
 	//UTILITY FUNCTIONS
+	public IEnumerator DelaySecondaryAttack(UnitStateController unit, float seconds)
+	{
+		unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
+		unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
+		yield return new WaitForSeconds(seconds);
+		unit.weaponSystem.ShootSecondaryWeapon();
+	}
 	public void RefundUnit()
 	{
 		currentHealth = 0;

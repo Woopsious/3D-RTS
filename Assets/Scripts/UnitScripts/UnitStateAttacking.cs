@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -37,9 +38,16 @@ public class UnitStateAttacking : UnitBaseState
 			unit.weaponSystem.secondaryWeaponAttackSpeedTimer += Time.deltaTime;
 			if (unit.weaponSystem.secondaryWeaponAttackSpeedTimer >= unit.weaponSystem.secondaryWeaponAttackSpeed)
 			{
-				unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
-				unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
-				unit.weaponSystem.ShootSecondaryWeapon();
+				if (unit.hasAnimation)
+				{
+					unit.StartCoroutine(unit.DelaySecondaryAttack(unit, 1));
+				}
+				else
+				{
+					unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
+					unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
+					unit.weaponSystem.ShootSecondaryWeapon();
+				}
 			}
 		}
 	}
