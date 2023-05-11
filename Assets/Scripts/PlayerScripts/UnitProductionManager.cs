@@ -127,7 +127,6 @@ public class UnitProductionManager : MonoBehaviour
 				{
 					//then -unit prices and add to correct queue list and start production on first one if not already started, then update resUI
 					UnitCost(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
-					playerController.gameUIManager.UpdateCurrentResourcesUI();
 
 					if (build.listNumRef == 1)
 					{
@@ -330,5 +329,7 @@ public class UnitProductionManager : MonoBehaviour
 		GameManager.Instance.playerOneCurrentMoney -= moneyCost;
 		GameManager.Instance.playerOneCurrentAlloys -= alloyCost;
 		GameManager.Instance.playerOneCurrentCrystals -= crystalCost;
+
+		playerController.gameUIManager.UpdateCurrentResourcesUI();
 	}
 }

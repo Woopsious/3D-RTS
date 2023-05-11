@@ -5,16 +5,16 @@ using UnityEngine;
 public class EnergyGenController : MonoBehaviour
 {
 	public BuildingManager buildingRef;
-    CapturePointController pointController;
 	public bool isActive;
 
-	//on start every 3 secs if buildings in cap point are unpowered power them
-	public void Start()
+	//every 3 secs if buildings in cap point are unpowered power them
+	public void StartPower()
 	{
 		StartCoroutine(UpdatePoweredBuildings());
 	}
 	IEnumerator UpdatePoweredBuildings()
 	{
+		Debug.Log("powering buildings");
 		PowerBuildings();
 		yield return new WaitForSeconds(3f);
 		//call itself again after 3 seconds
@@ -22,83 +22,39 @@ public class EnergyGenController : MonoBehaviour
 	}
 	public void PowerBuildings()
 	{
-		try
-		{
-			if (!pointController.HQRef.isPowered)
-			{
-				pointController.HQRef.isPowered = true;
-				//pointController.HQRef.UpdateProductionIncome(pointController.HQRef.moneyProduction,
-					//pointController.HQRef.alloyProduction, pointController.HQRef.crystalProduction);
-				buildingRef.playerController.gameUIManager.UpdateCurrentResourcesUI();
-			}
+		if (!buildingRef.capturePointController.HQRef.isPowered)
+			buildingRef.capturePointController.HQRef.isPowered = true;
 
-			foreach (BuildingManager building in pointController.RefinaryBuildings)
-			{
-				if (!building.isPowered)
-				{
-					building.isPowered = true;
-					//building.UpdateProductionIncome(building.moneyProduction, building.alloyProduction, building.crystalProduction);
-					building.playerController.gameUIManager.UpdateCurrentResourcesUI();
-				}
-			}
-			foreach (BuildingManager building in pointController.lightVehProdBuildings)
-			{
-				if (!building.isPowered)
-					building.isPowered = true;
-			}
-			foreach (BuildingManager building in pointController.heavyVehProdBuildings)
-			{
-				if (!building.isPowered)
-					building.isPowered = true;
-			}
-			foreach (BuildingManager building in pointController.vtolProdBuildings)
-			{
-				if(!building.isPowered)
-					building.isPowered = true;
-			}
-		}
-		catch
+		foreach (BuildingManager building in buildingRef.capturePointController.RefinaryBuildings)
 		{
-			//do nothing
+			if (!building.isPowered && buildingRef.capturePointController.RefinaryBuildings.Count != 0)
+				building.isPowered = true;
+		}
+		foreach (BuildingManager building in buildingRef.capturePointController.lightVehProdBuildings)
+		{
+			if (!building.isPowered && buildingRef.capturePointController.lightVehProdBuildings.Count != 0)
+				building.isPowered = true;
+		}
+		foreach (BuildingManager building in buildingRef.capturePointController.heavyVehProdBuildings)
+		{
+			if (!building.isPowered && buildingRef.capturePointController.heavyVehProdBuildings.Count != 0)
+				building.isPowered = true;
+		}
+		foreach (BuildingManager building in buildingRef.capturePointController.vtolProdBuildings)
+		{
+			if(!building.isPowered && buildingRef.capturePointController.vtolProdBuildings.Count != 0)
+				building.isPowered = true;
 		}
 	}
 	public void UnpowerBuildings()
 	{
-		pointController.HQRef.isPowered = false;
-		//pointController.HQRef.UpdateProductionIncome(-pointController.HQRef.moneyProduction, 
-			//-pointController.HQRef.alloyProduction, -pointController.HQRef.crystalProduction);
-		//buildingRef.playerController.gameUIManager.UpdateCurrentResourcesUI();
-
-		foreach (BuildingManager building in pointController.RefinaryBuildings)
-		{
+		foreach (BuildingManager building in buildingRef.capturePointController.RefinaryBuildings)
 			building.isPowered = false;
-			//building.UpdateProductionIncome(-building.moneyProduction, -building.alloyProduction, -building.crystalProduction);
-			//building.playerController.gameUIManager.UpdateCurrentResourcesUI();
-		}
-		foreach (BuildingManager building in pointController.lightVehProdBuildings)
-		{
+		foreach (BuildingManager building in buildingRef.capturePointController.lightVehProdBuildings)
 			building.isPowered = false;
-		}
-		foreach (BuildingManager building in pointController.heavyVehProdBuildings)
-		{
+		foreach (BuildingManager building in buildingRef.capturePointController.heavyVehProdBuildings)
 			building.isPowered = false;
-		}
-		foreach (BuildingManager building in pointController.vtolProdBuildings)
-		{
+		foreach (BuildingManager building in buildingRef.capturePointController.vtolProdBuildings)
 			building.isPowered = false;
-		}
 	}
-
-	//track if colliding with capture point
-	public void OnTriggerEnter(Collider other)
-	{
-		if (other.GetComponent<CapturePointController>())
-			pointController = other.GetComponent<CapturePointController>();
-	}
-	public void OnTriggerExit(Collider other)
-	{
-		if (other.GetComponent<CapturePointController>())
-			pointController = null;
-	}
-
 }

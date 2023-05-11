@@ -13,6 +13,7 @@ public class CanPlaceBuilding : MonoBehaviour
 	public bool isPlayerOneBuilding;
 	public bool isCollidingWithAnotherBuilding;
 	public bool canPlace;
+	public bool isPlaced;
 
 	public void Start()
 	{
@@ -33,6 +34,8 @@ public class CanPlaceBuilding : MonoBehaviour
 				highlighterObj.GetComponent<Renderer>().material.color = new Color(0, 1.0f, 0, 0.15f);
 			else
 				highlighterObj.GetComponent<Renderer>().material.color = new Color(1.0f, 0, 0, 0.15f);
+
+			building.capturePointController = pointController;
 		}
 
 		if (other.GetComponent<BuildingManager>())
@@ -116,53 +119,5 @@ public class CanPlaceBuilding : MonoBehaviour
 		}
 		else
 			return canPlace = false;
-	}
-
-	//track buildings refs
-	public void GrabBuildingRefs()
-	{
-		if (building.isGeneratorBuilding)
-		{
-			pointController.energyGeneratorBuilding = building;
-		}
-		else if (building.isRefineryBuilding)
-		{
-			pointController.RefinaryBuildings.Add(building);
-		}
-		else if (building.isLightVehProdBuilding)
-		{
-			pointController.lightVehProdBuildings.Add(building);
-		}
-		else if (building.isHeavyVehProdBuilding)
-		{
-			pointController.heavyVehProdBuildings.Add(building);
-		}
-	}
-	public void RemoveBuildingRefs()
-	{
-		if (building.isGeneratorBuilding)
-		{
-			pointController.energyGeneratorBuilding = null;
-			building.GetComponent<EnergyGenController>().UnpowerBuildings();
-		}
-		else if (building.isRefineryBuilding)
-		{
-			pointController.RefinaryBuildings.Remove(building);
-		}
-		else if (building.isLightVehProdBuilding)
-		{
-			pointController.lightVehProdBuildings.Remove(building);
-			building.playerController.lightVehProdBuildingsList.Remove(building);
-		}
-		else if (building.isHeavyVehProdBuilding)
-		{
-			pointController.heavyVehProdBuildings.Remove(building);
-			building.playerController.heavyVehProdBuildingsList.Remove(building);
-		}
-		else if (building.isVTOLProdBuilding)
-		{
-			pointController.heavyVehProdBuildings.Remove(building);
-			building.playerController.heavyVehProdBuildingsList.Remove(building);
-		}
 	}
 }

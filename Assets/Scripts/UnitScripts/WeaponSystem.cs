@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class WeaponSystem : MonoBehaviour
 {
@@ -42,7 +43,8 @@ public class WeaponSystem : MonoBehaviour
 					unit.unitTargetList.Add(collider.GetComponent<UnitStateController>());
 				}
 			}
-			if (collider.GetComponent<BuildingManager>() != null && unit.isPlayerOneUnit != collider.GetComponent<BuildingManager>().isPlayerOneBuilding)
+			if (collider.GetComponent<BuildingManager>() != null && unit.isPlayerOneUnit != collider.GetComponent<BuildingManager>().isPlayerOneBuilding
+				&& !collider.GetComponent<CanPlaceBuilding>().isPlaced)		//filter out non placed buildings
 			{
 				if (!unit.buildingTargetList.Contains(collider.GetComponent<BuildingManager>()))
 				{

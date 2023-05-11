@@ -75,9 +75,12 @@ public class BuildingPlacementManager : MonoBehaviour
 			currentBuildingPlacement.gameObject.layer = buildingLayer;
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
+			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().isPlaced = true;
 			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
+			currentBuildingPlacement.AddBuildingRefs();
+			if (currentBuildingPlacement.isGeneratorBuilding)
+				currentBuildingPlacement.GetComponent<EnergyGenController>().StartPower();
 			currentBuildingPlacement = null;
-			playerController.gameUIManager.UpdateCurrentResourcesUI();
 			//NOTIFY PLAYER CODE HERE
 		}
 		else if (Input.GetMouseButtonDown(0) && !currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
@@ -140,6 +143,8 @@ public class BuildingPlacementManager : MonoBehaviour
 		GameManager.Instance.playerOneCurrentMoney -= moneyCost;
 		GameManager.Instance.playerOneCurrentAlloys -= alloyCost;
 		GameManager.Instance.playerOneCurrentCrystals -= crystalCost;
+
+		playerController.gameUIManager.UpdateCurrentResourcesUI();
 	}
 	public bool CheckIfCanBuy(int MoneyCost, int AlloyCost, int CrystalCost)
 	{

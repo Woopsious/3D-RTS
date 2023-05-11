@@ -7,6 +7,7 @@ using UnityEngine.UIElements;
 public class BuildingManager : MonoBehaviour
 {
 	public PlayerController playerController;
+	public CapturePointController capturePointController;
 
 	[Header("Building Refs")]
 	public bool isPlayerOneBuilding;
@@ -94,9 +95,7 @@ public class BuildingManager : MonoBehaviour
 		if (currentHealth <= 0)
 		{
 			//remove relevent refs, check to make sure it is powered before updating income incase building is destroyed whilst never having been powered
-			gameObject.GetComponent<CanPlaceBuilding>().RemoveBuildingRefs();
-			if(isPowered)
-				//UpdateProductionIncome(-moneyProduction, -alloyProduction, -crystalProduction);
+			RemoveBuildingRefs();
 			if (isRefineryBuilding)
 				gameObject.GetComponent<RefineryController>().DeleteCargoShipsOnDeath();
 
@@ -127,6 +126,53 @@ public class BuildingManager : MonoBehaviour
 		}
 		playerController.gameUIManager.UpdateCurrentResourcesUI();
 		OnDeath();
+	}
+	//track buildings refs
+	public void AddBuildingRefs()
+	{
+		if (isGeneratorBuilding)
+		{
+			capturePointController.energyGeneratorBuilding = this;
+		}
+		else if (isRefineryBuilding)
+		{
+			capturePointController.RefinaryBuildings.Add(this);
+		}
+		else if (isLightVehProdBuilding)
+		{
+			capturePointController.lightVehProdBuildings.Add(this);
+		}
+		else if (isHeavyVehProdBuilding)
+		{
+			capturePointController.heavyVehProdBuildings.Add(this);
+		}
+	}
+	public void RemoveBuildingRefs()
+	{
+		if (isGeneratorBuilding)
+		{
+			capturePointController.energyGeneratorBuilding = null;
+			GetComponent<EnergyGenController>().UnpowerBuildings();
+		}
+		else if (isRefineryBuilding)
+		{
+			capturePointController.RefinaryBuildings.Remove(this);
+		}
+		else if (isLightVehProdBuilding)
+		{
+			capturePointController.lightVehProdBuildings.Remove(this);
+			playerController.lightVehProdBuildingsList.Remove(this);
+		}
+		else if (isHeavyVehProdBuilding)
+		{
+			capturePointController.heavyVehProdBuildings.Remove(this);
+			playerController.heavyVehProdBuildingsList.Remove(this);
+		}
+		else if (isVTOLProdBuilding)
+		{
+			capturePointController.heavyVehProdBuildings.Remove(this);
+			playerController.heavyVehProdBuildingsList.Remove(this);
+		}
 	}
 	public void UpdateAudioVolume()
 	{
