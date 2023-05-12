@@ -15,10 +15,8 @@ public class UnitStateAttacking : UnitBaseState
 	{
 		//Debug.Log("Entered Attacking State");
 		unit.ShowUnit();
-		if (unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
-		{
+		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
 			unit.weaponSystem.GetTargetList();
-		}
 	}
 	public override void Exit(UnitStateController unit)
 	{
@@ -26,52 +24,32 @@ public class UnitStateAttacking : UnitBaseState
 	}
 	public override void UpdateLogic(UnitStateController unit)
 	{
-		unit.weaponSystem.mainWeaponAttackSpeedTimer += Time.deltaTime;
-		if (unit.weaponSystem.mainWeaponAttackSpeedTimer >= unit.weaponSystem.mainWeaponAttackSpeed)
+		if (unit.isUnitArmed)
 		{
-			unit.weaponSystem.mainWeaponAttackSpeedTimer++;
-			unit.weaponSystem.mainWeaponAttackSpeedTimer %= unit.weaponSystem.mainWeaponAttackSpeed - 1;
-			unit.weaponSystem.ShootMainWeapon();
-		}
-		if (unit.weaponSystem.hasSecondaryWeapon)
-		{
-			unit.weaponSystem.secondaryWeaponAttackSpeedTimer += Time.deltaTime;
-			if (unit.weaponSystem.secondaryWeaponAttackSpeedTimer >= unit.weaponSystem.secondaryWeaponAttackSpeed)
-			{
-				if (unit.hasAnimation)
-				{
-					unit.StartCoroutine(unit.DelaySecondaryAttack(unit, 1));
-				}
-				else
-				{
-					unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
-					unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
-					unit.weaponSystem.ShootSecondaryWeapon();
-				}
-			}
+			MainGunTimer(unit);
+
+			if (unit.weaponSystem.hasSecondaryWeapon)
+				SecondaryGunTimer(unit);
 		}
 	}
 	public override void UpdatePhysics(UnitStateController unit)
 	{
 		//continue to last movement destination, only look at target thats within attack range
-		if(unit.currentUnitTarget != null)
+		if (unit.currentUnitTarget != null)
 		{
 			if (unit.weaponSystem.CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 				StopAndLookAtTarget(unit);
 		}
-		else if (unit.currentBuildingTarget != null) 
+		else if (unit.currentBuildingTarget != null)
 		{
 			if (unit.weaponSystem.CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 				StopAndLookAtTarget(unit);
 		}
-		if (Vector3.Distance(unit.transform.position, unit.movePos) > unit.agentNav.stoppingDistance && unit.movePos != new Vector3(0, 0, 0))
+		if (Vector3.Distance(unit.transform.position, unit.movePos) < unit.agentNav.stoppingDistance)
 		{
-			unit.animatorController.SetBool("isIdle", false);
-		}
-		else
-		{
-			unit.movePos = new Vector3(0, 0, 0);
-			unit.animatorController.SetBool("isIdle", true);
+			if (unit.isUnitArmed)
+				unit.animatorController.SetBool("isIdle", true);
+			
 			if (unit.movingSFX.isPlaying)
 				unit.movingSFX.Stop();
 		}
@@ -87,6 +65,33 @@ public class UnitStateAttacking : UnitBaseState
 		{
 			var lookRotation = Quaternion.LookRotation(unit.currentBuildingTarget.transform.position - unit.transform.position);
 			unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, unit.agentNav.angularSpeed / 1000);
+		}
+	}
+	public void MainGunTimer(UnitStateController unit)
+	{
+		unit.weaponSystem.mainWeaponAttackSpeedTimer += Time.deltaTime;
+		if (unit.weaponSystem.mainWeaponAttackSpeedTimer >= unit.weaponSystem.mainWeaponAttackSpeed)
+		{
+			unit.weaponSystem.mainWeaponAttackSpeedTimer++;
+			unit.weaponSystem.mainWeaponAttackSpeedTimer %= unit.weaponSystem.mainWeaponAttackSpeed - 1;
+			unit.weaponSystem.ShootMainWeapon();
+		}
+	}
+	public void SecondaryGunTimer(UnitStateController unit)
+	{
+		unit.weaponSystem.secondaryWeaponAttackSpeedTimer += Time.deltaTime;
+		if (unit.weaponSystem.secondaryWeaponAttackSpeedTimer >= unit.weaponSystem.secondaryWeaponAttackSpeed)
+		{
+			if (unit.hasAnimation)
+			{
+				unit.StartCoroutine(unit.DelaySecondaryAttack(unit, 1));
+			}
+			else
+			{
+				unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
+				unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
+				unit.weaponSystem.ShootSecondaryWeapon();
+			}
 		}
 	}
 }

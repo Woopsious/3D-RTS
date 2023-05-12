@@ -151,13 +151,6 @@ public class WeaponSystem : MonoBehaviour
 	//sort targets from closest to furthest, then check if target is in view + attack range, once a valid target is found, return that target and end loop
 	public UnitStateController GrabClosestUnit()
 	{
-		/*
-		foreach (UnitStateController listedUnit in unit.unitTargetList)
-		{
-			if (listedUnit == null)
-				unit.unitTargetList.Remove(listedUnit);
-		}
-		*/
 		unit.unitTargetList = unit.unitTargetList.OrderBy(newtarget => Vector3.Distance(unit.transform.position, newtarget.transform.position)).ToList();
 
 		for (int i = 0; i < unit.unitTargetList.Count; i++)
@@ -175,13 +168,6 @@ public class WeaponSystem : MonoBehaviour
 	}
 	public BuildingManager GrabClosestBuilding()
 	{
-		/*
-		foreach (BuildingManager listedBuilding in unit.buildingTargetList)
-		{
-			if (listedBuilding == null)
-				unit.buildingTargetList.Remove(listedBuilding);
-		}
-		*/
 		unit.buildingTargetList = unit.buildingTargetList.OrderBy(newtarget => Vector3.Distance(unit.transform.position, newtarget.transform.position)).ToList();
 
 		for (int i = 0; i < unit.buildingTargetList.Count; i++)

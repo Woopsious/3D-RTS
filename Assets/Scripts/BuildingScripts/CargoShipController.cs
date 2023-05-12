@@ -166,7 +166,6 @@ public class CargoShipController : UnitStateController
 			{
 				crystalsCount = maxCrystalCarryCapacity;
 				targetResourceNode.resourcesAmount -= maxCrystalCarryCapacity;
-				crystalsCount = targetResourceNode.resourcesAmount;
 			}
 			else
 			{

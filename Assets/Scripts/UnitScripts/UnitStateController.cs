@@ -98,15 +98,6 @@ public class UnitStateController : MonoBehaviour
 	}
 	public virtual void Update()
 	{
-		if(!isCargoShip && movePos != Vector3.zero && currentState != movingState && currentState != attackState)
-		{
-			ChangeStateMoving();
-		}
-		if (!isCargoShip && movePos == Vector3.zero && currentState != idleState && currentState != attackState)
-		{
-			ChangeStateIdle();
-		}
-
 		if (isSelected)
 		{
 			if (!unitUiObj.activeInHierarchy)
@@ -121,13 +112,13 @@ public class UnitStateController : MonoBehaviour
 	public virtual void FixedUpdate()
 	{
 		currentState.UpdatePhysics(this);
-		if (!isCargoShip && currentState != attackState)
+
+		if (!isCargoShip && currentState != attackState || !isCargoShip && !isUnitArmed)
 			ScanForTargets();
 	}
 	//grab correct entity types in view range, if entity is in attack range and to tempTargetList then switch to attack state if any found
 	public void ScanForTargets()
 	{
-		//Debug.Log("scanning for targets");
 		//scan for targets
 		Collider[] newTargetArray = Physics.OverlapSphere(transform.position, ViewRange); //find targets in attack range
 
@@ -139,10 +130,8 @@ public class UnitStateController : MonoBehaviour
 				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<UnitStateController>().CenterPoint.transform.position,
 					out RaycastHit hit, ignoreMe);
 
-				if (hit.collider.GetComponent<UnitStateController>() != null && weaponSystem.CheckIfInAttackRange(hit.collider.transform.position))
-				{
+				if (hit.collider.GetComponent<UnitStateController>() != null) // && weaponSystem.CheckIfInAttackRange(hit.collider.transform.position)
 					targetObjs.Add(target.gameObject);
-				}
 			}
 			if (target.GetComponent<BuildingManager>() != null && isPlayerOneUnit != target.GetComponent<BuildingManager>().isPlayerOneBuilding
 				&& !target.GetComponent<CanPlaceBuilding>().isPlaced)	//filter out non placed buildings
@@ -150,23 +139,15 @@ public class UnitStateController : MonoBehaviour
 				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<BuildingManager>().CenterPoint.transform.position,
 					out RaycastHit hit, ignoreMe);
 
-				if (hit.collider.GetComponent<BuildingManager>() != null && weaponSystem.CheckIfInAttackRange(hit.collider.transform.position))
-				{
+				if (hit.collider.GetComponent<BuildingManager>() != null) // && weaponSystem.CheckIfInAttackRange(hit.collider.transform.position)
 					targetObjs.Add(target.gameObject);
-				}
 			}
 		}
-		if (isUnitArmed)
-		{
-			if (targetObjs.Count >= 1 && currentState != attackState)
-			{
-				ChangeStateAttacking();
-			}
-			if (targetObjs.Count == 0 && currentState == attackState && movePos == new Vector3(0, 0, 0))
-			{
-				ChangeStateIdle();
-			}
-		}
+		if (targetObjs.Count >= 1 && currentState != attackState || targetObjs.Count >= 1 && currentState != movingState)
+			ChangeStateAttacking();
+
+		if (targetObjs.Count == 0 && currentState == attackState)
+			ChangeStateIdle();
 	}
 
 	//HEALTH FUNCTIONS

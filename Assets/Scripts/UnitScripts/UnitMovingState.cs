@@ -9,7 +9,7 @@ public class UnitMovingState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		//Debug.Log("Entered Moving State");
+		Debug.Log("Entered Moving State");
 		unit.agentNav.isStopped = false;
 		if (unit.hasAnimation)
 		{
@@ -24,13 +24,11 @@ public class UnitMovingState : UnitBaseState
 		}
 
 		if(CheckPath(unit))
-		{
 			unit.agentNav.SetPath(unit.navMeshPath);
-		}
+
 		else if (!CheckPath(unit))
-		{
 			unit.agentNav.destination = unit.transform.position;
-		}
+
 		unit.HideUnit();
 	}
 	public override void Exit(UnitStateController unit)
@@ -47,12 +45,11 @@ public class UnitMovingState : UnitBaseState
 	}
 	public void CheckDistance(UnitStateController unit)
 	{
-		if (Vector3.Distance(unit.transform.position, unit.movePos) > unit.agentNav.stoppingDistance && unit.movePos != new Vector3(0, 0, 0))
+		if (Vector3.Distance(unit.transform.position, unit.movePos) < unit.agentNav.stoppingDistance)
 		{
-			//do nothing
+			unit.ChangeStateIdle();
+			unit.agentNav.isStopped = true;
 		}
-		else
-			unit.movePos = new Vector3(0, 0, 0);
 	}
 	public bool CheckPath(UnitStateController unit)
 	{

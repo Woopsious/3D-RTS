@@ -7,12 +7,7 @@ public class ParticleCollisions : MonoBehaviour
 {
 	private ParticleSystem particle;
 	private List<ParticleCollisionEvent> particleCollisionsEvents;
-
-	public AudioSource WeaponHitAudio;
-	public GameObject ParticleParentObj;
-	public ParticleSystem WeaponHitParticles;
-
-	public GameObject ParticleTest;
+	public GameObject ParticleHitObj;
 
 	public void Start()
 	{
@@ -23,15 +18,8 @@ public class ParticleCollisions : MonoBehaviour
 	public void OnParticleCollision(GameObject other)
 	{
 		ParticlePhysicsExtensions.GetCollisionEvents(particle, other, particleCollisionsEvents);
-		//PlayHitSFXVFX(particleCollisionsEvents[0]);
 
-		GameObject go = Instantiate(ParticleTest);
+		GameObject go = Instantiate(ParticleHitObj);
 		go.transform.position = particleCollisionsEvents[0].intersection;
-	}
-	public void PlayHitSFXVFX(ParticleCollisionEvent particleCollision)
-	{
-		ParticleParentObj.transform.position = particleCollision.intersection;
-		WeaponHitParticles.Play();
-		WeaponHitAudio.Play();
 	}
 }
