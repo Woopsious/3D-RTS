@@ -13,7 +13,7 @@ public class UnitStateAttacking : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		//Debug.Log("Entered Attacking State");
+		Debug.Log("Entered Attacking State");
 		unit.ShowUnit();
 		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
 			unit.weaponSystem.GetTargetList();

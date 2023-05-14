@@ -44,8 +44,11 @@ public class WeaponSystem : MonoBehaviour
 				}
 			}
 			if (collider.GetComponent<BuildingManager>() != null && unit.isPlayerOneUnit != collider.GetComponent<BuildingManager>().isPlayerOneBuilding
-				&& !collider.GetComponent<CanPlaceBuilding>().isPlaced)		//filter out non placed buildings
+				&& collider.GetComponent<CanPlaceBuilding>().isPlaced)		//filter out non placed buildings
 			{
+
+				Debug.Log("got valid building :" + collider.gameObject.name);
+
 				if (!unit.buildingTargetList.Contains(collider.GetComponent<BuildingManager>()))
 				{
 					unit.buildingTargetList.Add(collider.GetComponent<BuildingManager>());
@@ -180,6 +183,8 @@ public class WeaponSystem : MonoBehaviour
 		{
 			Physics.Linecast(unit.CenterPoint.transform.position, unit.buildingTargetList[i].GetComponent<BuildingManager>().CenterPoint.transform.position,
 			out RaycastHit hit, unit.ignoreMe);
+
+			Debug.Log(hit.collider.gameObject.name);
 
 			if (hit.collider.GetComponent<BuildingManager>() != null) //&& CheckIfInAttackRange(hit.collider.transform.position))
 			{

@@ -135,7 +135,7 @@ public class UnitStateController : MonoBehaviour
 					targetObjs.Add(target.gameObject);
 			}
 			if (target.GetComponent<BuildingManager>() != null && isPlayerOneUnit != target.GetComponent<BuildingManager>().isPlayerOneBuilding
-				&& !target.GetComponent<CanPlaceBuilding>().isPlaced)	//filter out non placed buildings
+				&& target.GetComponent<CanPlaceBuilding>().isPlaced)	//filter out non placed buildings
 			{
 				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<BuildingManager>().CenterPoint.transform.position,
 					out RaycastHit hit, ignoreMe);
