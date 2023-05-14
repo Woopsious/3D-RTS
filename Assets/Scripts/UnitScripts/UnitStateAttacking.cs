@@ -42,7 +42,7 @@ public class UnitStateAttacking : UnitBaseState
 		}
 		else if (unit.currentBuildingTarget != null)
 		{
-			if (unit.weaponSystem.CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
+			if (unit.weaponSystem.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 				StopAndLookAtTarget(unit);
 		}
 		if (Vector3.Distance(unit.transform.position, unit.movePos) < unit.agentNav.stoppingDistance)

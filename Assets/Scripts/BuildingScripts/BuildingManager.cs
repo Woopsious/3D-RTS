@@ -20,6 +20,7 @@ public class BuildingManager : MonoBehaviour
 	public bool isGeneratorBuilding;
 
 	public GameObject CenterPoint;
+	public GameObject buildingDeathObj;
 	public AudioSource buildingIdleSound;
 	public GameObject selectedHighlighter;
 	public GameObject BuildingUiObj;
@@ -80,6 +81,7 @@ public class BuildingManager : MonoBehaviour
 		dmg -= armour;
 		if (dmg < 0)
 			dmg = 0;
+		Debug.Log("building dmg");
 		currentHealth -= dmg;
 		UpdateHealthBar();
 		OnDeath();
@@ -98,6 +100,8 @@ public class BuildingManager : MonoBehaviour
 			RemoveBuildingRefs();
 			if (isRefineryBuilding)
 				gameObject.GetComponent<RefineryController>().DeleteCargoShipsOnDeath();
+
+			Instantiate(buildingDeathObj, transform.position, Quaternion.identity);
 
 			Destroy(BuildingUiObj);
 			Destroy(gameObject);

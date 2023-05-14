@@ -11,11 +11,10 @@ public class UnitMovingState : UnitBaseState
 	{
 		Debug.Log("Entered Moving State");
 		unit.agentNav.isStopped = false;
+		unit.animatorController.SetBool("isIdle", false);
 		if (unit.hasAnimation)
-		{
 			unit.animatorController.SetBool("isAttacking", false);
-			unit.animatorController.SetBool("isIdle", false);
-		}
+
 		unit.movingSFX.Play();
 		if (unit.hasRadar)
 		{

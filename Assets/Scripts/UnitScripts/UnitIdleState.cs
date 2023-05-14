@@ -8,11 +8,10 @@ public class UnitIdleState : UnitBaseState
 	public override void Enter(UnitStateController unit)
 	{
 		Debug.Log("Entered Idle State");
+		unit.animatorController.SetBool("isIdle", true);
 		if (unit.hasAnimation)
-		{
 			unit.animatorController.SetBool("isAttacking", false);
-			unit.animatorController.SetBool("isIdle", true);
-		}
+
 		unit.movingSFX.Stop();
 		if (unit.hasRadar)
 		{

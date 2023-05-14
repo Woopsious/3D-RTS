@@ -69,12 +69,13 @@ public class WeaponSystem : MonoBehaviour
 	//check if entity exists + is in attack range, if true shoot it, else try get new target (ShootMainWeapon function calls GetTargetList again)
 	public void ShootMainWeapon()
 	{
-		if (unit.hasAnimation)
-		{
-			unit.animatorController.SetBool("isAttacking", true);
-		}
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 		{
+			if (unit.hasAnimation)
+			{
+				unit.animatorController.SetBool("isAttacking", true);
+			}
+
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
 
@@ -83,8 +84,13 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 		{
+			if (unit.hasAnimation)
+			{
+				unit.animatorController.SetBool("isAttacking", true);
+			}
+
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
-			unit.currentBuildingTarget.RecieveDamage(secondaryWeaponDamage);
+			unit.currentBuildingTarget.RecieveDamage(mainWeaponDamage);
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
@@ -158,7 +164,7 @@ public class WeaponSystem : MonoBehaviour
 			Physics.Linecast(unit.CenterPoint.transform.position, unit.unitTargetList[i].GetComponent<UnitStateController>().CenterPoint.transform.position,
 			out RaycastHit hit, unit.ignoreMe);
 
-			if (hit.collider.GetComponent<UnitStateController>() != null && CheckIfInAttackRange(hit.collider.transform.position))
+			if (hit.collider.GetComponent<UnitStateController>() != null) //&& CheckIfInAttackRange(hit.collider.transform.position))
 			{
 				hit.collider.GetComponent<UnitStateController>().ShowUnit();
 				return unit.unitTargetList[i];
@@ -175,7 +181,7 @@ public class WeaponSystem : MonoBehaviour
 			Physics.Linecast(unit.CenterPoint.transform.position, unit.buildingTargetList[i].GetComponent<BuildingManager>().CenterPoint.transform.position,
 			out RaycastHit hit, unit.ignoreMe);
 
-			if (hit.collider.GetComponent<BuildingManager>() != null && CheckIfInAttackRange(hit.collider.transform.position))
+			if (hit.collider.GetComponent<BuildingManager>() != null) //&& CheckIfInAttackRange(hit.collider.transform.position))
 			{
 				return unit.buildingTargetList[i];
 			}

@@ -23,6 +23,7 @@ public class UnitStateController : MonoBehaviour
 	public NavMeshAgent agentNav;
 	public Rigidbody rb;
 	public GameObject CenterPoint;
+	public GameObject unitDeathObj;
 	public GameObject selectedHighlighter;
 	public GameObject miniMapRenderObj;
 	public GameObject FoVMeshObj;
@@ -94,7 +95,7 @@ public class UnitStateController : MonoBehaviour
 		{
 			miniMapRenderObj.layer = 12;
 		}
-		FoVMeshObj.SetActive(true);
+		//FoVMeshObj.SetActive(true);
 	}
 	public virtual void Update()
 	{
@@ -173,9 +174,16 @@ public class UnitStateController : MonoBehaviour
 		if(currentHealth <= 0)
 		{
 			RemoveRefs();
+
+			Instantiate(unitDeathObj, transform.position, Quaternion.identity);
+
 			Destroy(unitUiObj);
 			Destroy(gameObject);
 		}
+	}
+	public void DeathFX()
+	{
+
 	}
 
 	//UTILITY FUNCTIONS
