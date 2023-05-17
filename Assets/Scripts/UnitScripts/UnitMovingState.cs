@@ -10,19 +10,21 @@ public class UnitMovingState : UnitBaseState
 	public override void Enter(UnitStateController unit)
 	{
 		Debug.Log("Entered Moving State");
-		unit.agentNav.isStopped = false;
-		unit.animatorController.SetBool("isIdle", false);
-		if (unit.hasAnimation)
-			unit.animatorController.SetBool("isAttacking", false);
-
-		unit.movingSFX.Play();
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[2].Stop();
 			unit.audioSFXs[1].Play();
 		}
+		unit.movingSFX.Play();
 
-		if(CheckPath(unit))
+		if (unit.unitName != "Scout Vehicle")
+			unit.animatorController.SetBool("isIdle", true);
+
+		if (unit.hasAnimation)
+			unit.animatorController.SetBool("isAttacking", false);
+
+		unit.agentNav.isStopped = false;
+		if (CheckPath(unit))
 			unit.agentNav.SetPath(unit.navMeshPath);
 
 		else if (!CheckPath(unit))

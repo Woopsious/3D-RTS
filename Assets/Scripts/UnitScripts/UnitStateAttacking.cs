@@ -15,6 +15,7 @@ public class UnitStateAttacking : UnitBaseState
 	{
 		Debug.Log("Entered Attacking State");
 		unit.ShowUnit();
+
 		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
 			unit.weaponSystem.GetTargetList();
 	}

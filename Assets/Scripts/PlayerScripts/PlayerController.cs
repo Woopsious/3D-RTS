@@ -66,17 +66,22 @@ public class PlayerController : MonoBehaviour
 		//hotkeys for items in shop tabs
 		BuyShopItemHotkeys();
 
-		if (buildingPlacementManager.currentBuildingPlacement != null)
-			buildingPlacementManager.PlaceBuildingManager();
+		//if (buildingPlacementManager.currentBuildingPlacement != null)
+			//buildingPlacementManager.PlaceBuildingManager();
 
 		//hotkeys for game speed Change
-		if(Input.GetKeyDown(KeyCode.Equals))
+		if (Input.GetKeyDown(KeyCode.Equals))
 		{
 			gameUIManager.IncreaseGameSpeed();
 		}
 		if (Input.GetKeyDown(KeyCode.Minus))
 		{
 			gameUIManager.DecreaseGameSpeed();
+		}
+		//enlarge/shrink Minimap
+		if (Input.GetKeyDown(KeyCode.M))
+		{
+			gameUIManager.ChangeMiniMapSize();
 		}
 	}
 	//logic path for quick buying units/buildings

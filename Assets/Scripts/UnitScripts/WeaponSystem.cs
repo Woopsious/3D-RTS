@@ -39,9 +39,7 @@ public class WeaponSystem : MonoBehaviour
 			if (collider.GetComponent<UnitStateController>() != null && unit.isPlayerOneUnit != collider.GetComponent<UnitStateController>().isPlayerOneUnit)
 			{
 				if (!unit.unitTargetList.Contains(collider.GetComponent<UnitStateController>()))
-				{
 					unit.unitTargetList.Add(collider.GetComponent<UnitStateController>());
-				}
 			}
 			if (collider.GetComponent<BuildingManager>() != null && unit.isPlayerOneUnit != collider.GetComponent<BuildingManager>().isPlayerOneBuilding
 				&& collider.GetComponent<CanPlaceBuilding>().isPlaced)		//filter out non placed buildings
@@ -51,6 +49,7 @@ public class WeaponSystem : MonoBehaviour
 
 				if (!unit.buildingTargetList.Contains(collider.GetComponent<BuildingManager>()))
 				{
+					collider.GetComponent<BuildingManager>().ShowBuilding();
 					unit.buildingTargetList.Add(collider.GetComponent<BuildingManager>());
 				}
 			}

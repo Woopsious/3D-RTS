@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using static UnityEngine.UI.CanvasScaler;
 
 public class BuildingManager : MonoBehaviour
 {
@@ -22,6 +24,7 @@ public class BuildingManager : MonoBehaviour
 	public GameObject CenterPoint;
 	public GameObject buildingDeathObj;
 	public AudioSource buildingIdleSound;
+	public GameObject miniMapRenderObj;
 	public GameObject selectedHighlighter;
 	public GameObject BuildingUiObj;
 	public GameObject refundBuildingButton;
@@ -53,6 +56,8 @@ public class BuildingManager : MonoBehaviour
 		BuildingUiObj.SetActive(false);
 		UpdateHealthBar();
 		BuildingUiObj.transform.rotation = Quaternion.identity;
+
+		//FoVMeshObj.SetActive(true);
 	}
 	public void Update()
 	{
@@ -131,6 +136,10 @@ public class BuildingManager : MonoBehaviour
 		playerController.gameUIManager.UpdateCurrentResourcesUI();
 		OnDeath();
 	}
+	public void ShowBuilding()
+	{
+		miniMapRenderObj.layer = 13;
+	}
 	//track buildings refs
 	public void AddBuildingRefs()
 	{
@@ -140,15 +149,18 @@ public class BuildingManager : MonoBehaviour
 		}
 		else if (isRefineryBuilding)
 		{
-			capturePointController.RefinaryBuildings.Add(this);
+			if (!capturePointController.RefinaryBuildings.Contains(this))
+				capturePointController.RefinaryBuildings.Add(this);
 		}
 		else if (isLightVehProdBuilding)
 		{
-			capturePointController.lightVehProdBuildings.Add(this);
+			if (!capturePointController.lightVehProdBuildings.Contains(this))
+				capturePointController.lightVehProdBuildings.Add(this);
 		}
 		else if (isHeavyVehProdBuilding)
 		{
-			capturePointController.heavyVehProdBuildings.Add(this);
+			if (!capturePointController.heavyVehProdBuildings.Contains(this))
+				capturePointController.heavyVehProdBuildings.Add(this);
 		}
 	}
 	public void RemoveBuildingRefs()

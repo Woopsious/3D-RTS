@@ -88,13 +88,10 @@ public class UnitStateController : MonoBehaviour
 		unitUiObj.transform.rotation = Quaternion.identity;
 
 		if (isPlayerOneUnit)
-		{
 			miniMapRenderObj.layer = 11;
-		}
+
 		else if (!isPlayerOneUnit)
-		{
 			miniMapRenderObj.layer = 12;
-		}
 		//FoVMeshObj.SetActive(true);
 	}
 	public virtual void Update()
@@ -131,7 +128,7 @@ public class UnitStateController : MonoBehaviour
 				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<UnitStateController>().CenterPoint.transform.position,
 					out RaycastHit hit, ignoreMe);
 
-				if (hit.collider.GetComponent<UnitStateController>() != null) // && weaponSystem.CheckIfInAttackRange(hit.collider.transform.position)
+				if (hit.collider.GetComponent<UnitStateController>() != null)
 					targetObjs.Add(target.gameObject);
 			}
 			if (target.GetComponent<BuildingManager>() != null && isPlayerOneUnit != target.GetComponent<BuildingManager>().isPlayerOneBuilding
@@ -140,7 +137,7 @@ public class UnitStateController : MonoBehaviour
 				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<BuildingManager>().CenterPoint.transform.position,
 					out RaycastHit hit, ignoreMe);
 
-				if (hit.collider.GetComponent<BuildingManager>() != null) // && weaponSystem.CheckIfInAttackRange(hit.collider.transform.position)
+				if (hit.collider.GetComponent<BuildingManager>() != null)
 					targetObjs.Add(target.gameObject);
 			}
 		}
@@ -180,10 +177,6 @@ public class UnitStateController : MonoBehaviour
 			Destroy(unitUiObj);
 			Destroy(gameObject);
 		}
-	}
-	public void DeathFX()
-	{
-
 	}
 
 	//UTILITY FUNCTIONS

@@ -48,16 +48,27 @@ public class BuildingPlacementManager : MonoBehaviour
 			buildingHQ = GameManager.Instance.buildingHQPlayerTwo;
 		}
 	}
-	public void PlaceBuildingManager()
+	public void Update()
+	{
+		BuildingFollowsMouseCursor();
+		PlaceBuildingManager();
+	}
+	public void BuildingFollowsMouseCursor()
 	{
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-		if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe))
+		if (currentBuildingPlacement != null)
 		{
-			currentBuildingPlacement.transform.position = hitInfo.point;
-			float mouseWheelRotation = Input.mouseScrollDelta.y;
-			currentBuildingPlacement.transform.Rotate(10 * mouseWheelRotation * Vector3.up);
+			if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe))
+			{
+				currentBuildingPlacement.transform.position = hitInfo.point;
+				float mouseWheelRotation = Input.mouseScrollDelta.y;
+				currentBuildingPlacement.transform.Rotate(10 * mouseWheelRotation * Vector3.up);
+			}
 		}
+	}
+	public void PlaceBuildingManager()
+	{
 		//place building and toggle it on
 		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
 		{

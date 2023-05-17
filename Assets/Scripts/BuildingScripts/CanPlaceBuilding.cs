@@ -22,6 +22,11 @@ public class CanPlaceBuilding : MonoBehaviour
 			highlighterObj.SetActive(true);
 			highlighterObj.GetComponent<Renderer>().material.color = new Color(1.0f, 0, 0, 0.15f);
 		}
+		if (building.isPlayerOneBuilding)
+			building.miniMapRenderObj.layer = 11;
+
+		else if (!building.isPlayerOneBuilding)
+			building.miniMapRenderObj.layer = 12;
 	}
 
 	//track if colliding with another building or capture point
