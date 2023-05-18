@@ -276,8 +276,12 @@ public class UnitProductionManager : MonoBehaviour
 	{
 		StartCoroutine(OpenCloseDoors(VehSpawnLocation));
 		GameObject go = Instantiate(buildOrder.UnitPrefab, VehSpawnLocation.vehProdSpawnPoint.transform.position, Quaternion.identity);
-		UnitStateController newUnit = go.GetComponent<UnitStateController>();
 
+		StartCoroutine(ChangeBuiltUnitState(go.GetComponent<UnitStateController>(), destination));
+	}
+	public IEnumerator ChangeBuiltUnitState(UnitStateController newUnit, Vector3 destination)
+	{
+		yield return new WaitForSeconds(0.1f);
 		newUnit.movePos = destination;
 		newUnit.ChangeStateMoving();
 	}

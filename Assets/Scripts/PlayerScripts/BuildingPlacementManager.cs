@@ -51,7 +51,9 @@ public class BuildingPlacementManager : MonoBehaviour
 	public void Update()
 	{
 		BuildingFollowsMouseCursor();
-		PlaceBuildingManager();
+
+		if (currentBuildingPlacement != null && !playerController.IsMouseOverUI())
+			PlaceBuildingManager();
 	}
 	public void BuildingFollowsMouseCursor()
 	{

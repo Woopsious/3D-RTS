@@ -18,7 +18,7 @@ public class UnitMovingState : UnitBaseState
 		unit.movingSFX.Play();
 
 		if (unit.unitName != "Scout Vehicle")
-			unit.animatorController.SetBool("isIdle", true);
+			unit.animatorController.SetBool("isIdle", false);
 
 		if (unit.hasAnimation)
 			unit.animatorController.SetBool("isAttacking", false);

@@ -20,7 +20,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		if (gameObject.layer == 2)
 		{
 			highlighterObj.SetActive(true);
-			highlighterObj.GetComponent<Renderer>().material.color = new Color(1.0f, 0, 0, 0.15f);
+			CanPlaceHighliterRed();
 		}
 		if (building.isPlayerOneBuilding)
 			building.miniMapRenderObj.layer = 11;
@@ -28,24 +28,29 @@ public class CanPlaceBuilding : MonoBehaviour
 		else if (!building.isPlayerOneBuilding)
 			building.miniMapRenderObj.layer = 12;
 	}
+	public void Update()
+	{
+		TrackPlacementHeight();
+	}
 
-	//track if colliding with another building or capture point
+	//track if colliding with another building or capture point and placement height
 	public void OnTriggerEnter(Collider other)
 	{
 		if(other.GetComponent<CapturePointController>())
 		{
 			pointController = other.GetComponent<CapturePointController>();
 			if (pointController.isPlayerOnePoint == building.isPlayerOneBuilding || pointController.isPlayerTwoPoint == !building.isPlayerOneBuilding)
-				highlighterObj.GetComponent<Renderer>().material.color = new Color(0, 1.0f, 0, 0.15f);
+				CanPlaceHighliterGreen();
+
 			else
-				highlighterObj.GetComponent<Renderer>().material.color = new Color(1.0f, 0, 0, 0.15f);
+				CanPlaceHighliterRed();
 
 			building.capturePointController = pointController;
 		}
 
 		if (other.GetComponent<BuildingManager>())
 		{
-			highlighterObj.GetComponent<Renderer>().material.color = new Color(1.0f, 0, 0, 0.15f);
+			CanPlaceHighliterRed();
 			isCollidingWithAnotherBuilding = true;
 		}
 	}
@@ -53,23 +58,46 @@ public class CanPlaceBuilding : MonoBehaviour
 	{
 		if (other.GetComponent<CapturePointController>())
 		{
-			highlighterObj.GetComponent<Renderer>().material.color = new Color(1.0f, 0, 0, 0.15f);
+			CanPlaceHighliterRed();
 			pointController = null;
 		}
 
 		if (other.GetComponent<BuildingManager>())
 		{
-			highlighterObj.GetComponent<Renderer>().material.color = new Color(0, 1.0f, 0, 0.15f);
+			CanPlaceHighliterGreen();
 			isCollidingWithAnotherBuilding = false;
 		}
 	}
+	public void TrackPlacementHeight()
+	{
+		if (pointController != null)
+		{
+			if (building.transform.position.y > 9f && building.transform.position.y < 10.5f)
+				CanPlaceHighliterGreen();
+
+			else
+				CanPlaceHighliterRed();
+		}
+	}
+
+	//change highlighter colour
+	public void CanPlaceHighliterGreen()
+	{
+		highlighterObj.GetComponent<Renderer>().material.color = new Color(0, 1.0f, 0, 0.15f);
+	}
+	public void CanPlaceHighliterRed()
+	{
+		highlighterObj.GetComponent<Renderer>().material.color = new Color(1.0f, 0, 0, 0.15f);
+	}
+
 	//bool check on mouse click
 	public bool CheckIfCanPlace()
 	{
 		if (pointController == null)
 			return canPlace = false;
 
-		if (!pointController.isPlayerOnePoint != building.isPlayerOneBuilding && pointController != null && !isCollidingWithAnotherBuilding)
+		if (!pointController.isPlayerOnePoint != building.isPlayerOneBuilding && pointController != null && !isCollidingWithAnotherBuilding &&
+			building.transform.position.y > 9f && building.transform.position.y < 10.5f)
 		{
 			if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)
 			{

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -43,6 +44,8 @@ public class PlayerController : MonoBehaviour
 	{
 		if (SceneManager.GetActiveScene().buildIndex == 1)
 			PlayerInputManager();
+
+		IsMouseOverUI();
 	}
 	public void PlayerInputManager()
 	{
@@ -84,6 +87,11 @@ public class PlayerController : MonoBehaviour
 			gameUIManager.ChangeMiniMapSize();
 		}
 	}
+	public bool IsMouseOverUI()
+	{
+		return EventSystem.current.IsPointerOverGameObject();
+	}
+
 	//logic path for quick buying units/buildings
 	public void BuyShopItemHotkeys()
 	{
@@ -158,11 +166,5 @@ public class PlayerController : MonoBehaviour
 				//NOTIFY PLAYER CODE HERE
 			}
 		}
-	}
-	public void BuildingAndUnitCost(int moneyCost, int alloyCost, int crystalCost)
-	{
-		GameManager.Instance.playerOneCurrentMoney -= moneyCost;
-		GameManager.Instance.playerOneCurrentAlloys -= alloyCost;
-		GameManager.Instance.playerOneCurrentCrystals -= crystalCost;
 	}
 }

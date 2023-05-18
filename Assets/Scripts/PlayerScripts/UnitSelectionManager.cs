@@ -51,7 +51,7 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		ShowUnitGhostProjections();
 		//unit selection
-		if (Input.GetMouseButtonDown(0))
+		if (Input.GetMouseButtonDown(0) && !playerController.IsMouseOverUI())
 		{
 			startMousePos = Input.mousePosition;
 			mouseDownTime += Time.deltaTime;
@@ -170,7 +170,7 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 			else if (SelectedCargoShip != null && hitInfo.collider.gameObject.GetComponent<ResourceNodes>() != null)
 			{
-				TryMoveSelectedEntities(hitInfo.collider.gameObject, hitInfo);
+				TryMoveSelectedEntities(hitInfo.collider.gameObject);
 			}
 			else if (hitInfo.collider.gameObject.GetComponent<BuildingManager>() != null)
 			{
@@ -182,7 +182,7 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 			else
 			{
-				TryMoveSelectedEntities(hitInfo.collider.gameObject, hitInfo);
+				TryMoveSelectedEntities(hitInfo.collider.gameObject);
 			}
 		}
 	}
@@ -249,7 +249,7 @@ public class UnitSelectionManager : MonoBehaviour
 			SelectedCargoShip.isSelected = true;
 		}
 	}
-	public void TryMoveSelectedEntities(GameObject Obj ,RaycastHit hitInfo)
+	public void TryMoveSelectedEntities(GameObject Obj)
 	{
 		//move selected cargoShip
 		if(SelectedCargoShip != null)
@@ -275,6 +275,7 @@ public class UnitSelectionManager : MonoBehaviour
 			MoveUnitsInFormation();
 		}
 	}
+
 	//remove selected unit from selectedunitlist if it died whilst selected
 	public void RemoveDeadUnitFromSelectedUnits(UnitStateController unit)
 	{

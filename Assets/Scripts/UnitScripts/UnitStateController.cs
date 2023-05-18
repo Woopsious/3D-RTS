@@ -65,8 +65,8 @@ public class UnitStateController : MonoBehaviour
 
 	public virtual void Start()
 	{
-		UpdateAudioVolume();
 		ChangeStateIdle();
+		UpdateAudioVolume();
 		//assign correct playercontroller to unit on start
 		PlayerController[] controllers = FindObjectsOfType<PlayerController>();
 		foreach(PlayerController controller in controllers)
