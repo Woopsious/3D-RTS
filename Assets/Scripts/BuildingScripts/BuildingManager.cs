@@ -65,14 +65,10 @@ public class BuildingManager : MonoBehaviour
 		{
 			BuildingUiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0,10,0));
 			if(!BuildingUiObj.activeInHierarchy)
-			{
 				BuildingUiObj.SetActive(true);
-			}
 		}
-		if (!isSelected && BuildingUiObj.activeInHierarchy)
-		{
-			StartCoroutine(HideUi());
-		}
+		else if (!isSelected && BuildingUiObj.activeInHierarchy)
+			BuildingUiObj.SetActive(false);
 	}
 	public IEnumerator HideUi()
 	{

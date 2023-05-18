@@ -7,12 +7,15 @@ public class GameUIManager : MonoBehaviour
 {
 	public static GameUIManager Instance;
 
+	public Canvas canvas;
+
 	public PlayerController playerControllerOne;
 	public PlayerController playerControllerTwo;
 
+	public MiniMapManager miniMap;
+
 	[Header("User UI Refs")]
 	public GameObject playerUiInfoObj;
-	public GameObject miniMapUiObj;
 	public GameObject settingsObj;
 	public GameObject buildingsUiShopObj;
 	public GameObject unitUiShopOneObj;
@@ -23,8 +26,6 @@ public class GameUIManager : MonoBehaviour
 	public Button audioBackButton;
 
 	public Text gameTimerText;
-
-	public bool isMiniMapEnlarged;
 
 	[Header("User Resource Refs")]
 	public Text CurrentMoneyText;
@@ -82,7 +83,6 @@ public class GameUIManager : MonoBehaviour
 				playerControllerOne = playerController;
 		}
 		playerControllerOne.gameUIManager = this;
-		isMiniMapEnlarged = false;
 	}
 	public IEnumerator DelayUiUpdate()
 	{
@@ -174,25 +174,6 @@ public class GameUIManager : MonoBehaviour
 			unitGroupsObj.transform.position = new Vector3(-500, 575, 0);
 		if (unitProdQueuesObj.transform.position != new Vector3(0, 575, 0))
 			unitProdQueuesObj.transform.position = new Vector3(0, 575, 0);
-	}
-
-	//MINIMAP FUNCTIONS
-	public void ChangeMiniMapSize()
-	{
-		RectTransform rectTransform = miniMapUiObj.GetComponent<RectTransform>();
-
-		if (isMiniMapEnlarged)
-		{
-			isMiniMapEnlarged = false;
-			rectTransform.anchoredPosition = new Vector2(803f, 383f);
-			rectTransform.sizeDelta = new Vector2(320, 320);
-		}
-		else if (!isMiniMapEnlarged)
-		{
-			isMiniMapEnlarged = true;
-			rectTransform.anchoredPosition = new Vector2(0, 41);
-			rectTransform.sizeDelta = new Vector2(765, 765);
-		}
 	}
 
 	//UI UPDATES

@@ -130,6 +130,9 @@ public class UnitStateController : MonoBehaviour
 
 				if (hit.collider.GetComponent<UnitStateController>() != null)
 					targetObjs.Add(target.gameObject);
+
+				if (!isUnitArmed)
+					target.GetComponent<UnitStateController>().ShowUnit();
 			}
 			if (target.GetComponent<BuildingManager>() != null && isPlayerOneUnit != target.GetComponent<BuildingManager>().isPlayerOneBuilding
 				&& target.GetComponent<CanPlaceBuilding>().isPlaced)	//filter out non placed buildings
@@ -139,9 +142,12 @@ public class UnitStateController : MonoBehaviour
 
 				if (hit.collider.GetComponent<BuildingManager>() != null)
 					targetObjs.Add(target.gameObject);
+
+				if (!isUnitArmed)
+					target.GetComponent<BuildingManager>().ShowBuilding();
 			}
 		}
-		if (targetObjs.Count >= 1 && currentState != attackState || targetObjs.Count >= 1 && currentState != movingState)
+		if (targetObjs.Count >= 1 && currentState != attackState && isUnitArmed || targetObjs.Count >= 1 && currentState != movingState && isUnitArmed)
 			ChangeStateAttacking();
 
 		if (targetObjs.Count == 0 && currentState == attackState)

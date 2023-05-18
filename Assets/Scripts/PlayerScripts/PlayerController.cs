@@ -84,12 +84,16 @@ public class PlayerController : MonoBehaviour
 		//enlarge/shrink Minimap
 		if (Input.GetKeyDown(KeyCode.M))
 		{
-			gameUIManager.ChangeMiniMapSize();
+			gameUIManager.miniMap.ChangeAndUpdateMiniMapSize();
 		}
 	}
 	public bool IsMouseOverUI()
 	{
 		return EventSystem.current.IsPointerOverGameObject();
+	}
+	public bool IsMouseOverMiniMap()
+	{
+		return true;
 	}
 
 	//logic path for quick buying units/buildings

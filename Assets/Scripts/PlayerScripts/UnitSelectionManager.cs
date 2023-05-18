@@ -51,7 +51,7 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		ShowUnitGhostProjections();
 		//unit selection
-		if (Input.GetMouseButtonDown(0) && !playerController.IsMouseOverUI())
+		if (Input.GetMouseButtonDown(0))
 		{
 			startMousePos = Input.mousePosition;
 			mouseDownTime += Time.deltaTime;
@@ -162,27 +162,28 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-		if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe))
+		if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe) && !playerController.IsMouseOverUI())
 		{
 			if (hitInfo.collider.gameObject.GetComponent<CargoShipController>() != null)
-			{
 				TrySelectCargoShip(hitInfo.collider.gameObject.GetComponent<CargoShipController>());
-			}
+
 			else if (SelectedCargoShip != null && hitInfo.collider.gameObject.GetComponent<ResourceNodes>() != null)
-			{
 				TryMoveSelectedEntities(hitInfo.collider.gameObject);
-			}
+
 			else if (hitInfo.collider.gameObject.GetComponent<BuildingManager>() != null)
-			{
 				TrySelectBuilding(hitInfo.collider.gameObject.GetComponent<BuildingManager>());
-			}
+
 			else if (hitInfo.collider.gameObject.GetComponent<UnitStateController>() != null)
-			{
 				TrySelectUnits(hitInfo.collider.gameObject.GetComponent<UnitStateController>());
-			}
+
+			else if (selectedUnitList.Count != 0)
+				TryMoveSelectedEntities(hitInfo.collider.gameObject);
+
 			else
 			{
-				TryMoveSelectedEntities(hitInfo.collider.gameObject);
+				DeselectUnits();
+				DeselectBuilding();
+				DeselectCargoShip();
 			}
 		}
 	}
