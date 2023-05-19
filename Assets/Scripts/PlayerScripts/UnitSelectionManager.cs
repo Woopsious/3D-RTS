@@ -162,27 +162,28 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-		if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe))
+		if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe) && !playerController.IsMouseOverUI())
 		{
 			if (hitInfo.collider.gameObject.GetComponent<CargoShipController>() != null)
-			{
 				TrySelectCargoShip(hitInfo.collider.gameObject.GetComponent<CargoShipController>());
-			}
+
 			else if (SelectedCargoShip != null && hitInfo.collider.gameObject.GetComponent<ResourceNodes>() != null)
-			{
-				TryMoveSelectedEntities(hitInfo.collider.gameObject, hitInfo);
-			}
+				TryMoveSelectedEntities(hitInfo.collider.gameObject);
+
 			else if (hitInfo.collider.gameObject.GetComponent<BuildingManager>() != null)
-			{
 				TrySelectBuilding(hitInfo.collider.gameObject.GetComponent<BuildingManager>());
-			}
+
 			else if (hitInfo.collider.gameObject.GetComponent<UnitStateController>() != null)
-			{
 				TrySelectUnits(hitInfo.collider.gameObject.GetComponent<UnitStateController>());
-			}
+
+			else if (selectedUnitList.Count != 0)
+				TryMoveSelectedEntities(hitInfo.collider.gameObject);
+
 			else
 			{
-				TryMoveSelectedEntities(hitInfo.collider.gameObject, hitInfo);
+				DeselectUnits();
+				DeselectBuilding();
+				DeselectCargoShip();
 			}
 		}
 	}
@@ -249,7 +250,7 @@ public class UnitSelectionManager : MonoBehaviour
 			SelectedCargoShip.isSelected = true;
 		}
 	}
-	public void TryMoveSelectedEntities(GameObject Obj ,RaycastHit hitInfo)
+	public void TryMoveSelectedEntities(GameObject Obj)
 	{
 		//move selected cargoShip
 		if(SelectedCargoShip != null)
@@ -275,6 +276,7 @@ public class UnitSelectionManager : MonoBehaviour
 			MoveUnitsInFormation();
 		}
 	}
+
 	//remove selected unit from selectedunitlist if it died whilst selected
 	public void RemoveDeadUnitFromSelectedUnits(UnitStateController unit)
 	{

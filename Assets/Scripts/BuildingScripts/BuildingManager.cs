@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using static UnityEngine.UI.CanvasScaler;
 
 public class BuildingManager : MonoBehaviour
 {
 	public PlayerController playerController;
+	public CapturePointController capturePointController;
 
 	[Header("Building Refs")]
 	public bool isPlayerOneBuilding;
@@ -19,7 +22,9 @@ public class BuildingManager : MonoBehaviour
 	public bool isGeneratorBuilding;
 
 	public GameObject CenterPoint;
+	public GameObject buildingDeathObj;
 	public AudioSource buildingIdleSound;
+	public GameObject miniMapRenderObj;
 	public GameObject selectedHighlighter;
 	public GameObject BuildingUiObj;
 	public GameObject refundBuildingButton;
@@ -51,6 +56,8 @@ public class BuildingManager : MonoBehaviour
 		BuildingUiObj.SetActive(false);
 		UpdateHealthBar();
 		BuildingUiObj.transform.rotation = Quaternion.identity;
+
+		//FoVMeshObj.SetActive(true);
 	}
 	public void Update()
 	{
@@ -58,14 +65,10 @@ public class BuildingManager : MonoBehaviour
 		{
 			BuildingUiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0,10,0));
 			if(!BuildingUiObj.activeInHierarchy)
-			{
 				BuildingUiObj.SetActive(true);
-			}
 		}
-		if (!isSelected && BuildingUiObj.activeInHierarchy)
-		{
-			StartCoroutine(HideUi());
-		}
+		else if (!isSelected && BuildingUiObj.activeInHierarchy)
+			BuildingUiObj.SetActive(false);
 	}
 	public IEnumerator HideUi()
 	{
@@ -79,6 +82,7 @@ public class BuildingManager : MonoBehaviour
 		dmg -= armour;
 		if (dmg < 0)
 			dmg = 0;
+		Debug.Log("building dmg");
 		currentHealth -= dmg;
 		UpdateHealthBar();
 		OnDeath();
@@ -94,11 +98,11 @@ public class BuildingManager : MonoBehaviour
 		if (currentHealth <= 0)
 		{
 			//remove relevent refs, check to make sure it is powered before updating income incase building is destroyed whilst never having been powered
-			gameObject.GetComponent<CanPlaceBuilding>().RemoveBuildingRefs();
-			if(isPowered)
-				//UpdateProductionIncome(-moneyProduction, -alloyProduction, -crystalProduction);
+			RemoveBuildingRefs();
 			if (isRefineryBuilding)
 				gameObject.GetComponent<RefineryController>().DeleteCargoShipsOnDeath();
+
+			Instantiate(buildingDeathObj, transform.position, Quaternion.identity);
 
 			Destroy(BuildingUiObj);
 			Destroy(gameObject);
@@ -127,6 +131,60 @@ public class BuildingManager : MonoBehaviour
 		}
 		playerController.gameUIManager.UpdateCurrentResourcesUI();
 		OnDeath();
+	}
+	public void ShowBuilding()
+	{
+		miniMapRenderObj.layer = 13;
+	}
+	//track buildings refs
+	public void AddBuildingRefs()
+	{
+		if (isGeneratorBuilding)
+		{
+			capturePointController.energyGeneratorBuilding = this;
+		}
+		else if (isRefineryBuilding)
+		{
+			if (!capturePointController.RefinaryBuildings.Contains(this))
+				capturePointController.RefinaryBuildings.Add(this);
+		}
+		else if (isLightVehProdBuilding)
+		{
+			if (!capturePointController.lightVehProdBuildings.Contains(this))
+				capturePointController.lightVehProdBuildings.Add(this);
+		}
+		else if (isHeavyVehProdBuilding)
+		{
+			if (!capturePointController.heavyVehProdBuildings.Contains(this))
+				capturePointController.heavyVehProdBuildings.Add(this);
+		}
+	}
+	public void RemoveBuildingRefs()
+	{
+		if (isGeneratorBuilding)
+		{
+			capturePointController.energyGeneratorBuilding = null;
+			GetComponent<EnergyGenController>().UnpowerBuildings();
+		}
+		else if (isRefineryBuilding)
+		{
+			capturePointController.RefinaryBuildings.Remove(this);
+		}
+		else if (isLightVehProdBuilding)
+		{
+			capturePointController.lightVehProdBuildings.Remove(this);
+			playerController.lightVehProdBuildingsList.Remove(this);
+		}
+		else if (isHeavyVehProdBuilding)
+		{
+			capturePointController.heavyVehProdBuildings.Remove(this);
+			playerController.heavyVehProdBuildingsList.Remove(this);
+		}
+		else if (isVTOLProdBuilding)
+		{
+			capturePointController.heavyVehProdBuildings.Remove(this);
+			playerController.heavyVehProdBuildingsList.Remove(this);
+		}
 	}
 	public void UpdateAudioVolume()
 	{

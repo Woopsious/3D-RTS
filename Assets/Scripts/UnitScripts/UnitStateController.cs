@@ -14,12 +14,16 @@ public class UnitStateController : MonoBehaviour
 	public UnitMovingState movingState = new UnitMovingState();
 	public UnitStateAttacking attackState = new UnitStateAttacking();
 
+	public WeaponSystem weaponSystem;
+
 	[Header("Unit Refs")]
 	public Animator animatorController;
 	public List<AudioSource> audioSFXs = new List<AudioSource>();
+	public AudioSource movingSFX;
 	public NavMeshAgent agentNav;
 	public Rigidbody rb;
 	public GameObject CenterPoint;
+	public GameObject unitDeathObj;
 	public GameObject selectedHighlighter;
 	public GameObject miniMapRenderObj;
 	public GameObject FoVMeshObj;
@@ -45,10 +49,6 @@ public class UnitStateController : MonoBehaviour
 	public int maxHealth;
 	public int currentHealth;
 	public int armour;
-	public int damage;
-	[System.NonSerialized]
-	public float attackSpeedTimer;
-	public float attackSpeed;
 	public float attackRange;
 	public float ViewRange;
 
@@ -65,8 +65,8 @@ public class UnitStateController : MonoBehaviour
 
 	public virtual void Start()
 	{
-		UpdateAudioVolume();
 		ChangeStateIdle();
+		UpdateAudioVolume();
 		//assign correct playercontroller to unit on start
 		PlayerController[] controllers = FindObjectsOfType<PlayerController>();
 		foreach(PlayerController controller in controllers)
@@ -88,28 +88,14 @@ public class UnitStateController : MonoBehaviour
 		unitUiObj.transform.rotation = Quaternion.identity;
 
 		if (isPlayerOneUnit)
-		{
 			miniMapRenderObj.layer = 11;
-		}
+
 		else if (!isPlayerOneUnit)
-		{
 			miniMapRenderObj.layer = 12;
-		}
-		FoVMeshObj.SetActive(true);
+		//FoVMeshObj.SetActive(true);
 	}
 	public virtual void Update()
 	{
-		if(!isCargoShip && movePos != Vector3.zero && currentState != movingState && currentState != attackState)
-		{
-			ChangeStateMoving();
-		}
-		if (!isCargoShip && movePos == Vector3.zero && currentState != idleState && currentState != attackState)
-		{
-			ChangeStateIdle();
-		}
-		if (!isCargoShip)
-			ScanForTargets();
-
 		if (isSelected)
 		{
 			if (!unitUiObj.activeInHierarchy)
@@ -124,8 +110,11 @@ public class UnitStateController : MonoBehaviour
 	public virtual void FixedUpdate()
 	{
 		currentState.UpdatePhysics(this);
+
+		if (!isCargoShip && currentState != attackState || !isCargoShip && !isUnitArmed)
+			ScanForTargets();
 	}
-	//scan for targets to switch to attack mode then moving mode once enemy killed or another target is found
+	//grab correct entity types in view range, if entity is in attack range and to tempTargetList then switch to attack state if any found
 	public void ScanForTargets()
 	{
 		//scan for targets
@@ -140,41 +129,31 @@ public class UnitStateController : MonoBehaviour
 					out RaycastHit hit, ignoreMe);
 
 				if (hit.collider.GetComponent<UnitStateController>() != null)
-				{
 					targetObjs.Add(target.gameObject);
-				}
+
+				if (!isUnitArmed)
+					target.GetComponent<UnitStateController>().ShowUnit();
 			}
-			if (target.GetComponent<BuildingManager>() != null && isPlayerOneUnit != target.GetComponent<BuildingManager>().isPlayerOneBuilding)
+			if (target.GetComponent<BuildingManager>() != null && isPlayerOneUnit != target.GetComponent<BuildingManager>().isPlayerOneBuilding
+				&& target.GetComponent<CanPlaceBuilding>().isPlaced)	//filter out non placed buildings
 			{
 				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<BuildingManager>().CenterPoint.transform.position,
 					out RaycastHit hit, ignoreMe);
 
 				if (hit.collider.GetComponent<BuildingManager>() != null)
-				{
 					targetObjs.Add(target.gameObject);
-				}
+
+				if (!isUnitArmed)
+					target.GetComponent<BuildingManager>().ShowBuilding();
 			}
 		}
-		if (isUnitArmed)
-		{
-			if (targetObjs.Count >= 1 && currentState != attackState)
-			{
-				ChangeStateAttacking();
-			}
-			if (targetObjs.Count == 0 && currentState == attackState && movePos == new Vector3(0, 0, 0))
-			{
-				ChangeStateIdle();
-			}
-		}
+		if (targetObjs.Count >= 1 && currentState != attackState && isUnitArmed || targetObjs.Count >= 1 && currentState != movingState && isUnitArmed)
+			ChangeStateAttacking();
+
+		if (targetObjs.Count == 0 && currentState == attackState)
+			ChangeStateIdle();
 	}
-		
-	//visulization of attack range
-	public void OnDrawGizmosSelected()
-	{
-		Gizmos.color = Color.red;
-		Gizmos.DrawWireSphere(transform.position, attackRange);
-		Gizmos.DrawWireSphere(transform.position, ViewRange);
-	}
+
 	//HEALTH FUNCTIONS
 	public void RecieveDamage(int dmg)
 	{
@@ -198,12 +177,22 @@ public class UnitStateController : MonoBehaviour
 		if(currentHealth <= 0)
 		{
 			RemoveRefs();
+
+			Instantiate(unitDeathObj, transform.position, Quaternion.identity);
+
 			Destroy(unitUiObj);
 			Destroy(gameObject);
 		}
 	}
 
 	//UTILITY FUNCTIONS
+	public IEnumerator DelaySecondaryAttack(UnitStateController unit, float seconds)
+	{
+		unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
+		unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
+		yield return new WaitForSeconds(seconds);
+		unit.weaponSystem.ShootSecondaryWeapon();
+	}
 	public void RefundUnit()
 	{
 		currentHealth = 0;
@@ -278,6 +267,12 @@ public class UnitStateController : MonoBehaviour
 			miniMapRenderObj.layer = 12;
 		}
 		//notifiy enemy player when enemy unit is unspotted
+	}
+	public void OnDrawGizmosSelected()
+	{
+		Gizmos.color = Color.red;
+		Gizmos.DrawWireSphere(transform.position, attackRange);
+		Gizmos.DrawWireSphere(transform.position, ViewRange);
 	}
 
 	//STATE CHANGE FUNCTIONS

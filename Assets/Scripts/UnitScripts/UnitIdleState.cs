@@ -7,18 +7,20 @@ public class UnitIdleState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		//Debug.Log("Entered Idle State");
-		if (unit.hasAnimation)
-		{
-			unit.animatorController.SetBool("isAttacking", false);
-			unit.animatorController.SetBool("isIdle", true);
-		}
-		unit.audioSFXs[0].Stop();
+		Debug.Log("Entered Idle State");
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[1].Stop();
 			unit.audioSFXs[2].Play();
 		}
+		unit.movingSFX.Stop();
+
+		if (unit.unitName != "Scout Vehicle")
+			unit.animatorController.SetBool("isIdle", true);
+
+		if (unit.hasAnimation)
+			unit.animatorController.SetBool("isAttacking", false);
+
 		unit.HideUnit();
 	}
 	public override void Exit(UnitStateController unit)

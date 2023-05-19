@@ -7,8 +7,12 @@ public class GameUIManager : MonoBehaviour
 {
 	public static GameUIManager Instance;
 
+	public Canvas canvas;
+
 	public PlayerController playerControllerOne;
 	public PlayerController playerControllerTwo;
+
+	public MiniMapManager miniMap;
 
 	[Header("User UI Refs")]
 	public GameObject playerUiInfoObj;
@@ -69,12 +73,7 @@ public class GameUIManager : MonoBehaviour
 		GameManager.Instance.LoadPlayerData();
 
 		audioBackButton.onClick.AddListener(delegate { AudioManager.Instance.AdjustAudioVolume(); });
-
-		gameSpeed = 1;
-		UpdateGameSpeedUi();
-		UpdateCurrentResourcesUI();
-		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
-
+		StartCoroutine(DelayUiUpdate());
 		//WIP soulution for multiplayer
 		PlayerController[] playerControllers = FindObjectsOfType<PlayerController>();
 
@@ -84,6 +83,15 @@ public class GameUIManager : MonoBehaviour
 				playerControllerOne = playerController;
 		}
 		playerControllerOne.gameUIManager = this;
+	}
+	public IEnumerator DelayUiUpdate()
+	{
+		yield return new WaitForSeconds(0.1f);
+
+		gameSpeed = 1;
+		UpdateGameSpeedUi();
+		UpdateCurrentResourcesUI();
+		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
 	}
 	public void Update()
 	{
@@ -186,12 +194,6 @@ public class GameUIManager : MonoBehaviour
 			CurrentMoneyText.text = GameManager.Instance.playerOneCurrentMoney.ToString();
 			CurrentAlloysText.text = GameManager.Instance.playerOneCurrentAlloys.ToString();
 			CurrentCrystalsText.text = GameManager.Instance.playerOneCurrentCrystals.ToString();
-		}
-		else if (playerControllerTwo != null)
-		{
-			CurrentMoneyText.text = GameManager.Instance.aiCurrentMoney.ToString();
-			CurrentAlloysText.text = GameManager.Instance.aiCurrentAlloys.ToString();
-			CurrentCrystalsText.text = GameManager.Instance.aiCurrentCrystals.ToString();
 		}
 	}
 	public void UpdateIncomeResourcesUI(int playerOneMoneyPerSecond, int playerOneAlloysPerSecond, int playerOneCrystalsPerSecond,

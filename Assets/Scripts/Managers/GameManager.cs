@@ -51,12 +51,12 @@ public class GameManager : MonoBehaviour
 	public GameObject buildingTurretPlayerOne;
 
 	[Header("PlayerOne Unit Prefabs")]
-	public GameObject unitScoutVehiclePlayerOne;
-	public GameObject unitRadarVehiclePlayerOne;
-	public GameObject unitLightMechPlayerOne;
-	public GameObject unitHeavyMechKnightPlayerOne;
-	public GameObject unitHeavyMechTankPlayerOne;
 	public GameObject unitVTOLPlayerOne;
+	public GameObject unitHeavyMechTankPlayerOne;
+	public GameObject unitHeavyMechKnightPlayerOne;
+	public GameObject unitLightMechPlayerOne;
+	public GameObject unitRadarVehiclePlayerOne;
+	public GameObject unitScoutVehiclePlayerOne;
 
 	[Header("PlayerTwo Building Prefabs")]
 	public GameObject buildingHQPlayerTwo;
@@ -68,15 +68,12 @@ public class GameManager : MonoBehaviour
 	public GameObject buildingTurretPlayerTwo;
 
 	[Header("PlayerTwo Unit Prefabs")]
-	public GameObject unitScoutVehiclePlayerTwo;
-	public GameObject unitRadarVehiclePlayerTwo;
-	public GameObject unitLightMechPlayerTwo;
-	public GameObject unitHeavyMechKnightPlayerTwo;
-	public GameObject unitHeavyMechTankPlayerTwo;
 	public GameObject unitVTOLPlayerTwo;
-
-	public int testAlloysAmount;
-	public int testCrystalsAmount;
+	public GameObject unitHeavyMechTankPlayerTwo;
+	public GameObject unitHeavyMechKnightPlayerTwo;
+	public GameObject unitLightMechPlayerTwo;
+	public GameObject unitRadarVehiclePlayerTwo;
+	public GameObject unitScoutVehiclePlayerTwo;
 
 	public void Awake()
 	{

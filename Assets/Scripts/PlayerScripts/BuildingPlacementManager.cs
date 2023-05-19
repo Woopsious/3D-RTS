@@ -48,16 +48,29 @@ public class BuildingPlacementManager : MonoBehaviour
 			buildingHQ = GameManager.Instance.buildingHQPlayerTwo;
 		}
 	}
-	public void PlaceBuildingManager()
+	public void Update()
+	{
+		BuildingFollowsMouseCursor();
+
+		if (currentBuildingPlacement != null && !playerController.IsMouseOverUI())
+			PlaceBuildingManager();
+	}
+	public void BuildingFollowsMouseCursor()
 	{
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-		if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe))
+		if (currentBuildingPlacement != null)
 		{
-			currentBuildingPlacement.transform.position = hitInfo.point;
-			float mouseWheelRotation = Input.mouseScrollDelta.y;
-			currentBuildingPlacement.transform.Rotate(10 * mouseWheelRotation * Vector3.up);
+			if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe))
+			{
+				currentBuildingPlacement.transform.position = hitInfo.point;
+				float mouseWheelRotation = Input.mouseScrollDelta.y;
+				currentBuildingPlacement.transform.Rotate(10 * mouseWheelRotation * Vector3.up);
+			}
 		}
+	}
+	public void PlaceBuildingManager()
+	{
 		//place building and toggle it on
 		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
 		{
@@ -75,9 +88,12 @@ public class BuildingPlacementManager : MonoBehaviour
 			currentBuildingPlacement.gameObject.layer = buildingLayer;
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
+			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().isPlaced = true;
 			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
+			currentBuildingPlacement.AddBuildingRefs();
+			if (currentBuildingPlacement.isGeneratorBuilding)
+				currentBuildingPlacement.GetComponent<EnergyGenController>().StartPower();
 			currentBuildingPlacement = null;
-			playerController.gameUIManager.UpdateCurrentResourcesUI();
 			//NOTIFY PLAYER CODE HERE
 		}
 		else if (Input.GetMouseButtonDown(0) && !currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
@@ -140,6 +156,8 @@ public class BuildingPlacementManager : MonoBehaviour
 		GameManager.Instance.playerOneCurrentMoney -= moneyCost;
 		GameManager.Instance.playerOneCurrentAlloys -= alloyCost;
 		GameManager.Instance.playerOneCurrentCrystals -= crystalCost;
+
+		playerController.gameUIManager.UpdateCurrentResourcesUI();
 	}
 	public bool CheckIfCanBuy(int MoneyCost, int AlloyCost, int CrystalCost)
 	{

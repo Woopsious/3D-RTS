@@ -25,7 +25,7 @@ public class BuildTime : MonoBehaviour
 	public void Start()
 	{
 		UnitStateController unit = UnitPrefab.GetComponent<UnitStateController>();
-		buildCostText.text = unit.name + "\n Cost: " + unit.moneyCost + " Money\n" + unit.alloyCost + " Alloys, " + unit.crystalCost + " Crystals";
+		buildCostText.text = unit.unitName + "\n Cost: " + unit.moneyCost + " Money\n" + unit.alloyCost + " Alloys, " + unit.crystalCost + " Crystals";
 		buildTimeText.text = "Time To Build: " + buildTime;
 	}
 	public void Update()
@@ -56,27 +56,22 @@ public class BuildTime : MonoBehaviour
 			if (isPlayerOne == possibleBuilding.building.isPlayerOneBuilding && possibleBuilding.building.isPowered)
 			{
 				if (possibleBuilding.building.isLightVehProdBuilding && listNumRef == 1)
-				{
 					correctProdBuildings.Add(possibleBuilding);
-				}
+
 				else if (possibleBuilding.building.isHeavyVehProdBuilding && listNumRef == 2)
-				{
 					correctProdBuildings.Add(possibleBuilding);
-				}
+
 				else if (possibleBuilding.building.isVTOLProdBuilding && listNumRef == 3)
-				{
 					correctProdBuildings.Add(possibleBuilding);
-				}
 			}
 		}
-		Debug.Log(correctProdBuildings.Count);
 		if (correctProdBuildings.Count == 0)
 		{
 			Debug.LogError("No correct type production buildings powered");
 			unitProductionManager.failedUnitPlacements.Add(this);
 			//notify player
 		}
-		else if (correctProdBuildings.Count <= 1)
+		else
 		{
 			List<VehProdSpawnLocation> closestProdBuildings = correctProdBuildings.OrderBy(newBuilding => Vector3.Distance(buildPosDestination,
 				newBuilding.gameObject.transform.position)).ToList();
@@ -84,7 +79,6 @@ public class BuildTime : MonoBehaviour
 			VehProdSpawnLocation closestBuilding = closestProdBuildings[0];
 			unitSpawnLocation = closestBuilding;
 		}
-		Debug.Log(correctProdBuildings.Count);
 	}
 	public void StartProduction()
 	{
@@ -99,20 +93,15 @@ public class BuildTime : MonoBehaviour
 
 		//once removed from build queue start next build
 		if (listNumRef == 1)
-		{
 			unitProductionManager.RemoveFromQueueAndStartNextBuild(unitProductionManager.lightVehProdList, this);
-		}
+
 		if (listNumRef == 2)
-		{
 			unitProductionManager.RemoveFromQueueAndStartNextBuild(unitProductionManager.heavyVehProdList, this);
-		}
+
 		if (listNumRef == 3)
-		{
 			unitProductionManager.RemoveFromQueueAndStartNextBuild(unitProductionManager.vtolVehProdList, this);
-		}
 
 		unitProductionManager.SpawnUnitsAtProdBuilding(this, unitSpawnLocation, buildPosDestination);
-
 		RemoveUi();
 	}
 	public void CancelProduction()
@@ -125,20 +114,14 @@ public class BuildTime : MonoBehaviour
 	public void RemoveUi()
 	{
 		if (listNumRef == 1)
-		{
-			//unitProductionManager.lightVehProdList.Remove(this);
 			unitProductionManager.RemoveFromQueueAndStartNextBuild(unitProductionManager.lightVehProdList, this);
-		}
+
 		if (listNumRef == 2)
-		{
-			//unitProductionManager.heavyVehProdList.Remove(this);
 			unitProductionManager.RemoveFromQueueAndStartNextBuild(unitProductionManager.heavyVehProdList, this);
-		}
+
 		if (listNumRef == 3)
-		{
-			//unitProductionManager.vtolVehProdList.Remove(this);
 			unitProductionManager.RemoveFromQueueAndStartNextBuild(unitProductionManager.vtolVehProdList, this);
-		}
+
 		unitProductionManager.currentUnitPlacements.Remove(this);
 		Destroy(gameObject);
 	}

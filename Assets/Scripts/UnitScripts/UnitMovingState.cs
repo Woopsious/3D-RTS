@@ -9,28 +9,27 @@ public class UnitMovingState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		//Debug.Log("Entered Moving State");
-		unit.agentNav.isStopped = false;
-		if (unit.hasAnimation)
-		{
-			unit.animatorController.SetBool("isAttacking", false);
-			unit.animatorController.SetBool("isIdle", false);
-		}
-		unit.audioSFXs[0].Play();
+		Debug.Log("Entered Moving State");
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[2].Stop();
 			unit.audioSFXs[1].Play();
 		}
+		unit.movingSFX.Play();
 
-		if(CheckPath(unit))
-		{
+		if (unit.unitName != "Scout Vehicle")
+			unit.animatorController.SetBool("isIdle", false);
+
+		if (unit.hasAnimation)
+			unit.animatorController.SetBool("isAttacking", false);
+
+		unit.agentNav.isStopped = false;
+		if (CheckPath(unit))
 			unit.agentNav.SetPath(unit.navMeshPath);
-		}
+
 		else if (!CheckPath(unit))
-		{
 			unit.agentNav.destination = unit.transform.position;
-		}
+
 		unit.HideUnit();
 	}
 	public override void Exit(UnitStateController unit)
@@ -47,12 +46,11 @@ public class UnitMovingState : UnitBaseState
 	}
 	public void CheckDistance(UnitStateController unit)
 	{
-		if (Vector3.Distance(unit.transform.position, unit.movePos) > unit.agentNav.stoppingDistance && unit.movePos != new Vector3(0, 0, 0))
+		if (Vector3.Distance(unit.transform.position, unit.movePos) < unit.agentNav.stoppingDistance)
 		{
-			//do nothing
+			unit.ChangeStateIdle();
+			unit.agentNav.isStopped = true;
 		}
-		else
-			unit.movePos = new Vector3(0, 0, 0);
 	}
 	public bool CheckPath(UnitStateController unit)
 	{
