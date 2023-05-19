@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
 
 	[Header("Game Ui Refs")]
 	public Camera miniMapCameraRenderer;
+	public CameraController mainCameraParent;
 	public GameUIManager gameUIManager;
 	public UnitSelectionManager unitSelectionManager;
 	public BuildingPlacementManager buildingPlacementManager;

@@ -6,48 +6,68 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(RectTransform))]
 public class MiniMapManager : MonoBehaviour, IPointerClickHandler
 {
+	public GameUIManager gameUIManager;
 	public GameObject miniMapUiObj;
 
-	public bool isMiniMapEnlarged;
+	private RectTransform miniMapRectTransform;
+	private bool isMiniMapEnlarged;
 
-	public Vector2 terrainSize = new Vector2(256, 256);
-	public Vector2 currentMinimapSize;
-
-	public Vector2 cameraJumpVector;
+	private Vector2 terrainSize = new Vector2(256, 256);
+	private Vector2 currentMinimapSize;
 
 	public void Start()
 	{
+		miniMapRectTransform = miniMapUiObj.GetComponent<RectTransform>();
 		isMiniMapEnlarged = false;
+		miniMapRectTransform.anchoredPosition = new Vector2(803f, 383f);
+		miniMapRectTransform.sizeDelta = new Vector2(320, 320);
+		currentMinimapSize = new Vector2(320, 320);
 		currentMinimapSize = miniMapUiObj.GetComponent<RectTransform>().sizeDelta;
-	}
-	public void Update()
-	{
-
 	}
 
 	//MINIMAP FUNCTIONS
 	public void ChangeAndUpdateMiniMapSize()
 	{
-		RectTransform rectTransform = miniMapUiObj.GetComponent<RectTransform>();
-
 		if (isMiniMapEnlarged)
 		{
 			isMiniMapEnlarged = false;
-			rectTransform.anchoredPosition = new Vector2(803f, 383f);
-			rectTransform.sizeDelta = new Vector2(320, 320);
+			miniMapRectTransform.anchoredPosition = new Vector2(803f, 383f);
+			miniMapRectTransform.sizeDelta = new Vector2(320, 320);
 			currentMinimapSize = new Vector2(320, 320);
 		}
 		else if (!isMiniMapEnlarged)
 		{
 			isMiniMapEnlarged = true;
-			rectTransform.anchoredPosition = new Vector2(580.5f, 40.5f);
-			rectTransform.sizeDelta = new Vector2(770, 770);
+			miniMapRectTransform.anchoredPosition = new Vector2(580.5f, 40.5f);
+			miniMapRectTransform.sizeDelta = new Vector2(770, 770);
 			currentMinimapSize = new Vector2(770, 770);
 		}
 	}
 	public void OnPointerClick(PointerEventData pointerEventData)
 	{
-		ScreenPointToMiniMapSize(pointerEventData);
+		//get clicked point on minimap, convert vector2 result to world vector2
+
+		RectTransformUtility.ScreenPointToLocalPointInRectangle(miniMapRectTransform, pointerEventData.position, null, out Vector2 localPoint);
+
+		//minimap size delta is 320,320 or 770, 770
+		//ratio of terrain size to minimap size is either 1.25 or 3.008
+		Vector2 offset = miniMapRectTransform.sizeDelta / 2;
+
+		localPoint += offset;
+
+		Debug.Log("point offset :" + localPoint);
+
+		//get ratio
+		Vector2 ratio;
+		ratio = miniMapRectTransform.sizeDelta / terrainSize;
+
+		Vector2 cameraJumpVector;
+		cameraJumpVector = localPoint / ratio;
+
+		gameUIManager.playerController.mainCameraParent.transform.position = 
+			new Vector3(cameraJumpVector.x, Camera.main.transform.position.y, cameraJumpVector.y);
+
+
 		/*
 		Debug.Log(pointerEventData.position);
 
@@ -57,6 +77,7 @@ public class MiniMapManager : MonoBehaviour, IPointerClickHandler
 		Debug.Log(localPoint);
 		*/
 	}
+	/*
 	public void ScreenPointToMiniMapSize(PointerEventData pointerEventData)
 	{
 		float miniMapSizeX = 310;
@@ -86,4 +107,5 @@ public class MiniMapManager : MonoBehaviour, IPointerClickHandler
 
 		Debug.Log(cameraMoveVector);
 	}
+	*/
 }

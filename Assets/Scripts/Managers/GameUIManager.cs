@@ -7,10 +7,7 @@ public class GameUIManager : MonoBehaviour
 {
 	public static GameUIManager Instance;
 
-	public Canvas canvas;
-
-	public PlayerController playerControllerOne;
-	public PlayerController playerControllerTwo;
+	public PlayerController playerController;
 
 	public MiniMapManager miniMap;
 
@@ -77,12 +74,7 @@ public class GameUIManager : MonoBehaviour
 		//WIP soulution for multiplayer
 		PlayerController[] playerControllers = FindObjectsOfType<PlayerController>();
 
-		foreach (PlayerController playerController in playerControllers)
-		{
-			if (playerController.isPlayerOne)
-				playerControllerOne = playerController;
-		}
-		playerControllerOne.gameUIManager = this;
+		playerController.gameUIManager = this;
 	}
 	public IEnumerator DelayUiUpdate()
 	{
@@ -189,7 +181,7 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void UpdateCurrentResourcesUI()
 	{
-		if (playerControllerOne != null)
+		if (playerController != null)
 		{
 			CurrentMoneyText.text = GameManager.Instance.playerOneCurrentMoney.ToString();
 			CurrentAlloysText.text = GameManager.Instance.playerOneCurrentAlloys.ToString();
@@ -199,13 +191,13 @@ public class GameUIManager : MonoBehaviour
 	public void UpdateIncomeResourcesUI(int playerOneMoneyPerSecond, int playerOneAlloysPerSecond, int playerOneCrystalsPerSecond,
 		int aiMoneyPerSecond, int aiAlloysPerSecond, int aiCrystalsPerSecond)
 	{
-		if(playerControllerOne != null)
+		if(playerController.isPlayerOne)
 		{
 			IncomeMoneyText.text = playerOneMoneyPerSecond.ToString() + "s";
 			IncomeAlloysText.text = playerOneAlloysPerSecond.ToString() + "s";
 			IncomeCrystalsText.text = playerOneCrystalsPerSecond.ToString() + "s";
 		}
-		else if (playerControllerTwo != null)
+		else if (!playerController.isPlayerOne)
 		{
 			IncomeMoneyText.text = aiMoneyPerSecond.ToString() + "s";
 			IncomeAlloysText.text = aiAlloysPerSecond.ToString() + "s";
