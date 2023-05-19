@@ -1,16 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.ConstrainedExecution;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class CameraController : MonoBehaviour
 {
 	private readonly float moveSpeed = 50f;
 	private readonly float turnSpeed = 100f;
 
+	private float addOffset = -1f;
+	private float minusOffset = +1f;
+
 	public void Update()
 	{
 		MoveCamera();
 		RotateCamera();
+		CheckDirectionalBounds();
 	}
 
 	public void MoveCamera()
@@ -50,5 +56,46 @@ public class CameraController : MonoBehaviour
 		{
 			transform.eulerAngles -= new Vector3(transform.rotation.x, -turnSpeed, transform.rotation.y) * Time.unscaledDeltaTime;
 		}
+	}
+	public void CheckDirectionalBounds()
+	{
+		if (CheckIfInBoundsPositive(transform.position.x, 248))
+		{
+			transform.position = new Vector3(transform.position.x + minusOffset, transform.position.y, transform.position.z);
+		}
+		if (CheckIfInBoundsPositive(transform.position.z, 248))
+		{
+			transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + minusOffset);
+		}
+		if (CheckIfInBoundsPositive(transform.position.y, 50))
+		{
+			transform.position = new Vector3(transform.position.x, transform.position.y + minusOffset, transform.position.z);
+		}
+		if (CheckIfInBoundsNegative(transform.position.x, 8))
+		{
+			transform.position = new Vector3(transform.position.x + addOffset, transform.position.y, transform.position.z);
+		}
+		if (CheckIfInBoundsNegative(transform.position.z, 8))
+		{
+			transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + addOffset);
+		}
+		if (CheckIfInBoundsNegative(transform.position.y, 20))
+		{
+			transform.position = new Vector3(transform.position.x, transform.position.y + addOffset, transform.position.z);
+		}
+	}
+	public bool CheckIfInBoundsPositive(float position, float bounds)
+	{
+		if (position < bounds)
+			return true;
+		else
+			return false;
+	}
+	public bool CheckIfInBoundsNegative(float position, float bounds)
+	{
+		if (position > bounds)
+			return true;
+		else
+			return false;
 	}
 }
