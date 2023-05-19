@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Converters;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -37,6 +38,8 @@ public class MenuUIManager : MonoBehaviour
 			Instance = this;
 		else
 			Destroy(gameObject);
+
+		GameManager.Instance.errorManager.CheckForErrorMessageObj();
 	}
 	public void PlayButtonSound()
 	{

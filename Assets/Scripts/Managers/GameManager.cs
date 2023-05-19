@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
 	public static GameManager Instance;
 
 	public GameUIManager gameUIManager;
+	public ErrorManager errorManager;
 
 	//references
 	public float timer;
@@ -84,6 +85,7 @@ public class GameManager : MonoBehaviour
 		}
 		else
 			Destroy(gameObject);
+
 		LocalCopyOfPlayerData = new PlayerData();
 		LocalCopyOfGameData = new GameData();
 

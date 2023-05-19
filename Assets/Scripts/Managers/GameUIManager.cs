@@ -75,6 +75,7 @@ public class GameUIManager : MonoBehaviour
 		PlayerController[] playerControllers = FindObjectsOfType<PlayerController>();
 
 		playerController.gameUIManager = this;
+		GameManager.Instance.errorManager.CheckForErrorMessageObj();
 	}
 	public IEnumerator DelayUiUpdate()
 	{
