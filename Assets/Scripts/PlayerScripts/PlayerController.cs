@@ -70,9 +70,6 @@ public class PlayerController : MonoBehaviour
 		//hotkeys for items in shop tabs
 		BuyShopItemHotkeys();
 
-		//if (buildingPlacementManager.currentBuildingPlacement != null)
-			//buildingPlacementManager.PlaceBuildingManager();
-
 		//hotkeys for game speed Change
 		if (Input.GetKeyDown(KeyCode.Equals))
 		{

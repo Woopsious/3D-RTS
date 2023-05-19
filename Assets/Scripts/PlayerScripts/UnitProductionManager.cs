@@ -153,7 +153,7 @@ public class UnitProductionManager : MonoBehaviour
 				else //if player cant afford them add build to failed list then at the end remove ui + refs
 				{
 					failedUnitPlacements.Add(build);
-					GameManager.Instance.errorManager.DisplayErrorMessage("Couldnt afford: " + 
+					GameManager.Instance.errorManager.DisplayNotificationMessage("Couldnt afford: " + 
 						build.UnitPrefab.GetComponent<UnitStateController>().unitName, 2); ;
 					//Some code to better notify player
 				}

@@ -40,15 +40,21 @@ public class ErrorManager : MonoBehaviour
 		errorText = errorPopUpObj.GetComponentInChildren<Text>();
 		errorPopUpObj.GetComponent<RectTransform>().anchoredPosition = new Vector2(-600, 240);
 	}
-
-	public void DisplayErrorMessage(string errorMessage, float displayTimeInSeconds)
+	public void DisplayMessage(string errorMessage, float displayTimeInSeconds)
 	{
 		errorText.text = errorMessage;
 		errorPopUpObj.SetActive(true);
-		StartCoroutine(HideErrorMessage(displayTimeInSeconds));
+		StartCoroutine(HideMessage(displayTimeInSeconds));
 	}
 
-	public IEnumerator HideErrorMessage(float displayTimeInSeconds)
+	public void DisplayNotificationMessage(string errorMessage, float displayTimeInSeconds)
+	{
+		errorText.text = errorMessage;
+		errorPopUpObj.SetActive(true);
+		StartCoroutine(HideMessage(displayTimeInSeconds));
+	}
+
+	public IEnumerator HideMessage(float displayTimeInSeconds)
 	{
 		yield return new WaitForSeconds(displayTimeInSeconds);
 		errorPopUpObj.SetActive(false);
