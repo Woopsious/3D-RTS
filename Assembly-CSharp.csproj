@@ -82,11 +82,11 @@
     <Compile Include="Assets\Scripts\UnitScripts\WeaponSystem.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\CanPlaceBuilding.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\Managers\ErrorManager.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\BuildingManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\ParticleEffects.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitProductionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\CapturePointController.cs" />
-    <Compile Include="Assets\Scripts\Managers\ErrorManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Effects\UI\FogOfWar\TestUnlit 1.shader" />

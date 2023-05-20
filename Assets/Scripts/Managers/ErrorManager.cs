@@ -10,10 +10,16 @@ public class ErrorManager : MonoBehaviour
 	private static ILogger logger = Debug.unityLogger;
 	private static string kTag = "3D-RTS Launched";
 
-	public GameObject errorMessagePrefab;
+	public GameObject errorWindowPrefab;
+	public GameObject errorLogMessagePrefab;
+	public GameObject errorLogWindowAndPlayerNotifParent;
 
-	public GameObject errorPopUpObj;
-	public Text errorText;
+	public GameObject errorLogWindowObj;
+	public Button errorLogClearButton;
+	public Button errorLogCloseButton;
+
+	public GameObject playerNotifObj;
+	public Text playerNotifText;
 
 	public void Awake()
 	{
@@ -33,31 +39,70 @@ public class ErrorManager : MonoBehaviour
 	}
 	public void CheckForErrorMessageObj()
 	{
-		if (errorPopUpObj == null)
-			errorPopUpObj = Instantiate(errorMessagePrefab, transform.position, Quaternion.identity);
-		errorPopUpObj.transform.SetParent(FindObjectOfType<Canvas>().transform, false);
+		if (errorLogWindowAndPlayerNotifParent == null)
+			errorLogWindowAndPlayerNotifParent = Instantiate(errorWindowPrefab, transform.position, Quaternion.identity);
 
-		errorText = errorPopUpObj.GetComponentInChildren<Text>();
-		errorPopUpObj.GetComponent<RectTransform>().anchoredPosition = new Vector2(-600, 240);
+		errorLogWindowAndPlayerNotifParent.transform.SetParent(FindObjectOfType<Canvas>().transform, false);
+		errorLogWindowAndPlayerNotifParent.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
+
+		SetUpErrorLogNotification();
+		SetUpPlayerNotification();
 	}
-	public void DisplayMessage(string errorMessage, float displayTimeInSeconds)
+	public void SetUpPlayerNotification()
 	{
-		errorText.text = errorMessage;
-		errorPopUpObj.SetActive(true);
-		StartCoroutine(HideMessage(displayTimeInSeconds));
+		playerNotifObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(3).gameObject; //set up player pop up notifs
+		playerNotifText = playerNotifObj.GetComponentInChildren<Text>();
+	}	
+	public void SetUpErrorLogNotification()
+	{
+		errorLogWindowObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(0).gameObject;
+		errorLogClearButton = errorLogWindowAndPlayerNotifParent.transform.GetChild(1).GetComponent<Button>();
+		errorLogCloseButton = errorLogWindowAndPlayerNotifParent.transform.GetChild(2).GetComponent<Button>();
+
+		errorLogClearButton.onClick.AddListener(delegate { ClearErrorLog(); });
+		errorLogCloseButton.onClick.AddListener(delegate { CloseErrorLog(); });
 	}
 
+	//FUNCTIONS FOR PLAYER NOTIFICATIONS
 	public void DisplayNotificationMessage(string errorMessage, float displayTimeInSeconds)
 	{
-		errorText.text = errorMessage;
-		errorPopUpObj.SetActive(true);
-		StartCoroutine(HideMessage(displayTimeInSeconds));
+		playerNotifText.text = errorMessage;
+		playerNotifObj.SetActive(true);
+		StartCoroutine(HidePopUpMessage(displayTimeInSeconds));
 	}
-
-	public IEnumerator HideMessage(float displayTimeInSeconds)
+	public IEnumerator HidePopUpMessage(float displayTimeInSeconds)
 	{
 		yield return new WaitForSeconds(displayTimeInSeconds);
-		errorPopUpObj.SetActive(false);
-		errorText.text = "";
+		playerNotifObj.SetActive(false);
+		playerNotifText.text = "";
+	}
+
+	//FUNCTIONS FOR ERROR LOG
+	public void DisplayErrorLogMessage(string errorMessage)
+	{
+		ShowErrorLog();
+
+		GameObject obj = Instantiate(errorLogMessagePrefab, errorLogWindowObj.transform);
+		Text text = obj.GetComponent<Text>();
+
+		text.text = errorMessage;
+	}
+	//button functions
+	public void ClearErrorLog()
+	{
+		for (int i = errorLogWindowObj.transform.childCount - 1; i >= 0; i--)
+			Destroy(errorLogWindowObj.transform.GetChild(i).gameObject);
+	}
+	public void ShowErrorLog()
+	{
+		errorLogWindowObj.SetActive(true);
+		errorLogClearButton.gameObject.SetActive(true);
+		errorLogCloseButton.gameObject.SetActive(true);
+	}
+	public void CloseErrorLog()
+	{
+		errorLogWindowObj.SetActive(false);
+		errorLogClearButton.gameObject.SetActive(false);
+		errorLogCloseButton.gameObject.SetActive(false);
 	}
 }

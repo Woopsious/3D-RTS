@@ -84,6 +84,14 @@ public class PlayerController : MonoBehaviour
 		{
 			gameUIManager.miniMap.ChangeAndUpdateMiniMapSize();
 		}
+		if (Input.GetKeyDown(KeyCode.BackQuote))
+		{
+			GameManager.Instance.errorManager.ShowErrorLog();
+		}
+		if (Input.GetKeyDown(KeyCode.Backspace))
+		{
+			GameManager.Instance.errorManager.DisplayErrorLogMessage("This is a test error log");
+		}
 	}
 	public bool IsMouseOverUI()
 	{
