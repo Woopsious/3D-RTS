@@ -39,8 +39,14 @@ public class CanPlaceBuilding : MonoBehaviour
 		if(other.GetComponent<CapturePointController>())
 		{
 			pointController = other.GetComponent<CapturePointController>();
-			if (pointController.isPlayerOnePoint == building.isPlayerOneBuilding || pointController.isPlayerTwoPoint == !building.isPlayerOneBuilding)
+			if (!CheckIfCapturePointIsNeutral())
+			{
 				CanPlaceHighliterGreen();
+				Debug.Log("in valid capture point");
+			}
+
+			if (pointController.isNeutralPoint)
+				CanPlaceHighliterRed();
 
 			else
 				CanPlaceHighliterRed();
@@ -70,7 +76,7 @@ public class CanPlaceBuilding : MonoBehaviour
 	}
 	public void TrackPlacementHeight()
 	{
-		if (pointController != null)
+		if (pointController != null && !CheckIfCapturePointIsNeutral())
 		{
 			if (building.transform.position.y > 9f && building.transform.position.y < 10.5f)
 				CanPlaceHighliterGreen();
@@ -78,6 +84,16 @@ public class CanPlaceBuilding : MonoBehaviour
 			else
 				CanPlaceHighliterRed();
 		}
+	}
+	public bool CheckIfCapturePointIsNeutral()
+	{
+		if (pointController.isPlayerOnePoint == building.isPlayerOneBuilding && !pointController.isNeutralPoint ||
+			pointController.isPlayerTwoPoint == !building.isPlayerOneBuilding && !pointController.isNeutralPoint)
+		{
+			return false;
+		}
+		else
+			return true;
 	}
 
 	//change highlighter colour

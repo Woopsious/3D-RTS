@@ -110,7 +110,6 @@ public class UnitProductionManager : MonoBehaviour
 			}
 		}
 	}
-
 	public void PlaceUnitManager()
 	{
 		//on left click add all builds to correct lists + check if player can afford them

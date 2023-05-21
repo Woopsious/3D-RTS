@@ -55,8 +55,6 @@ public class MiniMapManager : MonoBehaviour, IPointerClickHandler
 
 		localPoint += offset;
 
-		Debug.Log("point offset :" + localPoint);
-
 		//get ratio
 		Vector2 ratio;
 		ratio = miniMapRectTransform.sizeDelta / terrainSize;
@@ -66,46 +64,5 @@ public class MiniMapManager : MonoBehaviour, IPointerClickHandler
 
 		gameUIManager.playerController.mainCameraParent.transform.position = 
 			new Vector3(cameraJumpVector.x, Camera.main.transform.position.y, cameraJumpVector.y);
-
-
-		/*
-		Debug.Log(pointerEventData.position);
-
-		RectTransformUtility.ScreenPointToLocalPointInRectangle(miniMapUiObj.GetComponent<RectTransform>(), pointerEventData.position,
-		Camera.main, out Vector2 localPoint);
-
-		Debug.Log(localPoint);
-		*/
 	}
-	/*
-	public void ScreenPointToMiniMapSize(PointerEventData pointerEventData)
-	{
-		float miniMapSizeX = 310;
-		float miniMapSizeY = 310;
-
-		Vector2 size; //get local position of minimap
-		size.x = Screen.width - miniMapSizeX;
-		size.y = Screen.height - miniMapSizeY;
-
-		Debug.Log("Map Size is: " + size);
-
-		Vector2 newPoint; //get local point
-		newPoint = pointerEventData.position - size;
-
-		Debug.Log("point is :" + newPoint);
-
-		//get ratio of minimap to terrain size
-		Vector2 ratio;
-		ratio.x = miniMapSizeX / terrainSize.x;
-		ratio.y = miniMapSizeY / terrainSize.y;
-		Debug.Log(miniMapSizeX);
-		Debug.Log(miniMapSizeY);
-		Debug.Log("Ratio is: " + ratio);
-
-		Vector2 cameraMoveVector;
-		cameraMoveVector = newPoint / ratio;
-
-		Debug.Log(cameraMoveVector);
-	}
-	*/
 }
