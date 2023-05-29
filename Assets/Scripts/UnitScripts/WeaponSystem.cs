@@ -57,23 +57,16 @@ public class WeaponSystem : MonoBehaviour
 		//return closest target (see comment above function for more info)
 		unit.currentUnitTarget = GrabClosestUnit();
 		unit.currentBuildingTarget = GrabClosestBuilding();
-		if (unit.isPlayerOneUnit)
-		{
-			Debug.Log(unit.currentUnitTarget);
-			Debug.Log(unit.currentBuildingTarget);
-		}
 		//change to idle if no valid enemy entities are returned
 		if (!HasBuildingTarget() && !HasUnitTarget())
-		{
 			unit.ChangeStateIdle();
-		}
 	}
 	//check if entity exists + is in attack range, if true shoot it, else try get new target (ShootMainWeapon function calls GetTargetList again)
 	public void ShootMainWeapon()
 	{
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 		{
-			if (unit.hasAnimation)
+			//if (unit.hasAnimation)
 			{
 				unit.animatorController.SetBool("isAttacking", true);
 			}

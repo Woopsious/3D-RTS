@@ -10,6 +10,8 @@ public class ErrorManager : MonoBehaviour
 	private static ILogger logger = Debug.unityLogger;
 	private static string kTag = "3D-RTS Launched";
 
+	public GameObject fakeNullException;
+
 	public GameObject errorWindowPrefab;
 	public GameObject errorLogMessagePrefab;
 	public GameObject errorLogWindowAndPlayerNotifParent;
@@ -17,6 +19,9 @@ public class ErrorManager : MonoBehaviour
 	public GameObject errorLogWindowObj;
 	public Button errorLogClearButton;
 	public Button errorLogCloseButton;
+	public Scrollbar errorLogScrollBar;
+
+	public Text logText;
 
 	public GameObject playerNotifObj;
 	public Text playerNotifText;
@@ -37,6 +42,31 @@ public class ErrorManager : MonoBehaviour
 		logger.logEnabled = true;
 		logger.Log(kTag);
 	}
+	public void Update()
+	{
+		if (Input.GetKeyUp(KeyCode.BackQuote))
+		{
+			if (errorLogWindowObj.activeInHierarchy)
+				CloseErrorLog();
+			else
+				ShowErrorLog();
+		}
+		if (Input.GetKey(KeyCode.LeftShift))
+		{
+			if (Input.GetKeyDown(KeyCode.Alpha1))
+			{
+				Debug.Log("This is a test log");
+			}
+			if (Input.GetKeyDown(KeyCode.Alpha2))
+			{
+				Debug.LogError("This is a test error log");
+			}
+			if (Input.GetKeyDown(KeyCode.Alpha3))
+			{
+				GameManager.Instance.errorManager.MakeFakeNullException();
+			}
+		}
+	}
 	public void CheckForErrorMessageObj()
 	{
 		if (errorLogWindowAndPlayerNotifParent == null)
@@ -50,14 +80,15 @@ public class ErrorManager : MonoBehaviour
 	}
 	public void SetUpPlayerNotification()
 	{
-		playerNotifObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(3).gameObject; //set up player pop up notifs
+		playerNotifObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(4).gameObject; //set up player pop up notifs
 		playerNotifText = playerNotifObj.GetComponentInChildren<Text>();
 	}	
 	public void SetUpErrorLogNotification()
 	{
-		errorLogWindowObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(0).gameObject;
+		errorLogWindowObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(0).gameObject.transform.GetChild(0).gameObject;
 		errorLogClearButton = errorLogWindowAndPlayerNotifParent.transform.GetChild(1).GetComponent<Button>();
 		errorLogCloseButton = errorLogWindowAndPlayerNotifParent.transform.GetChild(2).GetComponent<Button>();
+		errorLogScrollBar = errorLogWindowAndPlayerNotifParent.transform.GetChild(3).GetComponent<Scrollbar>();
 
 		errorLogClearButton.onClick.AddListener(delegate { ClearErrorLog(); });
 		errorLogCloseButton.onClick.AddListener(delegate { CloseErrorLog(); });
@@ -78,17 +109,45 @@ public class ErrorManager : MonoBehaviour
 	}
 
 	//FUNCTIONS FOR ERROR LOG
-	public void DisplayErrorLogMessage(string errorMessage)
+	void OnEnable()
 	{
-		ShowErrorLog();
+		Application.logMessageReceived += HandleLog;
+	}
 
+	void OnDisable()
+	{
+		Application.logMessageReceived -= HandleLog;
+	}
+	public void HandleLog(string logString, string stackTrace, LogType type)
+	{
+		string log = stackTrace + "\n" + logString + logString + logString + logString;
+
+		if (type == LogType.Error)
+		{
+			RecordLogMessage(log, Color.red);
+			ShowErrorLog();
+		}
+		else if (type == LogType.Warning)
+		{
+			RecordLogMessage(log, Color.yellow);
+		}
+	}
+	void RecordLogMessage(string logString, Color color)
+	{
 		GameObject obj = Instantiate(errorLogMessagePrefab, errorLogWindowObj.transform);
-		Text text = obj.GetComponent<Text>();
+		Text text = obj.GetComponentInChildren<Text>();
 
-		text.text = errorMessage;
+		text.color = color;
+		text.text = logString;
+
+		errorLogScrollBar.size = 0.1f;
+	}
+	public void MakeFakeNullException()
+	{
+		fakeNullException.transform.position = this.transform.position;
 	}
 	//button functions
-	public void ClearErrorLog()
+	void ClearErrorLog()
 	{
 		for (int i = errorLogWindowObj.transform.childCount - 1; i >= 0; i--)
 			Destroy(errorLogWindowObj.transform.GetChild(i).gameObject);
@@ -98,11 +157,13 @@ public class ErrorManager : MonoBehaviour
 		errorLogWindowObj.SetActive(true);
 		errorLogClearButton.gameObject.SetActive(true);
 		errorLogCloseButton.gameObject.SetActive(true);
+		errorLogScrollBar.gameObject.SetActive(true);
 	}
-	public void CloseErrorLog()
+	void CloseErrorLog()
 	{
 		errorLogWindowObj.SetActive(false);
 		errorLogClearButton.gameObject.SetActive(false);
 		errorLogCloseButton.gameObject.SetActive(false);
+		errorLogScrollBar.gameObject.SetActive(false);
 	}
 }

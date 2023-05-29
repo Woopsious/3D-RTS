@@ -40,10 +40,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		{
 			pointController = other.GetComponent<CapturePointController>();
 			if (!CheckIfCapturePointIsNeutral())
-			{
 				CanPlaceHighliterGreen();
-				Debug.Log("in valid capture point");
-			}
 
 			if (pointController.isNeutralPoint)
 				CanPlaceHighliterRed();
