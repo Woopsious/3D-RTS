@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,7 +23,8 @@ public class ErrorManager : MonoBehaviour
 	public Button errorLogCloseButton;
 	public Scrollbar errorLogScrollBar;
 
-	public Text logText;
+	public string lastLogMessage;
+	public Text lastLogCounterText;
 
 	public GameObject playerNotifObj;
 	public Text playerNotifText;
@@ -85,7 +88,7 @@ public class ErrorManager : MonoBehaviour
 	}	
 	public void SetUpErrorLogNotification()
 	{
-		errorLogWindowObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(0).gameObject.transform.GetChild(0).gameObject;
+		errorLogWindowObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(0).gameObject;
 		errorLogClearButton = errorLogWindowAndPlayerNotifParent.transform.GetChild(1).GetComponent<Button>();
 		errorLogCloseButton = errorLogWindowAndPlayerNotifParent.transform.GetChild(2).GetComponent<Button>();
 		errorLogScrollBar = errorLogWindowAndPlayerNotifParent.transform.GetChild(3).GetComponent<Scrollbar>();
@@ -111,41 +114,114 @@ public class ErrorManager : MonoBehaviour
 	//FUNCTIONS FOR ERROR LOG
 	void OnEnable()
 	{
-		Application.logMessageReceived += HandleLog;
+		Application.logMessageReceived += HandleLogs;
 	}
 
 	void OnDisable()
 	{
-		Application.logMessageReceived -= HandleLog;
+		Application.logMessageReceived -= HandleLogs;
 	}
-	public void HandleLog(string logString, string stackTrace, LogType type)
+	//compare last message string with new message string if they match do the following
+	//grab number at start of string which will either not exist yet, or be from 2 to 10
+	//if its 10, check for a + after 10, if its 10+ discard rest of code, else
+	//if it doesnt exist yet add 2 to start of string
+	//if a number between 2 and 9 exist, add + 1 for ever repeated log message
+	//if number is 10 make it 10+
+	public void HandleLogs(string logString, string stackTrace, LogType type)
 	{
-		string log = stackTrace + "\n" + logString + logString + logString + logString;
+		string log = stackTrace + "\n" + logString;
 
-		if (type == LogType.Error)
+		if (CheckForRepeatingLogMessages(log))
 		{
-			RecordLogMessage(log, Color.red);
-			ShowErrorLog();
+			HandleRepeatingLogMessages();
 		}
-		else if (type == LogType.Warning)
+		else
 		{
-			RecordLogMessage(log, Color.yellow);
+			if (type == LogType.Error)
+			{
+				RecordLogMessage(log, Color.red);
+				ShowErrorLog();
+			}
+			else if (type == LogType.Warning)
+			{
+				RecordLogMessage(log, Color.yellow);
+			}
 		}
 	}
 	void RecordLogMessage(string logString, Color color)
 	{
-		GameObject obj = Instantiate(errorLogMessagePrefab, errorLogWindowObj.transform);
-		Text text = obj.GetComponentInChildren<Text>();
+		GameObject obj = Instantiate(errorLogMessagePrefab, errorLogWindowObj.transform.GetChild(0).gameObject.transform);
+		Text counter = obj.transform.GetChild(0).GetComponent<Text>();
+		Text text = obj.transform.GetChild(1).GetComponent<Text>();
 
 		text.color = color;
 		text.text = logString;
+		counter.text = "";
 
 		errorLogScrollBar.size = 0.1f;
+		SaveLastMessage(counter, logString);
+	}
+	//in case of repeating log messages instead of overflowing the window add to a counter that goes to 10+
+	void HandleRepeatingLogMessages()
+	{
+		if (lastLogCounterText.text.StartsWith("1"))
+		{
+			Debug.Log("error counter starts with 1");
+			string num = "10+";
+			UpdateRepeatedLogMessage(num);
+			return;
+		}
+		else if (int.TryParse(lastLogCounterText.text, out int num))
+		{
+			if (num > 1 && num < 10)
+			{
+				Debug.Log("error counter starts with a 2-9");
+				num++;
+				UpdateRepeatedLogMessage(num.ToString());
+			}
+		}
+		else
+		{
+			Debug.Log("error counter is empty");
+			num = 2;
+			UpdateRepeatedLogMessage(num.ToString());
+		}
 	}
 	public void MakeFakeNullException()
 	{
-		fakeNullException.transform.position = this.transform.position;
+		try
+		{
+			fakeNullException.transform.position = this.transform.position;
+		}
+		catch (Exception e)
+		{
+			Debug.LogError(e);
+		}
 	}
+	//UTILITY FUNCTIONS
+	bool CheckForRepeatingLogMessages(string message)
+	{
+		if (lastLogMessage == message)
+		{
+			Debug.Log("last and current error log match");
+			return true;
+		}
+		else
+		{
+			Debug.Log("last and current error log DONT match");
+			return false;
+		}
+	}
+	void UpdateRepeatedLogMessage(string num)
+	{
+		lastLogCounterText.text = num;
+	}
+	void SaveLastMessage(Text counter, string message)
+	{
+		lastLogCounterText = counter;
+		lastLogMessage = message;
+	}
+
 	//button functions
 	void ClearErrorLog()
 	{

@@ -120,38 +120,45 @@ public class UnitStateController : MonoBehaviour
 		//scan for targets
 		Collider[] newTargetArray = Physics.OverlapSphere(transform.position, ViewRange); //find targets in attack range
 
-		List<GameObject> targetObjs = new List<GameObject>();
-		foreach(Collider target in newTargetArray)
-		{	
-			if (target.GetComponent<UnitStateController>() != null && isPlayerOneUnit != target.GetComponent<UnitStateController>().isPlayerOneUnit)
+		try
+		{
+			List<GameObject> targetObjs = new List<GameObject>();
+			foreach (Collider target in newTargetArray)
 			{
-				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<UnitStateController>().CenterPoint.transform.position,
-					out RaycastHit hit, ignoreMe);
+				if (target.GetComponent<UnitStateController>() != null && isPlayerOneUnit != target.GetComponent<UnitStateController>().isPlayerOneUnit)
+				{
+					Physics.Linecast(CenterPoint.transform.position, target.GetComponent<UnitStateController>().CenterPoint.transform.position,
+						out RaycastHit hit, ignoreMe);
 
-				if (hit.collider.GetComponent<UnitStateController>() != null)
-					targetObjs.Add(target.gameObject);
+					if (hit.collider.GetComponent<UnitStateController>() != null)
+						targetObjs.Add(target.gameObject);
 
-				if (!isUnitArmed)
-					target.GetComponent<UnitStateController>().ShowUnit();
+					if (!isUnitArmed)
+						target.GetComponent<UnitStateController>().ShowUnit();
+				}
+				if (target.GetComponent<BuildingManager>() != null && isPlayerOneUnit != target.GetComponent<BuildingManager>().isPlayerOneBuilding
+					&& target.GetComponent<CanPlaceBuilding>().isPlaced)    //filter out non placed buildings
+				{
+					Physics.Linecast(CenterPoint.transform.position, target.GetComponent<BuildingManager>().CenterPoint.transform.position,
+						out RaycastHit hit, ignoreMe);
+
+					if (hit.collider.GetComponent<BuildingManager>() != null)
+						targetObjs.Add(target.gameObject);
+
+					if (!isUnitArmed)
+						target.GetComponent<BuildingManager>().ShowBuilding();
+				}
 			}
-			if (target.GetComponent<BuildingManager>() != null && isPlayerOneUnit != target.GetComponent<BuildingManager>().isPlayerOneBuilding
-				&& target.GetComponent<CanPlaceBuilding>().isPlaced)	//filter out non placed buildings
-			{
-				Physics.Linecast(CenterPoint.transform.position, target.GetComponent<BuildingManager>().CenterPoint.transform.position,
-					out RaycastHit hit, ignoreMe);
+			if (targetObjs.Count >= 1 && currentState != attackState && isUnitArmed || targetObjs.Count >= 1 && currentState != movingState && isUnitArmed)
+				ChangeStateAttacking();
 
-				if (hit.collider.GetComponent<BuildingManager>() != null)
-					targetObjs.Add(target.gameObject);
-
-				if (!isUnitArmed)
-					target.GetComponent<BuildingManager>().ShowBuilding();
-			}
+			if (targetObjs.Count == 0 && currentState == attackState)
+				ChangeStateIdle();
 		}
-		if (targetObjs.Count >= 1 && currentState != attackState && isUnitArmed || targetObjs.Count >= 1 && currentState != movingState && isUnitArmed)
-			ChangeStateAttacking();
-
-		if (targetObjs.Count == 0 && currentState == attackState)
-			ChangeStateIdle();
+		catch(Exception e)
+		{
+			Debug.LogError(e);
+		}
 	}
 
 	//HEALTH FUNCTIONS
