@@ -6,9 +6,6 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.PlayerSettings;
-using static UnityEditor.Progress;
-using static UnityEngine.UI.CanvasScaler;
 
 public class UnitSelectionManager : MonoBehaviour
 {

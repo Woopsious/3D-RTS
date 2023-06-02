@@ -66,7 +66,7 @@ public class WeaponSystem : MonoBehaviour
 	{
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 		{
-			//if (unit.hasAnimation)
+			if (unit.hasAnimation)
 			{
 				unit.animatorController.SetBool("isAttacking", true);
 			}

@@ -24,6 +24,10 @@ public class GameManager : MonoBehaviour
 	[Header("Volume Refs")]
 	public float backgroundSliderVolume, menuSFXSliderVolume, gameSFXSliderVolume;
 
+	//file Path Locations
+	static string playerDataPath;
+	static string playerGameDataPath;
+
 	public string PlayerControllerTag = "PlayerController";
 
 	[Header("player One Stats")]
@@ -88,17 +92,12 @@ public class GameManager : MonoBehaviour
 
 		LocalCopyOfPlayerData = new PlayerData();
 		LocalCopyOfGameData = new GameData();
+		playerDataPath = Application.persistentDataPath;
+		playerGameDataPath = Path.Combine(Application.persistentDataPath, "Saves");
 
-		try
-		{
-			GameManager.Instance.LoadPlayerData();
-		}
-		catch
-		{
-			GameManager.Instance.SavePlayerData();
-		}
+		GameManager.Instance.LoadPlayerData();
+		//GameManager.Instance.SavePlayerData();
 	}
-
 	public void Update()
 	{
 		if(SceneManager.GetActiveScene().buildIndex == 1)
@@ -152,27 +151,28 @@ public class GameManager : MonoBehaviour
 	//save/load player and game data
 	public void SavePlayerData()
 	{
-		//create directory if it doesnt exist
-		if (!Directory.Exists("/Saves"))
-			Directory.CreateDirectory(Application.persistentDataPath + "/Saves");
-
+		//create/overwrite file
 		BinaryFormatter formatter = new BinaryFormatter();
+		FileStream playerData = File.Create(playerDataPath + "/playerData.sav");
 
-		FileStream playerData = File.Create(Application.persistentDataPath + "/Saves/playerData.sav");
 		formatter.Serialize(playerData, GameManager.Instance.LocalCopyOfPlayerData);
 		playerData.Close();
 	}
 	public void LoadPlayerData()
 	{
-		//create directory if it doesnt exist
-		if (!Directory.Exists(Application.persistentDataPath + "/Saves"))
-			Directory.CreateDirectory(Application.persistentDataPath + "/Saves/playerData.sav");
+		//on start up load file if it exists
+		if (!File.Exists(playerDataPath + "/playerData.sav"))
+			SavePlayerData();
 
 		BinaryFormatter formatter = new BinaryFormatter();
-		FileStream playerData = File.Open(Application.persistentDataPath + "/Saves/playerData.sav", FileMode.Open);
+		FileStream playerData = File.Open(playerDataPath + "/playerData.sav", FileMode.Open);
 
 		LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
 		playerData.Close();
+	}
+	public void CreatePlayerData()
+	{
+		Directory.CreateDirectory(playerDataPath);
 	}
 	public void SaveGameData(string filePath)
 	{

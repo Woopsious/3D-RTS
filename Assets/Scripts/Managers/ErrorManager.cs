@@ -1,16 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ErrorManager : MonoBehaviour
 {
 	public static ErrorManager Instance;
-
-	private static ILogger logger = Debug.unityLogger;
-	private static string kTag = "3D-RTS Launched";
 
 	public GameObject fakeNullException;
 
@@ -39,11 +38,9 @@ public class ErrorManager : MonoBehaviour
 		else
 			Destroy(gameObject);
 	}
-
 	public void Start()
 	{
-		logger.logEnabled = true;
-		logger.Log(kTag);
+
 	}
 	public void Update()
 	{
@@ -68,8 +65,13 @@ public class ErrorManager : MonoBehaviour
 			{
 				GameManager.Instance.errorManager.MakeFakeNullException();
 			}
+			if (Input.GetKeyUp(KeyCode.F1))
+			{
+				OnStartUpHandleLogFiles();
+			}
 		}
 	}
+	//SET UP ERROR LOGGER AND PLAYER NOTIFICATIONS
 	public void CheckForErrorMessageObj()
 	{
 		if (errorLogWindowAndPlayerNotifParent == null)
@@ -198,6 +200,42 @@ public class ErrorManager : MonoBehaviour
 			Debug.LogError(e);
 		}
 	}
+
+	//on start up create playerError.log text file, (if one already exists rename it to prevPlayerError.log)
+	//grab error log strings, open playerError.log and add them to file (with repeating logs only add them 5 times with a counter)
+	//close playerError.log after writing to it
+
+	//FUNCTIONS TO SAVE LOGS TO TEXT FILE, REPLACING UNITIES ONE
+	public void OnStartUpHandleLogFiles()
+	{
+		string playerLogPath = Application.persistentDataPath + "/playerError.log";
+		string prevPlayeLogPath = Application.persistentDataPath + "/prevPlayerError.log";
+
+		if (File.Exists(playerLogPath))
+		{
+			if (File.Exists(prevPlayeLogPath)) //delete prevPlayerError.log, rename playerError.log to prevPlayerError.log
+				FileUtil.ReplaceFile(playerLogPath, prevPlayeLogPath);
+
+			else
+				FileUtil.MoveFileOrDirectory(playerLogPath, prevPlayeLogPath);
+
+			CreateLogFile(playerLogPath);
+		}
+		else
+			CreateLogFile(playerLogPath);
+	}
+	public void CreateLogFile(string path)
+	{
+		string pcInfo = "GPU: " + SystemInfo.graphicsDeviceName + " Memory: " + SystemInfo.graphicsMemorySize + "MB\nCPU: " + SystemInfo.processorType + 
+			"processor Count: " + SystemInfo.processorCount;
+
+		File.WriteAllText(path, pcInfo);
+	}
+	public void HandleWritingToLogFile(string logCounter, string logString)
+	{
+		string playerLogPath = Application.persistentDataPath + "/playerError.log";
+	}
+
 	//UTILITY FUNCTIONS
 	bool CheckForRepeatingLogMessages(string message)
 	{
