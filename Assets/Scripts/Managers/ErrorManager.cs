@@ -37,6 +37,8 @@ public class ErrorManager : MonoBehaviour
 		}
 		else
 			Destroy(gameObject);
+
+		OnStartUpHandleLogFiles();
 	}
 	public void Start()
 	{
@@ -67,7 +69,7 @@ public class ErrorManager : MonoBehaviour
 			}
 			if (Input.GetKeyUp(KeyCode.F1))
 			{
-				OnStartUpHandleLogFiles();
+				//OnStartUpHandleLogFiles();
 			}
 		}
 	}
@@ -118,7 +120,6 @@ public class ErrorManager : MonoBehaviour
 	{
 		Application.logMessageReceived += HandleLogs;
 	}
-
 	void OnDisable()
 	{
 		Application.logMessageReceived -= HandleLogs;
@@ -134,20 +135,19 @@ public class ErrorManager : MonoBehaviour
 		string log = stackTrace + "\n" + logString;
 
 		if (CheckForRepeatingLogMessages(log))
-		{
-			HandleRepeatingLogMessages();
-		}
+			HandleRepeatingLogMessages(log);
+
 		else
 		{
+			WriteLogToFile("1", logString);
+
 			if (type == LogType.Error)
 			{
 				RecordLogMessage(log, Color.red);
 				ShowErrorLog();
 			}
 			else if (type == LogType.Warning)
-			{
 				RecordLogMessage(log, Color.yellow);
-			}
 		}
 	}
 	void RecordLogMessage(string logString, Color color)
@@ -158,35 +158,30 @@ public class ErrorManager : MonoBehaviour
 
 		text.color = color;
 		text.text = logString;
-		counter.text = "";
+		counter.text = "1";
 
 		errorLogScrollBar.size = 0.1f;
 		SaveLastMessage(counter, logString);
 	}
 	//in case of repeating log messages instead of overflowing the window add to a counter that goes to 10+
-	void HandleRepeatingLogMessages()
+	void HandleRepeatingLogMessages(string logString)
 	{
-		if (lastLogCounterText.text.StartsWith("1"))
+		if (int.TryParse(lastLogCounterText.text, out int num))
 		{
-			Debug.Log("error counter starts with 1");
-			string num = "10+";
-			UpdateRepeatedLogMessage(num);
-			return;
-		}
-		else if (int.TryParse(lastLogCounterText.text, out int num))
-		{
-			if (num > 1 && num < 10)
+			if (num > 0 && num < 9) //update counter from 2 to 10
 			{
-				Debug.Log("error counter starts with a 2-9");
 				num++;
 				UpdateRepeatedLogMessage(num.ToString());
+				WriteLogToFile(num.ToString(), logString);
 			}
-		}
-		else
-		{
-			Debug.Log("error counter is empty");
-			num = 2;
-			UpdateRepeatedLogMessage(num.ToString());
+			else if (num == 9) //update counter to 10+ then stop recording
+			{
+				string newNum = "10+";
+				UpdateRepeatedLogMessage(newNum);
+				WriteLogToFile(newNum, logString);
+			}
+			else
+				return;
 		}
 	}
 	public void MakeFakeNullException()
@@ -231,9 +226,10 @@ public class ErrorManager : MonoBehaviour
 
 		File.WriteAllText(path, pcInfo);
 	}
-	public void HandleWritingToLogFile(string logCounter, string logString)
+	public void WriteLogToFile(string logCounter, string logString)
 	{
 		string playerLogPath = Application.persistentDataPath + "/playerError.log";
+		File.AppendAllText(playerLogPath, "\n\n[BEGINING OF LOG] Times Log Message Sent: " + logCounter + " / Error Log: \n" + logString);
 	}
 
 	//UTILITY FUNCTIONS
