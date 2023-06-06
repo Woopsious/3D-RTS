@@ -133,20 +133,23 @@ public class ErrorManager : MonoBehaviour
 	{
 		string log = stackTrace + "\n" + logString;
 
-		if (CheckForRepeatingLogMessages(log))
+		if (type == LogType.Error || type == LogType.Warning)
 		{
-			HandleRepeatingLogMessages();
-		}
-		else
-		{
-			if (type == LogType.Error)
+			if (CheckForRepeatingLogMessages(log))
 			{
-				RecordLogMessage(log, Color.red);
-				ShowErrorLog();
+				HandleRepeatingLogMessages();
 			}
-			else if (type == LogType.Warning)
+			else
 			{
-				RecordLogMessage(log, Color.yellow);
+				if (type == LogType.Error)
+				{
+					RecordLogMessage(log, Color.red);
+					ShowErrorLog();
+				}
+				else if (type == LogType.Warning)
+				{
+					RecordLogMessage(log, Color.yellow);
+				}
 			}
 		}
 	}
@@ -168,7 +171,6 @@ public class ErrorManager : MonoBehaviour
 	{
 		if (lastLogCounterText.text.StartsWith("1"))
 		{
-			Debug.Log("error counter starts with 1");
 			string num = "10+";
 			UpdateRepeatedLogMessage(num);
 			return;
@@ -177,14 +179,12 @@ public class ErrorManager : MonoBehaviour
 		{
 			if (num > 1 && num < 10)
 			{
-				Debug.Log("error counter starts with a 2-9");
 				num++;
 				UpdateRepeatedLogMessage(num.ToString());
 			}
 		}
 		else
 		{
-			Debug.Log("error counter is empty");
 			num = 2;
 			UpdateRepeatedLogMessage(num.ToString());
 		}
@@ -240,15 +240,10 @@ public class ErrorManager : MonoBehaviour
 	bool CheckForRepeatingLogMessages(string message)
 	{
 		if (lastLogMessage == message)
-		{
-			Debug.Log("last and current error log match");
 			return true;
-		}
+
 		else
-		{
-			Debug.Log("last and current error log DONT match");
 			return false;
-		}
 	}
 	void UpdateRepeatedLogMessage(string num)
 	{

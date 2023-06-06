@@ -11,8 +11,6 @@ public class UnitProductionManager : MonoBehaviour
 
 	public GameObject vehicleProdInfoTemplateObj;
 
-	public bool isPlayerOne;
-
 	[Header("Light Veh Queue Refs")]
 	public GameObject lightVehProdQueueObj;
 	public List<BuildTime> lightVehProdList;
@@ -49,7 +47,7 @@ public class UnitProductionManager : MonoBehaviour
 
 	public void Start()
 	{
-		if(isPlayerOne)
+		if(playerController.isPlayerOne)
 		{
 			unitScoutVehicle = GameManager.Instance.unitScoutVehiclePlayerOne;
 			unitRadarVehicle = GameManager.Instance.unitRadarVehiclePlayerOne;
@@ -58,7 +56,7 @@ public class UnitProductionManager : MonoBehaviour
 			unitHeavyMechTank = GameManager.Instance.unitHeavyMechTankPlayerOne;
 			unitVTOL = GameManager.Instance.unitVTOLPlayerOne;
 }
-		if(!isPlayerOne)
+		if(!playerController.isPlayerOne)
 		{
 			unitScoutVehicle = GameManager.Instance.unitScoutVehiclePlayerTwo;
 			unitRadarVehicle = GameManager.Instance.unitRadarVehiclePlayerTwo;
@@ -192,7 +190,7 @@ public class UnitProductionManager : MonoBehaviour
 
 		script.UnitPrefab = unitScoutVehicle;
 		script.unitProductionManager = this;
-		script.isPlayerOne = isPlayerOne;
+		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 1;
 		script.buildTime = UpdateBuildTime(scoutVehicleBuildTime, playerController.lightVehProdBuildingsList); ;
 
@@ -206,7 +204,7 @@ public class UnitProductionManager : MonoBehaviour
 
 		script.UnitPrefab = unitRadarVehicle;
 		script.unitProductionManager = this;
-		script.isPlayerOne = isPlayerOne;
+		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 1;
 		script.buildTime = UpdateBuildTime(radarVehicleBuildTime, playerController.lightVehProdBuildingsList); ;
 
@@ -220,7 +218,7 @@ public class UnitProductionManager : MonoBehaviour
 
 		script.UnitPrefab = unitLightMech;
 		script.unitProductionManager = this;
-		script.isPlayerOne = isPlayerOne;
+		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 1;
 		script.buildTime = UpdateBuildTime(lightMechBuildTime, playerController.lightVehProdBuildingsList);
 
@@ -234,7 +232,7 @@ public class UnitProductionManager : MonoBehaviour
 
 		script.UnitPrefab = unitHeavyMechKnight;
 		script.unitProductionManager = this;
-		script.isPlayerOne = isPlayerOne;
+		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 2;
 		script.buildTime = UpdateBuildTime(heavyMechKnightBuildTime, playerController.heavyVehProdBuildingsList);
 
@@ -248,7 +246,7 @@ public class UnitProductionManager : MonoBehaviour
 
 		script.UnitPrefab = unitHeavyMechTank;
 		script.unitProductionManager = this;
-		script.isPlayerOne = isPlayerOne;
+		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 2;
 		script.buildTime = UpdateBuildTime(heavyMechTankBuildTime, playerController.heavyVehProdBuildingsList);
 
@@ -262,7 +260,7 @@ public class UnitProductionManager : MonoBehaviour
 
 		script.UnitPrefab = unitVTOL;
 		script.unitProductionManager = this;
-		script.isPlayerOne = isPlayerOne;
+		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 3;
 		script.buildTime = UpdateBuildTime(vtolShipBuildTime, playerController.vtolVehProdBuildingsList);
 

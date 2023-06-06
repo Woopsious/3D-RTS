@@ -16,8 +16,6 @@ public class UnitSelectionManager : MonoBehaviour
 	public RectTransform selectionBoxUi;
 	public Button refundSelectedUnitsButton;
 
-	public bool isPlayerOne;
-
 	[Header("Dynamic Refs")]
 	public Bounds bounds;
 	private Vector2 startMousePos;

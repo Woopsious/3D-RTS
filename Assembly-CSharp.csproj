@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Managers\MiniMapManager.cs" />
+    <Compile Include="Assets\Scripts\Collisions.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\VehProdSpawnLocation.cs" />
     <Compile Include="Assets\Scripts\BuildTime.cs" />
     <Compile Include="Assets\Scripts\DestroyInSeconds.cs" />

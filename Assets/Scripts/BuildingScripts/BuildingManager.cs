@@ -136,6 +136,14 @@ public class BuildingManager : MonoBehaviour
 	{
 		miniMapRenderObj.layer = 13;
 	}
+	public void HideBuilding()
+	{
+		if (isPlayerOneBuilding)
+			miniMapRenderObj.layer = 11;
+
+		else if (!isPlayerOneBuilding)
+			miniMapRenderObj.layer = 12;
+	}
 	//track buildings refs
 	public void AddBuildingRefs()
 	{

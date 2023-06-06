@@ -9,7 +9,7 @@ public class UnitMovingState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		Debug.Log("Entered Moving State");
+		//Debug.Log("Entered Moving State");
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[2].Stop();
@@ -58,12 +58,10 @@ public class UnitMovingState : UnitBaseState
 		if (unit.agentNav.CalculatePath(unit.movePos, path))
 		{
 			unit.navMeshPath = path;
-			Debug.Log("can find path");
 			return true;
 		}
 		else
 		{
-			Debug.Log("cant find path");
 			return false;
 		}
 	}
