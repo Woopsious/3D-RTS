@@ -5,7 +5,10 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
+using static Unity.Collections.AllocatorManager;
+using static UnityEngine.GraphicsBuffer;
 
 public class UnitSelectionManager : MonoBehaviour
 {
@@ -84,8 +87,25 @@ public class UnitSelectionManager : MonoBehaviour
 		{
 			ManageSelectedUnitsAndGroups();
 		}
-	}
 
+		if (movePosHighlighterObj[0].activeInHierarchy)
+		{
+			GameObject obj = movePosHighlighterObj[0].gameObject;
+			Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y -5, obj.transform.position.z);
+			bool isTouchingMesh = NavMesh.Raycast(obj.transform.position, targetPos, out NavMeshHit hit, NavMesh.GetAreaFromName("Walkable"));
+
+			Debug.DrawLine(obj.transform.position, targetPos, isTouchingMesh ? Color.red : Color.green);
+
+			if (isTouchingMesh)
+			{
+				Debug.Log("touching navmesh");
+			}
+			else
+			{
+				Debug.Log("not touching navmesh");
+			}
+		}
+	}
 	public void RefundSelectedUnits()
 	{
 		for (int i = selectedUnitList.Count- 1; i >= 0;i--)
@@ -99,19 +119,12 @@ public class UnitSelectionManager : MonoBehaviour
 		}
 	}
 	public void SetUnitRefundButtonActiveUnactive()
-	{//remove try catch after completion
-		try
-		{
-			if (selectedUnitList.Count == 0 && refundSelectedUnitsButton.gameObject.activeInHierarchy)
-				refundSelectedUnitsButton.gameObject.SetActive(false);
+	{
+		if (selectedUnitList.Count == 0 && refundSelectedUnitsButton.gameObject.activeInHierarchy)
+			refundSelectedUnitsButton.gameObject.SetActive(false);
 
-			else if (selectedUnitList.Count != 0 && !refundSelectedUnitsButton.gameObject.activeInHierarchy)
-				refundSelectedUnitsButton.gameObject.SetActive(true);
-		}
-		catch (Exception ex)
-		{
-			Debug.LogException(ex);
-		}
+		else if (selectedUnitList.Count != 0 && !refundSelectedUnitsButton.gameObject.activeInHierarchy)
+			refundSelectedUnitsButton.gameObject.SetActive(true);
 	}
 
 	//UNIT GHOST PROJECTION WHEN UNITS ARE HIGHLIGHTED
@@ -197,7 +210,7 @@ public class UnitSelectionManager : MonoBehaviour
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
 			}
-			//add newly selected unit to list of existing selected units, or remove if unit was already selected
+			//check if unit is already in selectedUnitList, if it was remove it, else add it
 			if (Input.GetKey(KeyCode.LeftShift))
 			{
 				foreach (UnitStateController selectedUnit in selectedUnitList)
@@ -235,7 +248,7 @@ public class UnitSelectionManager : MonoBehaviour
 	}
 	public void TrySelectCargoShip(CargoShipController cargoShip)
 	{
-		if (CargoShipExists(cargoShip) && cargoShip.isPlayerOneUnit != !playerController.isPlayerOne)
+		if (CheckForCargoShip(cargoShip) && cargoShip.isPlayerOneUnit != !playerController.isPlayerOne)
 		{
 			DeselectBuilding();
 			DeselectUnits();
@@ -585,12 +598,14 @@ public class UnitSelectionManager : MonoBehaviour
 			return true;
 		else return false;
 	}
+	/*
 	public bool CargoShipExists(UnitStateController unit)
 	{
 		if (unit != null)
 			return true;
 		else return false;
 	}
+	*/
 	public bool CheckForCargoShip(UnitStateController unit)
 	{
 		if (unit.isCargoShip)

@@ -40,7 +40,7 @@ public class ErrorManager : MonoBehaviour
 	}
 	public void Start()
 	{
-
+		OnStartUpHandleLogFiles();
 	}
 	public void Update()
 	{
@@ -65,10 +65,12 @@ public class ErrorManager : MonoBehaviour
 			{
 				GameManager.Instance.errorManager.MakeFakeNullException();
 			}
+			/*
 			if (Input.GetKeyUp(KeyCode.F1))
 			{
 				OnStartUpHandleLogFiles();
 			}
+			*/
 		}
 	}
 	//SET UP ERROR LOGGER AND PLAYER NOTIFICATIONS
@@ -123,12 +125,8 @@ public class ErrorManager : MonoBehaviour
 	{
 		Application.logMessageReceived -= HandleLogs;
 	}
-	//compare last message string with new message string if they match do the following
-	//grab number at start of string which will either not exist yet, or be from 2 to 10
-	//if its 10, check for a + after 10, if its 10+ discard rest of code, else
-	//if it doesnt exist yet add 2 to start of string
-	//if a number between 2 and 9 exist, add + 1 for ever repeated log message
-	//if number is 10 make it 10+
+	//FUNCTIONS TO HANDLE LOGS AND CONSOLE WINDOW
+	//handle all logs that are warnings and errors, writing to both a player.log file and in game console window
 	public void HandleLogs(string logString, string stackTrace, LogType type)
 	{
 		string log = stackTrace + "\n" + logString;
@@ -137,23 +135,55 @@ public class ErrorManager : MonoBehaviour
 		{
 			if (CheckForRepeatingLogMessages(log))
 			{
-				HandleRepeatingLogMessages();
+				HandleRepeatingLogMessages(type, logString);
 			}
 			else
 			{
 				if (type == LogType.Error)
 				{
-					RecordLogMessage(log, Color.red);
+					RecordLogMessageToUi(log, Color.red);
+					WriteToLogFile(type, "0", logString);
 					ShowErrorLog();
 				}
 				else if (type == LogType.Warning)
 				{
-					RecordLogMessage(log, Color.yellow);
+					RecordLogMessageToUi(log, Color.yellow);
+					WriteToLogFile(type, "0", logString);
 				}
 			}
 		}
 	}
-	void RecordLogMessage(string logString, Color color)
+	//in case of repeating log messages update counter if last and prev log message is the same, do this for in game ui and player.log file
+	void HandleRepeatingLogMessages(LogType logType, string logString)
+	{
+		if (lastLogCounterText.text == "10+")
+			return;
+
+		else if (lastLogCounterText.text == "10")
+		{
+			string num = "10+";
+			UpdateRepeatedLogMessage(num);
+			WriteToLogFile(logType, num, logString);
+			return;
+		}
+		else if (int.TryParse(lastLogCounterText.text, out int num))
+		{
+			if (num >= 2 && num < 10)
+			{
+				num++;
+				int newNum = num - 1;
+				UpdateRepeatedLogMessage(num.ToString());
+				WriteToLogFile(logType, newNum.ToString(), logString);
+			}
+		}
+		else
+		{
+			num = 2;
+			UpdateRepeatedLogMessage(num.ToString());
+			WriteToLogFile(logType, "1", logString);
+		}
+	}
+	void RecordLogMessageToUi(string logString, Color color)
 	{
 		GameObject obj = Instantiate(errorLogMessagePrefab, errorLogWindowObj.transform.GetChild(0).gameObject.transform);
 		Text counter = obj.transform.GetChild(0).GetComponent<Text>();
@@ -163,54 +193,15 @@ public class ErrorManager : MonoBehaviour
 		text.text = logString;
 		counter.text = "";
 
-		errorLogScrollBar.size = 0.1f;
 		SaveLastMessage(counter, logString);
 	}
-	//in case of repeating log messages instead of overflowing the window add to a counter that goes to 10+
-	void HandleRepeatingLogMessages()
-	{
-		if (lastLogCounterText.text.StartsWith("1"))
-		{
-			string num = "10+";
-			UpdateRepeatedLogMessage(num);
-			return;
-		}
-		else if (int.TryParse(lastLogCounterText.text, out int num))
-		{
-			if (num > 1 && num < 10)
-			{
-				num++;
-				UpdateRepeatedLogMessage(num.ToString());
-			}
-		}
-		else
-		{
-			num = 2;
-			UpdateRepeatedLogMessage(num.ToString());
-		}
-	}
-	public void MakeFakeNullException()
-	{
-		try
-		{
-			fakeNullException.transform.position = this.transform.position;
-		}
-		catch (Exception e)
-		{
-			Debug.LogError(e);
-		}
-	}
 
-	//on start up create playerError.log text file, (if one already exists rename it to prevPlayerError.log)
-	//grab error log strings, open playerError.log and add them to file (with repeating logs only add them 5 times with a counter)
-	//close playerError.log after writing to it
-
-	//FUNCTIONS TO SAVE LOGS TO TEXT FILE, REPLACING UNITIES ONE
+	//FUNCTIONS TO HANDLE player.log FILES
 	public void OnStartUpHandleLogFiles()
 	{
 		string playerLogPath = Application.persistentDataPath + "/playerError.log";
 		string prevPlayeLogPath = Application.persistentDataPath + "/prevPlayerError.log";
-
+		Debug.Log("handleing log files");
 		if (File.Exists(playerLogPath))
 		{
 			if (File.Exists(prevPlayeLogPath)) //delete prevPlayerError.log, rename playerError.log to prevPlayerError.log
@@ -224,16 +215,18 @@ public class ErrorManager : MonoBehaviour
 		else
 			CreateLogFile(playerLogPath);
 	}
-	public void CreateLogFile(string path)
+	public void CreateLogFile(string path) //create log file and system info of user
 	{
 		string pcInfo = "GPU: " + SystemInfo.graphicsDeviceName + " Memory: " + SystemInfo.graphicsMemorySize + "MB\nCPU: " + SystemInfo.processorType + 
 			"processor Count: " + SystemInfo.processorCount;
 
 		File.WriteAllText(path, pcInfo);
 	}
-	public void HandleWritingToLogFile(string logCounter, string logString)
+	public void WriteToLogFile(LogType logType, string counter, string logString)
 	{
 		string playerLogPath = Application.persistentDataPath + "/playerError.log";
+
+		File.AppendAllText(playerLogPath, "\n\n[BEGINING OF LOG] | LogType: " + logType + " | Times Repeated: " + counter + "\n" +  logString);
 	}
 
 	//UTILITY FUNCTIONS
@@ -253,6 +246,17 @@ public class ErrorManager : MonoBehaviour
 	{
 		lastLogCounterText = counter;
 		lastLogMessage = message;
+	}
+	public void MakeFakeNullException()
+	{
+		try
+		{
+			fakeNullException.transform.position = this.transform.position;
+		}
+		catch (Exception e)
+		{
+			Debug.LogError(e);
+		}
 	}
 
 	//button functions

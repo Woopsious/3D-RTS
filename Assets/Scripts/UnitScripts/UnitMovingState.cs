@@ -26,9 +26,11 @@ public class UnitMovingState : UnitBaseState
 		unit.agentNav.isStopped = false;
 		if (CheckPath(unit))
 			unit.agentNav.SetPath(unit.navMeshPath);
-
-		else if (!CheckPath(unit))
-			unit.agentNav.destination = unit.transform.position;
+		else
+		{
+			unit.ChangeStateIdle();
+			GameManager.Instance.errorManager.DisplayNotificationMessage("Unit Cant find path to location", 2);
+		}
 
 		unit.HideUnit();
 	}
@@ -61,8 +63,6 @@ public class UnitMovingState : UnitBaseState
 			return true;
 		}
 		else
-		{
 			return false;
-		}
 	}
 }
