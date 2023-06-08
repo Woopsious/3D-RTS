@@ -201,7 +201,7 @@ public class ErrorManager : MonoBehaviour
 	{
 		string playerLogPath = Application.persistentDataPath + "/playerError.log";
 		string prevPlayeLogPath = Application.persistentDataPath + "/prevPlayerError.log";
-		Debug.Log("handleing log files");
+		Debug.Log("handling log files");
 		if (File.Exists(playerLogPath))
 		{
 			if (File.Exists(prevPlayeLogPath)) //delete prevPlayerError.log, rename playerError.log to prevPlayerError.log

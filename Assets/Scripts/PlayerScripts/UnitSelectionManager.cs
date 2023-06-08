@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.AI.Navigation;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -12,6 +13,10 @@ using static UnityEngine.GraphicsBuffer;
 
 public class UnitSelectionManager : MonoBehaviour
 {
+	public NavMeshQueryFilter navMeshQueryFilter;
+
+	public NavMeshSurface navMeshSurface;
+
 	[Header("Game Ui + Refs")]
 	public PlayerController playerController;
 	public CanvasScaler canvasScaler;
@@ -90,45 +95,46 @@ public class UnitSelectionManager : MonoBehaviour
 
 		if (movePosHighlighterObj[0].activeInHierarchy)
 		{
+			GameObject obj = movePosHighlighterObj[0].gameObject;
+			Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
+
+			NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 5, navMeshSurface.layerMask.value);
+
+			Debug.Log("Object Location: " + obj.transform.position);
+			Debug.Log("Hit Location: " + hit.position);
+
+			if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+			{
+				if (obj.transform.position.y >= hit.position.y)
+				{
+					Debug.Log("touching navmesh");
+				}
+				else
+				{
+					Debug.Log("not touching navmesh");
+				}
+			}
+
 			/*
 			GameObject obj = movePosHighlighterObj[0].gameObject;
 			Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
 
-			if (NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 3, NavMesh.GetAreaFromName("Walkable")))
+			Debug.Log("Area Mask: " + navMeshFilter.agentTypeID);
+			NavMesh.Raycast(obj.transform.position, targetPos, out NavMeshHit hit, navMeshFilter.agentTypeID);
+
+			Debug.Log("Object Location: " + obj.transform.position);
+			Debug.Log("Hit Location: " + hit.position);
+
+			if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
 			{
-				if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+				if (obj.transform.position.y >= hit.position.y)
 				{
-					if (obj.transform.position.y >= hit.position.y)
-					{
-						Debug.Log("touching navmesh");
-					}
-					else
-					{
-						Debug.Log("not touching navmesh");
-					}
-
+					Debug.Log("touching navmesh");
 				}
-			}
-
-			NavMesh.Raycast(obj.transform.position, targetPos, out NavMeshHit hit, NavMesh.GetAreaFromName("Walkable"));
-			bool isTouchingMesh;
-
-			if (hit.mask != 1)
-			{
-				isTouchingMesh = true;
-			}
-			else
-				isTouchingMesh = false;
-
-			Debug.DrawLine(obj.transform.position, targetPos, isTouchingMesh ? Color.red : Color.green);
-
-			if (isTouchingMesh)
-			{
-				Debug.Log("touching navmesh");
-			}
-			else
-			{
-				Debug.Log("not touching navmesh");
+				else
+				{
+					Debug.Log("not touching navmesh");
+				}
 			}
 			*/
 		}
