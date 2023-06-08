@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Managers\MiniMapManager.cs" />
-    <Compile Include="Assets\Scripts\Collisions.cs" />
+    <Compile Include="Assets\Scripts\UnitScripts\Collisions.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\VehProdSpawnLocation.cs" />
     <Compile Include="Assets\Scripts\BuildTime.cs" />
     <Compile Include="Assets\Scripts\DestroyInSeconds.cs" />
@@ -86,6 +86,7 @@
     <Compile Include="Assets\Scripts\Managers\ErrorManager.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\BuildingManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\ParticleEffects.cs" />
+    <Compile Include="Assets\Scripts\ShowNavMesh.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitProductionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\CapturePointController.cs" />
   </ItemGroup>

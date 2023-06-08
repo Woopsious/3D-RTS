@@ -90,9 +90,35 @@ public class UnitSelectionManager : MonoBehaviour
 
 		if (movePosHighlighterObj[0].activeInHierarchy)
 		{
+			/*
 			GameObject obj = movePosHighlighterObj[0].gameObject;
-			Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y -5, obj.transform.position.z);
-			bool isTouchingMesh = NavMesh.Raycast(obj.transform.position, targetPos, out NavMeshHit hit, NavMesh.GetAreaFromName("Walkable"));
+			Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
+
+			if (NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 3, NavMesh.GetAreaFromName("Walkable")))
+			{
+				if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+				{
+					if (obj.transform.position.y >= hit.position.y)
+					{
+						Debug.Log("touching navmesh");
+					}
+					else
+					{
+						Debug.Log("not touching navmesh");
+					}
+
+				}
+			}
+
+			NavMesh.Raycast(obj.transform.position, targetPos, out NavMeshHit hit, NavMesh.GetAreaFromName("Walkable"));
+			bool isTouchingMesh;
+
+			if (hit.mask != 1)
+			{
+				isTouchingMesh = true;
+			}
+			else
+				isTouchingMesh = false;
 
 			Debug.DrawLine(obj.transform.position, targetPos, isTouchingMesh ? Color.red : Color.green);
 
@@ -104,6 +130,7 @@ public class UnitSelectionManager : MonoBehaviour
 			{
 				Debug.Log("not touching navmesh");
 			}
+			*/
 		}
 	}
 	public void RefundSelectedUnits()
@@ -332,6 +359,8 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 		}
 	}
+
+	//DRAG SELECT FUNCTIONS
 	//drag selection logic to generate list of drag selected units, then see what player unit is inside bounds of drag select
 	public void UpdateSelectionBox(Vector2 currentMousePos)
 	{
@@ -384,7 +413,7 @@ public class UnitSelectionManager : MonoBehaviour
 		SetUnitRefundButtonActiveUnactive();
 	}
 
-	//remove all units from selected list
+	//DESELECT ENTITY FUNCTIONS
 	public void DeselectUnits()
 	{
 		if (selectedUnitList.Count != 0)
@@ -473,7 +502,7 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 		}
 	}
-	//reset ui list count, see line 384, recount units in group to update ui
+	//reset ui list count, recount units in group to update ui
 	public void AssignUnitsToGroupOne()
 	{
 		playerController.gameUIManager.ResetGroupUI();
@@ -585,7 +614,7 @@ public class UnitSelectionManager : MonoBehaviour
 		SetUnitRefundButtonActiveUnactive();
 	}
 
-	//bool checks
+	//BOOL CHECKS
 	public bool BuildingExists(BuildingManager building)
 	{
 		if (building != null)
