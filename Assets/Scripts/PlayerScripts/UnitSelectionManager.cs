@@ -3,20 +3,27 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.AI.Navigation;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
+using static Unity.Collections.AllocatorManager;
+using static UnityEngine.GraphicsBuffer;
 
 public class UnitSelectionManager : MonoBehaviour
 {
+	NavMeshQueryFilter filter = new NavMeshQueryFilter();
+
+	Color transparentGreen;
+	Color transparentRed;
+
 	[Header("Game Ui + Refs")]
 	public PlayerController playerController;
 	public CanvasScaler canvasScaler;
 	public RectTransform selectionBoxRect;
 	public RectTransform selectionBoxUi;
 	public Button refundSelectedUnitsButton;
-
-	public bool isPlayerOne;
 
 	[Header("Dynamic Refs")]
 	public Bounds bounds;
@@ -43,6 +50,14 @@ public class UnitSelectionManager : MonoBehaviour
 	public List<Vector3> movePosOffset;
 	public GameObject movePosHighlighterParentObj;
 	public List<GameObject> movePosHighlighterObj;
+
+	public void Start()
+	{
+		filter.areaMask = 1 << NavMesh.GetAreaFromName("Walkable");
+
+		transparentGreen = new Color(0, 1, 0, 0.1f);
+		transparentRed = new Color(1, 0, 0, 0.1f);
+	}
 
 	public void Update()
 	{
@@ -86,8 +101,65 @@ public class UnitSelectionManager : MonoBehaviour
 		{
 			ManageSelectedUnitsAndGroups();
 		}
-	}
 
+		if (movePosHighlighterObj[0].activeInHierarchy)
+		{
+			for (int i = 0; i < movePosHighlighterObj.Count; i++)
+			{
+				if (movePosHighlighterObj[i].activeInHierarchy)
+				{
+					GameObject obj = movePosHighlighterObj[i].gameObject;
+					Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
+					NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 2.5f, filter);
+
+					if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+					{
+						if (obj.transform.position.y >= hit.position.y)
+						{
+							obj.GetComponent<Renderer>().material.SetColor("_Color", transparentGreen);
+							Debug.Log("touching navmesh");
+						}
+					}
+					else
+					{
+						obj.GetComponent<Renderer>().material.SetColor("_Color", transparentRed);
+						Debug.Log("not touching navmesh");
+					}
+				}
+			}
+		}
+		/*
+		if (IsInNavMeshBounds(obj, navMeshSurface.navMeshData.sourceBounds))
+		{
+			Debug.Log("touching navmesh");
+		}
+		elses
+		{
+			Debug.Log("not touching navmesh");
+		}
+		/*
+		GameObject obj = movePosHighlighterObj[0].gameObject;
+		Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
+
+		Debug.Log("Area Mask: " + navMeshFilter.agentTypeID);
+		NavMesh.Raycast(obj.transform.position, targetPos, out NavMeshHit hit, navMeshFilter.agentTypeID);
+
+		Debug.Log("Object Location: " + obj.transform.position);
+		Debug.Log("Hit Location: " + hit.position);
+
+		if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+		{
+			if (obj.transform.position.y >= hit.position.y)
+			{
+				Debug.Log("touching navmesh");
+			}
+			else
+			{
+				Debug.Log("not touching navmesh");
+			}
+		}
+		*/
+	}
 	public void RefundSelectedUnits()
 	{
 		for (int i = selectedUnitList.Count- 1; i >= 0;i--)
@@ -101,19 +173,12 @@ public class UnitSelectionManager : MonoBehaviour
 		}
 	}
 	public void SetUnitRefundButtonActiveUnactive()
-	{//remove try catch after completion
-		try
-		{
-			if (selectedUnitList.Count == 0 && refundSelectedUnitsButton.gameObject.activeInHierarchy)
-				refundSelectedUnitsButton.gameObject.SetActive(false);
+	{
+		if (selectedUnitList.Count == 0 && refundSelectedUnitsButton.gameObject.activeInHierarchy)
+			refundSelectedUnitsButton.gameObject.SetActive(false);
 
-			else if (selectedUnitList.Count != 0 && !refundSelectedUnitsButton.gameObject.activeInHierarchy)
-				refundSelectedUnitsButton.gameObject.SetActive(true);
-		}
-		catch (Exception ex)
-		{
-			Debug.LogException(ex);
-		}
+		else if (selectedUnitList.Count != 0 && !refundSelectedUnitsButton.gameObject.activeInHierarchy)
+			refundSelectedUnitsButton.gameObject.SetActive(true);
 	}
 
 	//UNIT GHOST PROJECTION WHEN UNITS ARE HIGHLIGHTED
@@ -199,7 +264,7 @@ public class UnitSelectionManager : MonoBehaviour
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
 			}
-			//add newly selected unit to list of existing selected units, or remove if unit was already selected
+			//check if unit is already in selectedUnitList, if it was remove it, else add it
 			if (Input.GetKey(KeyCode.LeftShift))
 			{
 				foreach (UnitStateController selectedUnit in selectedUnitList)
@@ -237,7 +302,7 @@ public class UnitSelectionManager : MonoBehaviour
 	}
 	public void TrySelectCargoShip(CargoShipController cargoShip)
 	{
-		if (CargoShipExists(cargoShip) && cargoShip.isPlayerOneUnit != !playerController.isPlayerOne)
+		if (CheckForCargoShip(cargoShip) && cargoShip.isPlayerOneUnit != !playerController.isPlayerOne)
 		{
 			DeselectBuilding();
 			DeselectUnits();
@@ -321,6 +386,8 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 		}
 	}
+
+	//DRAG SELECT FUNCTIONS
 	//drag selection logic to generate list of drag selected units, then see what player unit is inside bounds of drag select
 	public void UpdateSelectionBox(Vector2 currentMousePos)
 	{
@@ -373,7 +440,7 @@ public class UnitSelectionManager : MonoBehaviour
 		SetUnitRefundButtonActiveUnactive();
 	}
 
-	//remove all units from selected list
+	//DESELECT ENTITY FUNCTIONS
 	public void DeselectUnits()
 	{
 		if (selectedUnitList.Count != 0)
@@ -462,7 +529,7 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 		}
 	}
-	//reset ui list count, see line 384, recount units in group to update ui
+	//reset ui list count, recount units in group to update ui
 	public void AssignUnitsToGroupOne()
 	{
 		playerController.gameUIManager.ResetGroupUI();
@@ -574,7 +641,7 @@ public class UnitSelectionManager : MonoBehaviour
 		SetUnitRefundButtonActiveUnactive();
 	}
 
-	//bool checks
+	//BOOL CHECKS
 	public bool BuildingExists(BuildingManager building)
 	{
 		if (building != null)
@@ -587,12 +654,14 @@ public class UnitSelectionManager : MonoBehaviour
 			return true;
 		else return false;
 	}
+	/*
 	public bool CargoShipExists(UnitStateController unit)
 	{
 		if (unit != null)
 			return true;
 		else return false;
 	}
+	*/
 	public bool CheckForCargoShip(UnitStateController unit)
 	{
 		if (unit.isCargoShip)

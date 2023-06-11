@@ -7,7 +7,7 @@ public class UnitIdleState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		Debug.Log("Entered Idle State");
+		//Debug.Log("Entered Idle State");
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[1].Stop();

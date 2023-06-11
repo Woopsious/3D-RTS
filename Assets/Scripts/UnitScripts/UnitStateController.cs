@@ -55,6 +55,8 @@ public class UnitStateController : MonoBehaviour
 	[Header("Unit Dynamic Refs")]
 	public int GroupNum;
 	public PlayerController playerController;
+
+	public List<GameObject> targetList;
 	public List<BuildingManager> buildingTargetList;
 	public BuildingManager currentBuildingTarget;
 	public List<UnitStateController> unitTargetList;
@@ -111,53 +113,39 @@ public class UnitStateController : MonoBehaviour
 	{
 		currentState.UpdatePhysics(this);
 
-		if (!isCargoShip && currentState != attackState || !isCargoShip && !isUnitArmed)
-			ScanForTargets();
+		if (targetList.Count != 0 && isUnitArmed && !isCargoShip && currentState != attackState) //switch to attack state if targets found
+			ChangeStateAttacking();
+
+		else if (targetList.Count == 0 && currentState == attackState)
+			ChangeStateIdle();
 	}
-	//grab correct entity types in view range, if entity is in attack range and to tempTargetList then switch to attack state if any found
-	public void ScanForTargets()
+	//filter out everything but enemy Entities
+	public void AddTargetsOnFOVEnter(GameObject triggerObj)
 	{
-		//scan for targets
-		Collider[] newTargetArray = Physics.OverlapSphere(transform.position, ViewRange); //find targets in attack range
-
-		try
+		if (triggerObj.GetComponent<UnitStateController>() != null && isPlayerOneUnit != triggerObj.GetComponent<UnitStateController>().isPlayerOneUnit)
 		{
-			List<GameObject> targetObjs = new List<GameObject>();
-			foreach (Collider target in newTargetArray)
-			{
-				if (target.GetComponent<UnitStateController>() != null && isPlayerOneUnit != target.GetComponent<UnitStateController>().isPlayerOneUnit)
-				{
-					Physics.Linecast(CenterPoint.transform.position, target.GetComponent<UnitStateController>().CenterPoint.transform.position,
-						out RaycastHit hit, ignoreMe);
-
-					if (hit.collider.GetComponent<UnitStateController>() != null)
-						targetObjs.Add(target.gameObject);
-
-					if (!isUnitArmed)
-						target.GetComponent<UnitStateController>().ShowUnit();
-				}
-				if (target.GetComponent<BuildingManager>() != null && isPlayerOneUnit != target.GetComponent<BuildingManager>().isPlayerOneBuilding
-					&& target.GetComponent<CanPlaceBuilding>().isPlaced)    //filter out non placed buildings
-				{
-					Physics.Linecast(CenterPoint.transform.position, target.GetComponent<BuildingManager>().CenterPoint.transform.position,
-						out RaycastHit hit, ignoreMe);
-
-					if (hit.collider.GetComponent<BuildingManager>() != null)
-						targetObjs.Add(target.gameObject);
-
-					if (!isUnitArmed)
-						target.GetComponent<BuildingManager>().ShowBuilding();
-				}
-			}
-			if (targetObjs.Count >= 1 && currentState != attackState && isUnitArmed || targetObjs.Count >= 1 && currentState != movingState && isUnitArmed)
-				ChangeStateAttacking();
-
-			if (targetObjs.Count == 0 && currentState == attackState)
-				ChangeStateIdle();
+			if (!unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
+				targetList.Add(triggerObj);
 		}
-		catch(Exception e)
+		else if (triggerObj.GetComponent<BuildingManager>() != null && isPlayerOneUnit != triggerObj.GetComponent<BuildingManager>().isPlayerOneBuilding
+			&& triggerObj.GetComponent<CanPlaceBuilding>().isPlaced)    //filter out non placed buildings
 		{
-			Debug.LogError(e);
+			if (!buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
+				targetList.Add(triggerObj);
+		}
+	}
+	public void RemoveTargetsOnFOVExit(GameObject triggerObj)
+	{
+		if (targetList.Contains(triggerObj))
+		{
+			targetList.Remove(triggerObj);
+			triggerObj.GetComponent<UnitStateController>().HideUnit();
+		}
+
+		else if (targetList.Contains(triggerObj))
+		{
+			targetList.Remove(triggerObj);
+			triggerObj.GetComponent<BuildingManager>().HideBuilding();
 		}
 	}
 
@@ -193,6 +181,24 @@ public class UnitStateController : MonoBehaviour
 	}
 
 	//UTILITY FUNCTIONS
+	public void RemoveNullRefsFromLists(List<GameObject> targetList, List<UnitStateController> unitList, List<BuildingManager> buildingList)
+	{
+		for (int i = targetList.Count - 1; i >= 0; i--)
+		{
+			if (targetList[i] == null)
+				targetList.RemoveAt(i);
+		}
+		for (int i = unitList.Count - 1; i >= 0; i--)
+		{
+			if (unitList[i] == null)
+				unitList.RemoveAt(i);
+		}
+		for (int i = buildingList.Count - 1; i >= 0; i--)
+		{
+			if (buildingList[i] == null)
+				buildingList.RemoveAt(i);
+		}
+	}
 	public IEnumerator DelaySecondaryAttack(UnitStateController unit, float seconds)
 	{
 		unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
@@ -266,13 +272,10 @@ public class UnitStateController : MonoBehaviour
 	public void HideUnit()
 	{
 		if (isPlayerOneUnit)
-		{
 			miniMapRenderObj.layer = 11;
-		}
+
 		else if (!isPlayerOneUnit)
-		{
 			miniMapRenderObj.layer = 12;
-		}
 		//notifiy enemy player when enemy unit is unspotted
 	}
 	public void OnDrawGizmosSelected()

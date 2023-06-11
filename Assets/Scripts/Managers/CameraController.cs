@@ -17,8 +17,8 @@ public class CameraController : MonoBehaviour
 		MoveCamera();
 		RotateCamera();
 		CheckDirectionalBounds();
+		CheckLookDirection();
 	}
-
 	public void MoveCamera()
 	{
 		if (Input.GetKey(KeyCode.W))
@@ -57,13 +57,17 @@ public class CameraController : MonoBehaviour
 			transform.eulerAngles -= new Vector3(transform.rotation.x, -turnSpeed, transform.rotation.y) * Time.unscaledDeltaTime;
 		}
 	}
+	public void CheckLookDirection()
+	{
+		Debug.Log(gameObject.transform.eulerAngles.y);
+	}
 	public void CheckDirectionalBounds()
 	{
-		if (CheckIfInBoundsPositive(transform.position.x, 248))
+		if (CheckIfInBoundsPositive(transform.position.x, 256))
 		{
 			transform.position = new Vector3(transform.position.x + minusOffset, transform.position.y, transform.position.z);
 		}
-		if (CheckIfInBoundsPositive(transform.position.z, 248))
+		if (CheckIfInBoundsPositive(transform.position.z, 256))
 		{
 			transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + minusOffset);
 		}
@@ -71,11 +75,11 @@ public class CameraController : MonoBehaviour
 		{
 			transform.position = new Vector3(transform.position.x, transform.position.y + minusOffset, transform.position.z);
 		}
-		if (CheckIfInBoundsNegative(transform.position.x, 8))
+		if (CheckIfInBoundsNegative(transform.position.x, 0))
 		{
 			transform.position = new Vector3(transform.position.x + addOffset, transform.position.y, transform.position.z);
 		}
-		if (CheckIfInBoundsNegative(transform.position.z, 8))
+		if (CheckIfInBoundsNegative(transform.position.z, 0))
 		{
 			transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + addOffset);
 		}
@@ -94,6 +98,13 @@ public class CameraController : MonoBehaviour
 	public bool CheckIfInBoundsNegative(float position, float bounds)
 	{
 		if (position > bounds)
+			return true;
+		else
+			return false;
+	}
+	public bool CheckDirection(float lookDirection, float minBounds, float MaxBounds)
+	{
+		if (lookDirection > minBounds && lookDirection < MaxBounds)
 			return true;
 		else
 			return false;

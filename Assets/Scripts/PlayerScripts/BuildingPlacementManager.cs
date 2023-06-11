@@ -7,7 +7,6 @@ public class BuildingPlacementManager : MonoBehaviour
 	[Header("Game Ui + Refs")]
 	public PlayerController playerController;
 
-	public bool isPlayerOne;
 	public int buildingLayer;
 
 	[Header("Player Building Prefabs")]
@@ -25,7 +24,7 @@ public class BuildingPlacementManager : MonoBehaviour
 
 	public void Start()
 	{
-		if (isPlayerOne)
+		if (playerController.isPlayerOne)
 		{
 			buildingHQ = GameManager.Instance.buildingHQPlayerOne;
 			buildingEnergyGen = GameManager.Instance.buildingEnergyGenPlayerOne;
@@ -36,7 +35,7 @@ public class BuildingPlacementManager : MonoBehaviour
 			//prefabs not made yet
 			buildingHQ = GameManager.Instance.buildingHQPlayerOne;
 		}
-		if (!isPlayerOne)
+		if (!playerController.isPlayerOne)
 		{
 			buildingHQ = GameManager.Instance.buildingHQPlayerTwo;
 			buildingEnergyGen = GameManager.Instance.buildingEnergyGenPlayerTwo;
