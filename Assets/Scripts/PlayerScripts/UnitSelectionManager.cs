@@ -13,9 +13,10 @@ using static UnityEngine.GraphicsBuffer;
 
 public class UnitSelectionManager : MonoBehaviour
 {
-	public NavMeshQueryFilter navMeshQueryFilter;
+	NavMeshQueryFilter filter = new NavMeshQueryFilter();
 
-	public NavMeshSurface navMeshSurface;
+	Color transparentGreen;
+	Color transparentRed;
 
 	[Header("Game Ui + Refs")]
 	public PlayerController playerController;
@@ -49,6 +50,14 @@ public class UnitSelectionManager : MonoBehaviour
 	public List<Vector3> movePosOffset;
 	public GameObject movePosHighlighterParentObj;
 	public List<GameObject> movePosHighlighterObj;
+
+	public void Start()
+	{
+		filter.areaMask = 1 << NavMesh.GetAreaFromName("Walkable");
+
+		transparentGreen = new Color(0, 1, 0, 0.1f);
+		transparentRed = new Color(1, 0, 0, 0.1f);
+	}
 
 	public void Update()
 	{
@@ -95,49 +104,61 @@ public class UnitSelectionManager : MonoBehaviour
 
 		if (movePosHighlighterObj[0].activeInHierarchy)
 		{
-			GameObject obj = movePosHighlighterObj[0].gameObject;
-			Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
-
-			NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 5, navMeshSurface.layerMask.value);
-
-			Debug.Log("Object Location: " + obj.transform.position);
-			Debug.Log("Hit Location: " + hit.position);
-
-			if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+			for (int i = 0; i < movePosHighlighterObj.Count; i++)
 			{
-				if (obj.transform.position.y >= hit.position.y)
+				if (movePosHighlighterObj[i].activeInHierarchy)
 				{
-					Debug.Log("touching navmesh");
-				}
-				else
-				{
-					Debug.Log("not touching navmesh");
+					GameObject obj = movePosHighlighterObj[i].gameObject;
+					Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
+					NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 2.5f, filter);
+
+					if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+					{
+						if (obj.transform.position.y >= hit.position.y)
+						{
+							obj.GetComponent<Renderer>().material.SetColor("_Color", transparentGreen);
+							Debug.Log("touching navmesh");
+						}
+					}
+					else
+					{
+						obj.GetComponent<Renderer>().material.SetColor("_Color", transparentRed);
+						Debug.Log("not touching navmesh");
+					}
 				}
 			}
-
-			/*
-			GameObject obj = movePosHighlighterObj[0].gameObject;
-			Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
-
-			Debug.Log("Area Mask: " + navMeshFilter.agentTypeID);
-			NavMesh.Raycast(obj.transform.position, targetPos, out NavMeshHit hit, navMeshFilter.agentTypeID);
-
-			Debug.Log("Object Location: " + obj.transform.position);
-			Debug.Log("Hit Location: " + hit.position);
-
-			if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
-			{
-				if (obj.transform.position.y >= hit.position.y)
-				{
-					Debug.Log("touching navmesh");
-				}
-				else
-				{
-					Debug.Log("not touching navmesh");
-				}
-			}
-			*/
 		}
+		/*
+		if (IsInNavMeshBounds(obj, navMeshSurface.navMeshData.sourceBounds))
+		{
+			Debug.Log("touching navmesh");
+		}
+		elses
+		{
+			Debug.Log("not touching navmesh");
+		}
+		/*
+		GameObject obj = movePosHighlighterObj[0].gameObject;
+		Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
+
+		Debug.Log("Area Mask: " + navMeshFilter.agentTypeID);
+		NavMesh.Raycast(obj.transform.position, targetPos, out NavMeshHit hit, navMeshFilter.agentTypeID);
+
+		Debug.Log("Object Location: " + obj.transform.position);
+		Debug.Log("Hit Location: " + hit.position);
+
+		if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+		{
+			if (obj.transform.position.y >= hit.position.y)
+			{
+				Debug.Log("touching navmesh");
+			}
+			else
+			{
+				Debug.Log("not touching navmesh");
+			}
+		}
+		*/
 	}
 	public void RefundSelectedUnits()
 	{
