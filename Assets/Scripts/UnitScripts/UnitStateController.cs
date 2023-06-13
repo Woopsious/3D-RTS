@@ -147,6 +147,12 @@ public class UnitStateController : MonoBehaviour
 			targetList.Remove(triggerObj);
 			triggerObj.GetComponent<BuildingManager>().HideBuilding();
 		}
+
+		if (unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
+			unitTargetList.Remove(triggerObj.GetComponent<UnitStateController>());
+
+		if (buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
+			buildingTargetList.Remove(triggerObj.GetComponent<BuildingManager>());
 	}
 
 	//HEALTH FUNCTIONS

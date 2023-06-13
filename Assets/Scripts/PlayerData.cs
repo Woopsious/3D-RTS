@@ -10,6 +10,22 @@ public class PlayerData
 	public float backgroundMusicVolumeData;
 	public float menuSFXVolumeData;
 	public float gameSFXVolumeData;
+
+	public string hotKeyTestOne;
+	public string hotKeyTestTwo;
+	public string hotKeyShopBuildings;
+	public string hotKeyShopLightUnits;
+	public string hotKeyShopHeavyUnits;
+	public string hotKeyMiniMap;
+
+	public string hotKeyCameraForward;
+	public string hotKeyCameraBackwards;
+	public string hotKeyCameraLeft;
+	public string hotKeyCameraRight;
+	public string hotKeyCameraUp;
+	public string hotKeyCameraDown;
+	public string hotKeyCameraRotateLeft;
+	public string hotKeyCameraRotateRight;
 }
 
 [System.Serializable]
