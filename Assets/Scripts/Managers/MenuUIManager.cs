@@ -11,14 +11,16 @@ public class MenuUIManager : MonoBehaviour
 	//references
 	[Header("MenuObj UI Refs")]
 	public GameObject mainMenuObj;
-	public GameObject highScoreObj;
-	public GameObject SettingsObj;
 	public GameObject singlePlayerScreenObj;
 	public GameObject multiPlayerScreenObj;
+	public GameObject highScoreObj;
+	public GameObject SettingsObj;
+	public GameObject SettingsVolumeObj;
+	public GameObject SettingsKeybindsObj;
 
-	[Header("Menu Button Refs")]
-	public Button newSinglePlayerButton, loadSinglePlayerButton;
-	public Button newMultiPlayerButton, loadMultiPlayerButton;
+	[Header("keybinds Ui")]
+	public InputField keybindTestOneInputField;
+	public InputField keybindTestTwoInputField;
 
 	[Header("EasyMode refs")]
 	public Text highscoreEasyOne;
@@ -52,11 +54,6 @@ public class MenuUIManager : MonoBehaviour
 		mainMenuObj.SetActive(false);
 		highScoreObj.SetActive(true);
 	}
-	public void ShowSettingsButton()
-	{
-		mainMenuObj.SetActive(false);
-		SettingsObj.SetActive(true);
-	}
 	public void ShowSinglePlayerScreen()
 	{
 		mainMenuObj.SetActive(false);
@@ -76,10 +73,61 @@ public class MenuUIManager : MonoBehaviour
 		multiPlayerScreenObj.SetActive(false);
 		GameManager.Instance.SavePlayerData();
 	}
+	public void ShowSettingsButton()
+	{
+		mainMenuObj.SetActive(false);
+		SettingsObj.SetActive(true);
+	}
+	public void ShowSettingsKeybindsButton()
+	{
+		SettingsObj.SetActive(false);
+		SettingsKeybindsObj.SetActive(true);
+	}	
+	public void ShowSettingsVolumeButton()
+	{
+		SettingsObj.SetActive(false);
+		SettingsVolumeObj.SetActive(true);
+	}
+	public void SettingsBackButton()
+	{
+		SettingsObj.SetActive(true);
+		SettingsVolumeObj.SetActive(false);
+		SettingsKeybindsObj.SetActive(false);
+
+	}
 	public void QuitGame()
 	{
 		GameManager.Instance.SavePlayerData();
 		Application.Quit();
+	}
+
+	//KEYBIND FUNCTIONS
+	public void DisplayKeyBinds()
+	{
+		keybindTestOneInputField.placeholder.GetComponent<Text>().text = GameManager.Instance.keyBindTestOne;
+		keybindTestTwoInputField.placeholder.GetComponent<Text>().text = GameManager.Instance.keyBindTestTwo;
+	}
+	public void SaveKeyBinds()
+	{
+		GameManager.Instance.keyBindTestOne = keybindTestOneInputField.textComponent.text;
+		GameManager.Instance.keyBindTestTwo = keybindTestTwoInputField.textComponent.text;
+
+		keybindTestOneInputField.text = "";
+		keybindTestTwoInputField.text = "";
+
+		DisplayKeyBinds();
+	}
+	public void ResetPlayerKeybinds()
+	{
+		GameManager.Instance.keyBindTestOne = KeyCode.J.ToString();
+		GameManager.Instance.keyBindTestTwo = KeyCode.K.ToString();
+	}
+	public void CheckIfValidKeybind(char newKeybind)
+	{
+		if (char.IsLower(newKeybind))
+		{
+
+		}
 	}
 
 	//single player button functions

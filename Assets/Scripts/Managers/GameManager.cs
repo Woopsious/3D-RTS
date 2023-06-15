@@ -24,6 +24,23 @@ public class GameManager : MonoBehaviour
 	[Header("Volume Refs")]
 	public float backgroundSliderVolume, menuSFXSliderVolume, gameSFXSliderVolume;
 
+	[Header("hotKeyRefs")]
+	public string keyBindTestOne;
+	public string keyBindTestTwo;
+	public string keyBindShopBuildings;
+	public string keyBindShopLightUnits;
+	public string keyBindShopHeavyUnits;
+	public string keyBindMiniMap;
+
+	public string keyBindCameraForward;
+	public string keyBindCameraBackwards;
+	public string keyBindCameraLeft;
+	public string keyBindCameraRight;
+	public string keyBindCameraUp;
+	public string keyBindCameraDown;
+	public string keyBindCameraRotateLeft;
+	public string keyBindCameraRotateRight;
+
 	//file Path Locations
 	static string playerDataPath;
 	static string playerGameDataPath;
@@ -105,6 +122,16 @@ public class GameManager : MonoBehaviour
 			GetResourcesPerSecond();
 			GameClock();
 		}
+		/*
+		if (Input.GetKeyDown(keyBindTestOne))
+		{
+			Debug.Log(keyBindTestOne + " key was Pressed | default key is J");
+		}
+		if (Input.GetKeyDown(keyBindTestTwo))
+		{
+			Debug.Log(keyBindTestTwo + " key was Pressed | default key is K");
+		}
+		*/
 	}
 	public void GetResourcesPerSecond()
 	{
@@ -155,6 +182,8 @@ public class GameManager : MonoBehaviour
 		BinaryFormatter formatter = new BinaryFormatter();
 		FileStream playerData = File.Create(playerDataPath + "/playerData.sav");
 
+		SavePlayerKeybinds();
+
 		formatter.Serialize(playerData, GameManager.Instance.LocalCopyOfPlayerData);
 		playerData.Close();
 	}
@@ -167,8 +196,20 @@ public class GameManager : MonoBehaviour
 		BinaryFormatter formatter = new BinaryFormatter();
 		FileStream playerData = File.Open(playerDataPath + "/playerData.sav", FileMode.Open);
 
+		LoadPlayerKeybinds();
+
 		LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
 		playerData.Close();
+	}
+	public void SavePlayerKeybinds()
+	{
+		Instance.LocalCopyOfPlayerData.hotKeyTestOne = Instance.keyBindTestOne;
+		Instance.LocalCopyOfPlayerData.hotKeyTestTwo = Instance.keyBindTestTwo;
+	}
+	public void LoadPlayerKeybinds()
+	{
+		Instance.keyBindTestOne = Instance.LocalCopyOfPlayerData.hotKeyTestOne;
+		Instance.keyBindTestTwo = Instance.LocalCopyOfPlayerData.hotKeyTestTwo;
 	}
 	public void CreatePlayerData()
 	{

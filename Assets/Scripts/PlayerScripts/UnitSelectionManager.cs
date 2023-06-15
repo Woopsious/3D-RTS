@@ -117,13 +117,13 @@ public class UnitSelectionManager : MonoBehaviour
 						if (obj.transform.position.y >= hit.position.y)
 						{
 							obj.GetComponent<Renderer>().material.SetColor("_Color", transparentGreen);
-							Debug.Log("touching navmesh");
+							//Debug.Log("touching navmesh");
 						}
 					}
 					else
 					{
 						obj.GetComponent<Renderer>().material.SetColor("_Color", transparentRed);
-						Debug.Log("not touching navmesh");
+						//Debug.Log("not touching navmesh");
 					}
 				}
 			}
