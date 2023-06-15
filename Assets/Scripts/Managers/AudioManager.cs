@@ -23,11 +23,6 @@ public class AudioManager : MonoBehaviour
 		else
 			Destroy(gameObject);
 	}
-	public void Start()
-	{
-		LoadSoundSettings();
-	}
-
 	public void AdjustAudioVolume()
 	{
 			BuildingManager[] buildings = FindObjectsOfType<BuildingManager>();

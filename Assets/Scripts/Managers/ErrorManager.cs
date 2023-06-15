@@ -28,20 +28,6 @@ public class ErrorManager : MonoBehaviour
 	public GameObject playerNotifObj;
 	public Text playerNotifText;
 
-	public void Awake()
-	{
-		if (Instance == null)
-		{
-			Instance = this;
-			DontDestroyOnLoad(Instance);
-		}
-		else
-			Destroy(gameObject);
-	}
-	public void Start()
-	{
-		OnStartUpHandleLogFiles();
-	}
 	public void Update()
 	{
 		if (Input.GetKeyUp(KeyCode.BackQuote))
@@ -73,6 +59,7 @@ public class ErrorManager : MonoBehaviour
 			*/
 		}
 	}
+
 	//SET UP ERROR LOGGER AND PLAYER NOTIFICATIONS
 	public void CheckForErrorMessageObj()
 	{
@@ -120,11 +107,11 @@ public class ErrorManager : MonoBehaviour
 	{
 		Application.logMessageReceived += HandleLogs;
 	}
-
 	void OnDisable()
 	{
 		Application.logMessageReceived -= HandleLogs;
 	}
+
 	//FUNCTIONS TO HANDLE LOGS AND CONSOLE WINDOW
 	//handle all logs that are warnings and errors, writing to both a player.log file and in game console window
 	public void HandleLogs(string logString, string stackTrace, LogType type)

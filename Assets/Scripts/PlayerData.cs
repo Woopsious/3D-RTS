@@ -1,3 +1,4 @@
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,22 +11,24 @@ public class PlayerData
 	public float backgroundMusicVolumeData;
 	public float menuSFXVolumeData;
 	public float gameSFXVolumeData;
+	public Dictionary<string, KeyCode> KeyBindDictionary;
 
-	public string hotKeyTestOne;
-	public string hotKeyTestTwo;
-	public string hotKeyShopBuildings;
-	public string hotKeyShopLightUnits;
-	public string hotKeyShopHeavyUnits;
-	public string hotKeyMiniMap;
+	public KeyCode hotKeyTestOne;
+	public KeyCode hotKeyTestTwo;
+	public KeyCode hotKeyTestThree;
+	public KeyCode hotKeyShopBuildings;
+	public KeyCode hotKeyShopLightUnits;
+	public KeyCode hotKeyShopHeavyUnits;
+	public KeyCode hotKeyMiniMap;
 
-	public string hotKeyCameraForward;
-	public string hotKeyCameraBackwards;
-	public string hotKeyCameraLeft;
-	public string hotKeyCameraRight;
-	public string hotKeyCameraUp;
-	public string hotKeyCameraDown;
-	public string hotKeyCameraRotateLeft;
-	public string hotKeyCameraRotateRight;
+	public KeyCode hotKeyCameraForward;
+	public KeyCode hotKeyCameraBackwards;
+	public KeyCode hotKeyCameraLeft;
+	public KeyCode hotKeyCameraRight;
+	public KeyCode hotKeyCameraUp;
+	public KeyCode hotKeyCameraDown;
+	public KeyCode hotKeyCameraRotateLeft;
+	public KeyCode hotKeyCameraRotateRight;
 }
 
 [System.Serializable]

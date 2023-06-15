@@ -63,6 +63,7 @@
     <Compile Include="Assets\Scripts\BuildTime.cs" />
     <Compile Include="Assets\Scripts\DestroyInSeconds.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\UnitStateController.cs" />
+    <Compile Include="Assets\Scripts\InputManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\UnitMovingState.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\BuildingPlacementManager.cs" />
     <Compile Include="Assets\Scripts\TestScripts\TestScript.cs" />

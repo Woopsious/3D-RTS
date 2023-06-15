@@ -19,8 +19,9 @@ public class MenuUIManager : MonoBehaviour
 	public GameObject SettingsKeybindsObj;
 
 	[Header("keybinds Ui")]
-	public InputField keybindTestOneInputField;
-	public InputField keybindTestTwoInputField;
+	public GameObject KeybindParentObj;
+	public GameObject keybindButtonPrefab;
+	public List<Button> keybindButtonList;
 
 	[Header("EasyMode refs")]
 	public Text highscoreEasyOne;
@@ -40,15 +41,13 @@ public class MenuUIManager : MonoBehaviour
 			Instance = this;
 		else
 			Destroy(gameObject);
-
-		GameManager.Instance.errorManager.CheckForErrorMessageObj();
 	}
 	public void PlayButtonSound()
 	{
 		AudioManager.Instance.menuSFX.Play();
 	}
 
-	//MAIN MENU BUTTONS FUNCTIONS
+	//FUNCTIONS FOR MAIN MENU BUTTONS
 	public void ShowHighScoreButton()
 	{
 		mainMenuObj.SetActive(false);
@@ -101,33 +100,49 @@ public class MenuUIManager : MonoBehaviour
 		Application.Quit();
 	}
 
-	//KEYBIND FUNCTIONS
-	public void DisplayKeyBinds()
+	//FUNCTIONS TO CHANGE KEYBINDS
+	public void SetUpKeybindButtonNames()
 	{
-		keybindTestOneInputField.placeholder.GetComponent<Text>().text = GameManager.Instance.keyBindTestOne;
-		keybindTestTwoInputField.placeholder.GetComponent<Text>().text = GameManager.Instance.keyBindTestTwo;
-	}
-	public void SaveKeyBinds()
-	{
-		GameManager.Instance.keyBindTestOne = keybindTestOneInputField.textComponent.text;
-		GameManager.Instance.keyBindTestTwo = keybindTestTwoInputField.textComponent.text;
-
-		keybindTestOneInputField.text = "";
-		keybindTestTwoInputField.text = "";
-
-		DisplayKeyBinds();
-	}
-	public void ResetPlayerKeybinds()
-	{
-		GameManager.Instance.keyBindTestOne = KeyCode.J.ToString();
-		GameManager.Instance.keyBindTestTwo = KeyCode.K.ToString();
-	}
-	public void CheckIfValidKeybind(char newKeybind)
-	{
-		if (char.IsLower(newKeybind))
+		int i = 0;
+		foreach (Transform child in KeybindParentObj.transform)
 		{
+			Debug.Log("index is: " + i);
+			int closureIndex = i;
+			child.GetComponentInChildren<Text>().text = "Keybind for: " + InputManager.Instance.keybindNames[closureIndex];
 
+			GameObject go = Instantiate(keybindButtonPrefab);
+			go.transform.SetParent(child.transform, false);
+			Button btn = go.GetComponent<Button>();
+
+			btn.onClick.AddListener(delegate { KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
+			btn.onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
+
+			KeyCode keyCode = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]];
+			go.GetComponentInChildren<Text>().text = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
+
+			i++;
 		}
+	}
+	public void KeyToRebind(string buttonName)
+	{
+		InputManager.Instance.keyToRebind = buttonName;
+	}
+	public void KeyToRebindButtonNum(int buttonNum)
+	{
+		InputManager.Instance.buttonNumToRebind = buttonNum;
+		KeybindParentObj.transform.GetChild(buttonNum).GetChild(1).GetComponentInChildren<Text>().text = "Press Key To Rebind";
+	}
+	public void UpdateKeybindButtonDisplay(int buttonNum, KeyCode key)
+	{
+		KeybindParentObj.transform.GetChild(buttonNum).GetChild(1).GetComponentInChildren<Text>().text = key.ToString();
+	}
+	public void KeyBindsSave()
+	{
+		InputManager.Instance.SavePlayerKeybinds();
+	}
+	public void KeyBindsReset()
+	{
+		InputManager.Instance.ResetKeybindsToDefault();
 	}
 
 	//single player button functions

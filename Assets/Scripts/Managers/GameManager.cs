@@ -24,23 +24,6 @@ public class GameManager : MonoBehaviour
 	[Header("Volume Refs")]
 	public float backgroundSliderVolume, menuSFXSliderVolume, gameSFXSliderVolume;
 
-	[Header("hotKeyRefs")]
-	public string keyBindTestOne;
-	public string keyBindTestTwo;
-	public string keyBindShopBuildings;
-	public string keyBindShopLightUnits;
-	public string keyBindShopHeavyUnits;
-	public string keyBindMiniMap;
-
-	public string keyBindCameraForward;
-	public string keyBindCameraBackwards;
-	public string keyBindCameraLeft;
-	public string keyBindCameraRight;
-	public string keyBindCameraUp;
-	public string keyBindCameraDown;
-	public string keyBindCameraRotateLeft;
-	public string keyBindCameraRotateRight;
-
 	//file Path Locations
 	static string playerDataPath;
 	static string playerGameDataPath;
@@ -106,14 +89,21 @@ public class GameManager : MonoBehaviour
 		}
 		else
 			Destroy(gameObject);
-
+	}
+	public void Start()
+	{
 		LocalCopyOfPlayerData = new PlayerData();
 		LocalCopyOfGameData = new GameData();
 		playerDataPath = Application.persistentDataPath;
 		playerGameDataPath = Path.Combine(Application.persistentDataPath, "Saves");
 
+		Instance.errorManager.OnStartUpHandleLogFiles();
+		Instance.errorManager.CheckForErrorMessageObj();
+
+		InputManager.Instance.SetUpKeybindDictionary();
+		MenuUIManager.Instance.SetUpKeybindButtonNames();
+
 		GameManager.Instance.LoadPlayerData();
-		//GameManager.Instance.SavePlayerData();
 	}
 	public void Update()
 	{
@@ -122,16 +112,21 @@ public class GameManager : MonoBehaviour
 			GetResourcesPerSecond();
 			GameClock();
 		}
-		/*
-		if (Input.GetKeyDown(keyBindTestOne))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestOneName]))
 		{
-			Debug.Log(keyBindTestOne + " key was Pressed | default key is J");
+			Debug.Log(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestOneName]
+				+ " key was Pressed | default key is 1");
 		}
-		if (Input.GetKeyDown(keyBindTestTwo))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestTwoName]))
 		{
-			Debug.Log(keyBindTestTwo + " key was Pressed | default key is K");
+			Debug.Log(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestTwoName]
+				+ " key was Pressed | default key is 2");
 		}
-		*/
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestThreeName]))
+		{
+			Debug.Log(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestThreeName]
+				+ " key was Pressed | default key is 3");
+		}
 	}
 	public void GetResourcesPerSecond()
 	{
@@ -176,44 +171,49 @@ public class GameManager : MonoBehaviour
 	}
 
 	//save/load player and game data
-	public void SavePlayerData()
+	public void CreatePlayerData()
 	{
-		//create/overwrite file
+		//create file
 		BinaryFormatter formatter = new BinaryFormatter();
 		FileStream playerData = File.Create(playerDataPath + "/playerData.sav");
 
-		SavePlayerKeybinds();
+		InputManager.Instance.SavePlayerKeybinds();
 
 		formatter.Serialize(playerData, GameManager.Instance.LocalCopyOfPlayerData);
 		playerData.Close();
+	}
+	public void SavePlayerData()
+	{
+		if (!File.Exists(playerDataPath + "/playerData.sav"))
+			CreatePlayerData();
+		else
+		{
+			//audio is saved when slider value is changed
+			InputManager.Instance.SavePlayerKeybinds();
+
+			BinaryFormatter formatter = new BinaryFormatter();
+			FileStream playerData = File.Open(playerDataPath + "/playerData.sav", FileMode.Create);
+
+			formatter.Serialize(playerData, GameManager.Instance.LocalCopyOfPlayerData);
+			playerData.Close();
+		}
 	}
 	public void LoadPlayerData()
 	{
 		//on start up load file if it exists
 		if (!File.Exists(playerDataPath + "/playerData.sav"))
-			SavePlayerData();
+			CreatePlayerData();
+		else
+		{
+			BinaryFormatter formatter = new BinaryFormatter();
+			FileStream playerData = File.Open(playerDataPath + "/playerData.sav", FileMode.Open);
 
-		BinaryFormatter formatter = new BinaryFormatter();
-		FileStream playerData = File.Open(playerDataPath + "/playerData.sav", FileMode.Open);
+			LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
+			playerData.Close();
 
-		LoadPlayerKeybinds();
-
-		LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
-		playerData.Close();
-	}
-	public void SavePlayerKeybinds()
-	{
-		Instance.LocalCopyOfPlayerData.hotKeyTestOne = Instance.keyBindTestOne;
-		Instance.LocalCopyOfPlayerData.hotKeyTestTwo = Instance.keyBindTestTwo;
-	}
-	public void LoadPlayerKeybinds()
-	{
-		Instance.keyBindTestOne = Instance.LocalCopyOfPlayerData.hotKeyTestOne;
-		Instance.keyBindTestTwo = Instance.LocalCopyOfPlayerData.hotKeyTestTwo;
-	}
-	public void CreatePlayerData()
-	{
-		Directory.CreateDirectory(playerDataPath);
+			AudioManager.Instance.LoadSoundSettings();
+			InputManager.Instance.LoadPlayerKeybinds();
+		}
 	}
 	public void SaveGameData(string filePath)
 	{
