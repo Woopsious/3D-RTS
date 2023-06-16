@@ -51,15 +51,15 @@ public class PlayerController : MonoBehaviour
 	public void PlayerInputManager()
 	{
 		//shop tab hotkeys
-		if (Input.GetKeyDown(KeyCode.B))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopBuildingsName]))
 		{
 			gameUIManager.ShowBuildingShop();
 		}
-		if (Input.GetKeyDown(KeyCode.G))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopLightUnitsName]))
 		{
 			gameUIManager.ShowUnitShopUnarmed();
 		}
-		if (Input.GetKeyDown(KeyCode.U))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopHeavyUnitsName]))
 		{
 			gameUIManager.ShowUnitShopArmed();
 		}
@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour
 			gameUIManager.DecreaseGameSpeed();
 		}
 		//enlarge/shrink Minimap
-		if (Input.GetKeyDown(KeyCode.M))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindMiniMapName]))
 		{
 			gameUIManager.miniMap.ChangeAndUpdateMiniMapSize();
 		}

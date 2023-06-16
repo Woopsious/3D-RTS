@@ -42,6 +42,10 @@ public class MenuUIManager : MonoBehaviour
 		else
 			Destroy(gameObject);
 	}
+	public void Start()
+	{
+		GameManager.Instance.OnSceneLoad(0);
+	}
 	public void PlayButtonSound()
 	{
 		AudioManager.Instance.menuSFX.Play();
@@ -81,6 +85,7 @@ public class MenuUIManager : MonoBehaviour
 	{
 		SettingsObj.SetActive(false);
 		SettingsKeybindsObj.SetActive(true);
+		UpdateKeybindButtonDisplay();
 	}	
 	public void ShowSettingsVolumeButton()
 	{
@@ -92,7 +97,7 @@ public class MenuUIManager : MonoBehaviour
 		SettingsObj.SetActive(true);
 		SettingsVolumeObj.SetActive(false);
 		SettingsKeybindsObj.SetActive(false);
-
+		GameManager.Instance.SavePlayerData();
 	}
 	public void QuitGame()
 	{
@@ -106,20 +111,26 @@ public class MenuUIManager : MonoBehaviour
 		int i = 0;
 		foreach (Transform child in KeybindParentObj.transform)
 		{
-			Debug.Log("index is: " + i);
 			int closureIndex = i;
 			child.GetComponentInChildren<Text>().text = "Keybind for: " + InputManager.Instance.keybindNames[closureIndex];
 
 			GameObject go = Instantiate(keybindButtonPrefab);
 			go.transform.SetParent(child.transform, false);
-			Button btn = go.GetComponent<Button>();
 
-			btn.onClick.AddListener(delegate { KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
-			btn.onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
-
-			KeyCode keyCode = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]];
+			go.GetComponent<Button>().onClick.AddListener(delegate { KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
+			go.GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
 			go.GetComponentInChildren<Text>().text = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
-
+			i++;
+		}
+	}
+	public void UpdateKeybindButtonDisplay()
+	{
+		int i = 0;
+		foreach (Transform child in KeybindParentObj.transform)
+		{
+			Text buttonText = child.GetChild(1).GetComponentInChildren<Text>();
+			KeyCode keyCode = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[i]];
+			buttonText.text = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[i]].ToString();
 			i++;
 		}
 	}
@@ -138,11 +149,12 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void KeyBindsSave()
 	{
-		InputManager.Instance.SavePlayerKeybinds();
+		GameManager.Instance.SavePlayerData();
 	}
 	public void KeyBindsReset()
 	{
 		InputManager.Instance.ResetKeybindsToDefault();
+		UpdateKeybindButtonDisplay();
 	}
 
 	//single player button functions

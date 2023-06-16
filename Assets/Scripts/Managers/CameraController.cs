@@ -40,38 +40,38 @@ public class CameraController : MonoBehaviour
 	}
 	public void MoveCamera()
 	{
-		if (Input.GetKey(KeyCode.W))
+		if (Input.GetKey(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindCameraForwardName]))
 		{
 			transform.position += moveSpeed * Time.unscaledDeltaTime * transform.forward;
 		}
-		if (Input.GetKey(KeyCode.A))
+		if (Input.GetKey(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindCameraLeftName]))
 		{
 			transform.position -= moveSpeed * Time.unscaledDeltaTime * transform.right;
 		}
-		if (Input.GetKey(KeyCode.S))
+		if (Input.GetKey(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindCameraBackwardsName]))
 		{
 			transform.position -= moveSpeed * Time.unscaledDeltaTime * transform.forward;
 		}
-		if (Input.GetKey(KeyCode.D))
+		if (Input.GetKey(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindCameraRightName]))
 		{
 			transform.position += moveSpeed * Time.unscaledDeltaTime * transform.right;
 		}
-		if (Input.GetKey(KeyCode.Space))
+		if (Input.GetKey(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindCameraUpName]))
 		{
 			transform.position += moveSpeed * Time.unscaledDeltaTime * transform.up;
 		}
-		if (Input.GetKey(KeyCode.LeftControl))
+		if (Input.GetKey(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindCameraDownName]))
 		{
 			transform.position -= moveSpeed * Time.unscaledDeltaTime * transform.up;
 		}
 	}
 	public void RotateCamera()
 	{
-		if (Input.GetKey(KeyCode.Q))
+		if (Input.GetKey(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindCameraRotateLeftName]))
 		{
 			transform.eulerAngles -= new Vector3(transform.rotation.x, turnSpeed, transform.rotation.y) * Time.unscaledDeltaTime;
 		}
-		if (Input.GetKey(KeyCode.E))
+		if (Input.GetKey(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindCameraRotateRightName]))
 		{
 			transform.eulerAngles -= new Vector3(transform.rotation.x, -turnSpeed, transform.rotation.y) * Time.unscaledDeltaTime;
 		}

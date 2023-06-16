@@ -11,8 +11,6 @@ public class ErrorManager : MonoBehaviour
 {
 	public static ErrorManager Instance;
 
-	public GameObject fakeNullException;
-
 	public GameObject errorWindowPrefab;
 	public GameObject errorLogMessagePrefab;
 	public GameObject errorLogWindowAndPlayerNotifParent;
@@ -36,27 +34,6 @@ public class ErrorManager : MonoBehaviour
 				CloseErrorLog();
 			else
 				ShowErrorLog();
-		}
-		if (Input.GetKey(KeyCode.LeftShift))
-		{
-			if (Input.GetKeyDown(KeyCode.Alpha1))
-			{
-				Debug.Log("This is a test log");
-			}
-			if (Input.GetKeyDown(KeyCode.Alpha2))
-			{
-				Debug.LogError("This is a test error log");
-			}
-			if (Input.GetKeyDown(KeyCode.Alpha3))
-			{
-				GameManager.Instance.errorManager.MakeFakeNullException();
-			}
-			/*
-			if (Input.GetKeyUp(KeyCode.F1))
-			{
-				OnStartUpHandleLogFiles();
-			}
-			*/
 		}
 	}
 
@@ -233,17 +210,6 @@ public class ErrorManager : MonoBehaviour
 	{
 		lastLogCounterText = counter;
 		lastLogMessage = message;
-	}
-	public void MakeFakeNullException()
-	{
-		try
-		{
-			fakeNullException.transform.position = this.transform.position;
-		}
-		catch (Exception e)
-		{
-			Debug.LogError(e);
-		}
 	}
 
 	//button functions

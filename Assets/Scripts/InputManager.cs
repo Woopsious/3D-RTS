@@ -15,20 +15,19 @@ public class InputManager : MonoBehaviour
     public readonly string keyBindTestOneName = "TestOne";
 	public readonly string keyBindTestTwoName = "TestTwo";
 	public readonly string keyBindTestThreeName = "TestThree";
-	public readonly string keyBindTestFourName = "TestFour";
-	public readonly string keyBindShopBuildingsName;
-	public readonly string keyBindShopLightUnitsName;
-	public readonly string keyBindShopHeavyUnitsName;
-	public readonly string keyBindMiniMapName;
+	public readonly string keyBindShopBuildingsName = "Building Shop";
+	public readonly string keyBindShopLightUnitsName = "Light Unit Shop";
+	public readonly string keyBindShopHeavyUnitsName = "Heavy Unit Shop";
+	public readonly string keyBindMiniMapName = "Minimap";
 
-	public readonly string keyBindCameraForwardName;
-	public readonly string keyBindCameraBackwardsName;
-	public readonly string keyBindCameraLeftName;
-	public readonly string keyBindCameraRightName;
-	public readonly string keyBindCameraUpName;
-	public readonly string keyBindCameraDownName;
-	public readonly string keyBindCameraRotateLeftName;
-	public readonly string keyBindCameraRotateRightName;
+	public readonly string keyBindCameraForwardName = "Camera Forward";
+	public readonly string keyBindCameraBackwardsName = "Camera Backwards";
+	public readonly string keyBindCameraLeftName = "Camera Left";
+	public readonly string keyBindCameraRightName = "Camera Right";
+	public readonly string keyBindCameraUpName = "Camera Up";
+	public readonly string keyBindCameraDownName = "Camera Down";
+	public readonly string keyBindCameraRotateLeftName = "Camera Rotate Left";
+	public readonly string keyBindCameraRotateRightName = "Camera Rotate Right";
 
 	[Header("Dynamic Refs")]
 	public string keyToRebind = "";
@@ -36,16 +35,47 @@ public class InputManager : MonoBehaviour
 
 	public void Awake()
 	{
-		Instance = this;
+		if (Instance == null)
+			Instance = this;
+		else
+			Destroy(gameObject);
 	}
+	public void Update()
+	{
+		CheckForInputWhenRebindingKey();
+	}
+
+	//save load player keybinds
+	public void SavePlayerKeybinds()
+	{
+		GameManager.Instance.LocalCopyOfPlayerData.KeyBindDictionary = InputManager.Instance.keyBindDictionary;
+	}
+	public void LoadPlayerKeybinds()
+	{
+		InputManager.Instance.keyBindDictionary = GameManager.Instance.LocalCopyOfPlayerData.KeyBindDictionary;
+	}
+
+	//KEY REBINDING FUNCTIONS
 	public void SetUpKeybindDictionary()
 	{
-		keybindNames= new List<string> 
+		keybindNames = new List<string>
 		{
-			keyBindTestOneName, 
-			keyBindTestTwoName, 
-			keyBindTestThreeName, 
-		};
+			keyBindTestOneName,
+			keyBindTestTwoName,
+			keyBindTestThreeName,
+			keyBindShopBuildingsName,
+			keyBindShopLightUnitsName,
+			keyBindShopHeavyUnitsName,
+			keyBindMiniMapName,
+			keyBindCameraForwardName,
+			keyBindCameraBackwardsName,
+			keyBindCameraLeftName,
+			keyBindCameraRightName,
+			keyBindCameraUpName,
+			keyBindCameraDownName,
+			keyBindCameraRotateLeftName,
+			keyBindCameraRotateRightName
+};
 
 		ResetKeybindsToDefault();
 	}
@@ -56,32 +86,21 @@ public class InputManager : MonoBehaviour
 			[keyBindTestOneName] = KeyCode.Alpha1,
 			[keyBindTestTwoName] = KeyCode.Alpha2,
 			[keyBindTestThreeName] = KeyCode.Alpha3,
+			[keyBindShopBuildingsName] = KeyCode.B,
+			[keyBindShopLightUnitsName] = KeyCode.G,
+			[keyBindShopHeavyUnitsName] = KeyCode.H,
+			[keyBindMiniMapName] = KeyCode.M,
+			[keyBindCameraForwardName] = KeyCode.W,
+			[keyBindCameraBackwardsName] = KeyCode.S,
+			[keyBindCameraLeftName] = KeyCode.A,
+			[keyBindCameraRightName] = KeyCode.D,
+			[keyBindCameraUpName] = KeyCode.Space,
+			[keyBindCameraDownName] = KeyCode.LeftControl,
+			[keyBindCameraRotateLeftName] = KeyCode.Q,
+			[keyBindCameraRotateRightName] = KeyCode.E
 		};
 	}
-	public void SavePlayerKeybinds()
-	{
-		//GameManager.Instance.LocalCopyOfPlayerData.KeyBindDictionary.Clear();
-		GameManager.Instance.LocalCopyOfPlayerData.KeyBindDictionary = InputManager.Instance.keyBindDictionary;
-		Debug.Log("after overwrite" + GameManager.Instance.LocalCopyOfPlayerData.KeyBindDictionary.Count);
-	}
-	public void LoadPlayerKeybinds()
-	{
-		//InputManager.Instance.keyBindDictionary.Clear();
-		for (int i = 0; i < InputManager.Instance.keyBindDictionary.Count; i++)
-		{
-			Debug.Log(InputManager.Instance.keyBindDictionary.Keys + " : " + InputManager.Instance.keyBindDictionary.Values);
-		}
-
-		InputManager.Instance.keyBindDictionary = GameManager.Instance.LocalCopyOfPlayerData.KeyBindDictionary;
-
-		for (int i = 0; i < InputManager.Instance.keyBindDictionary.Count; i++)
-		{
-			Debug.Log(InputManager.Instance.keyBindDictionary.Keys + " : " + InputManager.Instance.keyBindDictionary.Values);
-		}
-	}
-
-	//KEYBIND FUNCTIONS
-	public void Update()
+	public void CheckForInputWhenRebindingKey()
 	{
 		if (keyToRebind != "" && Input.anyKeyDown)
 		{
@@ -94,7 +113,8 @@ public class InputManager : MonoBehaviour
 	}
 	public void TrySetNewKeybind(string buttonName, int buttonNum, KeyCode key)
 	{
-		//add in check to make sure new keybidn is valid later
+		//add in check to make sure new keybind is valid later
+		CheckIfValidKeybind(key);
 
 		keyBindDictionary[buttonName] = key;
 		MenuUIManager.Instance.UpdateKeybindButtonDisplay(buttonNum, key);
@@ -102,8 +122,17 @@ public class InputManager : MonoBehaviour
 		keyToRebind = "";
 		buttonNumToRebind = -1;
 	}
-	public void CheckIfValidKeybind(char newKeybind)
+	public void CheckIfValidKeybind(KeyCode newKeybind)
 	{
-		//foreach 
+		Boolean keyExists = keyBindDictionary.ContainsValue(newKeybind);
+		if (keyExists)
+		{
+			Debug.Log("key exists");
+		}
+		else
+		{
+			Debug.Log("key doesnt exists");
+		}
+
 	}
 }

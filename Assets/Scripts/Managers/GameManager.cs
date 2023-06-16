@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
@@ -97,21 +98,14 @@ public class GameManager : MonoBehaviour
 		playerDataPath = Application.persistentDataPath;
 		playerGameDataPath = Path.Combine(Application.persistentDataPath, "Saves");
 
-		Instance.errorManager.OnStartUpHandleLogFiles();
-		Instance.errorManager.CheckForErrorMessageObj();
-
+		GameManager.Instance.errorManager.OnStartUpHandleLogFiles();
+		GameManager.Instance.errorManager.CheckForErrorMessageObj();
 		InputManager.Instance.SetUpKeybindDictionary();
-		MenuUIManager.Instance.SetUpKeybindButtonNames();
 
 		GameManager.Instance.LoadPlayerData();
 	}
 	public void Update()
 	{
-		if(SceneManager.GetActiveScene().buildIndex == 1)
-		{
-			GetResourcesPerSecond();
-			GameClock();
-		}
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestOneName]))
 		{
 			Debug.Log(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestOneName]
@@ -250,6 +244,21 @@ public class GameManager : MonoBehaviour
 		{
 			Debug.Log("LoadingNewScene");
 			yield return null;
+		}
+	}
+	public void OnSceneLoad(int sceneIndex)
+	{
+		Debug.Log("scene change done");
+		if (sceneIndex == 0)
+		{
+			Debug.Log("scene index is: " + sceneIndex);
+			GameManager.Instance.errorManager.CheckForErrorMessageObj();
+			MenuUIManager.Instance.SetUpKeybindButtonNames();
+		}
+		else if (sceneIndex == 1)
+		{
+			Debug.Log("scene index is: " + sceneIndex);
+			GameManager.Instance.errorManager.CheckForErrorMessageObj();
 		}
 	}
 }
