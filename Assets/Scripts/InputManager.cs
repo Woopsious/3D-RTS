@@ -19,6 +19,8 @@ public class InputManager : MonoBehaviour
 	public readonly string keyBindShopLightUnitsName = "Light Unit Shop";
 	public readonly string keyBindShopHeavyUnitsName = "Heavy Unit Shop";
 	public readonly string keyBindMiniMapName = "Minimap";
+	public readonly string keyBindUnitProdQueue = "Unit Prod Queue";
+	public readonly string keyBindUnitGroupsList = "Unit Group List";
 
 	public readonly string keyBindCameraForwardName = "Camera Forward";
 	public readonly string keyBindCameraBackwardsName = "Camera Backwards";
@@ -67,6 +69,9 @@ public class InputManager : MonoBehaviour
 			keyBindShopLightUnitsName,
 			keyBindShopHeavyUnitsName,
 			keyBindMiniMapName,
+			keyBindUnitProdQueue,
+			keyBindUnitGroupsList,
+
 			keyBindCameraForwardName,
 			keyBindCameraBackwardsName,
 			keyBindCameraLeftName,
@@ -90,12 +95,15 @@ public class InputManager : MonoBehaviour
 			[keyBindShopLightUnitsName] = KeyCode.G,
 			[keyBindShopHeavyUnitsName] = KeyCode.H,
 			[keyBindMiniMapName] = KeyCode.M,
+			[keyBindUnitProdQueue] = KeyCode.C,
+			[keyBindUnitGroupsList] = KeyCode.V,
+
 			[keyBindCameraForwardName] = KeyCode.W,
 			[keyBindCameraBackwardsName] = KeyCode.S,
 			[keyBindCameraLeftName] = KeyCode.A,
 			[keyBindCameraRightName] = KeyCode.D,
-			[keyBindCameraUpName] = KeyCode.Space,
-			[keyBindCameraDownName] = KeyCode.LeftControl,
+			[keyBindCameraUpName] = KeyCode.R,
+			[keyBindCameraDownName] = KeyCode.C,
 			[keyBindCameraRotateLeftName] = KeyCode.Q,
 			[keyBindCameraRotateRightName] = KeyCode.E
 		};

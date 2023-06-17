@@ -26,6 +26,9 @@ public class ErrorManager : MonoBehaviour
 	public GameObject playerNotifObj;
 	public Text playerNotifText;
 
+	public GameObject fakeNullExceptionOne;
+	public GameObject fakeNullExceptionTwo;
+
 	public void Update()
 	{
 		if (Input.GetKeyUp(KeyCode.BackQuote))
@@ -34,6 +37,17 @@ public class ErrorManager : MonoBehaviour
 				CloseErrorLog();
 			else
 				ShowErrorLog();
+		}
+		if (Input.GetKey(KeyCode.LeftShift))
+		{
+			if (Input.GetKeyDown(KeyCode.Alpha1))
+			{
+				fakeNullExceptionOne.transform.position = new Vector3(0, 0, 0);
+			}
+			if (Input.GetKeyDown(KeyCode.Alpha2))
+			{
+				fakeNullExceptionTwo.transform.position = new Vector3(0, 0, 0);
+			}
 		}
 	}
 

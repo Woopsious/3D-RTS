@@ -44,13 +44,34 @@ public class PlayerController : MonoBehaviour
 	public void Update()
 	{
 		if (SceneManager.GetActiveScene().buildIndex == 1)
-			PlayerInputManager();
+			PlayerInputs();
 
 		IsMouseOverUI();
 	}
-	public void PlayerInputManager()
+	public void PlayerInputs()
 	{
-		//shop tab hotkeys
+		MenuHotkeys();
+		BuyShopItemHotkeys();
+		GameSpeedHotkeys();
+	}
+	public void GameSpeedHotkeys()
+	{
+		if (Input.GetKeyDown(KeyCode.Equals))
+		{
+			gameUIManager.IncreaseGameSpeed();
+		}
+		if (Input.GetKeyDown(KeyCode.Minus))
+		{
+			gameUIManager.DecreaseGameSpeed();
+		}
+		if (Input.GetKeyDown(KeyCode.Space))
+		{
+			gameUIManager.PauseGame();
+		}
+	}
+	//hotkeys for game menu functions
+	public void MenuHotkeys()
+	{
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopBuildingsName]))
 		{
 			gameUIManager.ShowBuildingShop();
@@ -63,37 +84,19 @@ public class PlayerController : MonoBehaviour
 		{
 			gameUIManager.ShowUnitShopArmed();
 		}
-		if (Input.GetKeyDown(KeyCode.C))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindUnitProdQueue]))
+		{
+			gameUIManager.ShowUnitProdQueues();
+		}
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindUnitGroupsList]))
 		{
 			gameUIManager.ShowGroupedUnits();
 		}
-		//hotkeys for items in shop tabs
-		BuyShopItemHotkeys();
-
-		//hotkeys for game speed Change
-		if (Input.GetKeyDown(KeyCode.Equals))
-		{
-			gameUIManager.IncreaseGameSpeed();
-		}
-		if (Input.GetKeyDown(KeyCode.Minus))
-		{
-			gameUIManager.DecreaseGameSpeed();
-		}
-		//enlarge/shrink Minimap
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindMiniMapName]))
 		{
 			gameUIManager.miniMap.ChangeAndUpdateMiniMapSize();
 		}
 	}
-	public bool IsMouseOverUI()
-	{
-		return EventSystem.current.IsPointerOverGameObject();
-	}
-	public bool IsMouseOverMiniMap()
-	{
-		return true;
-	}
-
 	//logic path for quick buying units/buildings
 	public void BuyShopItemHotkeys()
 	{
@@ -168,5 +171,10 @@ public class PlayerController : MonoBehaviour
 				//NOTIFY PLAYER CODE HERE
 			}
 		}
+	}
+
+	public bool IsMouseOverUI()
+	{
+		return EventSystem.current.IsPointerOverGameObject();
 	}
 }

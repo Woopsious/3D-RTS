@@ -20,8 +20,7 @@ public class MenuUIManager : MonoBehaviour
 
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
-	public GameObject keybindButtonPrefab;
-	public List<Button> keybindButtonList;
+	public GameObject keybindPanelPrefab;
 
 	[Header("EasyMode refs")]
 	public Text highscoreEasyOne;
@@ -108,20 +107,33 @@ public class MenuUIManager : MonoBehaviour
 	//FUNCTIONS TO CHANGE KEYBINDS
 	public void SetUpKeybindButtonNames()
 	{
+		for (int i = 0; i < InputManager.Instance.keyBindDictionary.Count - 1; i++)
+		{
+			int closureIndex = i;
+			GameObject keybindPanelObj = Instantiate(keybindPanelPrefab, KeybindParentObj.transform);
+			keybindPanelObj.transform.GetChild(0).GetComponent<Text>().text = "Keybind for: " + InputManager.Instance.keybindNames[closureIndex];
+
+			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate 
+				{ KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
+			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
+			keybindPanelObj.transform.GetChild(1).GetComponentInChildren<Text>().text =
+				InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
+
+		}
+		/*
 		int i = 0;
 		foreach (Transform child in KeybindParentObj.transform)
 		{
 			int closureIndex = i;
-			child.GetComponentInChildren<Text>().text = "Keybind for: " + InputManager.Instance.keybindNames[closureIndex];
+			child.GetChild(0).GetComponent<Text>().text = "Keybind for: " + InputManager.Instance.keybindNames[closureIndex];
 
-			GameObject go = Instantiate(keybindButtonPrefab);
-			go.transform.SetParent(child.transform, false);
-
-			go.GetComponent<Button>().onClick.AddListener(delegate { KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
-			go.GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
-			go.GetComponentInChildren<Text>().text = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
+			child.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
+			child.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
+			child.GetChild(1).GetComponentInChildren<Text>().text = 
+				InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
 			i++;
 		}
+		*/
 	}
 	public void UpdateKeybindButtonDisplay()
 	{

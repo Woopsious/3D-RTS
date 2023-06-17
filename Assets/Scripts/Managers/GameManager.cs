@@ -241,23 +241,17 @@ public class GameManager : MonoBehaviour
 	{
 		var asyncLoadLevel = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Single);
 		while (!asyncLoadLevel.isDone)
-		{
-			Debug.Log("LoadingNewScene");
 			yield return null;
-		}
 	}
 	public void OnSceneLoad(int sceneIndex)
 	{
-		Debug.Log("scene change done");
 		if (sceneIndex == 0)
 		{
-			Debug.Log("scene index is: " + sceneIndex);
 			GameManager.Instance.errorManager.CheckForErrorMessageObj();
 			MenuUIManager.Instance.SetUpKeybindButtonNames();
 		}
 		else if (sceneIndex == 1)
 		{
-			Debug.Log("scene index is: " + sceneIndex);
 			GameManager.Instance.errorManager.CheckForErrorMessageObj();
 		}
 	}

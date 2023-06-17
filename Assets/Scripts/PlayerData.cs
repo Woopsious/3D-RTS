@@ -20,6 +20,8 @@ public class PlayerData
 	public KeyCode hotKeyShopLightUnits;
 	public KeyCode hotKeyShopHeavyUnits;
 	public KeyCode hotKeyMiniMap;
+	public KeyCode hotKeyUnitProdQueue;
+	public KeyCode hotKeyUnitGroupsList;
 
 	public KeyCode hotKeyCameraForward;
 	public KeyCode hotKeyCameraBackwards;

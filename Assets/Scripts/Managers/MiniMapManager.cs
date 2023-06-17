@@ -45,17 +45,11 @@ public class MiniMapManager : MonoBehaviour, IPointerClickHandler
 	}
 	public void OnPointerClick(PointerEventData pointerEventData)
 	{
-		//get clicked point on minimap, convert vector2 result to world vector2
-
 		RectTransformUtility.ScreenPointToLocalPointInRectangle(miniMapRectTransform, pointerEventData.position, null, out Vector2 localPoint);
 
-		//minimap size delta is 320,320 or 770, 770
-		//ratio of terrain size to minimap size is either 1.25 or 3.008
 		Vector2 offset = miniMapRectTransform.sizeDelta / 2;
-
 		localPoint += offset;
 
-		//get ratio
 		Vector2 ratio;
 		ratio = miniMapRectTransform.sizeDelta / terrainSize;
 
