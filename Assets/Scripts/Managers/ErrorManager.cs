@@ -42,12 +42,34 @@ public class ErrorManager : MonoBehaviour
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
-				fakeNullExceptionOne.transform.position = new Vector3(0, 0, 0);
+				GameManager.Instance.errorManager.MakeFakeNullExceptionOne();
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha2))
 			{
-				fakeNullExceptionTwo.transform.position = new Vector3(0, 0, 0);
+				GameManager.Instance.errorManager.MakeFakeNullExceptionTwo();
 			}
+		}
+	}
+	public void MakeFakeNullExceptionOne()
+	{
+		try
+		{
+			fakeNullExceptionOne.transform.position = this.transform.position;
+		}
+		catch (Exception e)
+		{
+			Debug.LogError(e);
+		}
+	}
+	public void MakeFakeNullExceptionTwo()
+	{
+		try
+		{
+			fakeNullExceptionTwo.transform.position = this.transform.position;
+		}
+		catch (Exception e)
+		{
+			Debug.LogError(e);
 		}
 	}
 

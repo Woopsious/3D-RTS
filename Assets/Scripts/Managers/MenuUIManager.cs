@@ -21,6 +21,7 @@ public class MenuUIManager : MonoBehaviour
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
 	public GameObject keybindPanelPrefab;
+	public string keybindDictionaryString;
 
 	[Header("EasyMode refs")]
 	public Text highscoreEasyOne;
@@ -107,7 +108,7 @@ public class MenuUIManager : MonoBehaviour
 	//FUNCTIONS TO CHANGE KEYBINDS
 	public void SetUpKeybindButtonNames()
 	{
-		for (int i = 0; i < InputManager.Instance.keyBindDictionary.Count - 1; i++)
+		for (int i = 0; i < InputManager.Instance.keyBindDictionary.Count; i++)
 		{
 			int closureIndex = i;
 			GameObject keybindPanelObj = Instantiate(keybindPanelPrefab, KeybindParentObj.transform);
@@ -118,7 +119,6 @@ public class MenuUIManager : MonoBehaviour
 			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
 			keybindPanelObj.transform.GetChild(1).GetComponentInChildren<Text>().text =
 				InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
-
 		}
 		/*
 		int i = 0;
@@ -156,6 +156,10 @@ public class MenuUIManager : MonoBehaviour
 		KeybindParentObj.transform.GetChild(buttonNum).GetChild(1).GetComponentInChildren<Text>().text = "Press Key To Rebind";
 	}
 	public void UpdateKeybindButtonDisplay(int buttonNum, KeyCode key)
+	{
+		KeybindParentObj.transform.GetChild(buttonNum).GetChild(1).GetComponentInChildren<Text>().text = key.ToString();
+	}
+	public void CancelKeybindButtonDisplay(int buttonNum, KeyCode key)
 	{
 		KeybindParentObj.transform.GetChild(buttonNum).GetChild(1).GetComponentInChildren<Text>().text = key.ToString();
 	}

@@ -80,7 +80,7 @@ public class InputManager : MonoBehaviour
 			keyBindCameraDownName,
 			keyBindCameraRotateLeftName,
 			keyBindCameraRotateRightName
-};
+		};
 
 		ResetKeybindsToDefault();
 	}
@@ -121,26 +121,31 @@ public class InputManager : MonoBehaviour
 	}
 	public void TrySetNewKeybind(string buttonName, int buttonNum, KeyCode key)
 	{
-		//add in check to make sure new keybind is valid later
-		CheckIfValidKeybind(key);
-
-		keyBindDictionary[buttonName] = key;
-		MenuUIManager.Instance.UpdateKeybindButtonDisplay(buttonNum, key);
-
-		keyToRebind = "";
-		buttonNumToRebind = -1;
-	}
-	public void CheckIfValidKeybind(KeyCode newKeybind)
-	{
-		Boolean keyExists = keyBindDictionary.ContainsValue(newKeybind);
-		if (keyExists)
+		//if key is escape cancel rebinding
+		if (key == KeyCode.Escape)
 		{
-			Debug.Log("key exists");
+			MenuUIManager.Instance.CancelKeybindButtonDisplay(buttonNum, InputManager.Instance.keyBindDictionary[Instance.keybindNames[buttonNum]]);
+			GameManager.Instance.errorManager.DisplayNotificationMessage("key Rebinding Canceled", 1f);
+		}
+		else if (CheckIfValidKeybind(key))
+		{
+			InputManager.Instance.keyBindDictionary[buttonName] = key;
+			MenuUIManager.Instance.UpdateKeybindButtonDisplay(buttonNum, key);
 		}
 		else
 		{
-			Debug.Log("key doesnt exists");
+			MenuUIManager.Instance.CancelKeybindButtonDisplay(buttonNum, InputManager.Instance.keyBindDictionary[Instance.keybindNames[buttonNum]]);
+			GameManager.Instance.errorManager.DisplayNotificationMessage("key already bound", 1f);
 		}
-
+		keyToRebind = "";
+		buttonNumToRebind = -1;
+	}
+	public bool CheckIfValidKeybind(KeyCode newKeybind)
+	{
+		Boolean keyExists = keyBindDictionary.ContainsValue(newKeybind);
+		if (keyExists)
+			return false;
+		else
+			return true;
 	}
 }
