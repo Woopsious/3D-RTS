@@ -52,12 +52,9 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.unitTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && CheckIfInLineOfSight(unit.unitTargetList[i].gameObject)
+			if (CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && unit.CheckIfInLineOfSight(unit.unitTargetList[i].gameObject)
 				&& unit.unitTargetList[i] != null)
-			{
-				unit.unitTargetList[i].GetComponent<UnitStateController>().ShowUnit();
 				return unit.unitTargetList[i];
-			}
 		}
 		return null;
 	}
@@ -67,12 +64,9 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.buildingTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && CheckIfInLineOfSight(unit.buildingTargetList[i].gameObject)
+			if (CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && unit.CheckIfInLineOfSight(unit.buildingTargetList[i].gameObject)
 				&& unit.buildingTargetList[i] != null)
-			{
-				unit.buildingTargetList[i].GetComponent<BuildingManager>().ShowBuilding();
 				return unit.buildingTargetList[i];
-			}
 		}
 		return null;
 	}
@@ -80,12 +74,10 @@ public class WeaponSystem : MonoBehaviour
 	//check if entity exists + is in attack range, if true shoot it, else try get new target and remove null refs from lists
 	public void ShootMainWeapon()
 	{
-		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && CheckIfInLineOfSight(unit.currentUnitTarget.gameObject))
+		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfInLineOfSight(unit.currentUnitTarget.gameObject))
 		{
 			if (unit.hasAnimation)
-			{
 				unit.animatorController.SetBool("isAttacking", true);
-			}
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
@@ -94,12 +86,10 @@ public class WeaponSystem : MonoBehaviour
 			mainWeaponParticles.Play();
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && 
-			CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && CheckIfInLineOfSight(unit.currentBuildingTarget.gameObject))
+			CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && unit.CheckIfInLineOfSight(unit.currentBuildingTarget.gameObject))
 		{
 			if (unit.hasAnimation)
-			{
 				unit.animatorController.SetBool("isAttacking", true);
-			}
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			unit.currentBuildingTarget.RecieveDamage(mainWeaponDamage);
@@ -112,7 +102,6 @@ public class WeaponSystem : MonoBehaviour
 			unit.currentUnitTarget = null;
 			unit.currentBuildingTarget = null;
 			unit.RemoveNullRefsFromLists(unit.targetList, unit.unitTargetList, unit.buildingTargetList);
-
 			TryFindTarget();
 		}
 	}
@@ -164,16 +153,6 @@ public class WeaponSystem : MonoBehaviour
 		float Distance = Vector3.Distance(transform.position, targetVector3);
 
 		if (Distance <= unit.attackRange)
-			return true;
-
-		else
-			return false;
-	}
-	public bool CheckIfInLineOfSight(GameObject targetObj)
-	{
-		Physics.Linecast(unit.CenterPoint.transform.position, targetObj.transform.position, out RaycastHit hit, unit.ignoreMe);
-
-		if (hit.collider.gameObject == targetObj)
 			return true;
 
 		else

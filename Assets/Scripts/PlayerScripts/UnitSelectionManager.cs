@@ -115,50 +115,13 @@ public class UnitSelectionManager : MonoBehaviour
 					if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
 					{
 						if (obj.transform.position.y >= hit.position.y)
-						{
 							obj.GetComponent<Renderer>().material.SetColor("_Color", transparentGreen);
-							//Debug.Log("touching navmesh");
-						}
 					}
 					else
-					{
 						obj.GetComponent<Renderer>().material.SetColor("_Color", transparentRed);
-						//Debug.Log("not touching navmesh");
-					}
 				}
 			}
 		}
-		/*
-		if (IsInNavMeshBounds(obj, navMeshSurface.navMeshData.sourceBounds))
-		{
-			Debug.Log("touching navmesh");
-		}
-		elses
-		{
-			Debug.Log("not touching navmesh");
-		}
-		/*
-		GameObject obj = movePosHighlighterObj[0].gameObject;
-		Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
-
-		Debug.Log("Area Mask: " + navMeshFilter.agentTypeID);
-		NavMesh.Raycast(obj.transform.position, targetPos, out NavMeshHit hit, navMeshFilter.agentTypeID);
-
-		Debug.Log("Object Location: " + obj.transform.position);
-		Debug.Log("Hit Location: " + hit.position);
-
-		if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
-		{
-			if (obj.transform.position.y >= hit.position.y)
-			{
-				Debug.Log("touching navmesh");
-			}
-			else
-			{
-				Debug.Log("not touching navmesh");
-			}
-		}
-		*/
 	}
 	public void RefundSelectedUnits()
 	{

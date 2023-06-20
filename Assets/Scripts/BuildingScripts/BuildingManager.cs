@@ -15,6 +15,7 @@ public class BuildingManager : MonoBehaviour
 	public bool isPlayerOneBuilding;
 	public bool isPowered;
 	public bool isSelected;
+	public bool isSpotted;
 	public bool isLightVehProdBuilding;
 	public bool isHeavyVehProdBuilding;
 	public bool isVTOLProdBuilding;
@@ -135,6 +136,7 @@ public class BuildingManager : MonoBehaviour
 	public void ShowBuilding()
 	{
 		miniMapRenderObj.layer = 13;
+		isSpotted = true;
 	}
 	public void HideBuilding()
 	{
@@ -143,6 +145,8 @@ public class BuildingManager : MonoBehaviour
 
 		else if (!isPlayerOneBuilding)
 			miniMapRenderObj.layer = 12;
+
+		isSpotted = false;
 	}
 	//track buildings refs
 	public void AddBuildingRefs()

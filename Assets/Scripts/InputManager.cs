@@ -12,9 +12,6 @@ public class InputManager : MonoBehaviour
 	public List<string> keybindNames;
 
 	[Header("hotKey Name Refs")]
-    public readonly string keyBindTestOneName = "TestOne";
-	public readonly string keyBindTestTwoName = "TestTwo";
-	public readonly string keyBindTestThreeName = "TestThree";
 	public readonly string keyBindShopBuildingsName = "Building Shop";
 	public readonly string keyBindShopLightUnitsName = "Light Unit Shop";
 	public readonly string keyBindShopHeavyUnitsName = "Heavy Unit Shop";
@@ -62,9 +59,6 @@ public class InputManager : MonoBehaviour
 	{
 		keybindNames = new List<string>
 		{
-			keyBindTestOneName,
-			keyBindTestTwoName,
-			keyBindTestThreeName,
 			keyBindShopBuildingsName,
 			keyBindShopLightUnitsName,
 			keyBindShopHeavyUnitsName,
@@ -88,9 +82,6 @@ public class InputManager : MonoBehaviour
 	{
 		keyBindDictionary = new Dictionary<string, KeyCode>
 		{
-			[keyBindTestOneName] = KeyCode.Alpha1,
-			[keyBindTestTwoName] = KeyCode.Alpha2,
-			[keyBindTestThreeName] = KeyCode.Alpha3,
 			[keyBindShopBuildingsName] = KeyCode.B,
 			[keyBindShopLightUnitsName] = KeyCode.G,
 			[keyBindShopHeavyUnitsName] = KeyCode.H,

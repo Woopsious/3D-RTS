@@ -12,25 +12,6 @@ public class PlayerData
 	public float menuSFXVolumeData;
 	public float gameSFXVolumeData;
 	public Dictionary<string, KeyCode> KeyBindDictionary;
-
-	public KeyCode hotKeyTestOne;
-	public KeyCode hotKeyTestTwo;
-	public KeyCode hotKeyTestThree;
-	public KeyCode hotKeyShopBuildings;
-	public KeyCode hotKeyShopLightUnits;
-	public KeyCode hotKeyShopHeavyUnits;
-	public KeyCode hotKeyMiniMap;
-	public KeyCode hotKeyUnitProdQueue;
-	public KeyCode hotKeyUnitGroupsList;
-
-	public KeyCode hotKeyCameraForward;
-	public KeyCode hotKeyCameraBackwards;
-	public KeyCode hotKeyCameraLeft;
-	public KeyCode hotKeyCameraRight;
-	public KeyCode hotKeyCameraUp;
-	public KeyCode hotKeyCameraDown;
-	public KeyCode hotKeyCameraRotateLeft;
-	public KeyCode hotKeyCameraRotateRight;
 }
 
 [System.Serializable]

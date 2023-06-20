@@ -120,20 +120,6 @@ public class MenuUIManager : MonoBehaviour
 			keybindPanelObj.transform.GetChild(1).GetComponentInChildren<Text>().text =
 				InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
 		}
-		/*
-		int i = 0;
-		foreach (Transform child in KeybindParentObj.transform)
-		{
-			int closureIndex = i;
-			child.GetChild(0).GetComponent<Text>().text = "Keybind for: " + InputManager.Instance.keybindNames[closureIndex];
-
-			child.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
-			child.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
-			child.GetChild(1).GetComponentInChildren<Text>().text = 
-				InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
-			i++;
-		}
-		*/
 	}
 	public void UpdateKeybindButtonDisplay()
 	{

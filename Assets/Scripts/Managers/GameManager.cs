@@ -104,24 +104,6 @@ public class GameManager : MonoBehaviour
 
 		GameManager.Instance.LoadPlayerData();
 	}
-	public void Update()
-	{
-		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestOneName]))
-		{
-			Debug.Log(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestOneName]
-				+ " key was Pressed | default key is 1");
-		}
-		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestTwoName]))
-		{
-			Debug.Log(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestTwoName]
-				+ " key was Pressed | default key is 2");
-		}
-		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestThreeName]))
-		{
-			Debug.Log(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTestThreeName]
-				+ " key was Pressed | default key is 3");
-		}
-	}
 	public void GetResourcesPerSecond()
 	{
 		timer += Time.deltaTime;
@@ -247,12 +229,12 @@ public class GameManager : MonoBehaviour
 	{
 		if (sceneIndex == 0)
 		{
-			GameManager.Instance.errorManager.CheckForErrorMessageObj();
 			MenuUIManager.Instance.SetUpKeybindButtonNames();
 		}
 		else if (sceneIndex == 1)
 		{
-			GameManager.Instance.errorManager.CheckForErrorMessageObj();
+
 		}
+		GameManager.Instance.errorManager.CheckForErrorMessageObj();
 	}
 }

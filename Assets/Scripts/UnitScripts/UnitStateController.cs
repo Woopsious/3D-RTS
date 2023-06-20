@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
@@ -133,6 +135,8 @@ public class UnitStateController : MonoBehaviour
 			if (!buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 				targetList.Add(triggerObj);
 		}
+		if (targetList.Count == 1)
+			StartCoroutine(TrySpotTargetsNotSpotted());
 	}
 	public void RemoveTargetsOnFOVExit(GameObject triggerObj)
 	{
@@ -153,6 +157,59 @@ public class UnitStateController : MonoBehaviour
 
 		if (buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 			buildingTargetList.Remove(triggerObj.GetComponent<BuildingManager>());
+	}
+	public bool CheckIfInLineOfSight(GameObject targetObj)
+	{
+		Physics.Linecast(CenterPoint.transform.position, targetObj.transform.position, out RaycastHit hit, ignoreMe);
+
+		Debug.DrawLine(CenterPoint.transform.position, hit.point);
+
+		if (hit.collider.gameObject == targetObj)
+			return true;
+
+		else
+			return false;
+	}
+	public IEnumerator TrySpotTargetsNotSpotted()
+	{
+		try
+		{
+			for (int i = 0; i < targetList.Count; i++)
+			{
+				if (targetList[i].GetComponent<UnitStateController>() != null)
+				{
+					if (!targetList[i].GetComponent<UnitStateController>().isSpotted && CheckIfInLineOfSight(targetList[i]))
+					{
+						GameManager.Instance.errorManager.DisplayNotificationMessage("Enemy Unit Spotted", 1f);
+						targetList[i].GetComponent<UnitStateController>().ShowUnit();
+					}
+
+					else if (targetList[i].GetComponent<UnitStateController>().isSpotted && !CheckIfInLineOfSight(targetList[i]))
+						targetList[i].GetComponent<UnitStateController>().HideUnit();
+				}
+				else if (targetList[i].GetComponent<BuildingManager>() != null)
+				{
+					if (!targetList[i].GetComponent<BuildingManager>().isSpotted && CheckIfInLineOfSight(targetList[i]))
+					{
+						GameManager.Instance.errorManager.DisplayNotificationMessage("Enemy Building Spotted", 1f);
+						targetList[i].GetComponent<BuildingManager>().ShowBuilding();
+					}
+
+					else if (targetList[i].GetComponent<BuildingManager>().isSpotted && !CheckIfInLineOfSight(targetList[i]))
+						targetList[i].GetComponent<BuildingManager>().HideBuilding();
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			throw e; //error pops up when a target is removed from the list, dont know how to fix
+			//should be fine to leave as null refs from lists get removed after target is destroyed
+		}
+
+		yield return new WaitForSeconds(1);
+
+		if (targetList.Count != 0)
+			StartCoroutine(TrySpotTargetsNotSpotted());
 	}
 
 	//HEALTH FUNCTIONS
@@ -273,7 +330,7 @@ public class UnitStateController : MonoBehaviour
 	public void ShowUnit()
 	{
 		miniMapRenderObj.layer = 13;
-		//notifiy enemy player when enemy unit is spotted
+		isSpotted = true;
 	}
 	public void HideUnit()
 	{
@@ -282,7 +339,8 @@ public class UnitStateController : MonoBehaviour
 
 		else if (!isPlayerOneUnit)
 			miniMapRenderObj.layer = 12;
-		//notifiy enemy player when enemy unit is unspotted
+
+		isSpotted = false;
 	}
 	public void OnDrawGizmosSelected()
 	{
