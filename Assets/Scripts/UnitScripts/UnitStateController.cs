@@ -126,14 +126,20 @@ public class UnitStateController : MonoBehaviour
 	{
 		if (triggerObj.GetComponent<UnitStateController>() != null && isPlayerOneUnit != triggerObj.GetComponent<UnitStateController>().isPlayerOneUnit)
 		{
+			Debug.Log("unit entity Spotted");
 			if (!unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
 				targetList.Add(triggerObj);
 		}
 		else if (triggerObj.GetComponent<BuildingManager>() != null && isPlayerOneUnit != triggerObj.GetComponent<BuildingManager>().isPlayerOneBuilding
 			&& triggerObj.GetComponent<CanPlaceBuilding>().isPlaced)    //filter out non placed buildings
 		{
+			Debug.Log("building entity Spotted");
 			if (!buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 				targetList.Add(triggerObj);
+		}
+		else
+		{
+			Debug.Log("no conditions met");
 		}
 		if (targetList.Count == 1)
 			StartCoroutine(TrySpotTargetsNotSpotted());

@@ -17,11 +17,10 @@ public class CanPlaceBuilding : MonoBehaviour
 
 	public void Start()
 	{
-		if (gameObject.layer == 2)
-		{
+		if (!building.isHQ)
 			highlighterObj.SetActive(true);
-			CanPlaceHighliterRed();
-		}
+		CanPlaceHighliterRed();
+
 		if (building.isPlayerOneBuilding)
 			building.miniMapRenderObj.layer = 11;
 

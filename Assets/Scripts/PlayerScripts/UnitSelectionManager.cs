@@ -151,7 +151,7 @@ public class UnitSelectionManager : MonoBehaviour
 		{
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-			if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe))
+			if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe))
 			{
 				movePosHighlighterParentObj.transform.position = hitInfo.point;
 				//not working properly
@@ -187,7 +187,7 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-		if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe) && !playerController.IsMouseOverUI())
+		if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe) && !playerController.IsMouseOverUI())
 		{
 			if (hitInfo.collider.gameObject.GetComponent<CargoShipController>() != null)
 				TrySelectCargoShip(hitInfo.collider.gameObject.GetComponent<CargoShipController>());

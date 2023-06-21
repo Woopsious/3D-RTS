@@ -16,6 +16,7 @@ public class BuildingManager : MonoBehaviour
 	public bool isPowered;
 	public bool isSelected;
 	public bool isSpotted;
+	public bool isHQ;
 	public bool isLightVehProdBuilding;
 	public bool isHeavyVehProdBuilding;
 	public bool isVTOLProdBuilding;

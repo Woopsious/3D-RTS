@@ -60,7 +60,7 @@ public class BuildingPlacementManager : MonoBehaviour
 
 		if (currentBuildingPlacement != null)
 		{
-			if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe))
+			if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe))
 			{
 				currentBuildingPlacement.transform.position = hitInfo.point;
 				float mouseWheelRotation = Input.mouseScrollDelta.y;
@@ -78,7 +78,6 @@ public class BuildingPlacementManager : MonoBehaviour
 
 			if(currentBuildingPlacement.isRefineryBuilding)
 				currentBuildingPlacement.GetComponent<RefineryController>().CheckCargoShipsCount();
-
 			if(currentBuildingPlacement.isVTOLProdBuilding)
 				currentBuildingPlacement.GetComponent<SphereCollider>().isTrigger = true;
 			else
@@ -88,8 +87,10 @@ public class BuildingPlacementManager : MonoBehaviour
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().isPlaced = true;
+
 			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
 			currentBuildingPlacement.AddBuildingRefs();
+
 			if (currentBuildingPlacement.isGeneratorBuilding)
 				currentBuildingPlacement.GetComponent<EnergyGenController>().StartPower();
 			currentBuildingPlacement = null;
@@ -144,7 +145,7 @@ public class BuildingPlacementManager : MonoBehaviour
 				GameManager.Instance.errorManager.DisplayNotificationMessage("Cant Afford buildings", 2);
 		}
 		else
-			GameManager.Instance.errorManager.DisplayNotificationMessage("A building is already beaing placed", 2);
+			GameManager.Instance.errorManager.DisplayNotificationMessage("A building is already being placed", 2);
 	}
 	public void BuildingCost(int moneyCost, int alloyCost, int crystalCost)
 	{
