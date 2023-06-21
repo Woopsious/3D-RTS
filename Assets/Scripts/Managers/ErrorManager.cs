@@ -26,9 +26,6 @@ public class ErrorManager : MonoBehaviour
 	public GameObject playerNotifObj;
 	public Text playerNotifText;
 
-	public GameObject fakeNullExceptionOne;
-	public GameObject fakeNullExceptionTwo;
-
 	public void Update()
 	{
 		if (Input.GetKeyUp(KeyCode.BackQuote))
@@ -37,39 +34,6 @@ public class ErrorManager : MonoBehaviour
 				CloseErrorLog();
 			else
 				ShowErrorLog();
-		}
-		if (Input.GetKey(KeyCode.LeftShift))
-		{
-			if (Input.GetKeyDown(KeyCode.Alpha1))
-			{
-				GameManager.Instance.errorManager.MakeFakeNullExceptionOne();
-			}
-			if (Input.GetKeyDown(KeyCode.Alpha2))
-			{
-				GameManager.Instance.errorManager.MakeFakeNullExceptionTwo();
-			}
-		}
-	}
-	public void MakeFakeNullExceptionOne()
-	{
-		try
-		{
-			fakeNullExceptionOne.transform.position = this.transform.position;
-		}
-		catch (Exception e)
-		{
-			Debug.LogError(e);
-		}
-	}
-	public void MakeFakeNullExceptionTwo()
-	{
-		try
-		{
-			fakeNullExceptionTwo.transform.position = this.transform.position;
-		}
-		catch (Exception e)
-		{
-			Debug.LogError(e);
 		}
 	}
 

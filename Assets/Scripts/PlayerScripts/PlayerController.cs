@@ -72,6 +72,13 @@ public class PlayerController : MonoBehaviour
 	//hotkeys for game menu functions
 	public void MenuHotkeys()
 	{
+		if (Input.GetKeyDown(KeyCode.Escape))
+		{
+			if (gameUIManager.settingsObj.activeInHierarchy)
+				gameUIManager.CloseSettings();
+			else
+				gameUIManager.OpenSettings();
+		}
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopBuildingsName]))
 		{
 			gameUIManager.ShowBuildingShop();

@@ -233,7 +233,8 @@ public class GameManager : MonoBehaviour
 		}
 		else if (sceneIndex == 1)
 		{
-
+			gameUIManager.ResetUi();
+			gameUIManager.ResetUnitGroupUI();
 		}
 		GameManager.Instance.errorManager.CheckForErrorMessageObj();
 	}

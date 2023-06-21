@@ -495,53 +495,58 @@ public class UnitSelectionManager : MonoBehaviour
 	//reset ui list count, recount units in group to update ui
 	public void AssignUnitsToGroupOne()
 	{
-		playerController.gameUIManager.ResetGroupUI();
+		playerController.gameUIManager.ResetUnitGroupUI();
 		CheckForUnitInList(unitGroupOne, 1);
 		CheckForUnitInList(unitGroupTwo, 2);
 		CheckForUnitInList(unitGroupThree, 3);
 		CheckForUnitInList(unitGroupFour, 4);
 		CheckForUnitInList(unitGroupFive, 5);
 		AddSelectedUnitsToNewGroup(unitGroupOne, 1);
+		playerController.gameUIManager.ShowGroupedUnitsWhenCreatingGroup();
 	}
 	public void AssignUnitsToGroupTwo()
 	{
-		playerController.gameUIManager.ResetGroupUI();
+		playerController.gameUIManager.ResetUnitGroupUI();
 		CheckForUnitInList(unitGroupOne, 1);
 		CheckForUnitInList(unitGroupTwo, 2);
 		CheckForUnitInList(unitGroupThree, 3);
 		CheckForUnitInList(unitGroupFour, 4);
 		CheckForUnitInList(unitGroupFive, 5);
 		AddSelectedUnitsToNewGroup(unitGroupTwo, 2);
+		playerController.gameUIManager.ShowGroupedUnitsWhenCreatingGroup();
 	}
 	public void AssignUnitsToGroupThree()
 	{
-		playerController.gameUIManager.ResetGroupUI();
+		playerController.gameUIManager.ResetUnitGroupUI();
 		CheckForUnitInList(unitGroupOne, 1);
 		CheckForUnitInList(unitGroupTwo, 2);
 		CheckForUnitInList(unitGroupThree, 3);
 		CheckForUnitInList(unitGroupFour, 4);
 		CheckForUnitInList(unitGroupFive, 5);
 		AddSelectedUnitsToNewGroup(unitGroupThree, 3);
+		playerController.gameUIManager.ShowGroupedUnitsWhenCreatingGroup();
 	}
 	public void AssignUnitsToGroupFour()
 	{
-		playerController.gameUIManager.ResetGroupUI();
+		playerController.gameUIManager.ResetUnitGroupUI();
 		CheckForUnitInList(unitGroupOne, 1);
 		CheckForUnitInList(unitGroupTwo, 2);
 		CheckForUnitInList(unitGroupThree, 3);
 		CheckForUnitInList(unitGroupFour, 4);
 		CheckForUnitInList(unitGroupFive, 5);
 		AddSelectedUnitsToNewGroup(unitGroupFour, 4);
+		playerController.gameUIManager.ShowGroupedUnitsWhenCreatingGroup();
 	}
 	public void AssignUnitsToGroupFive()
 	{
-		playerController.gameUIManager.ResetGroupUI();
+		playerController.gameUIManager.ResetUnitGroupUI();
 		CheckForUnitInList(unitGroupOne, 1);
 		CheckForUnitInList(unitGroupTwo, 2);
 		CheckForUnitInList(unitGroupThree, 3);
 		CheckForUnitInList(unitGroupFour, 4);
 		CheckForUnitInList(unitGroupFive, 5);
 		AddSelectedUnitsToNewGroup(unitGroupFive, 5);
+		playerController.gameUIManager.ShowGroupedUnitsWhenCreatingGroup();
 	}
 	//checks group for unit, if unit in group remove unit from group, then add unit to new group, update ui for changes 
 	public void CheckForUnitInList(List<UnitStateController> unitGroup, int groupToUpdate)
@@ -564,7 +569,7 @@ public class UnitSelectionManager : MonoBehaviour
 				}
 			}
 		}
-		playerController.gameUIManager.UpdateGroupUi(unitGroup, groupToUpdate);
+		playerController.gameUIManager.UpdateUnitGroupUi(unitGroup, groupToUpdate);
 	}
 	public void AddSelectedUnitsToNewGroup(List<UnitStateController> unitGroup, int groupToUpdate)
 	{
@@ -575,6 +580,7 @@ public class UnitSelectionManager : MonoBehaviour
 				selectedUnitList[i].selectedHighlighter.SetActive(true);
 				selectedUnitList[i].isSelected = true;
 				unitGroup.Add(selectedUnitList[i]);
+				Debug.Log("unit added: " + i);
 			}
 		}
 		else if (selectedUnitList.Count >= maxUnitGroupSize)
@@ -584,13 +590,14 @@ public class UnitSelectionManager : MonoBehaviour
 				selectedUnitList[i].selectedHighlighter.SetActive(true);
 				selectedUnitList[i].isSelected = true;
 				unitGroup.Add(selectedUnitList[i]);
+				Debug.Log("unit added: " + i);
 			}
 		}
 		foreach (UnitStateController unit in unitGroup)
 		{
 			unit.GroupNum = groupToUpdate;
 		}
-		playerController.gameUIManager.UpdateGroupUi(unitGroup, groupToUpdate);
+		playerController.gameUIManager.UpdateUnitGroupUi(unitGroup, groupToUpdate);
 	}
 	//if no units selected then select all units in group
 	public void SelectUnitsFromGroup(List<UnitStateController> unitGroup)
@@ -617,14 +624,6 @@ public class UnitSelectionManager : MonoBehaviour
 			return true;
 		else return false;
 	}
-	/*
-	public bool CargoShipExists(UnitStateController unit)
-	{
-		if (unit != null)
-			return true;
-		else return false;
-	}
-	*/
 	public bool CheckForCargoShip(UnitStateController unit)
 	{
 		if (unit.isCargoShip)

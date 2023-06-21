@@ -301,27 +301,27 @@ public class UnitStateController : MonoBehaviour
 		if (GroupNum == 1)
 		{
 			playerController.unitSelectionManager.unitGroupOne.Remove(this);
-			playerController.gameUIManager.UpdateGroupUi(playerController.unitSelectionManager.unitGroupOne, 1);
+			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupOne, 1);
 		}
 		if (GroupNum == 2)
 		{
 			playerController.unitSelectionManager.unitGroupTwo.Remove(this);
-			playerController.gameUIManager.UpdateGroupUi(playerController.unitSelectionManager.unitGroupTwo, 2);
+			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupTwo, 2);
 		}
 		if (GroupNum == 3)
 		{
 			playerController.unitSelectionManager.unitGroupThree.Remove(this);
-			playerController.gameUIManager.UpdateGroupUi(playerController.unitSelectionManager.unitGroupThree, 3);
+			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupThree, 3);
 		}
 		if (GroupNum == 4)
 		{
 			playerController.unitSelectionManager.unitGroupFour.Remove(this);
-			playerController.gameUIManager.UpdateGroupUi(playerController.unitSelectionManager.unitGroupFour, 4);
+			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFour, 4);
 		}
 		if (GroupNum == 5)
 		{
 			playerController.unitSelectionManager.unitGroupFive.Remove(this);
-			playerController.gameUIManager.UpdateGroupUi(playerController.unitSelectionManager.unitGroupFive, 5);
+			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFive, 5);
 		}
 
 		playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);

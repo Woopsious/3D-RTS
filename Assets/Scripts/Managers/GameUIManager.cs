@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -75,7 +76,6 @@ public class GameUIManager : MonoBehaviour
 	{
 		GameManager.Instance.OnSceneLoad(1);
 		GameManager.Instance.LoadPlayerData();
-		ResetUi();
 	}
 	public void Update()
 	{
@@ -151,6 +151,14 @@ public class GameUIManager : MonoBehaviour
 		else if (unitGroupsObj.transform.position != new Vector3(0, 575, 0))
 			unitGroupsObj.transform.position = new Vector3(0, 575, 0);
 	}
+	public void ShowGroupedUnitsWhenCreatingGroup()
+	{
+		if (unitProdQueuesObj.transform.position == new Vector3(0, 575, 0))
+			unitProdQueuesObj.transform.position = new Vector3(-500, 575, 0);
+
+		if (unitGroupsObj.transform.position == new Vector3(-500, 575, 0))
+			unitGroupsObj.transform.position = new Vector3(0, 575, 0);
+	}
 	public void ShowUnitProdQueues()
 	{
 		if (unitGroupsObj.transform.position == new Vector3(0, 575, 0))
@@ -205,7 +213,7 @@ public class GameUIManager : MonoBehaviour
 			IncomeCrystalsText.text = aiCrystalsPerSecond.ToString() + "s";
 		}
 	}
-	public void UpdateGroupUi(List<UnitStateController> unitGroup, int groupToUpdate)
+	public void UpdateUnitGroupUi(List<UnitStateController> unitGroup, int groupToUpdate)
 	{
 		int heavyMechCount = 0;
 		int lightMechCount = 0;
@@ -215,20 +223,21 @@ public class GameUIManager : MonoBehaviour
 
 		foreach (UnitStateController unit in unitGroup)
 		{
-			if (unit.moneyCost == 800)
-				heavyMechCount++;
-			else if (unit.moneyCost == 400)
-				lightMechCount++;
-			else if (unit.moneyCost == 700)
-				vtolCount++;
-			else if (unit.moneyCost == 600)
-				radarVehicleCount++;
-			else if (unit.moneyCost == 200)
+			if (unit.moneyCost == GameManager.Instance.unitScoutVehiclePlayerOne.GetComponent<UnitStateController>().moneyCost)
 				scoutVehicleCount++;
+			else if (unit.moneyCost == GameManager.Instance.unitRadarVehiclePlayerOne.GetComponent<UnitStateController>().moneyCost)
+				radarVehicleCount++;
+			else if (unit.moneyCost == GameManager.Instance.unitLightMechPlayerOne.GetComponent<UnitStateController>().moneyCost)
+				lightMechCount++;
+			else if (unit.moneyCost == GameManager.Instance.unitHeavyMechKnightPlayerOne.GetComponent<UnitStateController>().moneyCost || 
+				unit.moneyCost == GameManager.Instance.unitHeavyMechTankPlayerOne.GetComponent<UnitStateController>().moneyCost)
+				heavyMechCount++;
+			else if (unit.moneyCost == GameManager.Instance.unitVTOLPlayerOne.GetComponent<UnitStateController>().moneyCost)
+				vtolCount++;
 		}
 
-		string info = heavyMechCount.ToString() + "x Heavy Mech\n" + lightMechCount.ToString() + "x Light Mech\n" + vtolCount.ToString() + "x VTOL\n"
-			+ radarVehicleCount.ToString() + "x Radar Vehicle\n" + scoutVehicleCount.ToString() + "x Scout Vehicle";
+		string info = lightMechCount + "x Light Mech\n" + heavyMechCount + "x Heavy Mech\n" + vtolCount + "x VTOL\n"
+			+ radarVehicleCount + "x Radar Vehicle\n" + scoutVehicleCount + "x Scout Vehicle";
 
 		if (groupToUpdate == 1)
 			groupOneInfoUI.text = info;
@@ -241,13 +250,15 @@ public class GameUIManager : MonoBehaviour
 		else if (groupToUpdate == 5)
 			groupFiveInfoUI.text = info;
 	}
-	public void ResetGroupUI()
+	public void ResetUnitGroupUI()
 	{
-		groupOneInfoUI.text = string.Empty;
-		groupTwoInfoUI.text = string.Empty;
-		groupThreeInfoUI.text = string.Empty;
-		groupFourtInfoUI.text = string.Empty;
-		groupFiveInfoUI.text = string.Empty;
+		string info = 0 + "x Heavy Mech\n" + 0 + "x Light Mech\n" + 0 + "x VTOL\n" + 0 + "x Radar Vehicle\n" + 0 + "x Scout Vehicle";
+
+		groupOneInfoUI.text = info;
+		groupTwoInfoUI.text = info;
+		groupThreeInfoUI.text = info;
+		groupFourtInfoUI.text = info;
+		groupFiveInfoUI.text = info;
 	}
 
 	//game speed and pause functions
