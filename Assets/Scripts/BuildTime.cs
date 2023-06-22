@@ -53,7 +53,7 @@ public class BuildTime : MonoBehaviour
 
 		foreach (VehProdSpawnLocation possibleBuilding in allVehProdbuildings)
 		{
-			if (isPlayerOne == possibleBuilding.building.isPlayerOneBuilding && possibleBuilding.building.isPowered)
+			if (isPlayerOne == possibleBuilding.building.isPlayerOneEntity && possibleBuilding.building.isPowered)
 			{
 				if (possibleBuilding.building.isLightVehProdBuilding && listNumRef == 1)
 					correctProdBuildings.Add(possibleBuilding);

@@ -126,7 +126,7 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		for (int i = selectedUnitList.Count- 1; i >= 0;i--)
 		{
-			selectedUnitList[i].RefundUnit();
+			selectedUnitList[i].RefundEntity();
 		}
 		foreach (GameObject obj in movePosHighlighterObj)
 		{
@@ -216,13 +216,13 @@ public class UnitSelectionManager : MonoBehaviour
 		DeselectBuilding();
 		DeselectCargoShip();
 
-		if(unit.isPlayerOneUnit != !playerController.isPlayerOne)
+		if(unit.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
 			//reselect new unit
 			if (!Input.GetKey(KeyCode.LeftShift))
 			{
 				DeselectUnits();
-				unit.unitUiObj.SetActive(true);
+				unit.UiObj.SetActive(true);
 				unit.selectedHighlighter.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
@@ -234,7 +234,7 @@ public class UnitSelectionManager : MonoBehaviour
 				{
 					if (UnitAlreadyInList(selectedUnit, unit))
 					{
-						selectedUnit.unitUiObj.SetActive(false);
+						selectedUnit.UiObj.SetActive(false);
 						selectedUnit.selectedHighlighter.SetActive(false);
 						selectedUnit.isSelected = false;
 						selectedUnitList.Remove(selectedUnit);
@@ -245,7 +245,7 @@ public class UnitSelectionManager : MonoBehaviour
 							obj.SetActive(false);
 					}
 				}
-				unit.unitUiObj.SetActive(true);
+				unit.UiObj.SetActive(true);
 				unit.selectedHighlighter.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
@@ -255,19 +255,20 @@ public class UnitSelectionManager : MonoBehaviour
 	}
 	public void TrySelectBuilding(BuildingManager building)
 	{
-		if (BuildingExists(building) && building.isPlayerOneBuilding != !playerController.isPlayerOne)
+		if (BuildingExists(building) && building.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
 			DeselectBuilding();
 			DeselectUnits();
 			DeselectCargoShip();
 			selectedBuilding = building;
+			selectedBuilding.UiObj.SetActive(true);
 			selectedBuilding.selectedHighlighter.SetActive(true);
 			selectedBuilding.isSelected = true;
 		}
 	}
 	public void TrySelectCargoShip(CargoShipController cargoShip)
 	{
-		if (CheckForCargoShip(cargoShip) && cargoShip.isPlayerOneUnit != !playerController.isPlayerOne)
+		if (CheckForCargoShip(cargoShip) && cargoShip.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
 			DeselectBuilding();
 			DeselectUnits();
@@ -297,7 +298,7 @@ public class UnitSelectionManager : MonoBehaviour
 			MoveUnitsInFormation();
 		}
 		//move selected units closer to target and attack it
-		else if (selectedUnitList.Count != 0 && Obj.GetComponent<UnitStateController>().isPlayerOneUnit != playerController.isPlayerOne)
+		else if (selectedUnitList.Count != 0 && Obj.GetComponent<UnitStateController>().isPlayerOneEntity != playerController.isPlayerOne)
 		{
 			Debug.Log("FINAL CODE NOT IMPLAMENTED TO ATTACK SELECTED ENEMY UNIT");
 			MoveUnitsInFormation();
@@ -374,9 +375,9 @@ public class UnitSelectionManager : MonoBehaviour
 		foreach (UnitStateController unit in playerController.unitListForPlayer)
 		{
 			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf && 
-				unitCount < 8 && !unit.isPlayerOneUnit != playerController.isPlayerOne)
+				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne)
 			{
-				unit.unitUiObj.SetActive(true);
+				unit.UiObj.SetActive(true);
 				unit.selectedHighlighter.SetActive(true);
 				unit.isSelected = true;
 				dragSelectedUnitList.Add(unit);
@@ -384,7 +385,7 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 			else if (!UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && unit.selectedHighlighter.activeSelf)
 			{
-				unit.unitUiObj.SetActive(false);
+				unit.UiObj.SetActive(false);
 				unit.selectedHighlighter.SetActive(false);
 				unit.isSelected = false;
 				dragSelectedUnitList.Remove(unit);
@@ -397,7 +398,7 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{
-			if(!CheckForCargoShip(unit) && unit.isPlayerOneUnit != !playerController.isPlayerOne)
+			if(!CheckForCargoShip(unit) && unit.isPlayerOneEntity != !playerController.isPlayerOne)
 				selectedUnitList.Add(unit);
 		}
 		dragSelectedUnitList.Clear();
@@ -415,7 +416,7 @@ public class UnitSelectionManager : MonoBehaviour
 			SetUnitRefundButtonActiveUnactive();
 			foreach (UnitStateController selectedUnit in selectedUnitList)
 			{
-				selectedUnit.unitUiObj.SetActive(false);
+				selectedUnit.UiObj.SetActive(false);
 				selectedUnit.selectedHighlighter.SetActive(false);
 				selectedUnit.isSelected = false;
 			}
@@ -432,6 +433,7 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		if (selectedBuilding != null)
 		{
+			selectedBuilding.UiObj.SetActive(false);
 			selectedBuilding.selectedHighlighter.SetActive(false);
 			selectedBuilding.isSelected = false;
 			selectedBuilding = null;

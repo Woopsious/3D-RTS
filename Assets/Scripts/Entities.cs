@@ -8,13 +8,12 @@ public class Entities : MonoBehaviour
 {
 	[Header("Entity Refs")]
 	public PlayerController playerController;
-
+	public List<AudioSource> audioSFXs = new List<AudioSource>();
 	public GameObject UiObj;
 	public UnityEngine.UI.Slider HealthSlider;
 	public Text HealthText;
-
 	public GameObject CenterPoint;
-	public GameObject unitDeathObj;
+	public GameObject DeathObj;
 	public GameObject selectedHighlighter;
 	public GameObject miniMapRenderObj;
 
@@ -26,7 +25,140 @@ public class Entities : MonoBehaviour
 	public int currentHealth;
 	public int armour;
 
+	public float spottedCooldown;
+	private float spottedTimer;
+	public float hitCooldown;
+	private float hitTimer;
+
 	[Header("Entity Bools")]
+	public bool isPlayerOneEntity;
+	public bool wasRecentlyHit;
 	public bool isSelected;
 	public bool isSpotted;
+
+	public virtual void Start()
+	{
+		spottedTimer = spottedCooldown;
+		hitTimer = hitCooldown;
+		UpdateEntityAudioVolume();
+
+		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
+		UiObj.SetActive(false);
+		UpdateHealthBar();
+		UiObj.transform.rotation = Quaternion.identity;
+
+		if (isPlayerOneEntity)
+			miniMapRenderObj.layer = 11;
+		else if (!isPlayerOneEntity)
+			miniMapRenderObj.layer = 12;
+
+		//FoVMeshObj.SetActive(true);
+	}
+
+	public virtual void Update()
+	{
+		if (UiObj.activeInHierarchy)
+			UiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
+
+		IsEntityHitTimer();
+	}
+
+	//HEALTH FUNCTIONS
+	public void RecieveDamage(int dmg)
+	{
+		dmg -= armour;
+		if (dmg < 0)
+			dmg = 0;
+		Debug.Log("building dmg");
+		currentHealth -= dmg;
+		UpdateHealthBar();
+		OnDeath();
+	}
+	public void UpdateHealthBar()
+	{
+		float healthPercentage = (float)currentHealth / (float)maxHealth * 100;
+		HealthSlider.value = healthPercentage;
+		HealthText.text = currentHealth.ToString() + " / " + maxHealth.ToString();
+	}
+	public void OnDeath()
+	{
+		if (currentHealth <= 0)
+		{
+			//remove relevent refs, check to make sure it is powered before updating income incase building is destroyed whilst never having been powered
+			RemoveEntityRefs();
+			Instantiate(DeathObj, transform.position, Quaternion.identity);
+			Destroy(UiObj);
+			Destroy(gameObject);
+		}
+	}
+
+	//SPOTTING AND UI FUNCTIONS
+	public void ShowEntity()
+	{
+		miniMapRenderObj.layer = 13;
+		isSpotted = true;
+	}
+	public void HideEntity()
+	{
+		if (isPlayerOneEntity)
+			miniMapRenderObj.layer = 11;
+
+		else if (!isPlayerOneEntity)
+			miniMapRenderObj.layer = 12;
+
+		isSpotted = false;
+	}
+	public void IsEntityHitTimer()
+	{
+		if (hitTimer > 0)
+			hitTimer -= Time.deltaTime;
+
+		else if (wasRecentlyHit && hitTimer < 0)
+		{
+			UiObj.SetActive(false);
+			wasRecentlyHit = false;
+		}
+	}
+	public void ResetIsEntityHitTimer()
+	{
+		UiObj.SetActive(true);
+		wasRecentlyHit = true;
+		hitTimer = hitCooldown;
+	}
+
+	//UTILITY FUNCTIONS
+	public virtual void RemoveEntityRefs()
+	{
+
+	}
+	public void RefundEntity()
+	{
+		currentHealth = 0;
+		int refundMoney = (int)(moneyCost / 1.5);
+		int refundAlloy = (int)(alloyCost / 1.5);
+		int refundCrystal = (int)(crystalCost / 1.5);
+
+		if (isPlayerOneEntity)
+		{
+			GameManager.Instance.playerOneCurrentMoney += refundMoney;
+			GameManager.Instance.playerOneCurrentAlloys += refundAlloy;
+			GameManager.Instance.playerOneCurrentCrystals += refundCrystal;
+		}
+		else if (!isPlayerOneEntity)
+		{
+			GameManager.Instance.aiCurrentMoney += refundMoney;
+			GameManager.Instance.aiCurrentAlloys += refundAlloy;
+			GameManager.Instance.aiCurrentCrystals += refundCrystal;
+		}
+		playerController.gameUIManager.UpdateCurrentResourcesUI();
+		OnDeath();
+	}
+	public void UpdateEntityAudioVolume()
+	{
+		if (audioSFXs.Count != 0)
+		{
+			foreach (AudioSource audio in audioSFXs)
+				audio.volume = AudioManager.Instance.gameSFX.volume;
+		}
+	}
 }

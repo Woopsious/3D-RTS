@@ -32,7 +32,7 @@ public class UnitMovingState : UnitBaseState
 			GameManager.Instance.errorManager.DisplayNotificationMessage("Unit Cant find path to location", 2);
 		}
 
-		unit.HideUnit();
+		unit.HideEntity();
 	}
 	public override void Exit(UnitStateController unit)
 	{

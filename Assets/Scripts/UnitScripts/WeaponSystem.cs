@@ -51,7 +51,7 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.unitTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && unit.CheckIfUnitInLineOfSight(unit.unitTargetList[i])
+			if (CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && unit.CheckIfEntityInLineOfSight(unit.unitTargetList[i])
 				&& unit.unitTargetList[i] != null)
 				return unit.unitTargetList[i];
 		}
@@ -63,7 +63,7 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.buildingTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && unit.CheckIfBuildingInLineOfSight(unit.buildingTargetList[i])
+			if (CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && unit.CheckIfEntityInLineOfSight(unit.buildingTargetList[i])
 				&& unit.buildingTargetList[i] != null)
 				return unit.buildingTargetList[i];
 		}
@@ -73,25 +73,27 @@ public class WeaponSystem : MonoBehaviour
 	//check if entity exists + is in attack range, if true shoot it, else try get new target and remove null refs from lists
 	public void ShootMainWeapon()
 	{
-		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfUnitInLineOfSight(unit.currentUnitTarget))
+		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
 		{
 			if (unit.hasAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
+			unit.ResetIsEntityHitTimer();
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && 
-			CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && unit.CheckIfBuildingInLineOfSight(unit.currentBuildingTarget))
+			CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
 		{
 			if (unit.hasAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			unit.currentBuildingTarget.RecieveDamage(mainWeaponDamage);
+			unit.ResetIsEntityHitTimer();
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
