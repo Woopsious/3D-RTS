@@ -69,29 +69,26 @@ public class UnitStateAttacking : UnitBaseState
 	}
 	public void MainGunTimer(UnitStateController unit)
 	{
-		unit.weaponSystem.mainWeaponAttackSpeedTimer += Time.deltaTime;
-		if (unit.weaponSystem.mainWeaponAttackSpeedTimer >= unit.weaponSystem.mainWeaponAttackSpeed)
+		if (unit.weaponSystem.mainWeaponAttackSpeedTimer > 0)
+			unit.weaponSystem.mainWeaponAttackSpeedTimer -= Time.deltaTime;
+		else
 		{
-			unit.weaponSystem.mainWeaponAttackSpeedTimer++;
-			unit.weaponSystem.mainWeaponAttackSpeedTimer %= unit.weaponSystem.mainWeaponAttackSpeed - 1;
 			unit.weaponSystem.ShootMainWeapon();
+			unit.weaponSystem.mainWeaponAttackSpeedTimer = unit.weaponSystem.mainWeaponAttackSpeed;
 		}
 	}
 	public void SecondaryGunTimer(UnitStateController unit)
 	{
-		unit.weaponSystem.secondaryWeaponAttackSpeedTimer += Time.deltaTime;
-		if (unit.weaponSystem.secondaryWeaponAttackSpeedTimer >= unit.weaponSystem.secondaryWeaponAttackSpeed)
+		if (unit.weaponSystem.secondaryWeaponAttackSpeedTimer > 0)
+				unit.weaponSystem.secondaryWeaponAttackSpeedTimer -= Time.deltaTime;
+		else
 		{
 			if (unit.hasAnimation)
-			{
 				unit.StartCoroutine(unit.DelaySecondaryAttack(unit, 1));
-			}
 			else
-			{
-				unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
-				unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
 				unit.weaponSystem.ShootSecondaryWeapon();
-			}
+
+			unit.weaponSystem.secondaryWeaponAttackSpeedTimer = unit.weaponSystem.secondaryWeaponAttackSpeed;
 		}
 	}
 }

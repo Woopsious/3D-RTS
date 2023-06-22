@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -42,6 +43,7 @@ public class UnitStateController : MonoBehaviour
 	public bool hasRadar;
 	public bool isCargoShip;
 	public bool isSpotted;
+	public bool wasRecentlyHit;
 
 	[Header("Unit Stat Refs")]
 	public string unitName;
@@ -53,6 +55,11 @@ public class UnitStateController : MonoBehaviour
 	public int armour;
 	public float attackRange;
 	public float ViewRange;
+
+	public float spottedCooldown = 5f;
+	public float spottedTimer = 5f;
+	public float hitCooldown = 5f;
+	public float hitTimer = 5f;
 
 	[Header("Unit Dynamic Refs")]
 	public int GroupNum;
@@ -66,6 +73,8 @@ public class UnitStateController : MonoBehaviour
 	public Vector3 targetPos;
 	public Vector3 movePos;
 	public NavMeshPath navMeshPath;
+
+	RaycastHit raycastHit;
 
 	public virtual void Start()
 	{
@@ -100,6 +109,10 @@ public class UnitStateController : MonoBehaviour
 	}
 	public virtual void Update()
 	{
+		if (unitUiObj.activeInHierarchy)
+			unitUiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
+
+		/*
 		if (isSelected)
 		{
 			if (!unitUiObj.activeInHierarchy)
@@ -108,7 +121,8 @@ public class UnitStateController : MonoBehaviour
 		}
 		if (!isSelected && unitUiObj.activeInHierarchy)
 			unitUiObj.SetActive(false);
-
+		*/
+		UnitIsHitTimer();
 		currentState.UpdateLogic(this);
 	}
 	public virtual void FixedUpdate()
@@ -121,8 +135,9 @@ public class UnitStateController : MonoBehaviour
 		else if (targetList.Count == 0 && currentState == attackState)
 			ChangeStateIdle();
 	}
-	//filter out everything but enemy Entities
-	public void AddTargetsOnFOVEnter(GameObject triggerObj)
+
+	//SPOTTING SYSTEM FUNCTIONS
+	public void AddTargetsOnFOVEnter(GameObject triggerObj) //filter out everything but enemy Entities
 	{
 		if (triggerObj.GetComponent<UnitStateController>() != null && isPlayerOneUnit != triggerObj.GetComponent<UnitStateController>().isPlayerOneUnit)
 		{
@@ -164,13 +179,23 @@ public class UnitStateController : MonoBehaviour
 		if (buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 			buildingTargetList.Remove(triggerObj.GetComponent<BuildingManager>());
 	}
-	public bool CheckIfInLineOfSight(GameObject targetObj)
+	public bool CheckIfUnitInLineOfSight(UnitStateController unit)
 	{
-		Physics.Linecast(CenterPoint.transform.position, targetObj.transform.position, out RaycastHit hit, ignoreMe);
+		Physics.Linecast(CenterPoint.transform.position, unit.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
+		raycastHit = hit;
 
-		Debug.DrawLine(CenterPoint.transform.position, hit.point);
+		if (hit.collider.gameObject == unit.gameObject)
+			return true;
 
-		if (hit.collider.gameObject == targetObj)
+		else
+			return false;
+	}
+	public bool CheckIfBuildingInLineOfSight(BuildingManager building)
+	{
+		Physics.Linecast(CenterPoint.transform.position, building.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
+		raycastHit = hit;
+
+		if (hit.collider.gameObject == building.gameObject)
 			return true;
 
 		else
@@ -184,25 +209,27 @@ public class UnitStateController : MonoBehaviour
 			{
 				if (targetList[i].GetComponent<UnitStateController>() != null)
 				{
-					if (!targetList[i].GetComponent<UnitStateController>().isSpotted && CheckIfInLineOfSight(targetList[i]))
+					UnitStateController unit = targetList[i].GetComponent<UnitStateController>();
+					if (!unit.isSpotted && CheckIfUnitInLineOfSight(unit))
 					{
 						GameManager.Instance.errorManager.DisplayNotificationMessage("Enemy Unit Spotted", 1f);
-						targetList[i].GetComponent<UnitStateController>().ShowUnit();
+						unit.ShowUnit();
 					}
 
-					else if (targetList[i].GetComponent<UnitStateController>().isSpotted && !CheckIfInLineOfSight(targetList[i]))
-						targetList[i].GetComponent<UnitStateController>().HideUnit();
+					else if (unit.isSpotted && !CheckIfUnitInLineOfSight(unit))
+						unit.HideUnit();
 				}
 				else if (targetList[i].GetComponent<BuildingManager>() != null)
 				{
-					if (!targetList[i].GetComponent<BuildingManager>().isSpotted && CheckIfInLineOfSight(targetList[i]))
+					BuildingManager building = targetList[i].GetComponent<BuildingManager>();
+					if (!building.isSpotted && CheckIfBuildingInLineOfSight(building))
 					{
 						GameManager.Instance.errorManager.DisplayNotificationMessage("Enemy Building Spotted", 1f);
-						targetList[i].GetComponent<BuildingManager>().ShowBuilding();
+						building.ShowBuilding();
 					}
 
-					else if (targetList[i].GetComponent<BuildingManager>().isSpotted && !CheckIfInLineOfSight(targetList[i]))
-						targetList[i].GetComponent<BuildingManager>().HideBuilding();
+					else if (building.isSpotted && !CheckIfBuildingInLineOfSight(building))
+						building.HideBuilding();
 				}
 			}
 		}
@@ -217,6 +244,18 @@ public class UnitStateController : MonoBehaviour
 		if (targetList.Count != 0)
 			StartCoroutine(TrySpotTargetsNotSpotted());
 	}
+	public void UnitIsSpottedTimer()
+	{
+		if (spottedTimer > 0)
+			spottedTimer -= Time.deltaTime;
+
+		else
+			Debug.Log("Time Ran Out");
+	}
+	public void ResetUnitIsSpottedTimer()
+	{
+		spottedTimer = 5f;
+	}
 
 	//HEALTH FUNCTIONS
 	public void RecieveDamage(int dmg)
@@ -225,6 +264,7 @@ public class UnitStateController : MonoBehaviour
 		if (dmg < 0)
 			dmg = 0;
 		currentHealth -= dmg;
+		ResetUnitIsHitTimer();
 		UpdateHealthBar();
 		OnDeath();
 
@@ -248,7 +288,23 @@ public class UnitStateController : MonoBehaviour
 			Destroy(gameObject);
 		}
 	}
+	public void UnitIsHitTimer()
+	{
+		if (hitTimer > 0)
+			hitTimer -= Time.deltaTime;
 
+		else if (wasRecentlyHit && hitTimer < 0)
+		{
+			unitUiObj.SetActive(false);
+			wasRecentlyHit = false;
+		}
+	}
+	public void ResetUnitIsHitTimer()
+	{
+		unitUiObj.SetActive(true);
+		wasRecentlyHit = true;
+		hitTimer = 5f;
+	}
 	//UTILITY FUNCTIONS
 	public void RemoveNullRefsFromLists(List<GameObject> targetList, List<UnitStateController> unitList, List<BuildingManager> buildingList)
 	{
@@ -353,6 +409,7 @@ public class UnitStateController : MonoBehaviour
 		Gizmos.color = Color.red;
 		Gizmos.DrawWireSphere(transform.position, attackRange);
 		Gizmos.DrawWireSphere(transform.position, ViewRange);
+		Gizmos.DrawLine(CenterPoint.transform.position, raycastHit.point);
 	}
 
 	//STATE CHANGE FUNCTIONS

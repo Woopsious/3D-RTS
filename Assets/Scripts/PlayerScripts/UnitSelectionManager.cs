@@ -223,6 +223,7 @@ public class UnitSelectionManager : MonoBehaviour
 			if (!Input.GetKey(KeyCode.LeftShift))
 			{
 				DeselectUnits();
+				unit.unitUiObj.SetActive(true);
 				unit.selectedHighlighter.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
@@ -234,6 +235,7 @@ public class UnitSelectionManager : MonoBehaviour
 				{
 					if (UnitAlreadyInList(selectedUnit, unit))
 					{
+						selectedUnit.unitUiObj.SetActive(false);
 						selectedUnit.selectedHighlighter.SetActive(false);
 						selectedUnit.isSelected = false;
 						selectedUnitList.Remove(selectedUnit);
@@ -244,6 +246,7 @@ public class UnitSelectionManager : MonoBehaviour
 							obj.SetActive(false);
 					}
 				}
+				unit.unitUiObj.SetActive(true);
 				unit.selectedHighlighter.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
@@ -374,6 +377,7 @@ public class UnitSelectionManager : MonoBehaviour
 			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf && 
 				unitCount < 8 && !unit.isPlayerOneUnit != playerController.isPlayerOne)
 			{
+				unit.unitUiObj.SetActive(true);
 				unit.selectedHighlighter.SetActive(true);
 				unit.isSelected = true;
 				dragSelectedUnitList.Add(unit);
@@ -381,6 +385,7 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 			else if (!UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && unit.selectedHighlighter.activeSelf)
 			{
+				unit.unitUiObj.SetActive(false);
 				unit.selectedHighlighter.SetActive(false);
 				unit.isSelected = false;
 				dragSelectedUnitList.Remove(unit);
@@ -411,6 +416,7 @@ public class UnitSelectionManager : MonoBehaviour
 			SetUnitRefundButtonActiveUnactive();
 			foreach (UnitStateController selectedUnit in selectedUnitList)
 			{
+				selectedUnit.unitUiObj.SetActive(false);
 				selectedUnit.selectedHighlighter.SetActive(false);
 				selectedUnit.isSelected = false;
 			}
