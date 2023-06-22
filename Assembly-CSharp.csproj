@@ -91,6 +91,7 @@
     <Compile Include="Assets\Scripts\ShowNavMesh.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitProductionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\CapturePointController.cs" />
+    <Compile Include="Assets\Scripts\Entities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Effects\UI\FogOfWar\TestUnlit 1.shader" />

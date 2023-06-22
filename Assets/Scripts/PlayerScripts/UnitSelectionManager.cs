@@ -54,7 +54,6 @@ public class UnitSelectionManager : MonoBehaviour
 	public void Start()
 	{
 		filter.areaMask = 1 << NavMesh.GetAreaFromName("Walkable");
-
 		transparentGreen = new Color(0, 1, 0, 0.1f);
 		transparentRed = new Color(1, 0, 0, 0.1f);
 	}
