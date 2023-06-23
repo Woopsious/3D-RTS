@@ -21,7 +21,7 @@ public class UnitIdleState : UnitBaseState
 		if (unit.hasAnimation)
 			unit.animatorController.SetBool("isAttacking", false);
 
-		unit.HideEntity();
+		//unit.HideEntity();
 	}
 	public override void Exit(UnitStateController unit)
 	{

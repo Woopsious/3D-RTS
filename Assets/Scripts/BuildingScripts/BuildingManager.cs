@@ -38,7 +38,7 @@ public class BuildingManager : Entities
 	public IEnumerator HideUi()
 	{
 		yield return new WaitForSeconds(0.1f);
-		UiObj.SetActive(false);
+		HideUIHealthBar();
 	}
 
 	//UTILITY FUNCTIONS

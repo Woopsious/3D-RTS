@@ -26,13 +26,14 @@ public class Entities : MonoBehaviour
 	public int armour;
 
 	public float spottedCooldown;
-	private float spottedTimer;
+	public float spottedTimer;
 	public float hitCooldown;
-	private float hitTimer;
+	public float hitTimer;
 
 	[Header("Entity Bools")]
 	public bool isPlayerOneEntity;
 	public bool wasRecentlyHit;
+	public bool wasRecentlySpotted;
 	public bool isSelected;
 	public bool isSpotted;
 
@@ -43,7 +44,7 @@ public class Entities : MonoBehaviour
 		UpdateEntityAudioVolume();
 
 		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
-		UiObj.SetActive(false);
+		HideUIHealthBar();
 		UpdateHealthBar();
 		UiObj.transform.rotation = Quaternion.identity;
 
@@ -61,6 +62,7 @@ public class Entities : MonoBehaviour
 			UiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
 
 		IsEntityHitTimer();
+		IsEntitySpottedTimer();
 	}
 
 	//HEALTH FUNCTIONS
@@ -69,7 +71,6 @@ public class Entities : MonoBehaviour
 		dmg -= armour;
 		if (dmg < 0)
 			dmg = 0;
-		Debug.Log("building dmg");
 		currentHealth -= dmg;
 		UpdateHealthBar();
 		OnDeath();
@@ -108,6 +109,21 @@ public class Entities : MonoBehaviour
 
 		isSpotted = false;
 	}
+	public void IsEntitySpottedTimer()
+	{
+		if (spottedTimer > 0)
+			spottedTimer -= Time.deltaTime;
+
+		else if (wasRecentlySpotted && spottedTimer < 0)
+			wasRecentlySpotted = false;
+	}
+	public void ResetEntitySpottedTimer()
+	{
+		wasRecentlySpotted = true;
+		spottedTimer = spottedCooldown;
+	}
+
+	//RECENTLY HIT + HEALTH UI FUNCTIONS
 	public void IsEntityHitTimer()
 	{
 		if (hitTimer > 0)
@@ -115,17 +131,25 @@ public class Entities : MonoBehaviour
 
 		else if (wasRecentlyHit && hitTimer < 0)
 		{
-			UiObj.SetActive(false);
 			wasRecentlyHit = false;
+			if (!isSelected)
+				HideUIHealthBar();
 		}
 	}
 	public void ResetIsEntityHitTimer()
 	{
-		UiObj.SetActive(true);
+		ShowUIHealthBar();
 		wasRecentlyHit = true;
 		hitTimer = hitCooldown;
 	}
-
+	public void ShowUIHealthBar()
+	{
+		UiObj.SetActive(true);
+	}
+	public void HideUIHealthBar()
+	{
+		UiObj.SetActive(false);
+	}
 	//UTILITY FUNCTIONS
 	public virtual void RemoveEntityRefs()
 	{

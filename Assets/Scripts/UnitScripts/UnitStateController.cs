@@ -95,20 +95,14 @@ public class UnitStateController : Entities
 	{
 		if (triggerObj.GetComponent<UnitStateController>() != null && isPlayerOneEntity != triggerObj.GetComponent<UnitStateController>().isPlayerOneEntity)
 		{
-			Debug.Log("unit entity Spotted");
 			if (!unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
 				targetList.Add(triggerObj);
 		}
 		else if (triggerObj.GetComponent<BuildingManager>() != null && isPlayerOneEntity != triggerObj.GetComponent<BuildingManager>().isPlayerOneEntity
 			&& triggerObj.GetComponent<CanPlaceBuilding>().isPlaced)    //filter out non placed buildings
 		{
-			Debug.Log("building entity Spotted");
 			if (!buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 				targetList.Add(triggerObj);
-		}
-		else
-		{
-			Debug.Log("no conditions met");
 		}
 		if (targetList.Count == 1)
 			StartCoroutine(TrySpotTargetsNotSpotted());
@@ -118,7 +112,7 @@ public class UnitStateController : Entities
 		if (targetList.Contains(triggerObj))
 		{
 			targetList.Remove(triggerObj);
-			triggerObj.GetComponent<Entities>().HideEntity();
+			//triggerObj.GetComponent<Entities>().HideEntity();
 		}
 
 		if (unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
@@ -152,7 +146,6 @@ public class UnitStateController : Entities
 	public bool CheckIfEntityInLineOfSight(Entities entity)
 	{
 		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
-		raycastHit = hit;
 
 		if (hit.collider.gameObject == entity.gameObject)
 			return true;
@@ -170,10 +163,7 @@ public class UnitStateController : Entities
 				if (!entity.isSpotted && CheckIfEntityInLineOfSight(entity) && entity != null)
 				{
 					entity.ShowEntity();
-					if (entity.GetComponent<UnitStateController>())
-						GameManager.Instance.errorManager.DisplayNotificationMessage("Enemy Spotted", 1f);
-					else if (entity.GetComponent<BuildingManager>())
-						GameManager.Instance.errorManager.DisplayNotificationMessage("Enemy Building Spotted", 1f);
+					entity.ResetEntitySpottedTimer();
 				}
 
 				else if (entity.isSpotted && !CheckIfEntityInLineOfSight(entity) && entity != null)
@@ -186,31 +176,13 @@ public class UnitStateController : Entities
 			//should be fine to leave as null refs from lists get removed after target is destroyed
 		}
 
-		yield return new WaitForSeconds(1);
+		yield return new WaitForSeconds(0.5f);
 
 		if (targetList.Count != 0)
 			StartCoroutine(TrySpotTargetsNotSpotted());
 	}
 
 	//UTILITY FUNCTIONS
-	public void RemoveNullRefsFromLists(List<GameObject> targetList, List<UnitStateController> unitList, List<BuildingManager> buildingList)
-	{
-		for (int i = targetList.Count - 1; i >= 0; i--)
-		{
-			if (targetList[i] == null)
-				targetList.RemoveAt(i);
-		}
-		for (int i = unitList.Count - 1; i >= 0; i--)
-		{
-			if (unitList[i] == null)
-				unitList.RemoveAt(i);
-		}
-		for (int i = buildingList.Count - 1; i >= 0; i--)
-		{
-			if (buildingList[i] == null)
-				buildingList.RemoveAt(i);
-		}
-	}
 	public IEnumerator DelaySecondaryAttack(UnitStateController unit, float seconds)
 	{
 		unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;

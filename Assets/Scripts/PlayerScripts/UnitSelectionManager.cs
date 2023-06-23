@@ -222,7 +222,7 @@ public class UnitSelectionManager : MonoBehaviour
 			if (!Input.GetKey(KeyCode.LeftShift))
 			{
 				DeselectUnits();
-				unit.UiObj.SetActive(true);
+				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
@@ -234,7 +234,7 @@ public class UnitSelectionManager : MonoBehaviour
 				{
 					if (UnitAlreadyInList(selectedUnit, unit))
 					{
-						selectedUnit.UiObj.SetActive(false);
+						selectedUnit.HideUIHealthBar();
 						selectedUnit.selectedHighlighter.SetActive(false);
 						selectedUnit.isSelected = false;
 						selectedUnitList.Remove(selectedUnit);
@@ -245,7 +245,7 @@ public class UnitSelectionManager : MonoBehaviour
 							obj.SetActive(false);
 					}
 				}
-				unit.UiObj.SetActive(true);
+				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
@@ -261,7 +261,7 @@ public class UnitSelectionManager : MonoBehaviour
 			DeselectUnits();
 			DeselectCargoShip();
 			selectedBuilding = building;
-			selectedBuilding.UiObj.SetActive(true);
+			selectedBuilding.ShowUIHealthBar();
 			selectedBuilding.selectedHighlighter.SetActive(true);
 			selectedBuilding.isSelected = true;
 		}
@@ -377,7 +377,7 @@ public class UnitSelectionManager : MonoBehaviour
 			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf && 
 				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne)
 			{
-				unit.UiObj.SetActive(true);
+				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
 				unit.isSelected = true;
 				dragSelectedUnitList.Add(unit);
@@ -385,7 +385,7 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 			else if (!UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && unit.selectedHighlighter.activeSelf)
 			{
-				unit.UiObj.SetActive(false);
+				unit.HideUIHealthBar();
 				unit.selectedHighlighter.SetActive(false);
 				unit.isSelected = false;
 				dragSelectedUnitList.Remove(unit);
@@ -416,7 +416,7 @@ public class UnitSelectionManager : MonoBehaviour
 			SetUnitRefundButtonActiveUnactive();
 			foreach (UnitStateController selectedUnit in selectedUnitList)
 			{
-				selectedUnit.UiObj.SetActive(false);
+				selectedUnit.HideUIHealthBar();
 				selectedUnit.selectedHighlighter.SetActive(false);
 				selectedUnit.isSelected = false;
 			}
@@ -433,7 +433,7 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		if (selectedBuilding != null)
 		{
-			selectedBuilding.UiObj.SetActive(false);
+			selectedBuilding.HideUIHealthBar();
 			selectedBuilding.selectedHighlighter.SetActive(false);
 			selectedBuilding.isSelected = false;
 			selectedBuilding = null;

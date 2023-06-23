@@ -14,11 +14,9 @@ public class EnergyGenController : MonoBehaviour
 	}
 	IEnumerator UpdatePoweredBuildings()
 	{
-		//Debug.Log("powering buildings");
+		yield return new WaitForSeconds(0.5f);
 		PowerBuildings();
-		yield return new WaitForSeconds(3f);
-		//call itself again after 3 seconds
-		StartCoroutine(UpdatePoweredBuildings());
+		//Debug.Log("powering buildings");
 	}
 	public void PowerBuildings()
 	{
