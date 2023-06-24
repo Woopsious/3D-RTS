@@ -13,8 +13,7 @@ public class UnitStateAttacking : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		if (unit.isPlayerOneEntity)
-			Debug.Log("Entered Attacking State");
+		//Debug.Log("Entered Attacking State");
 
 		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
 			unit.weaponSystem.TryFindTarget();

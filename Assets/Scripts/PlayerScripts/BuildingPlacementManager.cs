@@ -106,12 +106,11 @@ public class BuildingPlacementManager : MonoBehaviour
 			//NOTIFY PLAYER CODE HERE
 		}
 		else if (Input.GetMouseButtonDown(0) && !currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
-			GameManager.Instance.errorManager.DisplayNotificationMessage("Couldnt place building", 2);
+			GameManager.Instance.playerNotifsManager.DisplayNotificationMessage("Couldnt place building", 2);
 		//NOTIFY PLAYER CODE HERE
 
 		if (Input.GetMouseButtonDown(1))
 			Destroy(currentBuildingPlacement.gameObject);
-
 	}
 
 	//buy Invidual buildings
@@ -151,10 +150,10 @@ public class BuildingPlacementManager : MonoBehaviour
 				obj.GetComponent<BuildingManager>().playerController = playerController;
 			}
 			else
-				GameManager.Instance.errorManager.DisplayNotificationMessage("Cant Afford buildings", 2);
+				GameManager.Instance.playerNotifsManager.DisplayNotificationMessage("Cant Afford buildings", 2);
 		}
 		else
-			GameManager.Instance.errorManager.DisplayNotificationMessage("A building is already being placed", 2);
+			GameManager.Instance.playerNotifsManager.DisplayNotificationMessage("A building is already being placed", 2);
 	}
 	public void BuildingCost(int moneyCost, int alloyCost, int crystalCost)
 	{

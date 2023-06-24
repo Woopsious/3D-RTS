@@ -23,7 +23,6 @@ public class CameraController : MonoBehaviour
 		if (terrainCollider != null)
 			prevTerrainHeight = Terrain.activeTerrain.SampleHeight(transform.position);
 	}
-
 	public void Update()
 	{
 		MoveCamera();
@@ -76,7 +75,6 @@ public class CameraController : MonoBehaviour
 			transform.eulerAngles -= new Vector3(transform.rotation.x, -turnSpeed, transform.rotation.y) * Time.unscaledDeltaTime;
 		}
 	}
-
 	public void AdjustHeight()
 	{
 		float terrainHeight = Terrain.activeTerrain.SampleHeight(transform.position);

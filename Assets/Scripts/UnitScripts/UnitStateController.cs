@@ -160,14 +160,14 @@ public class UnitStateController : Entities
 			for (int i = 0; i < targetList.Count; i++)
 			{
 				Entities entity = targetList[i].GetComponent<Entities>();
-				if (!entity.isSpotted && CheckIfEntityInLineOfSight(entity) && entity != null)
+				if (CheckIfEntityInLineOfSight(entity) && entity != null)
 				{
+					if (!entity.wasRecentlySpotted)
+						GameManager.Instance.playerNotifsManager.DisplayNotificationMessage("New Enemy Spotted", 1f);
+
 					entity.ShowEntity();
 					entity.ResetEntitySpottedTimer();
 				}
-
-				else if (entity.isSpotted && !CheckIfEntityInLineOfSight(entity) && entity != null)
-					entity.HideEntity();
 			}
 		}
 		catch (Exception e)

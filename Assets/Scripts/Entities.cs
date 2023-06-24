@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
@@ -114,8 +115,11 @@ public class Entities : MonoBehaviour
 		if (spottedTimer > 0)
 			spottedTimer -= Time.deltaTime;
 
-		else if (wasRecentlySpotted && spottedTimer < 0)
+		else if (wasRecentlySpotted && spottedTimer < 0) //check if player can get notified of a unit being spotted
 			wasRecentlySpotted = false;
+
+		if (spottedTimer <= spottedCooldown - 3 && isSpotted) //hide unit on minimap after 3 secs of not being spotted
+			HideEntity();
 	}
 	public void ResetEntitySpottedTimer()
 	{
@@ -150,6 +154,7 @@ public class Entities : MonoBehaviour
 	{
 		UiObj.SetActive(false);
 	}
+
 	//UTILITY FUNCTIONS
 	public virtual void RemoveEntityRefs()
 	{

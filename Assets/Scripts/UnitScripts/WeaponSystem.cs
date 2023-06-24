@@ -53,9 +53,6 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.unitTargetList.Count; i++)
 		{
-			if (unit.isPlayerOneEntity)
-				Debug.Log(unit.unitTargetList[i].gameObject);
-
 			if (CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && 
 				unit.CheckIfEntityInLineOfSight(unit.unitTargetList[i]) && unit.unitTargetList[i] != null)
 					return unit.unitTargetList[i];
