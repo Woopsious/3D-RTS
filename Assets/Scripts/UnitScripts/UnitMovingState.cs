@@ -29,7 +29,7 @@ public class UnitMovingState : UnitBaseState
 		else
 		{
 			unit.ChangeStateIdle();
-			GameManager.Instance.playerNotifsManager.DisplayNotificationMessage("Unit Cant find path to location", 2);
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
 		}
 
 		//unit.HideEntity();

@@ -11,7 +11,7 @@ public class Entities : MonoBehaviour
 	public PlayerController playerController;
 	public List<AudioSource> audioSFXs = new List<AudioSource>();
 	public GameObject UiObj;
-	public UnityEngine.UI.Slider HealthSlider;
+	public Slider HealthSlider;
 	public Text HealthText;
 	public GameObject CenterPoint;
 	public GameObject DeathObj;
@@ -156,6 +156,13 @@ public class Entities : MonoBehaviour
 	}
 
 	//UTILITY FUNCTIONS
+	public bool ShouldDisplayEventNotifToPlayer()
+	{
+		if (playerController.isPlayerOne != isPlayerOneEntity)
+			return false;
+		else
+			return true;
+	}
 	public virtual void RemoveEntityRefs()
 	{
 

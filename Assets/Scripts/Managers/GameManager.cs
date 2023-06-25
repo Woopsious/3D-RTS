@@ -101,7 +101,6 @@ public class GameManager : MonoBehaviour
 
 		GameManager.Instance.errorManager.OnStartUpHandleLogFiles();
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
-		GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 		InputManager.Instance.SetUpKeybindDictionary();
 
 		GameManager.Instance.LoadPlayerData();
@@ -235,10 +234,10 @@ public class GameManager : MonoBehaviour
 		}
 		else if (sceneIndex == 1)
 		{
+			GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 			gameUIManager.ResetUi();
 			gameUIManager.ResetUnitGroupUI();
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
-		GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 	}
 }

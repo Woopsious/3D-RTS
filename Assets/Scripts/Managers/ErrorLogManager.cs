@@ -39,12 +39,13 @@ public class ErrorLogManager : MonoBehaviour
 	public void CheckForErrorLogObj()
 	{
 		if (errorLogWindowParent == null)
+		{
 			errorLogWindowParent = Instantiate(errorWindowPrefab, transform.position, Quaternion.identity);
+			errorLogWindowParent.transform.SetParent(FindObjectOfType<Canvas>().transform, false);
+			errorLogWindowParent.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
 
-		errorLogWindowParent.transform.SetParent(FindObjectOfType<Canvas>().transform, false);
-		errorLogWindowParent.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
-
-		SetUpErrorLogNotifs();
+			SetUpErrorLogNotifs();
+		}
 	}
 	public void SetUpErrorLogNotifs()
 	{

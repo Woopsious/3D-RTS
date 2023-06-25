@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 
 public class CameraController : MonoBehaviour
 {
+	public static CameraController instance;
 	public TerrainCollider terrainCollider;
 
 	private readonly float moveSpeed = 50f;
@@ -20,6 +21,7 @@ public class CameraController : MonoBehaviour
 
 	public void Start()
 	{
+		CameraController.instance = this;
 		if (terrainCollider != null)
 			prevTerrainHeight = Terrain.activeTerrain.SampleHeight(transform.position);
 	}

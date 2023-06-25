@@ -162,8 +162,8 @@ public class UnitStateController : Entities
 				Entities entity = targetList[i].GetComponent<Entities>();
 				if (CheckIfEntityInLineOfSight(entity) && entity != null)
 				{
-					if (!entity.wasRecentlySpotted)
-						GameManager.Instance.playerNotifsManager.DisplayNotificationMessage("New Enemy Spotted", 1f);
+					if (!entity.wasRecentlySpotted && ShouldDisplayEventNotifToPlayer())
+						GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
 
 					entity.ShowEntity();
 					entity.ResetEntitySpottedTimer();

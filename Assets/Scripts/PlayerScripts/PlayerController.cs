@@ -174,7 +174,7 @@ public class PlayerController : MonoBehaviour
 				|| Input.GetKeyDown(KeyCode.Alpha5) && buildingPlacementManager.currentBuildingPlacement != null 
 				|| Input.GetKeyDown(KeyCode.Alpha6) && buildingPlacementManager.currentBuildingPlacement != null)
 			{
-				Debug.Log("Building already being placed");
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing A Building", 2);
 				//NOTIFY PLAYER CODE HERE
 			}
 		}
