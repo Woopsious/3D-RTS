@@ -121,28 +121,6 @@ public class UnitStateController : Entities
 		if (buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 			buildingTargetList.Remove(triggerObj.GetComponent<BuildingManager>());
 	}
-	public bool CheckIfUnitInLineOf(UnitStateController unit)
-	{
-		Physics.Linecast(CenterPoint.transform.position, unit.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
-		raycastHit = hit;
-
-		if (hit.collider.gameObject == unit.gameObject)
-			return true;
-
-		else
-			return false;
-	}
-	public bool CheckIfBuildingInLineOf(BuildingManager building)
-	{
-		Physics.Linecast(CenterPoint.transform.position, building.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
-		raycastHit = hit;
-
-		if (hit.collider.gameObject == building.gameObject)
-			return true;
-
-		else
-			return false;
-	}
 	public bool CheckIfEntityInLineOfSight(Entities entity)
 	{
 		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);

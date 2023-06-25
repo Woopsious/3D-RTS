@@ -19,6 +19,7 @@ public class NotifsEventManager : MonoBehaviour, IPointerClickHandler
 	{
 		if (eventData.button == PointerEventData.InputButton.Left)
 			leftClick.Invoke();
+
 		else if (eventData.button == PointerEventData.InputButton.Right)
 			rightClick.Invoke();
 	}
@@ -26,6 +27,7 @@ public class NotifsEventManager : MonoBehaviour, IPointerClickHandler
 	{
 		GameObject cameraObj = CameraController.instance.gameObject;
 		cameraObj.transform.position = new Vector3(eventWorldPos.x, cameraObj.transform.position.y, eventWorldPos.z);
+
 		Destroy(gameObject);
 	}
 	public void OnRightClick()

@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 
 public class WeaponSystem : MonoBehaviour
@@ -80,6 +81,9 @@ public class WeaponSystem : MonoBehaviour
 			if (unit.hasAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
+			if (!unit.currentUnitTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
+				GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", unit.currentUnitTarget.transform.position);
+
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
 			unit.currentUnitTarget.ResetIsEntityHitTimer();
@@ -92,6 +96,9 @@ public class WeaponSystem : MonoBehaviour
 		{
 			if (unit.hasAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
+
+			if (!unit.currentBuildingTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
+				GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING UNDER ATTACK", unit.currentBuildingTarget.transform.position);
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			unit.currentBuildingTarget.RecieveDamage(mainWeaponDamage);

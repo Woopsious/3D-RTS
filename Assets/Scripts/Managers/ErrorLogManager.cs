@@ -212,5 +212,3 @@ public class ErrorLogManager : MonoBehaviour
 		errorLogScrollBar.gameObject.SetActive(false);
 	}
 }
-
-

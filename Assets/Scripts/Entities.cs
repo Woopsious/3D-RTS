@@ -40,8 +40,8 @@ public class Entities : MonoBehaviour
 
 	public virtual void Start()
 	{
-		spottedTimer = spottedCooldown;
-		hitTimer = hitCooldown;
+		spottedTimer = 0;
+		hitTimer = 0;
 		UpdateEntityAudioVolume();
 
 		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
@@ -56,7 +56,6 @@ public class Entities : MonoBehaviour
 
 		//FoVMeshObj.SetActive(true);
 	}
-
 	public virtual void Update()
 	{
 		if (UiObj.activeInHierarchy)
