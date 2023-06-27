@@ -27,16 +27,18 @@ public class UnitStateController : Entities
 	public Rigidbody rb;
 	public GameObject FoVMeshObj;
 
-	public bool isUnitArmed;
-	public bool isFlying;
-	public bool hasAnimation;
-	public bool hasRadar;
-	public bool isCargoShip;
-
-	[Header("Unit Stat Refs")]
+	[Header("Unit Stats")]
 	public string unitName;
 	public float attackRange;
 	public float ViewRange;
+
+	[Header("Unit Bools")]
+	public bool isUnitArmed;
+	public bool isFlying;
+	public bool hasRadar;
+	public bool isCargoShip;
+	public bool hasShootAnimation;
+	public bool hasMoveAnimation;
 
 	[Header("Unit Dynamic Refs")]
 	public int GroupNum;

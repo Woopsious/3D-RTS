@@ -25,8 +25,10 @@ public class NotifsEventManager : MonoBehaviour, IPointerClickHandler
 	}
 	public void OnLeftClick()
 	{
-		GameObject cameraObj = CameraController.instance.gameObject;
-		cameraObj.transform.position = new Vector3(eventWorldPos.x, cameraObj.transform.position.y, eventWorldPos.z);
+		CameraController.instance.SetNewCameraPosition(eventWorldPos);
+
+		//GameObject cameraObj = CameraController.instance.gameObject;
+		//cameraObj.transform.position = new Vector3(eventWorldPos.x, cameraObj.transform.position.y, eventWorldPos.z);
 
 		Destroy(gameObject);
 	}

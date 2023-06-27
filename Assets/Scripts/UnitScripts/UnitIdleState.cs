@@ -18,7 +18,7 @@ public class UnitIdleState : UnitBaseState
 		if (unit.unitName != "Scout Vehicle")
 			unit.animatorController.SetBool("isIdle", true);
 
-		if (unit.hasAnimation)
+		if (unit.hasShootAnimation)
 			unit.animatorController.SetBool("isAttacking", false);
 
 		//unit.HideEntity();

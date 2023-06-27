@@ -81,7 +81,7 @@ public class Entities : MonoBehaviour
 		HealthSlider.value = healthPercentage;
 		HealthText.text = currentHealth.ToString() + " / " + maxHealth.ToString();
 	}
-	public void OnDeath()
+	public virtual void OnDeath()
 	{
 		if (currentHealth <= 0)
 		{

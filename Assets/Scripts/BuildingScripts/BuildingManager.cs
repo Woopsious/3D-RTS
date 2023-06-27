@@ -68,27 +68,28 @@ public class BuildingManager : Entities
 	{
 		if (isGeneratorBuilding)
 		{
-			capturePointController.energyGeneratorBuilding = null;
 			GetComponent<EnergyGenController>().UnpowerBuildings();
+			capturePointController.energyGeneratorBuilding = null;
 		}
 		else if (isRefineryBuilding)
 		{
+			GetComponent<RefineryController>().DeleteCargoShipsOnDeath();
 			capturePointController.RefinaryBuildings.Remove(this);
 		}
 		else if (isLightVehProdBuilding)
 		{
-			capturePointController.lightVehProdBuildings.Remove(this);
 			playerController.lightVehProdBuildingsList.Remove(this);
+			capturePointController.lightVehProdBuildings.Remove(this);
 		}
 		else if (isHeavyVehProdBuilding)
 		{
-			capturePointController.heavyVehProdBuildings.Remove(this);
 			playerController.heavyVehProdBuildingsList.Remove(this);
+			capturePointController.heavyVehProdBuildings.Remove(this);
 		}
 		else if (isVTOLProdBuilding)
 		{
-			capturePointController.heavyVehProdBuildings.Remove(this);
 			playerController.heavyVehProdBuildingsList.Remove(this);
+			capturePointController.heavyVehProdBuildings.Remove(this);
 		}
 	}
 }

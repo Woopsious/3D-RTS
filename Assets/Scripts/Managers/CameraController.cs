@@ -89,4 +89,21 @@ public class CameraController : MonoBehaviour
 			prevTerrainHeight = terrainHeight;
 		}
 	}
+
+	//function to jump camera to pos based on event notifs
+	public void SetNewCameraPosition(Vector3 movePos)
+	{
+		float offset = gameObject.transform.position.y - 10;
+
+		if (movePos.z < offset + 10)
+		{
+			gameObject.transform.eulerAngles = new Vector3(0, 180, 0);
+			gameObject.transform.position = new Vector3(movePos.x, gameObject.transform.position.y, movePos.z + offset);
+		}
+		else
+		{
+			gameObject.transform.eulerAngles = new Vector3(0, 0, 0);
+			gameObject.transform.position = new Vector3(movePos.x, gameObject.transform.position.y, movePos.z - offset);
+		}
+	}
 }

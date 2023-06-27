@@ -78,7 +78,7 @@ public class WeaponSystem : MonoBehaviour
 	{
 		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
 		{
-			if (unit.hasAnimation)
+			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
 			if (!unit.currentUnitTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
@@ -94,7 +94,7 @@ public class WeaponSystem : MonoBehaviour
 		else if (!HasUnitTarget() && HasBuildingTarget() && 
 			CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
 		{
-			if (unit.hasAnimation)
+			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
 			if (!unit.currentBuildingTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())

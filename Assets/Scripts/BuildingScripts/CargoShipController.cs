@@ -198,6 +198,10 @@ public class CargoShipController : UnitStateController
 	{
 		movePos = moveDestination;
 	}
+	public void DeleteSelf()
+	{
+		Destroy(gameObject);
+	}
 
 	//bool checks
 	public bool CheckIfNodeIsEmpty()
