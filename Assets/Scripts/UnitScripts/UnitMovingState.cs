@@ -31,8 +31,6 @@ public class UnitMovingState : UnitBaseState
 			unit.ChangeStateIdle();
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
 		}
-
-		//unit.HideEntity();
 	}
 	public override void Exit(UnitStateController unit)
 	{

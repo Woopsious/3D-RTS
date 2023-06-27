@@ -60,19 +60,11 @@ public class UnitStateController : Entities
 
 		ChangeStateIdle();
 		//assign correct playercontroller to unit on start
-		PlayerController[] controllers = FindObjectsOfType<PlayerController>();
-		foreach(PlayerController controller in controllers)
+		PlayerController controller = FindObjectOfType<PlayerController>();
+		if (true)
 		{
-			if(controller.isPlayerOne == isPlayerOneEntity)
-			{
-				playerController = controller;
-				playerController.unitListForPlayer.Add(this);
-			}
-			else if (controller.isPlayerOne == !isPlayerOneEntity)
-			{
-				playerController = controller;
-				playerController.unitListForPlayer.Add(this);
-			}
+			playerController = controller;
+			playerController.unitListForPlayer.Add(this);
 		}
 	}
 	public override void Update()
@@ -95,13 +87,13 @@ public class UnitStateController : Entities
 	//SPOTTING SYSTEM FUNCTIONS
 	public void AddTargetsOnFOVEnter(GameObject triggerObj) //filter out everything but enemy Entities
 	{
-		if (triggerObj.GetComponent<UnitStateController>() != null && isPlayerOneEntity != triggerObj.GetComponent<UnitStateController>().isPlayerOneEntity)
+		if (triggerObj.GetComponent<UnitStateController>() !=null && isPlayerOneEntity != triggerObj.GetComponent<UnitStateController>().isPlayerOneEntity)
 		{
 			if (!unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
 				targetList.Add(triggerObj);
 		}
 		else if (triggerObj.GetComponent<BuildingManager>() != null && isPlayerOneEntity != triggerObj.GetComponent<BuildingManager>().isPlayerOneEntity
-			&& triggerObj.GetComponent<CanPlaceBuilding>().isPlaced)    //filter out non placed buildings
+			&& triggerObj.GetComponent<CanPlaceBuilding>().isPlaced)
 		{
 			if (!buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 				targetList.Add(triggerObj);
@@ -112,10 +104,7 @@ public class UnitStateController : Entities
 	public void RemoveTargetsOnFOVExit(GameObject triggerObj)
 	{
 		if (targetList.Contains(triggerObj))
-		{
 			targetList.Remove(triggerObj);
-			//triggerObj.GetComponent<Entities>().HideEntity();
-		}
 
 		if (unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
 			unitTargetList.Remove(triggerObj.GetComponent<UnitStateController>());
@@ -142,7 +131,7 @@ public class UnitStateController : Entities
 				Entities entity = targetList[i].GetComponent<Entities>();
 				if (CheckIfEntityInLineOfSight(entity) && entity != null)
 				{
-					if (!entity.wasRecentlySpotted && ShouldDisplayEventNotifToPlayer())
+					if (!entity.wasRecentlySpotted && ShouldDisplayEventNotifToPlayer() && entity.GetComponent<CargoShipController>() == null)
 						GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
 
 					entity.ShowEntity();

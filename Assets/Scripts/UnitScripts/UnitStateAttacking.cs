@@ -47,7 +47,7 @@ public class UnitStateAttacking : UnitBaseState
 		}
 		if (Vector3.Distance(unit.transform.position, unit.movePos) < unit.agentNav.stoppingDistance)
 		{
-			if (unit.isUnitArmed)
+			if (unit.hasMoveAnimation)
 				unit.animatorController.SetBool("isIdle", true);
 			
 			if (unit.movingSFX.isPlaying)

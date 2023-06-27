@@ -285,18 +285,18 @@ public class UnitSelectionManager : MonoBehaviour
 		{
 			ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
 
-			if (resourceNode.isBeingMined || resourceNode.isEmpty) //if node already being mined or is empty notify player and cancel order
-			{
-				Debug.Log("Resource Node is either empty of resources or is already being mined");
-			}
+			if (resourceNode.isBeingMined) //if node already being mined or is empty notify player and cancel order
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
+
+			else if (resourceNode.isEmpty)
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
+
 			else //else mine selected node
 				SelectedCargoShip.SetResourceNodeFromPlayerInput(resourceNode);
 		}
 		//move selected units to mouse pos
 		else if (selectedUnitList.Count != 0)
-		{
 			MoveUnitsInFormation();
-		}
 		//move selected units closer to target and attack it
 		else if (selectedUnitList.Count != 0 && Obj.GetComponent<UnitStateController>().isPlayerOneEntity != playerController.isPlayerOne)
 		{
@@ -398,7 +398,7 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{
-			if(!CheckForCargoShip(unit) && unit.isPlayerOneEntity != !playerController.isPlayerOne)
+			if(unit.isPlayerOneEntity != !playerController.isPlayerOne)
 				selectedUnitList.Add(unit);
 		}
 		dragSelectedUnitList.Clear();
@@ -631,9 +631,9 @@ public class UnitSelectionManager : MonoBehaviour
 			return true;
 		else return false;
 	}
-	public bool CheckForCargoShip(UnitStateController unit)
+	public bool CheckForCargoShip(CargoShipController cargoShip)
 	{
-		if (unit.isCargoShip)
+		if (cargoShip != null)
 			return true;
 		else return false;
 	}

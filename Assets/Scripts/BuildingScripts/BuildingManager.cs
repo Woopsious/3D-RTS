@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -73,8 +74,17 @@ public class BuildingManager : Entities
 		}
 		else if (isRefineryBuilding)
 		{
-			GetComponent<RefineryController>().DeleteCargoShipsOnDeath();
-			capturePointController.RefinaryBuildings.Remove(this);
+			try  //on the offchance one or both cargoships are already dead
+			{
+				GetComponent<RefineryController>().CargoShipList[1].DeleteSelf();
+				GetComponent<RefineryController>().CargoShipList[0].DeleteSelf();
+				capturePointController.RefinaryBuildings.Remove(this);
+			}
+			catch (Exception e)
+			{
+				throw e;
+			}
+			
 		}
 		else if (isLightVehProdBuilding)
 		{

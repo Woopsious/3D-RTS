@@ -70,12 +70,4 @@ public class RefineryController : MonoBehaviour
 
 		CheckCargoShipsCount();
 	}
-	public void DeleteCargoShipsOnDeath()
-	{
-		for (int i = 0; i < CargoShipList.Count - 1; i++)
-		{
-			building.playerController.unitListForPlayer.Remove(CargoShipList[i]);
-			CargoShipList[i].DeleteSelf();
-		}
-	}
 }
