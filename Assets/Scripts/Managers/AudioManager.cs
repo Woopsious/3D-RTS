@@ -25,19 +25,12 @@ public class AudioManager : MonoBehaviour
 	}
 	public void AdjustAudioVolume()
 	{
-			BuildingManager[] buildings = FindObjectsOfType<BuildingManager>();
+		Entities[] entities = FindObjectsOfType<Entities>();
 
-			foreach (BuildingManager building in buildings)
-			{
-			if (building.buildingIdleSound != null)
-				building.UpdateAudioVolume();
-			}
-			UnitStateController[] units = FindObjectsOfType<UnitStateController>();
-
-			foreach (UnitStateController unit in units)
-			{
-				unit.UpdateAudioVolume();
-			}
+		foreach (Entities entity in entities)
+		{
+			entity.UpdateEntityAudioVolume();
+		}
 	}
 	public void UpdateBackgroundSounds()
 	{

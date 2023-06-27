@@ -34,22 +34,22 @@ public class CargoShipController : UnitStateController
 		PlayerController[] controllers = FindObjectsOfType<PlayerController>();
 		foreach (PlayerController controller in controllers)
 		{
-			if (controller.isPlayerOne == isPlayerOneUnit)
+			if (controller.isPlayerOne == isPlayerOneEntity)
 			{
 				playerController = controller;
 				playerController.unitListForPlayer.Add(this);
 			}
-			else if (controller.isPlayerOne == !isPlayerOneUnit)
+			else if (controller.isPlayerOne == !isPlayerOneEntity)
 			{
 				playerController = controller;
 				playerController.unitListForPlayer.Add(this);
 			}
 		}
 
-		unitUiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
-		unitUiObj.SetActive(false);
+		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
+		UiObj.SetActive(false);
 		UpdateHealthBar();
-		unitUiObj.transform.rotation = Quaternion.identity;
+		UiObj.transform.rotation = Quaternion.identity;
 
 		FindTargetResourcesNode();
 		StartCoroutine(MoveToResourceNode());
@@ -152,7 +152,7 @@ public class CargoShipController : UnitStateController
 	}
 
 	//Utility Functions
-	public override void RemoveRefs()
+	public override void RemoveEntityRefs()
 	{
 		targetResourceNode.isBeingMined = false;
 		refineryControllerParent.CargoShipList.Remove(this);
@@ -197,6 +197,10 @@ public class CargoShipController : UnitStateController
 	public void SetDestination(Vector3 moveDestination)
 	{
 		movePos = moveDestination;
+	}
+	public void DeleteSelf()
+	{
+		Destroy(gameObject);
 	}
 
 	//bool checks

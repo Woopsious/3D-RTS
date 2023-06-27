@@ -7,24 +7,22 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ErrorManager : MonoBehaviour
+public class ErrorLogManager : MonoBehaviour
 {
-	public static ErrorManager Instance;
+	public static ErrorLogManager Instance;
 
+	[Header("Prefabs")]
 	public GameObject errorWindowPrefab;
 	public GameObject errorLogMessagePrefab;
-	public GameObject errorLogWindowAndPlayerNotifParent;
 
+	[Header("Scene Change Refs")]
+	public GameObject errorLogWindowParent;
 	public GameObject errorLogWindowObj;
 	public Button errorLogClearButton;
 	public Button errorLogCloseButton;
 	public Scrollbar errorLogScrollBar;
-
 	public string lastLogMessage;
 	public Text lastLogCounterText;
-
-	public GameObject playerNotifObj;
-	public Text playerNotifText;
 
 	public void Update()
 	{
@@ -38,45 +36,26 @@ public class ErrorManager : MonoBehaviour
 	}
 
 	//SET UP ERROR LOGGER AND PLAYER NOTIFICATIONS
-	public void CheckForErrorMessageObj()
+	public void CheckForErrorLogObj()
 	{
-		if (errorLogWindowAndPlayerNotifParent == null)
-			errorLogWindowAndPlayerNotifParent = Instantiate(errorWindowPrefab, transform.position, Quaternion.identity);
+		if (errorLogWindowParent == null)
+		{
+			errorLogWindowParent = Instantiate(errorWindowPrefab, transform.position, Quaternion.identity);
+			errorLogWindowParent.transform.SetParent(FindObjectOfType<Canvas>().transform, false);
+			errorLogWindowParent.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
 
-		errorLogWindowAndPlayerNotifParent.transform.SetParent(FindObjectOfType<Canvas>().transform, false);
-		errorLogWindowAndPlayerNotifParent.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
-
-		SetUpErrorLogNotification();
-		SetUpPlayerNotification();
+			SetUpErrorLogNotifs();
+		}
 	}
-	public void SetUpPlayerNotification()
+	public void SetUpErrorLogNotifs()
 	{
-		playerNotifObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(4).gameObject; //set up player pop up notifs
-		playerNotifText = playerNotifObj.GetComponentInChildren<Text>();
-	}
-	public void SetUpErrorLogNotification()
-	{
-		errorLogWindowObj = errorLogWindowAndPlayerNotifParent.transform.GetChild(0).gameObject;
-		errorLogClearButton = errorLogWindowAndPlayerNotifParent.transform.GetChild(1).GetComponent<Button>();
-		errorLogCloseButton = errorLogWindowAndPlayerNotifParent.transform.GetChild(2).GetComponent<Button>();
-		errorLogScrollBar = errorLogWindowAndPlayerNotifParent.transform.GetChild(3).GetComponent<Scrollbar>();
+		errorLogWindowObj = errorLogWindowParent.transform.GetChild(0).gameObject;
+		errorLogClearButton = errorLogWindowParent.transform.GetChild(1).GetComponent<Button>();
+		errorLogCloseButton = errorLogWindowParent.transform.GetChild(2).GetComponent<Button>();
+		errorLogScrollBar = errorLogWindowParent.transform.GetChild(3).GetComponent<Scrollbar>();
 
 		errorLogClearButton.onClick.AddListener(delegate { ClearErrorLog(); });
 		errorLogCloseButton.onClick.AddListener(delegate { CloseErrorLog(); });
-	}
-
-	//FUNCTIONS FOR PLAYER NOTIFICATIONS
-	public void DisplayNotificationMessage(string errorMessage, float displayTimeInSeconds)
-	{
-		playerNotifText.text = errorMessage;
-		playerNotifObj.SetActive(true);
-		StartCoroutine(HidePopUpMessage(displayTimeInSeconds));
-	}
-	public IEnumerator HidePopUpMessage(float displayTimeInSeconds)
-	{
-		yield return new WaitForSeconds(displayTimeInSeconds);
-		playerNotifObj.SetActive(false);
-		playerNotifText.text = "";
 	}
 
 	//FUNCTIONS FOR ERROR LOG
@@ -165,7 +144,7 @@ public class ErrorManager : MonoBehaviour
 	{
 		string playerLogPath = Application.persistentDataPath + "/playerError.log";
 		string prevPlayeLogPath = Application.persistentDataPath + "/prevPlayerError.log";
-		Debug.Log("handling log files");
+
 		if (File.Exists(playerLogPath))
 		{
 			if (File.Exists(prevPlayeLogPath)) //delete prevPlayerError.log, rename playerError.log to prevPlayerError.log
@@ -233,5 +212,3 @@ public class ErrorManager : MonoBehaviour
 		errorLogScrollBar.gameObject.SetActive(false);
 	}
 }
-
-

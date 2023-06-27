@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 
 public class WeaponSystem : MonoBehaviour
@@ -27,16 +28,18 @@ public class WeaponSystem : MonoBehaviour
 	public float secondaryWeaponAttackSpeedTimer;
 	public bool hasSecondaryWeapon;
 
-	//if x component exists + not in list, then add it to list, else ignore it, then grab closest
+	//if x component exists and not in list, then add it to list, else ignore it, then grab closest
 	public void TryFindTarget()
 	{
 		foreach (GameObject target in unit.targetList)
 		{
-			if (target.GetComponent<UnitStateController>() && target != null && !unit.unitTargetList.Contains(target.GetComponent<UnitStateController>()))
+			if (target.GetComponent<UnitStateController>() && target != null && CheckIfInAttackRange(target.transform.position) &&
+				!unit.unitTargetList.Contains(target.GetComponent<UnitStateController>()))
 			{
 				unit.unitTargetList.Add(target.GetComponent<UnitStateController>());
 			}
-			else if (target.GetComponent<BuildingManager>() && target != null && !unit.buildingTargetList.Contains(target.GetComponent<BuildingManager>()))
+			else if (target.GetComponent<BuildingManager>() && target != null && CheckIfInAttackRange(target.transform.position) && 
+				!unit.buildingTargetList.Contains(target.GetComponent<BuildingManager>()))
 			{
 				unit.buildingTargetList.Add(target.GetComponent<BuildingManager>());
 			}
@@ -51,9 +54,9 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.unitTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && unit.CheckIfUnitInLineOfSight(unit.unitTargetList[i])
-				&& unit.unitTargetList[i] != null)
-				return unit.unitTargetList[i];
+			if (CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && 
+				unit.CheckIfEntityInLineOfSight(unit.unitTargetList[i]) && unit.unitTargetList[i] != null)
+					return unit.unitTargetList[i];
 		}
 		return null;
 	}
@@ -63,9 +66,9 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.buildingTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && unit.CheckIfBuildingInLineOfSight(unit.buildingTargetList[i])
-				&& unit.buildingTargetList[i] != null)
-				return unit.buildingTargetList[i];
+			if (CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && 
+				unit.CheckIfEntityInLineOfSight(unit.buildingTargetList[i]) && unit.buildingTargetList[i] != null)
+					return unit.buildingTargetList[i];
 		}
 		return null;
 	}
@@ -73,25 +76,33 @@ public class WeaponSystem : MonoBehaviour
 	//check if entity exists + is in attack range, if true shoot it, else try get new target and remove null refs from lists
 	public void ShootMainWeapon()
 	{
-		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfUnitInLineOfSight(unit.currentUnitTarget))
+		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
 		{
-			if (unit.hasAnimation)
+			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
+
+			if (!unit.currentUnitTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
+				GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", unit.currentUnitTarget.transform.position);
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
+			unit.currentUnitTarget.ResetIsEntityHitTimer();
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
 		}
 		else if (!HasUnitTarget() && HasBuildingTarget() && 
-			CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && unit.CheckIfBuildingInLineOfSight(unit.currentBuildingTarget))
+			CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
 		{
-			if (unit.hasAnimation)
+			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
+
+			if (!unit.currentBuildingTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
+				GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING UNDER ATTACK", unit.currentBuildingTarget.transform.position);
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			unit.currentBuildingTarget.RecieveDamage(mainWeaponDamage);
+			unit.currentBuildingTarget.ResetIsEntityHitTimer();
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
@@ -100,7 +111,7 @@ public class WeaponSystem : MonoBehaviour
 		{
 			unit.currentUnitTarget = null;
 			unit.currentBuildingTarget = null;
-			unit.RemoveNullRefsFromLists(unit.targetList, unit.unitTargetList, unit.buildingTargetList);
+			RemoveNullRefsFromLists(unit.targetList, unit.unitTargetList, unit.buildingTargetList);
 			TryFindTarget();
 		}
 	}
@@ -123,11 +134,30 @@ public class WeaponSystem : MonoBehaviour
 			secondaryWeaponParticles.Play();
 		}
 	}
-	//function to shoot projectile at target center
-	public void AimProjectileAtTarget(GameObject particleObject, Vector3 targetPos)
+
+	//UTILITY FUNCTIONS
+	public void AimProjectileAtTarget(GameObject particleObject, Vector3 targetPos) //function to shoot projectile at target center
 	{
 		var lookRotation = Quaternion.LookRotation(targetPos - particleObject.transform.position);
 		particleObject.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, 1);
+	}
+	public void RemoveNullRefsFromLists(List<GameObject> targetList, List<UnitStateController> unitList, List<BuildingManager> buildingList)
+	{
+		for (int i = targetList.Count - 1; i >= 0; i--)
+		{
+			if (targetList[i] == null)
+				targetList.RemoveAt(i);
+		}
+		for (int i = unitList.Count - 1; i >= 0; i--)
+		{
+			if (unitList[i] == null)
+				unitList.RemoveAt(i);
+		}
+		for (int i = buildingList.Count - 1; i >= 0; i--)
+		{
+			if (buildingList[i] == null)
+				buildingList.RemoveAt(i);
+		}
 	}
 
 	//BOOL CHECKS

@@ -11,7 +11,8 @@ public class GameManager : MonoBehaviour
 	public static GameManager Instance;
 
 	public GameUIManager gameUIManager;
-	public ErrorManager errorManager;
+	public ErrorLogManager errorManager;
+	public PlayerNotifsManager playerNotifsManager;
 
 	//references
 	public float timer;
@@ -99,7 +100,7 @@ public class GameManager : MonoBehaviour
 		playerGameDataPath = Path.Combine(Application.persistentDataPath, "Saves");
 
 		GameManager.Instance.errorManager.OnStartUpHandleLogFiles();
-		GameManager.Instance.errorManager.CheckForErrorMessageObj();
+		GameManager.Instance.errorManager.CheckForErrorLogObj();
 		InputManager.Instance.SetUpKeybindDictionary();
 
 		GameManager.Instance.LoadPlayerData();
@@ -233,9 +234,10 @@ public class GameManager : MonoBehaviour
 		}
 		else if (sceneIndex == 1)
 		{
+			GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 			gameUIManager.ResetUi();
 			gameUIManager.ResetUnitGroupUI();
 		}
-		GameManager.Instance.errorManager.CheckForErrorMessageObj();
+		GameManager.Instance.errorManager.CheckForErrorLogObj();
 	}
 }

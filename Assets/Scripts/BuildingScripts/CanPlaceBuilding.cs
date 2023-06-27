@@ -21,10 +21,10 @@ public class CanPlaceBuilding : MonoBehaviour
 			highlighterObj.SetActive(true);
 		CanPlaceHighliterRed();
 
-		if (building.isPlayerOneBuilding)
+		if (building.isPlayerOneEntity)
 			building.miniMapRenderObj.layer = 11;
 
-		else if (!building.isPlayerOneBuilding)
+		else if (!building.isPlayerOneEntity)
 			building.miniMapRenderObj.layer = 12;
 	}
 	public void Update()
@@ -83,8 +83,8 @@ public class CanPlaceBuilding : MonoBehaviour
 	}
 	public bool CheckIfCapturePointIsNeutral()
 	{
-		if (pointController.isPlayerOnePoint == building.isPlayerOneBuilding && !pointController.isNeutralPoint ||
-			pointController.isPlayerTwoPoint == !building.isPlayerOneBuilding && !pointController.isNeutralPoint)
+		if (pointController.isPlayerOnePoint == building.isPlayerOneEntity && !pointController.isNeutralPoint ||
+			pointController.isPlayerTwoPoint == !building.isPlayerOneEntity && !pointController.isNeutralPoint)
 		{
 			return false;
 		}
@@ -108,7 +108,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		if (pointController == null)
 			return canPlace = false;
 
-		if (!pointController.isPlayerOnePoint != building.isPlayerOneBuilding && pointController != null && !isCollidingWithAnotherBuilding &&
+		if (!pointController.isPlayerOnePoint != building.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
 			building.transform.position.y > 9f && building.transform.position.y < 10.5f)
 		{
 			if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)

@@ -80,9 +80,9 @@ public class CapturePointController : MonoBehaviour
 		{
 			UnitStateController unit = other.GetComponent<UnitStateController>();
 
-			if (unit.isPlayerOneUnit)
+			if (unit.isPlayerOneEntity)
 				playerOneUnitList.Add(unit);
-			else if (!unit.isPlayerOneUnit)
+			else if (!unit.isPlayerOneEntity)
 				playerTwoUnitList.Add(unit);
 		}
 	}
@@ -92,9 +92,9 @@ public class CapturePointController : MonoBehaviour
 		{
 			UnitStateController unit = other.GetComponent<UnitStateController>();
 
-			if (unit.isPlayerOneUnit)
+			if (unit.isPlayerOneEntity)
 				playerOneUnitList.Remove(unit);
-			else if (!unit.isPlayerOneUnit)
+			else if (!unit.isPlayerOneEntity)
 				playerTwoUnitList.Remove(unit);
 		}
 	}

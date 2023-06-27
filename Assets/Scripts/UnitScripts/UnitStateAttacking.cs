@@ -83,7 +83,7 @@ public class UnitStateAttacking : UnitBaseState
 				unit.weaponSystem.secondaryWeaponAttackSpeedTimer -= Time.deltaTime;
 		else
 		{
-			if (unit.hasAnimation)
+			if (unit.hasShootAnimation)
 				unit.StartCoroutine(unit.DelaySecondaryAttack(unit, 1));
 			else
 				unit.weaponSystem.ShootSecondaryWeapon();

@@ -17,10 +17,10 @@ public class UnitMovingState : UnitBaseState
 		}
 		unit.movingSFX.Play();
 
-		if (unit.unitName != "Scout Vehicle")
+		if (unit.hasMoveAnimation)
 			unit.animatorController.SetBool("isIdle", false);
 
-		if (unit.hasAnimation)
+		if (unit.hasShootAnimation)
 			unit.animatorController.SetBool("isAttacking", false);
 
 		unit.agentNav.isStopped = false;
@@ -29,10 +29,10 @@ public class UnitMovingState : UnitBaseState
 		else
 		{
 			unit.ChangeStateIdle();
-			GameManager.Instance.errorManager.DisplayNotificationMessage("Unit Cant find path to location", 2);
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
 		}
 
-		unit.HideUnit();
+		//unit.HideEntity();
 	}
 	public override void Exit(UnitStateController unit)
 	{

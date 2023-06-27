@@ -63,17 +63,20 @@
     <Compile Include="Assets\Scripts\BuildTime.cs" />
     <Compile Include="Assets\Scripts\DestroyInSeconds.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\UnitStateController.cs" />
-    <Compile Include="Assets\Scripts\InputManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\InputManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\UnitMovingState.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\BuildingPlacementManager.cs" />
     <Compile Include="Assets\Scripts\TestScripts\TestScript.cs" />
     <Compile Include="Assets\Scripts\PlayerData.cs" />
     <Compile Include="Assets\Scripts\ResourceNodes.cs" />
+    <Compile Include="Assets\Scripts\Managers\NotifsEventManager.cs" />
     <Compile Include="Assets\Scripts\Managers\AudioManager.cs" />
     <Compile Include="Assets\Scripts\Managers\CameraController.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitSelectionManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\PlayerNotifsManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\ParticleCollisions.cs" />
     <Compile Include="Assets\Scripts\Managers\MenuUIManager.cs" />
+    <Compile Include="Assets\Scripts\Entities.cs" />
     <Compile Include="Assets\Scripts\Managers\GameUIManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\UnitBaseState.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\RefineryController.cs" />
@@ -85,13 +88,11 @@
     <Compile Include="Assets\Scripts\UnitScripts\WeaponSystem.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\CanPlaceBuilding.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\PlayerController.cs" />
-    <Compile Include="Assets\Scripts\Managers\ErrorManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\ErrorLogManager.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\BuildingManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\ParticleEffects.cs" />
-    <Compile Include="Assets\Scripts\ShowNavMesh.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitProductionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\CapturePointController.cs" />
-    <Compile Include="Assets\Scripts\Entities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Effects\UI\FogOfWar\TestUnlit 1.shader" />

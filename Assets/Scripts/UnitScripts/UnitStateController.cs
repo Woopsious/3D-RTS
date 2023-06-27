@@ -8,8 +8,9 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.UI.CanvasScaler;
 
-public class UnitStateController : MonoBehaviour
+public class UnitStateController : Entities
 {
 	public LayerMask ignoreMe;
 	public UnitBaseState currentState;
@@ -21,49 +22,26 @@ public class UnitStateController : MonoBehaviour
 
 	[Header("Unit Refs")]
 	public Animator animatorController;
-	public List<AudioSource> audioSFXs = new List<AudioSource>();
 	public AudioSource movingSFX;
 	public NavMeshAgent agentNav;
 	public Rigidbody rb;
-	public GameObject CenterPoint;
-	public GameObject unitDeathObj;
-	public GameObject selectedHighlighter;
-	public GameObject miniMapRenderObj;
 	public GameObject FoVMeshObj;
 
-	public GameObject unitUiObj;
-	public UnityEngine.UI.Slider HealthSlider;
-	public Text HealthText;
-
-	public bool isPlayerOneUnit;
-	public bool isSelected;
-	public bool isUnitArmed;
-	public bool isFlying;
-	public bool hasAnimation;
-	public bool hasRadar;
-	public bool isCargoShip;
-	public bool isSpotted;
-	public bool wasRecentlyHit;
-
-	[Header("Unit Stat Refs")]
+	[Header("Unit Stats")]
 	public string unitName;
-	public int moneyCost; 
-	public int alloyCost; 
-	public int crystalCost;
-	public int maxHealth;
-	public int currentHealth;
-	public int armour;
 	public float attackRange;
 	public float ViewRange;
 
-	public float spottedCooldown = 5f;
-	public float spottedTimer = 5f;
-	public float hitCooldown = 5f;
-	public float hitTimer = 5f;
+	[Header("Unit Bools")]
+	public bool isUnitArmed;
+	public bool isFlying;
+	public bool hasRadar;
+	public bool isCargoShip;
+	public bool hasShootAnimation;
+	public bool hasMoveAnimation;
 
 	[Header("Unit Dynamic Refs")]
 	public int GroupNum;
-	public PlayerController playerController;
 
 	public List<GameObject> targetList;
 	public List<BuildingManager> buildingTargetList;
@@ -76,53 +54,31 @@ public class UnitStateController : MonoBehaviour
 
 	RaycastHit raycastHit;
 
-	public virtual void Start()
+	public override void Start()
 	{
+		base.Start();
+
 		ChangeStateIdle();
-		UpdateAudioVolume();
 		//assign correct playercontroller to unit on start
 		PlayerController[] controllers = FindObjectsOfType<PlayerController>();
 		foreach(PlayerController controller in controllers)
 		{
-			if(controller.isPlayerOne == isPlayerOneUnit)
+			if(controller.isPlayerOne == isPlayerOneEntity)
 			{
 				playerController = controller;
 				playerController.unitListForPlayer.Add(this);
 			}
-			else if (controller.isPlayerOne == !isPlayerOneUnit)
+			else if (controller.isPlayerOne == !isPlayerOneEntity)
 			{
 				playerController = controller;
 				playerController.unitListForPlayer.Add(this);
 			}
 		}
-		unitUiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
-		unitUiObj.SetActive(false);
-		UpdateHealthBar();
-		unitUiObj.transform.rotation = Quaternion.identity;
-
-		if (isPlayerOneUnit)
-			miniMapRenderObj.layer = 11;
-
-		else if (!isPlayerOneUnit)
-			miniMapRenderObj.layer = 12;
-		//FoVMeshObj.SetActive(true);
 	}
-	public virtual void Update()
+	public override void Update()
 	{
-		if (unitUiObj.activeInHierarchy)
-			unitUiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
+		base.Update();
 
-		/*
-		if (isSelected)
-		{
-			if (!unitUiObj.activeInHierarchy)
-				unitUiObj.SetActive(true);
-			unitUiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
-		}
-		if (!isSelected && unitUiObj.activeInHierarchy)
-			unitUiObj.SetActive(false);
-		*/
-		UnitIsHitTimer();
 		currentState.UpdateLogic(this);
 	}
 	public virtual void FixedUpdate()
@@ -139,22 +95,16 @@ public class UnitStateController : MonoBehaviour
 	//SPOTTING SYSTEM FUNCTIONS
 	public void AddTargetsOnFOVEnter(GameObject triggerObj) //filter out everything but enemy Entities
 	{
-		if (triggerObj.GetComponent<UnitStateController>() != null && isPlayerOneUnit != triggerObj.GetComponent<UnitStateController>().isPlayerOneUnit)
+		if (triggerObj.GetComponent<UnitStateController>() != null && isPlayerOneEntity != triggerObj.GetComponent<UnitStateController>().isPlayerOneEntity)
 		{
-			Debug.Log("unit entity Spotted");
 			if (!unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
 				targetList.Add(triggerObj);
 		}
-		else if (triggerObj.GetComponent<BuildingManager>() != null && isPlayerOneUnit != triggerObj.GetComponent<BuildingManager>().isPlayerOneBuilding
+		else if (triggerObj.GetComponent<BuildingManager>() != null && isPlayerOneEntity != triggerObj.GetComponent<BuildingManager>().isPlayerOneEntity
 			&& triggerObj.GetComponent<CanPlaceBuilding>().isPlaced)    //filter out non placed buildings
 		{
-			Debug.Log("building entity Spotted");
 			if (!buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 				targetList.Add(triggerObj);
-		}
-		else
-		{
-			Debug.Log("no conditions met");
 		}
 		if (targetList.Count == 1)
 			StartCoroutine(TrySpotTargetsNotSpotted());
@@ -164,13 +114,7 @@ public class UnitStateController : MonoBehaviour
 		if (targetList.Contains(triggerObj))
 		{
 			targetList.Remove(triggerObj);
-			triggerObj.GetComponent<UnitStateController>().HideUnit();
-		}
-
-		else if (targetList.Contains(triggerObj))
-		{
-			targetList.Remove(triggerObj);
-			triggerObj.GetComponent<BuildingManager>().HideBuilding();
+			//triggerObj.GetComponent<Entities>().HideEntity();
 		}
 
 		if (unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
@@ -179,23 +123,11 @@ public class UnitStateController : MonoBehaviour
 		if (buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 			buildingTargetList.Remove(triggerObj.GetComponent<BuildingManager>());
 	}
-	public bool CheckIfUnitInLineOfSight(UnitStateController unit)
+	public bool CheckIfEntityInLineOfSight(Entities entity)
 	{
-		Physics.Linecast(CenterPoint.transform.position, unit.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
-		raycastHit = hit;
+		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
 
-		if (hit.collider.gameObject == unit.gameObject)
-			return true;
-
-		else
-			return false;
-	}
-	public bool CheckIfBuildingInLineOfSight(BuildingManager building)
-	{
-		Physics.Linecast(CenterPoint.transform.position, building.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
-		raycastHit = hit;
-
-		if (hit.collider.gameObject == building.gameObject)
+		if (hit.collider.gameObject == entity.gameObject)
 			return true;
 
 		else
@@ -207,29 +139,14 @@ public class UnitStateController : MonoBehaviour
 		{
 			for (int i = 0; i < targetList.Count; i++)
 			{
-				if (targetList[i].GetComponent<UnitStateController>() != null)
+				Entities entity = targetList[i].GetComponent<Entities>();
+				if (CheckIfEntityInLineOfSight(entity) && entity != null)
 				{
-					UnitStateController unit = targetList[i].GetComponent<UnitStateController>();
-					if (!unit.isSpotted && CheckIfUnitInLineOfSight(unit))
-					{
-						GameManager.Instance.errorManager.DisplayNotificationMessage("Enemy Unit Spotted", 1f);
-						unit.ShowUnit();
-					}
+					if (!entity.wasRecentlySpotted && ShouldDisplayEventNotifToPlayer())
+						GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
 
-					else if (unit.isSpotted && !CheckIfUnitInLineOfSight(unit))
-						unit.HideUnit();
-				}
-				else if (targetList[i].GetComponent<BuildingManager>() != null)
-				{
-					BuildingManager building = targetList[i].GetComponent<BuildingManager>();
-					if (!building.isSpotted && CheckIfBuildingInLineOfSight(building))
-					{
-						GameManager.Instance.errorManager.DisplayNotificationMessage("Enemy Building Spotted", 1f);
-						building.ShowBuilding();
-					}
-
-					else if (building.isSpotted && !CheckIfBuildingInLineOfSight(building))
-						building.HideBuilding();
+					entity.ShowEntity();
+					entity.ResetEntitySpottedTimer();
 				}
 			}
 		}
@@ -239,91 +156,13 @@ public class UnitStateController : MonoBehaviour
 			//should be fine to leave as null refs from lists get removed after target is destroyed
 		}
 
-		yield return new WaitForSeconds(1);
+		yield return new WaitForSeconds(0.5f);
 
 		if (targetList.Count != 0)
 			StartCoroutine(TrySpotTargetsNotSpotted());
 	}
-	public void UnitIsSpottedTimer()
-	{
-		if (spottedTimer > 0)
-			spottedTimer -= Time.deltaTime;
 
-		else
-			Debug.Log("Time Ran Out");
-	}
-	public void ResetUnitIsSpottedTimer()
-	{
-		spottedTimer = 5f;
-	}
-
-	//HEALTH FUNCTIONS
-	public void RecieveDamage(int dmg)
-	{
-		dmg -= armour;
-		if (dmg < 0)
-			dmg = 0;
-		currentHealth -= dmg;
-		ResetUnitIsHitTimer();
-		UpdateHealthBar();
-		OnDeath();
-
-		//notify player when unit is under attack
-	}
-	public void UpdateHealthBar()
-	{
-		float healthPercentage = (float)currentHealth / (float)maxHealth * 100;
-		HealthSlider.value = healthPercentage;
-		HealthText.text = currentHealth.ToString() + " / " + maxHealth.ToString();
-	}
-	public void OnDeath()
-	{
-		if(currentHealth <= 0)
-		{
-			RemoveRefs();
-
-			Instantiate(unitDeathObj, transform.position, Quaternion.identity);
-
-			Destroy(unitUiObj);
-			Destroy(gameObject);
-		}
-	}
-	public void UnitIsHitTimer()
-	{
-		if (hitTimer > 0)
-			hitTimer -= Time.deltaTime;
-
-		else if (wasRecentlyHit && hitTimer < 0)
-		{
-			unitUiObj.SetActive(false);
-			wasRecentlyHit = false;
-		}
-	}
-	public void ResetUnitIsHitTimer()
-	{
-		unitUiObj.SetActive(true);
-		wasRecentlyHit = true;
-		hitTimer = 5f;
-	}
 	//UTILITY FUNCTIONS
-	public void RemoveNullRefsFromLists(List<GameObject> targetList, List<UnitStateController> unitList, List<BuildingManager> buildingList)
-	{
-		for (int i = targetList.Count - 1; i >= 0; i--)
-		{
-			if (targetList[i] == null)
-				targetList.RemoveAt(i);
-		}
-		for (int i = unitList.Count - 1; i >= 0; i--)
-		{
-			if (unitList[i] == null)
-				unitList.RemoveAt(i);
-		}
-		for (int i = buildingList.Count - 1; i >= 0; i--)
-		{
-			if (buildingList[i] == null)
-				buildingList.RemoveAt(i);
-		}
-	}
 	public IEnumerator DelaySecondaryAttack(UnitStateController unit, float seconds)
 	{
 		unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
@@ -331,34 +170,7 @@ public class UnitStateController : MonoBehaviour
 		yield return new WaitForSeconds(seconds);
 		unit.weaponSystem.ShootSecondaryWeapon();
 	}
-	public void RefundUnit()
-	{
-		currentHealth = 0;
-		int refundMoney = (int)(moneyCost / 1.5);
-		int refundAlloy = (int)(alloyCost / 1.5);
-		int refundCrystal = (int)(crystalCost / 1.5);
-
-		if (isPlayerOneUnit)
-		{
-			GameManager.Instance.playerOneCurrentMoney += refundMoney;
-			GameManager.Instance.playerOneCurrentAlloys += refundAlloy;
-			GameManager.Instance.playerOneCurrentCrystals += refundCrystal;
-		}
-		else if (!isPlayerOneUnit)
-		{
-			GameManager.Instance.aiCurrentMoney += refundMoney;
-			GameManager.Instance.aiCurrentAlloys += refundAlloy;
-			GameManager.Instance.aiCurrentCrystals += refundCrystal;
-		}
-		playerController.gameUIManager.UpdateCurrentResourcesUI();
-		OnDeath();
-	}
-	public void UpdateAudioVolume()
-	{
-		foreach (AudioSource audio in audioSFXs)
-			audio.volume = AudioManager.Instance.gameSFX.volume;
-	}
-	public virtual void RemoveRefs()
+	public override void RemoveEntityRefs()
 	{
 		if (GroupNum == 1)
 		{
@@ -388,21 +200,6 @@ public class UnitStateController : MonoBehaviour
 
 		playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
 		playerController.unitListForPlayer.Remove(this);
-	}
-	public void ShowUnit()
-	{
-		miniMapRenderObj.layer = 13;
-		isSpotted = true;
-	}
-	public void HideUnit()
-	{
-		if (isPlayerOneUnit)
-			miniMapRenderObj.layer = 11;
-
-		else if (!isPlayerOneUnit)
-			miniMapRenderObj.layer = 12;
-
-		isSpotted = false;
 	}
 	public void OnDrawGizmosSelected()
 	{

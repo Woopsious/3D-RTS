@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 
 public class CameraController : MonoBehaviour
 {
+	public static CameraController instance;
 	public TerrainCollider terrainCollider;
 
 	private readonly float moveSpeed = 50f;
@@ -20,10 +21,10 @@ public class CameraController : MonoBehaviour
 
 	public void Start()
 	{
+		CameraController.instance = this;
 		if (terrainCollider != null)
 			prevTerrainHeight = Terrain.activeTerrain.SampleHeight(transform.position);
 	}
-
 	public void Update()
 	{
 		MoveCamera();
@@ -76,7 +77,6 @@ public class CameraController : MonoBehaviour
 			transform.eulerAngles -= new Vector3(transform.rotation.x, -turnSpeed, transform.rotation.y) * Time.unscaledDeltaTime;
 		}
 	}
-
 	public void AdjustHeight()
 	{
 		float terrainHeight = Terrain.activeTerrain.SampleHeight(transform.position);
@@ -87,6 +87,23 @@ public class CameraController : MonoBehaviour
 			changeInHeight = prevTerrainHeight - terrainHeight;
 			transform.position = new Vector3(transform.position.x, transform.position.y - changeInHeight, transform.position.z);
 			prevTerrainHeight = terrainHeight;
+		}
+	}
+
+	//function to jump camera to pos based on event notifs
+	public void SetNewCameraPosition(Vector3 movePos)
+	{
+		float offset = gameObject.transform.position.y - 10;
+
+		if (movePos.z < offset + 10)
+		{
+			gameObject.transform.eulerAngles = new Vector3(0, 180, 0);
+			gameObject.transform.position = new Vector3(movePos.x, gameObject.transform.position.y, movePos.z + offset);
+		}
+		else
+		{
+			gameObject.transform.eulerAngles = new Vector3(0, 0, 0);
+			gameObject.transform.position = new Vector3(movePos.x, gameObject.transform.position.y, movePos.z - offset);
 		}
 	}
 }
