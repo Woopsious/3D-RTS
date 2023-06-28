@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
 using static Unity.Collections.AllocatorManager;
+using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 
 public class UnitSelectionManager : MonoBehaviour
@@ -187,27 +188,57 @@ public class UnitSelectionManager : MonoBehaviour
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
 		if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe) && !playerController.IsMouseOverUI())
-		{
-			if (hitInfo.collider.gameObject.GetComponent<CargoShipController>() != null)
-				TrySelectCargoShip(hitInfo.collider.gameObject.GetComponent<CargoShipController>());
+		{	
+			//handle selecting of entities
+			if (hitInfo.collider.gameObject.GetComponent<Entities>() != null)
+			{
+				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
+				if (entity.GetComponent<UnitStateController>() != null && entity.isPlayerOneEntity != playerController.isPlayerOne)
+				{
+					Debug.Log("1");
+					TryAttackEnemyEntity();
+				}
 
-			else if (SelectedCargoShip != null && hitInfo.collider.gameObject.GetComponent<ResourceNodes>() != null)
-				TryMoveSelectedEntities(hitInfo.collider.gameObject);
+				else if (entity.GetComponent<CargoShipController>() != null)
+				{
+					Debug.Log("2");
+					TrySelectCargoShip(entity.GetComponent<CargoShipController>());
+				}
 
-			else if (hitInfo.collider.gameObject.GetComponent<BuildingManager>() != null)
-				TrySelectBuilding(hitInfo.collider.gameObject.GetComponent<BuildingManager>());
+				else if (entity.GetComponent<BuildingManager>() != null)
+				{
+					Debug.Log("3");
+					TrySelectBuilding(entity.GetComponent<BuildingManager>());
+				}
 
-			else if (hitInfo.collider.gameObject.GetComponent<UnitStateController>() != null)
-				TrySelectUnits(hitInfo.collider.gameObject.GetComponent<UnitStateController>());
-
-			else if (selectedUnitList.Count != 0)
-				TryMoveSelectedEntities(hitInfo.collider.gameObject);
-
+				else if (entity.GetComponent<UnitStateController>() != null)
+				{
+					Debug.Log("4");
+					TrySelectUnits(entity.GetComponent<UnitStateController>());
+				}
+			}
+			//handle anything else
 			else
 			{
-				DeselectUnits();
-				DeselectBuilding();
-				DeselectCargoShip();
+				if (SelectedCargoShip != null && hitInfo.collider.gameObject.GetComponent<ResourceNodes>() != null)
+				{
+					Debug.Log("5");
+					TryMoveSelectedEntities(hitInfo.collider.gameObject);
+				}
+
+				else if (selectedUnitList.Count != 0)
+				{
+					Debug.Log("6");
+					TryMoveSelectedEntities(hitInfo.collider.gameObject);
+				}
+
+				else
+				{
+					Debug.Log("reset");
+					DeselectUnits();
+					DeselectBuilding();
+					DeselectCargoShip();
+				}
 			}
 		}
 	}
@@ -297,8 +328,11 @@ public class UnitSelectionManager : MonoBehaviour
 		//move selected units to mouse pos
 		else if (selectedUnitList.Count != 0)
 			MoveUnitsInFormation();
+	}
+	public void TryAttackEnemyEntity()
+	{
 		//move selected units closer to target and attack it
-		else if (selectedUnitList.Count != 0 && Obj.GetComponent<UnitStateController>().isPlayerOneEntity != playerController.isPlayerOne)
+		//if (selectedUnitList.Count != 0 && entity.GetComponent<UnitStateController>().isPlayerOneEntity != playerController.isPlayerOne)
 		{
 			Debug.Log("FINAL CODE NOT IMPLAMENTED TO ATTACK SELECTED ENEMY UNIT");
 			MoveUnitsInFormation();

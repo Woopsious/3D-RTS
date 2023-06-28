@@ -35,7 +35,12 @@ public class UnitStateAttacking : UnitBaseState
 	public override void UpdatePhysics(UnitStateController unit)
 	{
 		//continue to last movement destination, only look at target thats within attack range
-		if (unit.currentUnitTarget != null)
+		if (unit.playerSetTarget != null)
+		{
+			if (unit.weaponSystem.CheckIfInAttackRange(unit.playerSetTarget.transform.position))
+				StopAndLookAtTarget(unit);
+		}
+		else if (unit.currentUnitTarget != null)
 		{
 			if (unit.weaponSystem.CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 				StopAndLookAtTarget(unit);
@@ -45,7 +50,7 @@ public class UnitStateAttacking : UnitBaseState
 			if (unit.weaponSystem.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 				StopAndLookAtTarget(unit);
 		}
-		if (Vector3.Distance(unit.transform.position, unit.movePos) < unit.agentNav.stoppingDistance)
+		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
 			if (unit.hasMoveAnimation)
 				unit.animatorController.SetBool("isIdle", true);
@@ -56,12 +61,17 @@ public class UnitStateAttacking : UnitBaseState
 	}
 	public void StopAndLookAtTarget(UnitStateController unit)
 	{
-		if (unit.currentUnitTarget != null)
+		if (unit.playerSetTarget != null)
+		{
+			var lookRotation = Quaternion.LookRotation(unit.playerSetTarget.transform.position - unit.transform.position);
+			unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, unit.agentNav.angularSpeed / 1000);
+		}
+		else if (unit.currentUnitTarget != null)
 		{
 			var lookRotation = Quaternion.LookRotation(unit.currentUnitTarget.transform.position - unit.transform.position);
 			unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, unit.agentNav.angularSpeed / 1000);
 		}
-		if (unit.currentUnitTarget == null && unit.currentBuildingTarget != null)
+		else if (unit.currentBuildingTarget != null)
 		{
 			var lookRotation = Quaternion.LookRotation(unit.currentBuildingTarget.transform.position - unit.transform.position);
 			unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, unit.agentNav.angularSpeed / 1000);

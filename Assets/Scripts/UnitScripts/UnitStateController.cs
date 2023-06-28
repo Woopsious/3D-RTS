@@ -41,18 +41,17 @@ public class UnitStateController : Entities
 	public bool hasMoveAnimation;
 
 	[Header("Unit Dynamic Refs")]
-	public int GroupNum;
-
 	public List<GameObject> targetList;
 	public List<BuildingManager> buildingTargetList;
 	public BuildingManager currentBuildingTarget;
 	public List<UnitStateController> unitTargetList;
 	public UnitStateController currentUnitTarget;
+	public Entities playerSetTarget;
+
+	public int GroupNum;
 	public Vector3 targetPos;
 	public Vector3 movePos;
 	public NavMeshPath navMeshPath;
-
-	RaycastHit raycastHit;
 
 	public override void Start()
 	{
@@ -187,7 +186,6 @@ public class UnitStateController : Entities
 		Gizmos.color = Color.red;
 		Gizmos.DrawWireSphere(transform.position, attackRange);
 		Gizmos.DrawWireSphere(transform.position, ViewRange);
-		Gizmos.DrawLine(CenterPoint.transform.position, raycastHit.point);
 	}
 
 	//STATE CHANGE FUNCTIONS

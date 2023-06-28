@@ -76,7 +76,22 @@ public class WeaponSystem : MonoBehaviour
 	//check if entity exists + is in attack range, if true shoot it, else try get new target and remove null refs from lists
 	public void ShootMainWeapon()
 	{
-		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
+		if (HasPlayerSetTarget() && CheckIfInAttackRange(unit.playerSetTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		{
+			if (unit.hasShootAnimation)
+				unit.animatorController.SetBool("isAttacking", true);
+
+			if (!unit.playerSetTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
+				GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", unit.playerSetTarget.transform.position);
+
+			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
+			unit.playerSetTarget.RecieveDamage(mainWeaponDamage);
+			unit.playerSetTarget.ResetIsEntityHitTimer();
+
+			mainWeaponAudio.Play();
+			mainWeaponParticles.Play();
+		}
+		else if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
@@ -91,8 +106,8 @@ public class WeaponSystem : MonoBehaviour
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
 		}
-		else if (!HasUnitTarget() && HasBuildingTarget() && 
-			CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
+		else if (HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && 
+			unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
@@ -117,7 +132,15 @@ public class WeaponSystem : MonoBehaviour
 	}
 	public void ShootSecondaryWeapon()
 	{
-		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
+		if (HasPlayerSetTarget())
+		{
+			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
+			unit.playerSetTarget.RecieveDamage(secondaryWeaponDamage);
+
+			secondaryWeaponAudio.Play();
+			secondaryWeaponParticles.Play();
+		}
+		else if (HasUnitTarget())
 		{
 			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(secondaryWeaponDamage);
@@ -125,7 +148,7 @@ public class WeaponSystem : MonoBehaviour
 			secondaryWeaponAudio.Play();
 			secondaryWeaponParticles.Play();
 		}
-		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
+		else if (HasBuildingTarget())
 		{
 			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			unit.currentBuildingTarget.RecieveDamage(secondaryWeaponDamage);
@@ -149,20 +172,22 @@ public class WeaponSystem : MonoBehaviour
 	}
 
 	//BOOL CHECKS
+	public bool HasPlayerSetTarget()
+	{
+		if (unit.playerSetTarget != null)
+			return true;
+		return false;
+	}
 	public bool HasUnitTarget()
 	{
 		if (unit.currentUnitTarget != null)
-		{
 			return true;
-		}
 		return false;
 	}
 	public bool HasBuildingTarget()
 	{
 		if (unit.currentBuildingTarget != null)
-		{
 			return true;
-		}
 		return false;
 	}
 	public bool CheckIfInAttackRange(Vector3 targetVector3)
