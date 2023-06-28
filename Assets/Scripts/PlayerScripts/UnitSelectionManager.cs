@@ -285,7 +285,7 @@ public class UnitSelectionManager : MonoBehaviour
 		{
 			ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
 
-			if (resourceNode.isBeingMined) //if node already being mined or is empty notify player and cancel order
+			if (resourceNode.isBeingMined)
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
 
 			else if (resourceNode.isEmpty)

@@ -46,7 +46,7 @@ public class UnitMovingState : UnitBaseState
 	}
 	public void CheckDistance(UnitStateController unit)
 	{
-		if (Vector3.Distance(unit.transform.position, unit.movePos) < unit.agentNav.stoppingDistance)
+		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
 			unit.ChangeStateIdle();
 			unit.agentNav.isStopped = true;

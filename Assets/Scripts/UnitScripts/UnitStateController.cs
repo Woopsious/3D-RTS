@@ -124,27 +124,19 @@ public class UnitStateController : Entities
 	}
 	public IEnumerator TrySpotTargetsNotSpotted()
 	{
-		try
+		targetList = targetList.Where(item => item != null).ToList();
+		for (int i = 0; i < targetList.Count; i++)
 		{
-			for (int i = 0; i < targetList.Count; i++)
+			Entities entity = targetList[i].GetComponent<Entities>();
+			if (CheckIfEntityInLineOfSight(entity) && entity != null)
 			{
-				Entities entity = targetList[i].GetComponent<Entities>();
-				if (CheckIfEntityInLineOfSight(entity) && entity != null)
-				{
-					if (!entity.wasRecentlySpotted && ShouldDisplayEventNotifToPlayer() && entity.GetComponent<CargoShipController>() == null)
-						GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
+				if (!entity.wasRecentlySpotted && ShouldDisplayEventNotifToPlayer() && entity.GetComponent<CargoShipController>() == null)
+					GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
 
-					entity.ShowEntity();
-					entity.ResetEntitySpottedTimer();
-				}
+				entity.ShowEntity();
+				entity.ResetEntitySpottedTimer();
 			}
 		}
-		catch (Exception e)
-		{
-			throw e; //error pops up when a target is removed from the list, dont know how to fix
-			//should be fine to leave as null refs from lists get removed after target is destroyed
-		}
-
 		yield return new WaitForSeconds(0.5f);
 
 		if (targetList.Count != 0)

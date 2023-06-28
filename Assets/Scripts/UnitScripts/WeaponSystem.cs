@@ -111,7 +111,7 @@ public class WeaponSystem : MonoBehaviour
 		{
 			unit.currentUnitTarget = null;
 			unit.currentBuildingTarget = null;
-			RemoveNullRefsFromLists(unit.targetList, unit.unitTargetList, unit.buildingTargetList);
+			RemoveNullRefsFromTargetLists();
 			TryFindTarget();
 		}
 	}
@@ -141,23 +141,11 @@ public class WeaponSystem : MonoBehaviour
 		var lookRotation = Quaternion.LookRotation(targetPos - particleObject.transform.position);
 		particleObject.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, 1);
 	}
-	public void RemoveNullRefsFromLists(List<GameObject> targetList, List<UnitStateController> unitList, List<BuildingManager> buildingList)
+	public void RemoveNullRefsFromTargetLists()
 	{
-		for (int i = targetList.Count - 1; i >= 0; i--)
-		{
-			if (targetList[i] == null)
-				targetList.RemoveAt(i);
-		}
-		for (int i = unitList.Count - 1; i >= 0; i--)
-		{
-			if (unitList[i] == null)
-				unitList.RemoveAt(i);
-		}
-		for (int i = buildingList.Count - 1; i >= 0; i--)
-		{
-			if (buildingList[i] == null)
-				buildingList.RemoveAt(i);
-		}
+		unit.targetList = unit.targetList.Where(item => item != null).ToList();
+		unit.unitTargetList = unit.unitTargetList.Where(item => item != null).ToList();
+		unit.buildingTargetList = unit.buildingTargetList.Where(item => item != null).ToList();
 	}
 
 	//BOOL CHECKS

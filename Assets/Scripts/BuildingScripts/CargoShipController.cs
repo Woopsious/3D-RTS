@@ -144,7 +144,7 @@ public class CargoShipController : UnitStateController
 		}
 
 		if(PossibleNodes.Count == 0)
-			Debug.Log("No Free Resource Nodes");
+			Debug.LogError("No Free Resource Nodes");
 
 		else
 		{
@@ -215,8 +215,7 @@ public class CargoShipController : UnitStateController
 	{
 		if (targetResourceNode.isEmpty)
 			return true;
-
-		return false;
+		else return false;
 	}
 	public bool CheckIfInPosition(Vector3 moveDestination)
 	{
@@ -224,7 +223,6 @@ public class CargoShipController : UnitStateController
 
 		if (Distance <= 0.1)
 			return true;
-
 		else return false;
 	}
 }
