@@ -39,6 +39,7 @@ public class UnitStateController : Entities
 	public bool isCargoShip;
 	public bool hasShootAnimation;
 	public bool hasMoveAnimation;
+	public bool hasTargetToMoveTo;
 
 	[Header("Unit Dynamic Refs")]
 	public List<GameObject> targetList;
@@ -155,17 +156,11 @@ public class UnitStateController : Entities
 		{
 			playerSetTarget = entity;
 		}
-		else
+		else //walk in line of sight of enemy then switch to that target
 		{
-			if (targetList.Contains(entity.gameObject) && CheckIfEntityInLineOfSight(entity)) //check i
-			{
-
-			}
-			else
-			{
-
-			}
-			//walk in line of sight of enemy then switch to that target
+			playerSetTarget = entity;
+			MoveToDestination(entity.transform.position);
+			hasTargetToMoveTo = true;
 		}
 	}
 	public bool IsPlayerSetTargetSpotted(Entities entity)
@@ -186,6 +181,17 @@ public class UnitStateController : Entities
 		}
 		else
 			return false;
+	}
+
+	//UNIT MOVE FUNCTION
+	public void MoveToDestination(Vector3 newMovePos)
+	{
+		if (isFlying)
+			movePos = new Vector3(newMovePos.x, newMovePos.y + 7, newMovePos.z);
+		else
+			movePos = newMovePos;
+
+		ChangeStateMoving();
 	}
 
 	//UTILITY FUNCTIONS

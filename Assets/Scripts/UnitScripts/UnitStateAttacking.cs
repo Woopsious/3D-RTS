@@ -34,7 +34,7 @@ public class UnitStateAttacking : UnitBaseState
 	}
 	public override void UpdatePhysics(UnitStateController unit)
 	{
-		//continue to last movement destination, only look at target thats within attack range
+		//only look at target when its within attack range
 		if (unit.playerSetTarget != null)
 		{
 			if (unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position))
@@ -50,13 +50,28 @@ public class UnitStateAttacking : UnitBaseState
 			if (unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 				StopAndLookAtTarget(unit);
 		}
-		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
+
+		//continue to last movement destination
+		if (!unit.hasTargetToMoveTo && unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
 			if (unit.hasMoveAnimation)
 				unit.animatorController.SetBool("isIdle", true);
-			
+
 			if (unit.movingSFX.isPlaying)
 				unit.movingSFX.Stop();
+			unit.agentNav.isStopped = true;
+		}
+		else if (unit.hasTargetToMoveTo && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		{
+			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
+			{
+				if (unit.hasMoveAnimation)
+					unit.animatorController.SetBool("isIdle", true);
+
+				if (unit.movingSFX.isPlaying)
+					unit.movingSFX.Stop();
+				unit.agentNav.isStopped = true;
+			}
 		}
 	}
 	public void StopAndLookAtTarget(UnitStateController unit)

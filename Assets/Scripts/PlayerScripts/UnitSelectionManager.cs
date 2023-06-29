@@ -194,47 +194,28 @@ public class UnitSelectionManager : MonoBehaviour
 			{
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
 				if (entity.GetComponent<UnitStateController>() != null && entity.isPlayerOneEntity != playerController.isPlayerOne)
-				{
-					Debug.Log("1");
 					TryAttackEnemyEntity(entity);
-				}
 
 				else if (entity.GetComponent<CargoShipController>() != null)
-				{
-					Debug.Log("2");
 					TrySelectCargoShip(entity.GetComponent<CargoShipController>());
-				}
 
 				else if (entity.GetComponent<BuildingManager>() != null)
-				{
-					Debug.Log("3");
 					TrySelectBuilding(entity.GetComponent<BuildingManager>());
-				}
 
 				else if (entity.GetComponent<UnitStateController>() != null)
-				{
-					Debug.Log("4");
 					TrySelectUnits(entity.GetComponent<UnitStateController>());
-				}
 			}
 			//handle anything else
 			else
 			{
 				if (SelectedCargoShip != null && hitInfo.collider.gameObject.GetComponent<ResourceNodes>() != null)
-				{
-					Debug.Log("5");
 					TryMoveSelectedEntities(hitInfo.collider.gameObject);
-				}
 
 				else if (selectedUnitList.Count != 0)
-				{
-					Debug.Log("6");
 					TryMoveSelectedEntities(hitInfo.collider.gameObject);
-				}
 
 				else
 				{
-					Debug.Log("reset");
 					DeselectUnits();
 					DeselectBuilding();
 					DeselectCargoShip();
@@ -323,11 +304,23 @@ public class UnitSelectionManager : MonoBehaviour
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
 
 			else //else mine selected node
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
 				SelectedCargoShip.SetResourceNodeFromPlayerInput(resourceNode);
+			}
 		}
 		//move selected units to mouse pos
 		else if (selectedUnitList.Count != 0)
-			MoveUnitsInFormation();
+		{
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Moving!", 1f);
+
+			for (int i = 0; i < selectedUnitList.Count; i++)
+			{
+				UnitStateController unit = selectedUnitList[i];
+				Vector3 movePos = movePosHighlighterObj[i].transform.position;
+				unit.MoveToDestination(movePos);
+			}
+		}
 	}
 	public void TryAttackEnemyEntity(Entities entity)
 	{
@@ -344,47 +337,6 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		selectedUnitList.Remove(unit);
 		movePosHighlighterObj[selectedUnitList.Count].SetActive(false);
-	}
-	//move to mouse pos on click
-	public void MoveUnitsInFormation()
-	{
-		for (int i = 0; i < selectedUnitList.Count; i++)
-		{
-			UnitStateController unit = selectedUnitList[i];
-			Vector3 moveCoords = movePosHighlighterObj[i].transform.position;
-			if (unit.isFlying)
-			{
-				unit.movePos = new Vector3(moveCoords.x, moveCoords.y + 7, moveCoords.z);
-				unit.ChangeStateMoving();
-			}
-			else
-			{
-				unit.movePos = moveCoords;
-				unit.ChangeStateMoving();
-			}
-		}
-	}
-	//move closer to selected enemy unit and attack
-	public void MoveToAndAttack(RaycastHit hitInfo)
-	{
-		int i = 0;
-		foreach (UnitStateController selectedUnit in selectedUnitList)
-		{
-			if (i < movePosOffset.Count)
-			{
-				if (selectedUnit.isFlying)
-				{
-					selectedUnit.movePos = new Vector3(hitInfo.point.x, hitInfo.point.y + 7, hitInfo.point.z) + movePosOffset[i];
-					selectedUnit.ChangeStateMoving();
-				}
-				else
-				{
-					selectedUnit.movePos = hitInfo.point + movePosOffset[i];
-					selectedUnit.ChangeStateMoving();
-				}
-				i++;
-			}
-		}
 	}
 
 	//DRAG SELECT FUNCTIONS

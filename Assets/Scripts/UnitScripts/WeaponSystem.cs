@@ -92,7 +92,7 @@ public class WeaponSystem : MonoBehaviour
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
-			unit.playerSetTarget = null;
+			//unit.playerSetTarget = null;
 		}
 		else if (HasBuildingTarget() && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && 
 			unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
@@ -109,13 +109,13 @@ public class WeaponSystem : MonoBehaviour
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
-			unit.currentUnitTarget = null;
+			//unit.currentUnitTarget = null;
 		}
 		else
 		{
-			unit.playerSetTarget = null;
-			unit.currentUnitTarget = null;
-			unit.currentBuildingTarget = null;
+			//unit.playerSetTarget = null;
+			//unit.currentUnitTarget = null;
+			//unit.currentBuildingTarget = null;
 			RemoveNullRefsFromTargetLists();
 			TryFindTarget();
 		}

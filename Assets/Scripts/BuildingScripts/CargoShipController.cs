@@ -123,8 +123,6 @@ public class CargoShipController : UnitStateController
 		}
 		else
 			hasNewOrders = true;
-
-		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
 	}
 	public void ChangeResourceNode()
 	{
