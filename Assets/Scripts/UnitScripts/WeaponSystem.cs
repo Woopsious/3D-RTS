@@ -28,22 +28,9 @@ public class WeaponSystem : MonoBehaviour
 	public float secondaryWeaponAttackSpeedTimer;
 	public bool hasSecondaryWeapon;
 
-	//if x component exists and not in list, then add it to list, else ignore it, then grab closest
+	//if found then grab closest one
 	public void TryFindTarget()
 	{
-		foreach (GameObject target in unit.targetList)
-		{
-			if (target.GetComponent<UnitStateController>() && target != null && CheckIfInAttackRange(target.transform.position) &&
-				!unit.unitTargetList.Contains(target.GetComponent<UnitStateController>()))
-			{
-				unit.unitTargetList.Add(target.GetComponent<UnitStateController>());
-			}
-			else if (target.GetComponent<BuildingManager>() && target != null && CheckIfInAttackRange(target.transform.position) && 
-				!unit.buildingTargetList.Contains(target.GetComponent<BuildingManager>()))
-			{
-				unit.buildingTargetList.Add(target.GetComponent<BuildingManager>());
-			}
-		}
 		unit.currentUnitTarget = GrabClosestUnit();
 		unit.currentBuildingTarget = GrabClosestBuilding();
 	}
@@ -54,7 +41,7 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.unitTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && 
+			if (unit.CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && 
 				unit.CheckIfEntityInLineOfSight(unit.unitTargetList[i]) && unit.unitTargetList[i] != null)
 					return unit.unitTargetList[i];
 		}
@@ -66,17 +53,17 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.buildingTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && 
+			if (unit.CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && 
 				unit.CheckIfEntityInLineOfSight(unit.buildingTargetList[i]) && unit.buildingTargetList[i] != null)
 					return unit.buildingTargetList[i];
 		}
 		return null;
 	}
 
-	//check if entity exists + is in attack range, if true shoot it, else try get new target and remove null refs from lists
+	//check if entity exists + is in attack range, if true shoot it in order of attack priority, else try get new target and remove null refs from lists
 	public void ShootMainWeapon()
 	{
-		if (HasPlayerSetTarget() && CheckIfInAttackRange(unit.playerSetTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		if (HasPlayerSetTarget() && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
@@ -91,7 +78,7 @@ public class WeaponSystem : MonoBehaviour
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
 		}
-		else if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
+		else if (HasUnitTarget() && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
@@ -105,8 +92,9 @@ public class WeaponSystem : MonoBehaviour
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
+			unit.playerSetTarget = null;
 		}
-		else if (HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && 
+		else if (HasBuildingTarget() && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && 
 			unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
 		{
 			if (unit.hasShootAnimation)
@@ -121,9 +109,11 @@ public class WeaponSystem : MonoBehaviour
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
+			unit.currentUnitTarget = null;
 		}
 		else
 		{
+			unit.playerSetTarget = null;
 			unit.currentUnitTarget = null;
 			unit.currentBuildingTarget = null;
 			RemoveNullRefsFromTargetLists();
@@ -189,15 +179,5 @@ public class WeaponSystem : MonoBehaviour
 		if (unit.currentBuildingTarget != null)
 			return true;
 		return false;
-	}
-	public bool CheckIfInAttackRange(Vector3 targetVector3)
-	{
-		float Distance = Vector3.Distance(transform.position, targetVector3);
-
-		if (Distance <= unit.attackRange)
-			return true;
-
-		else
-			return false;
 	}
 }

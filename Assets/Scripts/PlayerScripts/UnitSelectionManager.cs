@@ -196,7 +196,7 @@ public class UnitSelectionManager : MonoBehaviour
 				if (entity.GetComponent<UnitStateController>() != null && entity.isPlayerOneEntity != playerController.isPlayerOne)
 				{
 					Debug.Log("1");
-					TryAttackEnemyEntity();
+					TryAttackEnemyEntity(entity);
 				}
 
 				else if (entity.GetComponent<CargoShipController>() != null)
@@ -329,13 +329,13 @@ public class UnitSelectionManager : MonoBehaviour
 		else if (selectedUnitList.Count != 0)
 			MoveUnitsInFormation();
 	}
-	public void TryAttackEnemyEntity()
+	public void TryAttackEnemyEntity(Entities entity)
 	{
 		//move selected units closer to target and attack it
-		//if (selectedUnitList.Count != 0 && entity.GetComponent<UnitStateController>().isPlayerOneEntity != playerController.isPlayerOne)
+		for (int i = 0; i < selectedUnitList.Count; i++)
 		{
-			Debug.Log("FINAL CODE NOT IMPLAMENTED TO ATTACK SELECTED ENEMY UNIT");
-			MoveUnitsInFormation();
+			UnitStateController unit = selectedUnitList[i];
+			unit.TryAttackPlayerSetTarget(entity);
 		}
 	}
 

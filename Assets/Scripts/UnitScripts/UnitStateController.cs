@@ -111,16 +111,6 @@ public class UnitStateController : Entities
 		if (buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 			buildingTargetList.Remove(triggerObj.GetComponent<BuildingManager>());
 	}
-	public bool CheckIfEntityInLineOfSight(Entities entity)
-	{
-		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
-
-		if (hit.collider.gameObject == entity.gameObject)
-			return true;
-
-		else
-			return false;
-	}
 	public IEnumerator TrySpotTargetsNotSpotted()
 	{
 		targetList = targetList.Where(item => item != null).ToList();
@@ -132,6 +122,9 @@ public class UnitStateController : Entities
 				if (!entity.wasRecentlySpotted && ShouldDisplayEventNotifToPlayer() && entity.GetComponent<CargoShipController>() == null)
 					GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
 
+				if (isUnitArmed)
+					AddSpottedTargetsToListsWhenInAttackRange(entity);
+
 				entity.ShowEntity();
 				entity.ResetEntitySpottedTimer();
 			}
@@ -140,6 +133,59 @@ public class UnitStateController : Entities
 
 		if (targetList.Count != 0)
 			StartCoroutine(TrySpotTargetsNotSpotted());
+	}
+	public void AddSpottedTargetsToListsWhenInAttackRange(Entities entity)
+	{
+		if (entity.GetComponent<UnitStateController>() && entity != null && CheckIfInAttackRange(entity.transform.position) &&
+			!unitTargetList.Contains(entity.GetComponent<UnitStateController>()))
+		{
+			unitTargetList.Add(entity.GetComponent<UnitStateController>());
+		}
+		else if (entity.GetComponent<BuildingManager>() && entity != null && CheckIfInAttackRange(entity.transform.position) &&
+			!buildingTargetList.Contains(entity.GetComponent<BuildingManager>()))
+		{
+			buildingTargetList.Add(entity.GetComponent<BuildingManager>());
+		}
+	}
+
+	//ATTACK PLAYER SET TARGET FUNCTIONS
+	public void TryAttackPlayerSetTarget(Entities entity)
+	{
+		if (IsPlayerSetTargetSpotted(entity)) //check if already spotted in target lists
+		{
+			playerSetTarget = entity;
+		}
+		else
+		{
+			if (targetList.Contains(entity.gameObject) && CheckIfEntityInLineOfSight(entity)) //check i
+			{
+
+			}
+			else
+			{
+
+			}
+			//walk in line of sight of enemy then switch to that target
+		}
+	}
+	public bool IsPlayerSetTargetSpotted(Entities entity)
+	{
+		if (entity.GetComponent<UnitStateController>() != null)
+		{
+			if (unitTargetList.Contains(entity))
+				return true;
+			else
+				return false;
+		}
+		else if (entity.GetComponent<BuildingManager>() != null)
+		{
+			if (buildingTargetList.Contains(entity))
+				return true;
+			else
+				return false;
+		}
+		else
+			return false;
 	}
 
 	//UTILITY FUNCTIONS
@@ -203,5 +249,26 @@ public class UnitStateController : Entities
 	{
 		currentState = attackState;
 		currentState.Enter(this);
+	}
+
+	//BOOL FUNCTIONS
+	public bool CheckIfEntityInLineOfSight(Entities entity)
+	{
+		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
+
+		if (hit.collider.gameObject == entity.gameObject)
+			return true;
+
+		else
+			return false;
+	}
+	public bool CheckIfInAttackRange(Vector3 targetVector3)
+	{
+		float Distance = Vector3.Distance(transform.position, targetVector3);
+
+		if (Distance <= attackRange)
+			return true;
+		else
+			return false;
 	}
 }

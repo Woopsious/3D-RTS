@@ -37,17 +37,17 @@ public class UnitStateAttacking : UnitBaseState
 		//continue to last movement destination, only look at target thats within attack range
 		if (unit.playerSetTarget != null)
 		{
-			if (unit.weaponSystem.CheckIfInAttackRange(unit.playerSetTarget.transform.position))
+			if (unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position))
 				StopAndLookAtTarget(unit);
 		}
 		else if (unit.currentUnitTarget != null)
 		{
-			if (unit.weaponSystem.CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
+			if (unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
 				StopAndLookAtTarget(unit);
 		}
 		else if (unit.currentBuildingTarget != null)
 		{
-			if (unit.weaponSystem.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
+			if (unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 				StopAndLookAtTarget(unit);
 		}
 		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
