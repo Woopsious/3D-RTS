@@ -115,7 +115,6 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else
 		{
-			Debug.Log("test");
 			//unit.playerSetTarget = null;
 			//unit.currentUnitTarget = null;
 			//unit.currentBuildingTarget = null;
