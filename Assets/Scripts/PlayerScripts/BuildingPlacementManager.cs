@@ -89,6 +89,7 @@ public class BuildingPlacementManager : MonoBehaviour
 			currentBuildingPlacement.AddBuildingRefs();
 			currentBuildingPlacement = null;
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 2f);
+			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 		}
 		else if (Input.GetMouseButtonDown(0) && !currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 2f);

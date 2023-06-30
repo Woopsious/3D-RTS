@@ -104,15 +104,23 @@ public class BuildTime : MonoBehaviour
 		if (listNumRef == 3)
 			unitProductionManager.RemoveFromQueueAndStartNextBuild(unitProductionManager.vtolVehProdList, this);
 
-		unitProductionManager.SpawnUnitsAtProdBuilding(this, unitSpawnLocation, buildPosDestination);
-		RemoveUi();
+		//NEEDS CHECK INCASE PRODBUILDING IS DESTROYED WHILST IN BUILD QUEUE
+		//first try find another valid spawn point?? if that fails cancel build and refund player
+		if (unitSpawnLocation != null)
+		{
+			unitProductionManager.SpawnUnitsAtProdBuilding(this, unitSpawnLocation, buildPosDestination);
+			RemoveUi();
+		}
+		else
+			CancelProduction();
 	}
 	public void CancelProduction()
 	{
-		RemoveUi();
-
 		UnitStateController unit = UnitPrefab.GetComponent<UnitStateController>();
 		UnitCost(unit.moneyCost, unit.alloyCost, unit.crystalCost);
+		GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
+		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("unit production canceled", 1f);
+		RemoveUi();
 	}
 	public void RemoveUi()
 	{

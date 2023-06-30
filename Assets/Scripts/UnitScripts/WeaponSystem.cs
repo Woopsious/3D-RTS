@@ -31,8 +31,14 @@ public class WeaponSystem : MonoBehaviour
 	//if found then grab closest one
 	public void TryFindTarget()
 	{
-		unit.currentUnitTarget = GrabClosestUnit();
-		unit.currentBuildingTarget = GrabClosestBuilding();
+		if (unit.unitTargetList.Count != 0)
+		{
+			unit.currentUnitTarget = GrabClosestUnit();
+		}
+		if (unit.buildingTargetList.Count != 0)
+		{
+			unit.currentBuildingTarget = GrabClosestBuilding();
+		}
 	}
 	//sort targets from closest to furthest, then check if target is in view + attack range, once a valid target is found, return that target and end loop
 	public UnitStateController GrabClosestUnit()
@@ -113,6 +119,7 @@ public class WeaponSystem : MonoBehaviour
 		}
 		else
 		{
+			Debug.Log("test");
 			//unit.playerSetTarget = null;
 			//unit.currentUnitTarget = null;
 			//unit.currentBuildingTarget = null;
