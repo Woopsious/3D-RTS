@@ -382,6 +382,12 @@ public class UnitSelectionManager : MonoBehaviour
 	//add drag selected units to selected units list and hid drag select box
 	public void ReleaseSelectionBox()
 	{
+		if (dragSelectedUnitList.Count != 0)
+		{
+			DeselectUnits();
+			DeselectBuilding();
+			DeselectCargoShip();
+		}
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{
 			if(unit.isPlayerOneEntity != !playerController.isPlayerOne)

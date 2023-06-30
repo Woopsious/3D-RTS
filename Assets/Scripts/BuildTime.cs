@@ -43,33 +43,34 @@ public class BuildTime : MonoBehaviour
 			buildTimeText.text = "Time To Build: " + buildTimer;
 		}
 	}
-	public void FindClosestProdBuilding()
+	public bool FindClosestProdBuilding()
 	{
 		VehProdSpawnLocation[] allVehProdbuildings = FindObjectsOfType<VehProdSpawnLocation>();
 		List<VehProdSpawnLocation> correctProdBuildings = new List<VehProdSpawnLocation>();
 
-		if(allVehProdbuildings.Length == 0)
-			Debug.LogError("No production buildings found");
 
-		foreach (VehProdSpawnLocation possibleBuilding in allVehProdbuildings)
+		if (allVehProdbuildings.Length != 0)
 		{
-			if (isPlayerOne == possibleBuilding.building.isPlayerOneEntity && possibleBuilding.building.isPowered)
+			foreach (VehProdSpawnLocation possibleBuilding in allVehProdbuildings)
 			{
-				if (possibleBuilding.building.isLightVehProdBuilding && listNumRef == 1)
-					correctProdBuildings.Add(possibleBuilding);
+				if (isPlayerOne == possibleBuilding.building.isPlayerOneEntity && possibleBuilding.building.isPowered)
+				{
+					if (possibleBuilding.building.isLightVehProdBuilding && listNumRef == 1)
+						correctProdBuildings.Add(possibleBuilding);
 
-				else if (possibleBuilding.building.isHeavyVehProdBuilding && listNumRef == 2)
-					correctProdBuildings.Add(possibleBuilding);
+					else if (possibleBuilding.building.isHeavyVehProdBuilding && listNumRef == 2)
+						correctProdBuildings.Add(possibleBuilding);
 
-				else if (possibleBuilding.building.isVTOLProdBuilding && listNumRef == 3)
-					correctProdBuildings.Add(possibleBuilding);
+					else if (possibleBuilding.building.isVTOLProdBuilding && listNumRef == 3)
+						correctProdBuildings.Add(possibleBuilding);
+				}
 			}
 		}
-		if (correctProdBuildings.Count == 0)
+		if (correctProdBuildings.Count == 0 || allVehProdbuildings.Length == 0)
 		{
-			Debug.LogError("No correct type production buildings powered");
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("no powered vehicle production buildings found", 3f);
 			unitProductionManager.failedUnitPlacements.Add(this);
-			//notify player
+			return false;
 		}
 		else
 		{
@@ -78,6 +79,8 @@ public class BuildTime : MonoBehaviour
 
 			VehProdSpawnLocation closestBuilding = closestProdBuildings[0];
 			unitSpawnLocation = closestBuilding;
+
+			return true;
 		}
 	}
 	public void StartProduction()

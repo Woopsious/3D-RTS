@@ -9,8 +9,6 @@ using static UnityEngine.UI.CanvasScaler;
 
 public class BuildingManager : Entities
 {
-	public CapturePointController capturePointController;
-
 	[Header("Building Refs")]
 	public bool isPowered;
 	public bool isHQ;
@@ -28,9 +26,17 @@ public class BuildingManager : Entities
 	public int crystalProduction;
 	public int unitBuildTimeBoost;
 
+	[Header("Building Dynamic Refs")]
+	public CapturePointController capturePointController;
+
 	public override void Start()
 	{
 		base.Start();
+
+		if (isGeneratorBuilding)
+			gameObject.GetComponent<EnergyGenController>().PowerBuildings();
+		else if (!isGeneratorBuilding && capturePointController.energyGeneratorBuilding != null)
+			capturePointController.energyGeneratorBuilding.GetComponent<EnergyGenController>().PowerBuildings();
 	}
 	public override void Update()
 	{
@@ -43,6 +49,37 @@ public class BuildingManager : Entities
 	}
 
 	//UTILITY FUNCTIONS
+	public void PowerBuilding()
+	{
+		isPowered = true;
+
+		if (isRefineryBuilding)
+		{
+			RefineryController refineryController = gameObject.GetComponent<RefineryController>();
+			refineryController.CheckCargoShipsCount();
+
+			if (refineryController.CargoShipList.Count != 0)
+			{
+				foreach (CargoShipController cargoShip in refineryController.CargoShipList)
+					cargoShip.ContinueMining();
+			}
+		}
+	}
+	public void UnpowerBuilding()
+	{
+		isPowered = false;
+
+		if (isRefineryBuilding)
+		{
+			RefineryController refineryController = gameObject.GetComponent<RefineryController>();
+
+			if (refineryController.CargoShipList.Count != 0)
+			{
+				foreach (CargoShipController cargoShip in refineryController.CargoShipList)
+					cargoShip.PauseMining();
+			}
+		}
+	}
 	public void AddBuildingRefs()
 	{
 		if (isGeneratorBuilding)
@@ -74,7 +111,7 @@ public class BuildingManager : Entities
 		}
 		else if (isRefineryBuilding)
 		{
-			try  //on the offchance one or both cargoships are already dead
+			try  //on the off chance one or both cargoships are already dead
 			{
 				GetComponent<RefineryController>().CargoShipList[1].DeleteSelf();
 				GetComponent<RefineryController>().CargoShipList[0].DeleteSelf();

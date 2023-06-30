@@ -24,6 +24,7 @@ public class CargoShipController : UnitStateController
 
 	public bool canChangeOrders;
 	public bool hasNewOrders;
+	public bool hasPauseOperation;
 
 	[Header("Dynamic Refs")]
 	public RefineryController refineryControllerParent;
@@ -34,13 +35,18 @@ public class CargoShipController : UnitStateController
 	{
 		base.Start();
 		FindClosestTargetResourcesNode();
-		StartCoroutine(IncreaseHeightFromRefinery());
+
+		if (refineryControllerParent.building.isPowered)
+			StartCoroutine(IncreaseHeightFromRefinery());
+		else
+			PauseMining();
 	}
 	public override void FixedUpdate()
 	{
 		transform.position = Vector3.MoveTowards(transform.position, movePos, moveSpeed * Time.deltaTime);
 	}
-	//FUNCTIONS FOR LOOPING RESOURCE GATHERING BEHAVIOUR
+
+	//FUNCTIONS FOR LOOPING RESOURCE GATHERING
 	//can chnage mine orders here
 	public IEnumerator IncreaseHeightFromRefinery()
 	{
@@ -63,7 +69,7 @@ public class CargoShipController : UnitStateController
 	public IEnumerator DecreaseHeightToResourceNode()
 	{
 		canChangeOrders = true;
-		SetDestination(new Vector3(targetResourceNode.transform.position.x, targetResourceNode.transform.position.y + 5,
+		SetDestination(new Vector3(targetResourceNode.transform.position.x, targetResourceNode.transform.position.y + 3,
 			targetResourceNode.transform.position.z));
 
 		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);
@@ -84,20 +90,21 @@ public class CargoShipController : UnitStateController
 
 		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);				//increase height from current pos + check pos till true
 
-		SetDestination(new Vector3(refineryControllerParent.transform.position.x, 22, refineryControllerParent.transform.position.z));
+		SetDestination(new Vector3(refineryControllerParent.transform.position.x - 2.9f, 22, refineryControllerParent.transform.position.z - 0.9f));
 
-		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);				//move above refinery keepinh height + check pos till true
+		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);				//move above refinery keeping height + check pos till true
 
-		SetDestination(new Vector3(refineryControllerParent.transform.position.x, refineryControllerParent.transform.position.y + 5,
-			refineryControllerParent.transform.position.z));
+		SetDestination(new Vector3(refineryControllerParent.transform.position.x - 2.9f, refineryControllerParent.transform.position.y + 6,
+			refineryControllerParent.transform.position.z - 0.9f));
 
 		RefineResourcesFromInventroy();                                                                 //drop off resources at refinery and wait 5s
 		yield return new WaitForSeconds(5);
 
 		if (hasNewOrders)
-			ChangeResourceNode();															//if neworders are avalable switch to them here
+			ChangeResourceNode();																	//if neworders are avalable switch to them here
 
-		StartCoroutine(IncreaseHeightFromRefinery());
+		if (!hasPauseOperation) //continue loop if not paused (parent refinery is unpowered)
+			StartCoroutine(IncreaseHeightFromRefinery());
 	}
 	//only used when orders changed
 	public IEnumerator IncreaseHeight()
@@ -110,7 +117,7 @@ public class CargoShipController : UnitStateController
 		StartCoroutine(MoveToResourceNode());
 	}
 
-	//Functions to find or set resource node to mine from
+	//function to find res nodes
 	public void SetResourceNodeFromPlayerInput(ResourceNodes resourceNode)
 	{
 		playerSetResourceNode = resourceNode;
@@ -154,7 +161,7 @@ public class CargoShipController : UnitStateController
 		}
 	}
 
-	//Utility Functions
+	//UTILITY FUNCTIONS
 	public override void RemoveEntityRefs()
 	{
 		targetResourceNode.isBeingMined = false;
@@ -202,13 +209,28 @@ public class CargoShipController : UnitStateController
 	{
 		movePos = moveDestination;
 	}
+	public void PauseMining()
+	{
+		StopAllCoroutines();
+		hasPauseOperation = true;
+		SetDestination(new Vector3(refineryControllerParent.transform.position.x, 22, refineryControllerParent.transform.position.z));
+	}
+	public void ContinueMining()
+	{
+		hasPauseOperation = false;
+		if (crystalsCount != 0 || alloysCount != 0)
+			StartCoroutine(MineResourceNodeAndReturnToRefinery());
+
+		else
+			StartCoroutine(MoveToResourceNode());
+	}
 	public void DeleteSelf()
 	{
 		currentHealth = -10;
 		OnDeath();
 	}
 
-	//bool checks
+	//BOOL CHECKS
 	public bool CheckIfNodeIsEmpty()
 	{
 		if (targetResourceNode.isEmpty)

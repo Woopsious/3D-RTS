@@ -10,7 +10,7 @@ public class EnergyGenController : MonoBehaviour
 	//every 3 secs if buildings in cap point are unpowered power them
 	public void StartPower()
 	{
-		StartCoroutine(UpdatePoweredBuildings());
+		//StartCoroutine(UpdatePoweredBuildings());
 	}
 	IEnumerator UpdatePoweredBuildings()
 	{
@@ -21,38 +21,38 @@ public class EnergyGenController : MonoBehaviour
 	public void PowerBuildings()
 	{
 		if (!buildingRef.capturePointController.HQRef.isPowered)
-			buildingRef.capturePointController.HQRef.isPowered = true;
+			buildingRef.capturePointController.HQRef.PowerBuilding();
 
 		foreach (BuildingManager building in buildingRef.capturePointController.RefinaryBuildings)
 		{
 			if (!building.isPowered && buildingRef.capturePointController.RefinaryBuildings.Count != 0)
-				building.isPowered = true;
+				building.PowerBuilding();
 		}
 		foreach (BuildingManager building in buildingRef.capturePointController.lightVehProdBuildings)
 		{
 			if (!building.isPowered && buildingRef.capturePointController.lightVehProdBuildings.Count != 0)
-				building.isPowered = true;
+				building.PowerBuilding();
 		}
 		foreach (BuildingManager building in buildingRef.capturePointController.heavyVehProdBuildings)
 		{
 			if (!building.isPowered && buildingRef.capturePointController.heavyVehProdBuildings.Count != 0)
-				building.isPowered = true;
+				building.PowerBuilding();
 		}
 		foreach (BuildingManager building in buildingRef.capturePointController.vtolProdBuildings)
 		{
 			if(!building.isPowered && buildingRef.capturePointController.vtolProdBuildings.Count != 0)
-				building.isPowered = true;
+				building.PowerBuilding();
 		}
 	}
 	public void UnpowerBuildings()
 	{
 		foreach (BuildingManager building in buildingRef.capturePointController.RefinaryBuildings)
-			building.isPowered = false;
+			building.UnpowerBuilding();
 		foreach (BuildingManager building in buildingRef.capturePointController.lightVehProdBuildings)
-			building.isPowered = false;
+			building.UnpowerBuilding();
 		foreach (BuildingManager building in buildingRef.capturePointController.heavyVehProdBuildings)
-			building.isPowered = false;
+			building.UnpowerBuilding();
 		foreach (BuildingManager building in buildingRef.capturePointController.vtolProdBuildings)
-			building.isPowered = false;
+			building.UnpowerBuilding();
 	}
 }

@@ -51,17 +51,14 @@ public class RefineryController : MonoBehaviour
 
 		GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 	}
-
 	public void CheckCargoShipsCount()
 	{
 		if(CargoShipList.Count < 2)
-		{
 			StartCoroutine(ConstructNewCargoShip());
-		}
 	}
 	public IEnumerator ConstructNewCargoShip()
 	{
-		yield return new WaitForSeconds(3);
+		yield return new WaitForSeconds(5);
 		GameObject go = Instantiate(cargoShipPrefab, vehSpawnLocation.transform.position, Quaternion.identity);
 		CargoShipController script = go.GetComponent<CargoShipController>();
 		script.refineryControllerParent = this;

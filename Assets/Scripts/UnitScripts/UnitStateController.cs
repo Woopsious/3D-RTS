@@ -17,7 +17,6 @@ public class UnitStateController : Entities
 	public UnitIdleState idleState = new UnitIdleState();
 	public UnitMovingState movingState = new UnitMovingState();
 	public UnitStateAttacking attackState = new UnitStateAttacking();
-
 	public WeaponSystem weaponSystem;
 
 	[Header("Unit Refs")]
@@ -43,11 +42,12 @@ public class UnitStateController : Entities
 
 	[Header("Unit Dynamic Refs")]
 	public List<GameObject> targetList;
-	public List<BuildingManager> buildingTargetList;
-	public BuildingManager currentBuildingTarget;
 	public List<UnitStateController> unitTargetList;
-	public UnitStateController currentUnitTarget;
+	public List<BuildingManager> buildingTargetList;
+
 	public Entities playerSetTarget;
+	public UnitStateController currentUnitTarget;
+	public BuildingManager currentBuildingTarget;
 
 	public int GroupNum;
 	public Vector3 targetPos;
