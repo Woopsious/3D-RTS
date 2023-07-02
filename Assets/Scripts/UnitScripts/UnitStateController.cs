@@ -151,13 +151,13 @@ public class UnitStateController : Entities
 	//HEALTH/HIT FUNCTIONS OVERRIDES
 	public override void TryDisplayEntityHitNotif()
 	{
-		if (!isCargoShip && !wasRecentlyHit && ShouldDisplayEventNotifToPlayer())
+		if (!isCargoShip && !wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", transform.position);
 	}
 	public override void OnDeath()
 	{
 		base.OnDeath();
-		if (!isCargoShip)
+		if (!isCargoShip && ShouldDisplaySpottedNotifToPlayer())
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT DESTROYED", transform.position);
 	}
 

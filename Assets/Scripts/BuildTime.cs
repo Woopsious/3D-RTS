@@ -107,7 +107,9 @@ public class BuildTime : MonoBehaviour
 		//first try find another valid spawn point?? if that fails cancel build and refund player
 		if (unitSpawnLocation == null)
 		{
-			isSpawnPointStillValid= false;
+			isSpawnPointStillValid = false;
+
+			FindClosestProdBuilding();
 		}
 
 		if (unitSpawnLocation != null)

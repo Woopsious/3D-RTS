@@ -114,11 +114,10 @@ public class Entities : MonoBehaviour
 	}
 	public void ResetIsEntityHitTimer()
 	{
+		TryDisplayEntityHitNotif();
 		ShowUIHealthBar();
 		wasRecentlyHit = true;
 		hitTimer = hitCooldown;
-
-		TryDisplayEntityHitNotif();
 	}
 	public virtual void TryDisplayEntityHitNotif()
 	{
