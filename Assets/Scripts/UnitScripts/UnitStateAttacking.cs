@@ -52,7 +52,7 @@ public class UnitStateAttacking : UnitBaseState
 		}
 
 		//continue to last movement destination
-		if (!unit.hasTargetToMoveTo && unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
+		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
 			if (unit.hasMoveAnimation)
 				unit.animatorController.SetBool("isIdle", true);
@@ -61,7 +61,7 @@ public class UnitStateAttacking : UnitBaseState
 				unit.movingSFX.Stop();
 			unit.agentNav.isStopped = true;
 		}
-		else if (unit.hasTargetToMoveTo && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		else if (unit.playerSetTarget != null && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
 			{

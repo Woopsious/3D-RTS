@@ -38,7 +38,6 @@ public class UnitStateController : Entities
 	public bool isCargoShip;
 	public bool hasShootAnimation;
 	public bool hasMoveAnimation;
-	public bool hasTargetToMoveTo;
 
 	[Header("Unit Dynamic Refs")]
 	public List<GameObject> targetList;
@@ -120,7 +119,7 @@ public class UnitStateController : Entities
 			Entities entity = targetList[i].GetComponent<Entities>();
 			if (CheckIfEntityInLineOfSight(entity) && entity != null)
 			{
-				if (!entity.wasRecentlySpotted && ShouldDisplayEventNotifToPlayer() && entity.GetComponent<CargoShipController>() == null)
+				if (!entity.wasRecentlySpotted && ShouldDisplaySpottedNotifToPlayer() && entity.GetComponent<CargoShipController>() == null)
 					GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
 
 				if (isUnitArmed)
@@ -149,6 +148,19 @@ public class UnitStateController : Entities
 		}
 	}
 
+	//HEALTH/HIT FUNCTIONS OVERRIDES
+	public override void TryDisplayEntityHitNotif()
+	{
+		if (!isCargoShip && !wasRecentlyHit && ShouldDisplayEventNotifToPlayer())
+			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", transform.position);
+	}
+	public override void OnDeath()
+	{
+		base.OnDeath();
+		if (!isCargoShip)
+			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT DESTROYED", transform.position);
+	}
+
 	//ATTACK PLAYER SET TARGET FUNCTIONS
 	public void TryAttackPlayerSetTarget(Entities entity)
 	{
@@ -160,7 +172,6 @@ public class UnitStateController : Entities
 		{
 			playerSetTarget = entity;
 			MoveToDestination(entity.transform.position);
-			hasTargetToMoveTo = true;
 		}
 	}
 	public bool IsPlayerSetTargetSpotted(Entities entity)

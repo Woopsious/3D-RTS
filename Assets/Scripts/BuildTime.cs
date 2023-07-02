@@ -19,6 +19,7 @@ public class BuildTime : MonoBehaviour
 	public float buildTime;
 	public float buildTimer;
 	public bool isInProduction;
+	public bool isSpawnPointStillValid;
 
 	public VehProdSpawnLocation unitSpawnLocation;
 
@@ -68,7 +69,6 @@ public class BuildTime : MonoBehaviour
 		}
 		if (correctProdBuildings.Count == 0 || allVehProdbuildings.Length == 0)
 		{
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("no powered vehicle production buildings found", 3f);
 			unitProductionManager.failedUnitPlacements.Add(this);
 			return false;
 		}
@@ -79,7 +79,6 @@ public class BuildTime : MonoBehaviour
 
 			VehProdSpawnLocation closestBuilding = closestProdBuildings[0];
 			unitSpawnLocation = closestBuilding;
-
 			return true;
 		}
 	}
@@ -106,6 +105,11 @@ public class BuildTime : MonoBehaviour
 
 		//NEEDS CHECK INCASE PRODBUILDING IS DESTROYED WHILST IN BUILD QUEUE
 		//first try find another valid spawn point?? if that fails cancel build and refund player
+		if (unitSpawnLocation == null)
+		{
+			isSpawnPointStillValid= false;
+		}
+
 		if (unitSpawnLocation != null)
 		{
 			unitProductionManager.SpawnUnitsAtProdBuilding(this, unitSpawnLocation, buildPosDestination);
@@ -119,7 +123,11 @@ public class BuildTime : MonoBehaviour
 		UnitStateController unit = UnitPrefab.GetComponent<UnitStateController>();
 		UnitCost(unit.moneyCost, unit.alloyCost, unit.crystalCost);
 		GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
-		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("unit production canceled", 1f);
+
+		if (isSpawnPointStillValid)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("unit production canceled", 1f);
+		else if (!isSpawnPointStillValid)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("unit production canceled, no valid spawn point", 3f);
 		RemoveUi();
 	}
 	public void RemoveUi()

@@ -65,35 +65,7 @@ public class Entities : MonoBehaviour
 		IsEntitySpottedTimer();
 	}
 
-	//HEALTH FUNCTIONS
-	public void RecieveDamage(int dmg)
-	{
-		dmg -= armour;
-		if (dmg < 0)
-			dmg = 0;
-		currentHealth -= dmg;
-		UpdateHealthBar();
-		OnDeath();
-	}
-	public void UpdateHealthBar()
-	{
-		float healthPercentage = (float)currentHealth / (float)maxHealth * 100;
-		HealthSlider.value = healthPercentage;
-		HealthText.text = currentHealth.ToString() + " / " + maxHealth.ToString();
-	}
-	public virtual void OnDeath()
-	{
-		if (currentHealth <= 0)
-		{
-			//remove relevent refs, check to make sure it is powered before updating income incase building is destroyed whilst never having been powered
-			RemoveEntityRefs();
-			Instantiate(DeathObj, transform.position, Quaternion.identity);
-			Destroy(UiObj);
-			Destroy(gameObject);
-		}
-	}
-
-	//SPOTTING AND UI FUNCTIONS
+	//SPOTTING + UI FUNCTIONS
 	public void ShowEntity()
 	{
 		miniMapRenderObj.layer = 13;
@@ -126,7 +98,8 @@ public class Entities : MonoBehaviour
 		spottedTimer = spottedCooldown;
 	}
 
-	//RECENTLY HIT + HEALTH UI FUNCTIONS
+	//HEALTH/HIT AND UI FUNCTIONS
+	//hit and ui
 	public void IsEntityHitTimer()
 	{
 		if (hitTimer > 0)
@@ -144,6 +117,12 @@ public class Entities : MonoBehaviour
 		ShowUIHealthBar();
 		wasRecentlyHit = true;
 		hitTimer = hitCooldown;
+
+		TryDisplayEntityHitNotif();
+	}
+	public virtual void TryDisplayEntityHitNotif()
+	{
+		GameManager.Instance.playerNotifsManager.DisplayEventMessage("Event Not Set Up", gameObject.transform.position);
 	}
 	public void ShowUIHealthBar()
 	{
@@ -153,9 +132,33 @@ public class Entities : MonoBehaviour
 	{
 		UiObj.SetActive(false);
 	}
+	//health and ui
+	public void RecieveDamage(int dmg)
+	{
+		dmg -= armour;
+		if (dmg < 0)
+			dmg = 0;
+		currentHealth -= dmg;
+		UpdateHealthBar();
+		if (currentHealth <= 0)
+			OnDeath();
+	}
+	public void UpdateHealthBar()
+	{
+		float healthPercentage = (float)currentHealth / (float)maxHealth * 100;
+		HealthSlider.value = healthPercentage;
+		HealthText.text = currentHealth.ToString() + " / " + maxHealth.ToString();
+	}
+	public virtual void OnDeath()
+	{
+		RemoveEntityRefs();
+		Instantiate(DeathObj, transform.position, Quaternion.identity);
+		Destroy(UiObj);
+		Destroy(gameObject);
+	}
 
 	//UTILITY FUNCTIONS
-	public bool ShouldDisplayEventNotifToPlayer()
+	public bool ShouldDisplaySpottedNotifToPlayer()
 	{
 		if (playerController.isPlayerOne != isPlayerOneEntity)
 			return false;

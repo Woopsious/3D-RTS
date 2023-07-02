@@ -65,13 +65,11 @@ public class WeaponSystem : MonoBehaviour
 	//check if entity exists + is in attack range, if true shoot it in order of attack priority, else try get new target and remove null refs from lists
 	public void ShootMainWeapon()
 	{
-		if (HasPlayerSetTarget() && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		if (HasPlayerSetTarget() && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position) && 
+			unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
-
-			if (!unit.playerSetTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
-				GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", unit.playerSetTarget.transform.position);
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
 			unit.playerSetTarget.RecieveDamage(mainWeaponDamage);
@@ -80,13 +78,11 @@ public class WeaponSystem : MonoBehaviour
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
 		}
-		else if (HasUnitTarget() && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
+		else if (HasUnitTarget() && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && 
+			unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
-
-			if (!unit.currentUnitTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
-				GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", unit.currentUnitTarget.transform.position);
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
@@ -94,7 +90,6 @@ public class WeaponSystem : MonoBehaviour
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
-			//unit.playerSetTarget = null;
 		}
 		else if (HasBuildingTarget() && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && 
 			unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
@@ -102,24 +97,15 @@ public class WeaponSystem : MonoBehaviour
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
-			if (!unit.currentBuildingTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
-				GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING UNDER ATTACK", unit.currentBuildingTarget.transform.position);
-
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			unit.currentBuildingTarget.RecieveDamage(mainWeaponDamage);
 			unit.currentBuildingTarget.ResetIsEntityHitTimer();
 
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
-			//unit.currentUnitTarget = null;
 		}
 		else
-		{
-			//unit.playerSetTarget = null;
-			//unit.currentUnitTarget = null;
-			//unit.currentBuildingTarget = null;
 			TryFindTarget();
-		}
 	}
 	public void ShootSecondaryWeapon()
 	{

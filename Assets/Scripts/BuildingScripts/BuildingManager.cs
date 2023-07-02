@@ -48,6 +48,18 @@ public class BuildingManager : Entities
 		HideUIHealthBar();
 	}
 
+	//HEALTH/HIT FUNCTIONS OVERRIDES
+	public override void TryDisplayEntityHitNotif()
+	{
+		if (!wasRecentlyHit && ShouldDisplayEventNotifToPlayer())
+			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING UNDER ATTACK", transform.position);
+	}
+	public override void OnDeath()
+	{
+		base.OnDeath();
+		GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING DESTROYED", transform.position);
+	}
+
 	//UTILITY FUNCTIONS
 	public void PowerBuilding()
 	{

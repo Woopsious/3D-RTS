@@ -46,12 +46,12 @@ public class UnitMovingState : UnitBaseState
 	}
 	public void CheckDistance(UnitStateController unit)
 	{
-		if (!unit.hasTargetToMoveTo && unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
+		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
 			unit.ChangeStateIdle();
 			unit.agentNav.isStopped = true;
 		}
-		else if (unit.hasTargetToMoveTo && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		else if (unit.playerSetTarget != null && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
 			{

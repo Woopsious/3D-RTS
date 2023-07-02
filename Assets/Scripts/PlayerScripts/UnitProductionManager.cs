@@ -153,8 +153,12 @@ public class UnitProductionManager : MonoBehaviour
 					else //if player cant afford them add build to failed list then at the end remove ui + refs
 					{
 						failedUnitPlacements.Add(build);
-						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt Afford some/all unit(s), ", 3f);
+						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt Afford some/all unit(s)", 3f);
 					}
+				}
+				else //if no valid spawn point for them is found
+				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("no powered vehicle production buildings found", 3f);
 				}
 			}
 			if (failedUnitPlacements.Count != 0)
