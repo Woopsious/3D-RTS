@@ -10,7 +10,7 @@ using static UnityEngine.UI.CanvasScaler;
 public class BuildingManager : Entities
 {
 	[Header("Building Refs")]
-	public GameObject refundBuildingButton;
+	public GameObject refundBuildingBackgroundObj;
 	public GameObject unpoweredBuildingIndicatorObj;
 
 
@@ -44,11 +44,16 @@ public class BuildingManager : Entities
 	public override void Update()
 	{
 		base.Update();
+		//if (isSelected)
+			//refundBuildingBackgroundObj.transform.position = new Vector3(transform.position.x, transform.position.y + 20, transform.position.z);
 	}
-	public IEnumerator HideUi()
+	public void ShowRefundButton()
 	{
-		yield return new WaitForSeconds(0.1f);
-		HideUIHealthBar();
+		refundBuildingBackgroundObj.SetActive(true);
+	}
+	public void HideRefundButton()
+	{
+		refundBuildingBackgroundObj.SetActive(false);
 	}
 
 	//HEALTH/HIT FUNCTIONS OVERRIDES

@@ -274,6 +274,7 @@ public class UnitSelectionManager : MonoBehaviour
 			DeselectCargoShip();
 			selectedBuilding = building;
 			selectedBuilding.ShowUIHealthBar();
+			selectedBuilding.ShowRefundButton();
 			selectedBuilding.selectedHighlighter.SetActive(true);
 			selectedBuilding.isSelected = true;
 		}
@@ -425,7 +426,9 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		if (selectedBuilding != null)
 		{
-			selectedBuilding.HideUIHealthBar();
+			if(!selectedBuilding.wasRecentlyHit)
+				selectedBuilding.HideUIHealthBar();
+			selectedBuilding.HideRefundButton();
 			selectedBuilding.selectedHighlighter.SetActive(false);
 			selectedBuilding.isSelected = false;
 			selectedBuilding = null;
