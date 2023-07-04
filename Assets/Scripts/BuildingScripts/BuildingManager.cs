@@ -44,8 +44,6 @@ public class BuildingManager : Entities
 	public override void Update()
 	{
 		base.Update();
-		//if (isSelected)
-			//refundBuildingBackgroundObj.transform.position = new Vector3(transform.position.x, transform.position.y + 20, transform.position.z);
 	}
 	public void ShowRefundButton()
 	{

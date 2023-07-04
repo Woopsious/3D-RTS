@@ -119,8 +119,15 @@ public class UnitStateController : Entities
 			Entities entity = targetList[i].GetComponent<Entities>();
 			if (CheckIfEntityInLineOfSight(entity) && entity != null)
 			{
-				if (!entity.wasRecentlySpotted && ShouldDisplaySpottedNotifToPlayer() && entity.GetComponent<CargoShipController>() == null)
-					GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
+				if (!entity.wasRecentlySpotted && ShouldDisplaySpottedNotifToPlayer())
+				{
+					if (entity.GetComponent<CargoShipController>() != null)
+						GameManager.Instance.playerNotifsManager.DisplayEventMessage("Enemy CargoShip Spotted", entity.transform.position);
+					else if (entity.GetComponent<UnitStateController>() != null)
+						GameManager.Instance.playerNotifsManager.DisplayEventMessage("Enemy Unit Spotted", entity.transform.position);
+					else if (entity.GetComponent<BuildingManager>() != null)
+						GameManager.Instance.playerNotifsManager.DisplayEventMessage("Enemy Building Spotted", entity.transform.position);
+				}
 
 				if (isUnitArmed)
 					AddSpottedTargetsToListsWhenInAttackRange(entity);
