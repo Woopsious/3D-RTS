@@ -167,9 +167,9 @@ public class CargoShipController : UnitStateController
 		if (!wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP UNDER ATTACK", transform.position);
 	}
-	public override void OnDeath()
+	public override void OnEntityDeath()
 	{
-		base.OnDeath();
+		base.OnEntityDeath();
 		if (ShouldDisplaySpottedNotifToPlayer())
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP DESTROYED", transform.position);
 	}
@@ -240,7 +240,7 @@ public class CargoShipController : UnitStateController
 	public void DeleteSelf()
 	{
 		currentHealth = -10;
-		OnDeath();
+		OnEntityDeath();
 	}
 
 	//BOOL CHECKS

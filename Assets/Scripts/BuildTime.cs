@@ -103,12 +103,10 @@ public class BuildTime : MonoBehaviour
 		if (listNumRef == 3)
 			unitProductionManager.RemoveFromQueueAndStartNextBuild(unitProductionManager.vtolVehProdList, this);
 
-		//NEEDS CHECK INCASE PRODBUILDING IS DESTROYED WHILST IN BUILD QUEUE
-		//first try find another valid spawn point?? if that fails cancel build and refund player
+		//check if spawnpoint still valid if not, try find new one, if failed cancel
 		if (unitSpawnLocation == null)
 		{
 			isSpawnPointStillValid = false;
-
 			FindClosestProdBuilding();
 		}
 

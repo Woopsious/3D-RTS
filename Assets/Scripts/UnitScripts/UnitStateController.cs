@@ -154,9 +154,9 @@ public class UnitStateController : Entities
 		if (!isCargoShip && !wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", transform.position);
 	}
-	public override void OnDeath()
+	public override void OnEntityDeath()
 	{
-		base.OnDeath();
+		base.OnEntityDeath();
 		if (!isCargoShip && ShouldDisplaySpottedNotifToPlayer())
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT DESTROYED", transform.position);
 	}

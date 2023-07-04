@@ -88,11 +88,11 @@ public class BuildingPlacementManager : MonoBehaviour
 			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
 			currentBuildingPlacement.AddBuildingRefs();
 			currentBuildingPlacement = null;
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 2f);
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
 			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 		}
 		else if (Input.GetMouseButtonDown(0) && !currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 2f);
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 1f);
 
 		if (Input.GetMouseButtonDown(1))
 			Destroy(currentBuildingPlacement.gameObject);
