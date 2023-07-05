@@ -140,7 +140,7 @@ public class Entities : MonoBehaviour
 		currentHealth -= dmg;
 		UpdateHealthBar();
 		if (currentHealth <= 0)
-			OnDeath();
+			OnEntityDeath();
 	}
 	public void UpdateHealthBar()
 	{
@@ -148,7 +148,7 @@ public class Entities : MonoBehaviour
 		HealthSlider.value = healthPercentage;
 		HealthText.text = currentHealth.ToString() + " / " + maxHealth.ToString();
 	}
-	public virtual void OnDeath()
+	public virtual void OnEntityDeath()
 	{
 		RemoveEntityRefs();
 		Instantiate(DeathObj, transform.position, Quaternion.identity);
@@ -170,7 +170,7 @@ public class Entities : MonoBehaviour
 	}
 	public void RefundEntity()
 	{
-		currentHealth = 0;
+		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Refunded 75% of resources", 1f);
 		int refundMoney = (int)(moneyCost / 1.5);
 		int refundAlloy = (int)(alloyCost / 1.5);
 		int refundCrystal = (int)(crystalCost / 1.5);
@@ -188,7 +188,9 @@ public class Entities : MonoBehaviour
 			GameManager.Instance.aiCurrentCrystals += refundCrystal;
 		}
 		playerController.gameUIManager.UpdateCurrentResourcesUI();
-		OnDeath();
+		RemoveEntityRefs();
+		Destroy(UiObj);
+		Destroy(gameObject);
 	}
 	public void UpdateEntityAudioVolume()
 	{

@@ -10,14 +10,8 @@ using static UnityEngine.UI.CanvasScaler;
 public class BuildingManager : Entities
 {
 	[Header("Building Refs")]
-	public bool isPowered;
-	public bool isHQ;
-	public bool isLightVehProdBuilding;
-	public bool isHeavyVehProdBuilding;
-	public bool isVTOLProdBuilding;
-	public bool isRefineryBuilding;
-	public bool isGeneratorBuilding;
-	public GameObject refundBuildingButton;
+	public GameObject refundBuildingBackgroundObj;
+	public GameObject unpoweredBuildingIndicatorObj;
 
 
 	[Header("Building Production Stats")]
@@ -25,6 +19,15 @@ public class BuildingManager : Entities
 	public int alloyProduction;
 	public int crystalProduction;
 	public int unitBuildTimeBoost;
+
+	[Header("Building Bools")]
+	public bool isPowered;
+	public bool isHQ;
+	public bool isLightVehProdBuilding;
+	public bool isHeavyVehProdBuilding;
+	public bool isVTOLProdBuilding;
+	public bool isRefineryBuilding;
+	public bool isGeneratorBuilding;
 
 	[Header("Building Dynamic Refs")]
 	public CapturePointController capturePointController;
@@ -42,10 +45,13 @@ public class BuildingManager : Entities
 	{
 		base.Update();
 	}
-	public IEnumerator HideUi()
+	public void ShowRefundButton()
 	{
-		yield return new WaitForSeconds(0.1f);
-		HideUIHealthBar();
+		refundBuildingBackgroundObj.SetActive(true);
+	}
+	public void HideRefundButton()
+	{
+		refundBuildingBackgroundObj.SetActive(false);
 	}
 
 	//HEALTH/HIT FUNCTIONS OVERRIDES
@@ -54,9 +60,9 @@ public class BuildingManager : Entities
 		if (!wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING UNDER ATTACK", transform.position);
 	}
-	public override void OnDeath()
+	public override void OnEntityDeath()
 	{
-		base.OnDeath();
+		base.OnEntityDeath();
 		if (ShouldDisplaySpottedNotifToPlayer())
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING DESTROYED", transform.position);
 	}
@@ -124,17 +130,12 @@ public class BuildingManager : Entities
 		}
 		else if (isRefineryBuilding)
 		{
-			try  //on the off chance one or both cargoships are already dead
-			{
+			if (GetComponent<RefineryController>().CargoShipList.Count == 2)
 				GetComponent<RefineryController>().CargoShipList[1].DeleteSelf();
+			if (GetComponent<RefineryController>().CargoShipList.Count == 1)
 				GetComponent<RefineryController>().CargoShipList[0].DeleteSelf();
-				capturePointController.RefinaryBuildings.Remove(this);
-			}
-			catch (Exception e)
-			{
-				throw e;
-			}
-			
+
+			capturePointController.RefinaryBuildings.Remove(this);			
 		}
 		else if (isLightVehProdBuilding)
 		{
