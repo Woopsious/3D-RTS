@@ -27,7 +27,6 @@ public class UnitStateController : Entities
 	public GameObject FoVMeshObj;
 
 	[Header("Unit Stats")]
-	public string unitName;
 	public float attackRange;
 	public float ViewRange;
 

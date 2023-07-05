@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 public class GameUIManager : MonoBehaviour
@@ -25,6 +26,8 @@ public class GameUIManager : MonoBehaviour
 	public Button audioBackButton;
 
 	public Text gameTimerText;
+
+	public GameObject entityInfoTemplatePrefab;
 
 	[Header("User Resource Refs")]
 	public Text CurrentMoneyText;
@@ -123,22 +126,33 @@ public class GameUIManager : MonoBehaviour
 		Time.timeScale = 1;
 		settingsObj.SetActive(false);
 	}
-	//show tab menu functions
-	public void ShowBuildingShop()
+
+	//SHOW UI ELEMENTS
+	public void ShowBuildingsBaseShop()
 	{
 		buildingsBaseUiShopObj.SetActive(true);
+		buildingsVehicleProdUiShopObj.SetActive(false);
+		unitsLightUiShopOneObj.SetActive(false);
+		unitsHeavyUiShopTwoObj.SetActive(false);
+	}
+	public void ShowBuildingsVehicleProdShop()
+	{
+		buildingsBaseUiShopObj.SetActive(false);
+		buildingsVehicleProdUiShopObj.SetActive(true);
 		unitsLightUiShopOneObj.SetActive(false);
 		unitsHeavyUiShopTwoObj.SetActive(false);
 	}
 	public void ShowUnitsLightShop()
 	{
 		buildingsBaseUiShopObj.SetActive(false);
+		buildingsVehicleProdUiShopObj.SetActive(false);
 		unitsLightUiShopOneObj.SetActive(true);
 		unitsHeavyUiShopTwoObj.SetActive(false);
 	}
 	public void ShowUnitsHeavyShop()
 	{
 		buildingsBaseUiShopObj.SetActive(false);
+		buildingsVehicleProdUiShopObj.SetActive(false);
 		unitsLightUiShopOneObj.SetActive(false);
 		unitsHeavyUiShopTwoObj.SetActive(true);
 	}
@@ -176,6 +190,130 @@ public class GameUIManager : MonoBehaviour
 			unitGroupsObj.transform.position = new Vector3(-500, 575, 0);
 		if (unitProdQueuesObj.transform.position != new Vector3(0, 575, 0))
 			unitProdQueuesObj.transform.position = new Vector3(0, 575, 0);
+	}
+
+	//SETUP UI ELEMENTS
+	public void SetUpBuildingsShopUi()
+	{
+		for (int i = 0; i < GameManager.Instance.PlayerOneBuildingsList.Count - 1; i++)
+		{
+			if (i < 3)
+			{
+				SetUpEntityTemplate(i, GameManager.Instance.PlayerOneBuildingsList, buildingsBaseUiShopObj);
+			}
+			else if (i >= 3)
+			{
+				SetUpEntityTemplate(i, GameManager.Instance.PlayerOneBuildingsList, buildingsVehicleProdUiShopObj);
+			}
+		}
+	}
+	public void SetUpUnitShopUi()
+	{
+		for (int i = 0; i < GameManager.Instance.PlayerOneUnitsList.Count; i++)
+		{
+			if (i < 3)
+			{
+				SetUpEntityTemplate(i, GameManager.Instance.PlayerOneUnitsList, unitsLightUiShopOneObj);
+			}
+			else if (i >= 3)
+			{
+				SetUpEntityTemplate(i, GameManager.Instance.PlayerOneUnitsList, unitsHeavyUiShopTwoObj);
+			}
+		}
+	}
+	public void SetUpEntityTemplate(int i, List<GameObject> entitysList, GameObject parent)
+	{
+		GameObject go = Instantiate(entityInfoTemplatePrefab, parent.transform);
+		Text entityTitleText = go.transform.GetChild(0).GetComponent<Text>();
+		Image entityImage = go.transform.GetChild(1).GetComponent<Image>();
+		Button entityBuyButton = go.transform.GetChild(2).GetComponent<Button>();
+		Text entityInfoText = go.transform.GetChild(3).GetComponent<Text>();
+
+		entityTitleText.text = entitysList[i].GetComponent<Entities>().entityName;
+		//entityImage = List of images in GameManager at some point
+
+		GrabUnitInfo(i, entityInfoText);
+
+		LinkBuyButtons(i, entityBuyButton, entitysList);
+	}
+	public void GrabBuildingInfo(int i, Text textInfo)
+	{
+
+	}
+	public void GrabUnitInfo(int i, Text textInfo)
+	{
+		UnitStateController unit = GameManager.Instance.PlayerOneUnitsList[i].GetComponent<UnitStateController>();
+		NavMeshAgent unitNavMesh = unit.GetComponent<NavMeshAgent>(); 
+
+		string costInfo = "Cost:\n Money " + unit.moneyCost + "Alloys " + unit.alloyCost + ", Crystals " + unit.crystalCost + "\n";
+		string healthInfo = "Stats:\n Health " + unit.maxHealth + ", Armour " + unit.armour + ", View Range " + unit.ViewRange + "\n";
+		string specialInfo = "Is Armed: NO, Can Fly: NO, Speed " + unitNavMesh.speed * 5 + "MPH \n";
+		if (unit.isFlying)
+			specialInfo = "Is Armed: NO, Can Fly: Yes, Speed " + unitNavMesh.speed * 5 + "MPH \n";
+
+		string combatInfo = "";
+		if (unit.isUnitArmed)
+		{
+			WeaponSystem weaponSystem = unit.GetComponent<WeaponSystem>();
+			float mainWeaponDPS = weaponSystem.mainWeaponDamage / weaponSystem.mainWeaponAttackSpeed;
+			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage / weaponSystem.secondaryWeaponAttackSpeed;
+			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
+
+			combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + unit.attackRange;
+		}
+		textInfo.text = costInfo + healthInfo + specialInfo + combatInfo;
+	}
+
+	public void LinkBuyButtons(int i, Button buttonToLink, List<GameObject> listType)
+	{
+		if (listType == GameManager.Instance.PlayerOneBuildingsList) //|| listType = GameManager.Instance. PLAYERTWOLIST
+		{
+			switch(i)
+			{
+				case 0:
+				buyEnergyGenBuilding = buttonToLink;
+				break;
+				case 1:
+				buyRefineryBuilding = buttonToLink;
+				break;
+				case 2:
+				buyEnergyGenBuilding = buttonToLink; //needs to be defense turrent in future
+				break;
+				case 3:
+				buyLightVehProdBuilding = buttonToLink;
+				break;
+				case 4:
+				buyHeavyVehProdBuilding = buttonToLink;
+				break;
+				case 5:
+				buyVTOLVehProdBuilding = buttonToLink;
+				break;
+			}
+		}
+		else if (listType == GameManager.Instance.PlayerOneUnitsList) //|| listType = GameManager.Instance. PLAYERTWOLIST
+		{
+			switch (i)
+			{
+				case 0:
+				buyScoutVehicle = buttonToLink;
+				break;
+				case 1:
+				buyRadarVehicle = buttonToLink;
+				break;
+				case 2:
+				buyLightMechVehicle = buttonToLink;
+				break;
+				case 3:
+				buyHeavyMechKnightVehicle = buttonToLink;
+				break;
+				case 4:
+				buyHeavyMechTankVehicle = buttonToLink;
+				break;
+				case 5:
+				buyVTOLVehicle = buttonToLink;
+				break;
+			}
+		}
 	}
 
 	//UI UPDATES

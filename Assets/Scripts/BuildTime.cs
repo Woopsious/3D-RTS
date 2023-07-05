@@ -26,7 +26,7 @@ public class BuildTime : MonoBehaviour
 	public void Start()
 	{
 		UnitStateController unit = UnitPrefab.GetComponent<UnitStateController>();
-		buildCostText.text = unit.unitName + "\n Cost: " + unit.moneyCost + " Money\n" + unit.alloyCost + " Alloys, " + unit.crystalCost + " Crystals";
+		buildCostText.text = unit.entityName + "\n Cost: " + unit.moneyCost + " Money\n" + unit.alloyCost + " Alloys, " + unit.crystalCost + " Crystals";
 		buildTimeText.text = "Time To Build: " + buildTime;
 	}
 	public void Update()

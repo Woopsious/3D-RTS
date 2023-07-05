@@ -57,6 +57,8 @@ public class GameManager : MonoBehaviour
 	public GameObject buildingVTOLProdPlayerOne;
 	public GameObject buildingTurretPlayerOne;
 
+	public List<GameObject> PlayerOneBuildingsList;
+
 	[Header("PlayerOne Unit Prefabs")]
 	public GameObject unitVTOLPlayerOne;
 	public GameObject unitHeavyMechTankPlayerOne;
@@ -64,6 +66,8 @@ public class GameManager : MonoBehaviour
 	public GameObject unitLightMechPlayerOne;
 	public GameObject unitRadarVehiclePlayerOne;
 	public GameObject unitScoutVehiclePlayerOne;
+
+	public List<GameObject> PlayerOneUnitsList;
 
 	[Header("PlayerTwo Building Prefabs")]
 	public GameObject buildingHQPlayerTwo;
@@ -237,6 +241,7 @@ public class GameManager : MonoBehaviour
 			GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 			gameUIManager.ResetUi();
 			gameUIManager.ResetUnitGroupUI();
+			gameUIManager.SetUpUnitShopUi();
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
 	}

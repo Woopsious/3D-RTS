@@ -19,6 +19,7 @@ public class Entities : MonoBehaviour
 	public GameObject miniMapRenderObj;
 
 	[Header("Entity Stats")]
+	public string entityName;
 	public int moneyCost;
 	public int alloyCost;
 	public int crystalCost;
