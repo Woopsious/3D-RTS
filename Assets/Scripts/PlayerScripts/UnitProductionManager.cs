@@ -79,7 +79,7 @@ public class UnitProductionManager : MonoBehaviour
 		{
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-			if (Physics.Raycast(ray, out RaycastHit hitInfo, playerController.ignoreMe))
+			if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe))
 			{
 				unitBuildHighlighterParent.transform.position = hitInfo.point;
 				//not working properly
@@ -108,6 +108,7 @@ public class UnitProductionManager : MonoBehaviour
 			}
 		}
 	}
+	//possibly split function up in future as its messy
 	public void PlaceUnitManager()
 	{
 		//on left click add all builds to correct lists + check if player can afford them
@@ -117,42 +118,47 @@ public class UnitProductionManager : MonoBehaviour
 			{
 				//run check to see if a building of the correct type for a unit is built in future
 				build.buildPosDestination = unitBuildHighlighterParent.transform.position;
-				build.FindClosestProdBuilding();
-				UnitStateController broughtUnit = build.UnitPrefab.GetComponent<UnitStateController>();
 
-				if (CheckIfCanBuy(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost)) //if player can afford them 
+				if(build.FindClosestProdBuilding())
 				{
-					//then -unit prices and add to correct queue list and start production on first one if not already started, then update resUI
-					UnitCost(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
+					UnitStateController broughtUnit = build.UnitPrefab.GetComponent<UnitStateController>();
 
-					if (build.listNumRef == 1)
+					if (CheckIfCanBuy(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost)) //if player can afford them 
 					{
-						lightVehProdList.Add(build);
-						if (!lightVehProdList[0].isInProduction)
-							lightVehProdList[0].StartProduction();
-					}
+						//then -unit prices and add to correct queue list and start production on first one if not already started, then update resUI
+						UnitCost(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
 
-					else if (build.listNumRef == 2)
-					{
-						heavyVehProdList.Add(build);
-						if (!heavyVehProdList[0].isInProduction)
-							heavyVehProdList[0].StartProduction();
-					}
+						if (build.listNumRef == 1)
+						{
+							lightVehProdList.Add(build);
+							if (!lightVehProdList[0].isInProduction)
+								lightVehProdList[0].StartProduction();
+						}
 
-					else if (build.listNumRef == 3)
-					{
-						vtolVehProdList.Add(build);
-						if (!vtolVehProdList[0].isInProduction)
-							vtolVehProdList[0].StartProduction();
+						else if (build.listNumRef == 2)
+						{
+							heavyVehProdList.Add(build);
+							if (!heavyVehProdList[0].isInProduction)
+								heavyVehProdList[0].StartProduction();
+						}
+
+						else if (build.listNumRef == 3)
+						{
+							vtolVehProdList.Add(build);
+							if (!vtolVehProdList[0].isInProduction)
+								vtolVehProdList[0].StartProduction();
+						}
+						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Units Brought", 2f);
 					}
-					//Some code to better notify player
+					else //if player cant afford them add build to failed list then at the end remove ui + refs
+					{
+						failedUnitPlacements.Add(build);
+						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt Afford some/all unit(s)", 3f);
+					}
 				}
-				else //if player cant afford them add build to failed list then at the end remove ui + refs
+				else //if no valid spawn point for them is found
 				{
-					failedUnitPlacements.Add(build);
-					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant afford: " + 
-						build.UnitPrefab.GetComponent<UnitStateController>().unitName, 2); ;
-					//Some code to better notify player
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("no powered vehicle production buildings found", 3f);
 				}
 			}
 			if (failedUnitPlacements.Count != 0)

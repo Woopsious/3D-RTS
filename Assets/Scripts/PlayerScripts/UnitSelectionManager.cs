@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
 using static Unity.Collections.AllocatorManager;
+using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 
 public class UnitSelectionManager : MonoBehaviour
@@ -187,27 +188,38 @@ public class UnitSelectionManager : MonoBehaviour
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
 		if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe) && !playerController.IsMouseOverUI())
-		{
-			if (hitInfo.collider.gameObject.GetComponent<CargoShipController>() != null)
-				TrySelectCargoShip(hitInfo.collider.gameObject.GetComponent<CargoShipController>());
+		{	
+			//handle selecting of entities
+			if (hitInfo.collider.gameObject.GetComponent<Entities>() != null)
+			{
+				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
+				if (entity.GetComponent<UnitStateController>() != null && entity.isPlayerOneEntity != playerController.isPlayerOne)
+					TryAttackEnemyEntity(entity);
 
-			else if (SelectedCargoShip != null && hitInfo.collider.gameObject.GetComponent<ResourceNodes>() != null)
-				TryMoveSelectedEntities(hitInfo.collider.gameObject);
+				else if (entity.GetComponent<CargoShipController>() != null)
+					TrySelectCargoShip(entity.GetComponent<CargoShipController>());
 
-			else if (hitInfo.collider.gameObject.GetComponent<BuildingManager>() != null)
-				TrySelectBuilding(hitInfo.collider.gameObject.GetComponent<BuildingManager>());
+				else if (entity.GetComponent<BuildingManager>() != null)
+					TrySelectBuilding(entity.GetComponent<BuildingManager>());
 
-			else if (hitInfo.collider.gameObject.GetComponent<UnitStateController>() != null)
-				TrySelectUnits(hitInfo.collider.gameObject.GetComponent<UnitStateController>());
-
-			else if (selectedUnitList.Count != 0)
-				TryMoveSelectedEntities(hitInfo.collider.gameObject);
-
+				else if (entity.GetComponent<UnitStateController>() != null)
+					TrySelectUnits(entity.GetComponent<UnitStateController>());
+			}
+			//handle anything else
 			else
 			{
-				DeselectUnits();
-				DeselectBuilding();
-				DeselectCargoShip();
+				if (SelectedCargoShip != null && hitInfo.collider.gameObject.GetComponent<ResourceNodes>() != null)
+					TryMoveSelectedEntities(hitInfo.collider.gameObject);
+
+				else if (selectedUnitList.Count != 0)
+					TryMoveSelectedEntities(hitInfo.collider.gameObject);
+
+				else
+				{
+					DeselectUnits();
+					DeselectBuilding();
+					DeselectCargoShip();
+				}
 			}
 		}
 	}
@@ -285,23 +297,38 @@ public class UnitSelectionManager : MonoBehaviour
 		{
 			ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
 
-			if (resourceNode.isBeingMined || resourceNode.isEmpty) //if node already being mined or is empty notify player and cancel order
-			{
-				Debug.Log("Resource Node is either empty of resources or is already being mined");
-			}
+			if (resourceNode.isBeingMined)
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
+
+			else if (resourceNode.isEmpty)
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
+
 			else //else mine selected node
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
 				SelectedCargoShip.SetResourceNodeFromPlayerInput(resourceNode);
+			}
 		}
 		//move selected units to mouse pos
 		else if (selectedUnitList.Count != 0)
 		{
-			MoveUnitsInFormation();
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Moving!", 1f);
+
+			for (int i = 0; i < selectedUnitList.Count; i++)
+			{
+				UnitStateController unit = selectedUnitList[i];
+				Vector3 movePos = movePosHighlighterObj[i].transform.position;
+				unit.MoveToDestination(movePos);
+			}
 		}
+	}
+	public void TryAttackEnemyEntity(Entities entity)
+	{
 		//move selected units closer to target and attack it
-		else if (selectedUnitList.Count != 0 && Obj.GetComponent<UnitStateController>().isPlayerOneEntity != playerController.isPlayerOne)
+		for (int i = 0; i < selectedUnitList.Count; i++)
 		{
-			Debug.Log("FINAL CODE NOT IMPLAMENTED TO ATTACK SELECTED ENEMY UNIT");
-			MoveUnitsInFormation();
+			UnitStateController unit = selectedUnitList[i];
+			unit.TryAttackPlayerSetTarget(entity);
 		}
 	}
 
@@ -310,47 +337,6 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		selectedUnitList.Remove(unit);
 		movePosHighlighterObj[selectedUnitList.Count].SetActive(false);
-	}
-	//move to mouse pos on click
-	public void MoveUnitsInFormation()
-	{
-		for (int i = 0; i < selectedUnitList.Count; i++)
-		{
-			UnitStateController unit = selectedUnitList[i];
-			Vector3 moveCoords = movePosHighlighterObj[i].transform.position;
-			if (unit.isFlying)
-			{
-				unit.movePos = new Vector3(moveCoords.x, moveCoords.y + 7, moveCoords.z);
-				unit.ChangeStateMoving();
-			}
-			else
-			{
-				unit.movePos = moveCoords;
-				unit.ChangeStateMoving();
-			}
-		}
-	}
-	//move closer to selected enemy unit and attack
-	public void MoveToAndAttack(RaycastHit hitInfo)
-	{
-		int i = 0;
-		foreach (UnitStateController selectedUnit in selectedUnitList)
-		{
-			if (i < movePosOffset.Count)
-			{
-				if (selectedUnit.isFlying)
-				{
-					selectedUnit.movePos = new Vector3(hitInfo.point.x, hitInfo.point.y + 7, hitInfo.point.z) + movePosOffset[i];
-					selectedUnit.ChangeStateMoving();
-				}
-				else
-				{
-					selectedUnit.movePos = hitInfo.point + movePosOffset[i];
-					selectedUnit.ChangeStateMoving();
-				}
-				i++;
-			}
-		}
 	}
 
 	//DRAG SELECT FUNCTIONS
@@ -396,9 +382,15 @@ public class UnitSelectionManager : MonoBehaviour
 	//add drag selected units to selected units list and hid drag select box
 	public void ReleaseSelectionBox()
 	{
+		if (dragSelectedUnitList.Count != 0)
+		{
+			DeselectUnits();
+			DeselectBuilding();
+			DeselectCargoShip();
+		}
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{
-			if(!CheckForCargoShip(unit) && unit.isPlayerOneEntity != !playerController.isPlayerOne)
+			if(unit.isPlayerOneEntity != !playerController.isPlayerOne)
 				selectedUnitList.Add(unit);
 		}
 		dragSelectedUnitList.Clear();
@@ -631,9 +623,9 @@ public class UnitSelectionManager : MonoBehaviour
 			return true;
 		else return false;
 	}
-	public bool CheckForCargoShip(UnitStateController unit)
+	public bool CheckForCargoShip(CargoShipController cargoShip)
 	{
-		if (unit.isCargoShip)
+		if (cargoShip != null)
 			return true;
 		else return false;
 	}

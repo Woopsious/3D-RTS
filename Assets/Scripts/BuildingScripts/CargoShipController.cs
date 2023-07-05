@@ -13,134 +13,144 @@ public class CargoShipController : UnitStateController
 {
 	[Header("Cargo Ship stats")]
 	public float viewRange;
-
 	public int moveSpeed;
 	public int maxMoveSpeed;
 	public int turnSpeed;
 
 	public int maxCrystalCarryCapacity;
 	public int maxAlloyCarryCapacity;
-
 	public int alloysCount;
 	public int crystalsCount;
+
+	public bool canChangeOrders;
+	public bool hasNewOrders;
+	public bool hasPauseOperation;
 
 	[Header("Dynamic Refs")]
 	public RefineryController refineryControllerParent;
 	public ResourceNodes targetResourceNode;
+	public ResourceNodes playerSetResourceNode;
 
 	public override void Start()
-	{       
-		//assign correct playercontroller to unit on start
-		PlayerController[] controllers = FindObjectsOfType<PlayerController>();
-		foreach (PlayerController controller in controllers)
-		{
-			if (controller.isPlayerOne == isPlayerOneEntity)
-			{
-				playerController = controller;
-				playerController.unitListForPlayer.Add(this);
-			}
-			else if (controller.isPlayerOne == !isPlayerOneEntity)
-			{
-				playerController = controller;
-				playerController.unitListForPlayer.Add(this);
-			}
-		}
-
-		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
-		UiObj.SetActive(false);
-		UpdateHealthBar();
-		UiObj.transform.rotation = Quaternion.identity;
-
-		FindTargetResourcesNode();
-		StartCoroutine(MoveToResourceNode());
-	}
-
-	public override void Update()
 	{
-		transform.position = Vector3.MoveTowards(transform.position, movePos, moveSpeed * Time.deltaTime);
+		base.Start();
+		FindClosestTargetResourcesNode();
+
+		if (refineryControllerParent.building.isPowered)
+			StartCoroutine(IncreaseHeightFromRefinery());
+		else
+			PauseMining();
 	}
 	public override void FixedUpdate()
 	{
-		//do nothing
+		transform.position = Vector3.MoveTowards(transform.position, movePos, moveSpeed * Time.deltaTime);
 	}
-	//logic to loop when mining resource node
+
+	//FUNCTIONS FOR LOOPING RESOURCE GATHERING
+	//can chnage mine orders here
+	public IEnumerator IncreaseHeightFromRefinery()
+	{
+		canChangeOrders = true;
+		SetDestination(new Vector3(refineryControllerParent.transform.position.x, 22, refineryControllerParent.transform.position.z));
+
+		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);
+
+		StartCoroutine(MoveToResourceNode());
+	}
 	public IEnumerator MoveToResourceNode()
 	{
-		SetDestination(new Vector3(refineryControllerParent.transform.position.x, refineryControllerParent.transform.position.y + 10, 
-			refineryControllerParent.transform.position.z));														//increase height from parent refinery
+		canChangeOrders = true;
+		SetDestination(new Vector3(targetResourceNode.transform.position.x, 22, targetResourceNode.transform.position.z));
 
-		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);												//check pos till true
+		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);
 
-		SetDestination(new Vector3(targetResourceNode.transform.position.x, targetResourceNode.transform.position.y + 10,
-			targetResourceNode.transform.position.z));															//move to resource node location
-
-		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);												//check pos till true
-
-		StartCoroutine(MineResources());
+		StartCoroutine(DecreaseHeightToResourceNode());
 	}
-	public IEnumerator MineResources()
+	public IEnumerator DecreaseHeightToResourceNode()
 	{
-		SetDestination(new Vector3(targetResourceNode.transform.position.x, targetResourceNode.transform.position.y + 5,
-			targetResourceNode.transform.position.z));																//Decrease height to resource node
+		canChangeOrders = true;
+		SetDestination(new Vector3(targetResourceNode.transform.position.x, targetResourceNode.transform.position.y + 3,
+			targetResourceNode.transform.position.z));
 
-		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);												//check pos till true
+		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);
 
+		StartCoroutine(MineResourceNodeAndReturnToRefinery());
+	}
+	//cant change mine orders here, and will have to wait
+	public IEnumerator MineResourceNodeAndReturnToRefinery()
+	{
+		canChangeOrders = false;
+		yield return new WaitForSeconds(15);                                                                                //mine resources for 15s
 		MineResourcesFromNode();
 
-		yield return new WaitForSeconds(15);																				//mine resources for 15s
-
-		SetDestination(new Vector3(gameObject.transform.position.x, gameObject.transform.position.y + 10,
-			gameObject.transform.position.z));																				//increase height from pos
-
-		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);												//check pos till true
-
 		if (CheckIfNodeIsEmpty()) //check to make sure resources are still avalable
-		{
-			FindTargetResourcesNode(); //if not find new closest resource node from parent refinery
-		}
+			FindClosestTargetResourcesNode(); //if not find new closest resource node from parent refinery
 
-		StartCoroutine(ReturnToParentRefinery());
+		SetDestination(new Vector3(gameObject.transform.position.x, 22, gameObject.transform.position.z));
+
+		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);				//increase height from current pos + check pos till true
+
+		SetDestination(new Vector3(refineryControllerParent.transform.position.x - 2.9f, 22, refineryControllerParent.transform.position.z - 0.9f));
+
+		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);				//move above refinery keeping height + check pos till true
+
+		SetDestination(new Vector3(refineryControllerParent.transform.position.x - 2.9f, refineryControllerParent.transform.position.y + 6,
+			refineryControllerParent.transform.position.z - 0.9f));
+
+		RefineResourcesFromInventroy();                                                                 //drop off resources at refinery and wait 5s
+		yield return new WaitForSeconds(5);
+
+		if (hasNewOrders)
+			ChangeResourceNode();																	//if neworders are avalable switch to them here
+
+		if (!hasPauseOperation) //continue loop if not paused (parent refinery is unpowered)
+			StartCoroutine(IncreaseHeightFromRefinery());
 	}
-	public IEnumerator ReturnToParentRefinery()
+	//only used when orders changed
+	public IEnumerator IncreaseHeight()
 	{
-		SetDestination(new Vector3(refineryControllerParent.transform.position.x, refineryControllerParent.transform.position.y + 10,
-			refineryControllerParent.transform.position.z));										//once true move to its parent refinery building
+		canChangeOrders = true;
+		SetDestination(new Vector3(gameObject.transform.position.x, 22, gameObject.transform.position.z));
 
-		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);												//check pos till true
-
-		SetDestination(new Vector3(refineryControllerParent.transform.position.x, refineryControllerParent.transform.position.y + 5,
-			refineryControllerParent.transform.position.z));												//once true decrease height to parent refinery
-
-		RefineResourcesFromInventroy();
-
-		yield return new WaitForSeconds(5);																				//drop off resources at refinery
+		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);
 
 		StartCoroutine(MoveToResourceNode());
 	}
 
-	//Functions to find or set resource node to mine from
+	//function to find res nodes
 	public void SetResourceNodeFromPlayerInput(ResourceNodes resourceNode)
 	{
-		targetResourceNode.isBeingMined = false;
-		targetResourceNode = resourceNode;
-		targetResourceNode.isBeingMined = true;
+		playerSetResourceNode = resourceNode;
+
+		if (canChangeOrders)
+		{
+			ChangeResourceNode();
+			StopAllCoroutines();
+			StartCoroutine(IncreaseHeight());
+		}
+		else
+			hasNewOrders = true;
 	}
-	public void FindTargetResourcesNode()
+	public void ChangeResourceNode()
+	{
+		targetResourceNode.isBeingMined = false;
+		targetResourceNode = playerSetResourceNode;
+		targetResourceNode.isBeingMined = true;
+		hasNewOrders = false;
+	}
+	public void FindClosestTargetResourcesNode()
 	{
 		List<ResourceNodes> PossibleNodes = new List<ResourceNodes>();
 
 		foreach (ResourceNodes resourceNode in refineryControllerParent.resourceNodesList)
 		{
 			if (!resourceNode.isBeingMined && !resourceNode.isEmpty)
-			{
 				PossibleNodes.Add(resourceNode);
-			}
 		}
 
 		if(PossibleNodes.Count == 0)
-		{
-			Debug.Log("No Free Resource Nodes");
-		}
+			Debug.LogError("No Free Resource Nodes");
+
 		else
 		{
 			PossibleNodes = PossibleNodes.OrderBy(newtarget => Vector3.Distance(refineryControllerParent.transform.position,
@@ -151,10 +161,24 @@ public class CargoShipController : UnitStateController
 		}
 	}
 
-	//Utility Functions
+	//HEALTH/HIT FUNCTIONS OVERRIDES
+	public override void TryDisplayEntityHitNotif()
+	{
+		if (!wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
+			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP UNDER ATTACK", transform.position);
+	}
+	public override void OnDeath()
+	{
+		base.OnDeath();
+		if (ShouldDisplaySpottedNotifToPlayer())
+			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP DESTROYED", transform.position);
+	}
+
+	//UTILITY FUNCTIONS
 	public override void RemoveEntityRefs()
 	{
 		targetResourceNode.isBeingMined = false;
+		playerController.unitListForPlayer.Remove(this);
 		refineryControllerParent.CargoShipList.Remove(this);
 		refineryControllerParent.CheckCargoShipsCount();
 	}
@@ -198,19 +222,33 @@ public class CargoShipController : UnitStateController
 	{
 		movePos = moveDestination;
 	}
+	public void PauseMining()
+	{
+		StopAllCoroutines();
+		hasPauseOperation = true;
+		SetDestination(new Vector3(refineryControllerParent.transform.position.x, 22, refineryControllerParent.transform.position.z));
+	}
+	public void ContinueMining()
+	{
+		hasPauseOperation = false;
+		if (crystalsCount != 0 || alloysCount != 0)
+			StartCoroutine(MineResourceNodeAndReturnToRefinery());
+
+		else
+			StartCoroutine(MoveToResourceNode());
+	}
 	public void DeleteSelf()
 	{
-		Destroy(gameObject);
+		currentHealth = -10;
+		OnDeath();
 	}
 
-	//bool checks
+	//BOOL CHECKS
 	public bool CheckIfNodeIsEmpty()
 	{
 		if (targetResourceNode.isEmpty)
-		{
 			return true;
-		}
-		return false;
+		else return false;
 	}
 	public bool CheckIfInPosition(Vector3 moveDestination)
 	{
@@ -218,7 +256,6 @@ public class CargoShipController : UnitStateController
 
 		if (Distance <= 0.1)
 			return true;
-
 		else return false;
 	}
 }

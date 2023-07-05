@@ -28,22 +28,11 @@ public class WeaponSystem : MonoBehaviour
 	public float secondaryWeaponAttackSpeedTimer;
 	public bool hasSecondaryWeapon;
 
-	//if x component exists and not in list, then add it to list, else ignore it, then grab closest
+	//if found then grab closest one
 	public void TryFindTarget()
 	{
-		foreach (GameObject target in unit.targetList)
-		{
-			if (target.GetComponent<UnitStateController>() && target != null && CheckIfInAttackRange(target.transform.position) &&
-				!unit.unitTargetList.Contains(target.GetComponent<UnitStateController>()))
-			{
-				unit.unitTargetList.Add(target.GetComponent<UnitStateController>());
-			}
-			else if (target.GetComponent<BuildingManager>() && target != null && CheckIfInAttackRange(target.transform.position) && 
-				!unit.buildingTargetList.Contains(target.GetComponent<BuildingManager>()))
-			{
-				unit.buildingTargetList.Add(target.GetComponent<BuildingManager>());
-			}
-		}
+		RemoveNullRefsFromTargetLists();
+
 		unit.currentUnitTarget = GrabClosestUnit();
 		unit.currentBuildingTarget = GrabClosestBuilding();
 	}
@@ -54,7 +43,7 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.unitTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && 
+			if (unit.CheckIfInAttackRange(unit.unitTargetList[i].transform.position) && 
 				unit.CheckIfEntityInLineOfSight(unit.unitTargetList[i]) && unit.unitTargetList[i] != null)
 					return unit.unitTargetList[i];
 		}
@@ -66,23 +55,34 @@ public class WeaponSystem : MonoBehaviour
 
 		for (int i = 0; i < unit.buildingTargetList.Count; i++)
 		{
-			if (CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && 
+			if (unit.CheckIfInAttackRange(unit.buildingTargetList[i].transform.position) && 
 				unit.CheckIfEntityInLineOfSight(unit.buildingTargetList[i]) && unit.buildingTargetList[i] != null)
 					return unit.buildingTargetList[i];
 		}
 		return null;
 	}
 
-	//check if entity exists + is in attack range, if true shoot it, else try get new target and remove null refs from lists
+	//check if entity exists + is in attack range, if true shoot it in order of attack priority, else try get new target and remove null refs from lists
 	public void ShootMainWeapon()
 	{
-		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
+		if (HasPlayerSetTarget() && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position) && 
+			unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
-			if (!unit.currentUnitTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
-				GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", unit.currentUnitTarget.transform.position);
+			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
+			unit.playerSetTarget.RecieveDamage(mainWeaponDamage);
+			unit.playerSetTarget.ResetIsEntityHitTimer();
+
+			mainWeaponAudio.Play();
+			mainWeaponParticles.Play();
+		}
+		else if (HasUnitTarget() && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && 
+			unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
+		{
+			if (unit.hasShootAnimation)
+				unit.animatorController.SetBool("isAttacking", true);
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
@@ -91,14 +91,11 @@ public class WeaponSystem : MonoBehaviour
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
 		}
-		else if (!HasUnitTarget() && HasBuildingTarget() && 
-			CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
+		else if (HasBuildingTarget() && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && 
+			unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
-
-			if (!unit.currentBuildingTarget.wasRecentlyHit && !unit.ShouldDisplayEventNotifToPlayer())
-				GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING UNDER ATTACK", unit.currentBuildingTarget.transform.position);
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			unit.currentBuildingTarget.RecieveDamage(mainWeaponDamage);
@@ -108,16 +105,19 @@ public class WeaponSystem : MonoBehaviour
 			mainWeaponParticles.Play();
 		}
 		else
-		{
-			unit.currentUnitTarget = null;
-			unit.currentBuildingTarget = null;
-			RemoveNullRefsFromLists(unit.targetList, unit.unitTargetList, unit.buildingTargetList);
 			TryFindTarget();
-		}
 	}
 	public void ShootSecondaryWeapon()
 	{
-		if (HasUnitTarget() && CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
+		if (HasPlayerSetTarget())
+		{
+			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
+			unit.playerSetTarget.RecieveDamage(secondaryWeaponDamage);
+
+			secondaryWeaponAudio.Play();
+			secondaryWeaponParticles.Play();
+		}
+		else if (HasUnitTarget())
 		{
 			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			unit.currentUnitTarget.RecieveDamage(secondaryWeaponDamage);
@@ -125,7 +125,7 @@ public class WeaponSystem : MonoBehaviour
 			secondaryWeaponAudio.Play();
 			secondaryWeaponParticles.Play();
 		}
-		else if (!HasUnitTarget() && HasBuildingTarget() && CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
+		else if (HasBuildingTarget())
 		{
 			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			unit.currentBuildingTarget.RecieveDamage(secondaryWeaponDamage);
@@ -141,50 +141,30 @@ public class WeaponSystem : MonoBehaviour
 		var lookRotation = Quaternion.LookRotation(targetPos - particleObject.transform.position);
 		particleObject.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, 1);
 	}
-	public void RemoveNullRefsFromLists(List<GameObject> targetList, List<UnitStateController> unitList, List<BuildingManager> buildingList)
+	public void RemoveNullRefsFromTargetLists()
 	{
-		for (int i = targetList.Count - 1; i >= 0; i--)
-		{
-			if (targetList[i] == null)
-				targetList.RemoveAt(i);
-		}
-		for (int i = unitList.Count - 1; i >= 0; i--)
-		{
-			if (unitList[i] == null)
-				unitList.RemoveAt(i);
-		}
-		for (int i = buildingList.Count - 1; i >= 0; i--)
-		{
-			if (buildingList[i] == null)
-				buildingList.RemoveAt(i);
-		}
+		unit.targetList = unit.targetList.Where(item => item != null).ToList();
+		unit.unitTargetList = unit.unitTargetList.Where(item => item != null).ToList();
+		unit.buildingTargetList = unit.buildingTargetList.Where(item => item != null).ToList();
 	}
 
 	//BOOL CHECKS
+	public bool HasPlayerSetTarget()
+	{
+		if (unit.playerSetTarget != null)
+			return true;
+		return false;
+	}
 	public bool HasUnitTarget()
 	{
 		if (unit.currentUnitTarget != null)
-		{
 			return true;
-		}
 		return false;
 	}
 	public bool HasBuildingTarget()
 	{
 		if (unit.currentBuildingTarget != null)
-		{
 			return true;
-		}
 		return false;
-	}
-	public bool CheckIfInAttackRange(Vector3 targetVector3)
-	{
-		float Distance = Vector3.Distance(transform.position, targetVector3);
-
-		if (Distance <= unit.attackRange)
-			return true;
-
-		else
-			return false;
 	}
 }

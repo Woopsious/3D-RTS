@@ -68,16 +68,13 @@ public class BuildingPlacementManager : MonoBehaviour
 			}
 		}
 	}
+	//place building and toggle it on
 	public void PlaceBuildingManager()
 	{
-		//place building and toggle it on
 		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
 		{
 			//enable building triggers, navMeshObstacle, set layer and unhighlight, -building cost and update resUI
 			currentBuildingPlacement.GetComponent<BuildingManager>().enabled = true;
-
-			if(currentBuildingPlacement.isRefineryBuilding)
-				currentBuildingPlacement.GetComponent<RefineryController>().CheckCargoShipsCount();
 			if(currentBuildingPlacement.isVTOLProdBuilding)
 				currentBuildingPlacement.GetComponent<SphereCollider>().isTrigger = true;
 			else
@@ -90,24 +87,12 @@ public class BuildingPlacementManager : MonoBehaviour
 
 			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
 			currentBuildingPlacement.AddBuildingRefs();
-
-			if (currentBuildingPlacement.isGeneratorBuilding) //if genBuilding power Already placed buildings
-				currentBuildingPlacement.GetComponent<EnergyGenController>().StartPower();
-
-			else if (!currentBuildingPlacement.isGeneratorBuilding) //else try get already placed gen and repower new buildings after .5 secs
-			{
-				if (currentBuildingPlacement.GetComponent<CanPlaceBuilding>().pointController.energyGeneratorBuilding != null)
-				{
-					currentBuildingPlacement.GetComponent<CanPlaceBuilding>().pointController.energyGeneratorBuilding.
-						GetComponent<EnergyGenController>().StartPower();
-				}
-			}
 			currentBuildingPlacement = null;
-			//NOTIFY PLAYER CODE HERE
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 2f);
+			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 		}
 		else if (Input.GetMouseButtonDown(0) && !currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 1);
-		//NOTIFY PLAYER CODE HERE
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 2f);
 
 		if (Input.GetMouseButtonDown(1))
 			Destroy(currentBuildingPlacement.gameObject);

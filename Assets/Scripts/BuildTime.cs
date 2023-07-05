@@ -19,6 +19,7 @@ public class BuildTime : MonoBehaviour
 	public float buildTime;
 	public float buildTimer;
 	public bool isInProduction;
+	public bool isSpawnPointStillValid;
 
 	public VehProdSpawnLocation unitSpawnLocation;
 
@@ -43,33 +44,33 @@ public class BuildTime : MonoBehaviour
 			buildTimeText.text = "Time To Build: " + buildTimer;
 		}
 	}
-	public void FindClosestProdBuilding()
+	public bool FindClosestProdBuilding()
 	{
 		VehProdSpawnLocation[] allVehProdbuildings = FindObjectsOfType<VehProdSpawnLocation>();
 		List<VehProdSpawnLocation> correctProdBuildings = new List<VehProdSpawnLocation>();
 
-		if(allVehProdbuildings.Length == 0)
-			Debug.LogError("No production buildings found");
 
-		foreach (VehProdSpawnLocation possibleBuilding in allVehProdbuildings)
+		if (allVehProdbuildings.Length != 0)
 		{
-			if (isPlayerOne == possibleBuilding.building.isPlayerOneEntity && possibleBuilding.building.isPowered)
+			foreach (VehProdSpawnLocation possibleBuilding in allVehProdbuildings)
 			{
-				if (possibleBuilding.building.isLightVehProdBuilding && listNumRef == 1)
-					correctProdBuildings.Add(possibleBuilding);
+				if (isPlayerOne == possibleBuilding.building.isPlayerOneEntity && possibleBuilding.building.isPowered)
+				{
+					if (possibleBuilding.building.isLightVehProdBuilding && listNumRef == 1)
+						correctProdBuildings.Add(possibleBuilding);
 
-				else if (possibleBuilding.building.isHeavyVehProdBuilding && listNumRef == 2)
-					correctProdBuildings.Add(possibleBuilding);
+					else if (possibleBuilding.building.isHeavyVehProdBuilding && listNumRef == 2)
+						correctProdBuildings.Add(possibleBuilding);
 
-				else if (possibleBuilding.building.isVTOLProdBuilding && listNumRef == 3)
-					correctProdBuildings.Add(possibleBuilding);
+					else if (possibleBuilding.building.isVTOLProdBuilding && listNumRef == 3)
+						correctProdBuildings.Add(possibleBuilding);
+				}
 			}
 		}
-		if (correctProdBuildings.Count == 0)
+		if (correctProdBuildings.Count == 0 || allVehProdbuildings.Length == 0)
 		{
-			Debug.LogError("No correct type production buildings powered");
 			unitProductionManager.failedUnitPlacements.Add(this);
-			//notify player
+			return false;
 		}
 		else
 		{
@@ -78,6 +79,7 @@ public class BuildTime : MonoBehaviour
 
 			VehProdSpawnLocation closestBuilding = closestProdBuildings[0];
 			unitSpawnLocation = closestBuilding;
+			return true;
 		}
 	}
 	public void StartProduction()
@@ -101,15 +103,34 @@ public class BuildTime : MonoBehaviour
 		if (listNumRef == 3)
 			unitProductionManager.RemoveFromQueueAndStartNextBuild(unitProductionManager.vtolVehProdList, this);
 
-		unitProductionManager.SpawnUnitsAtProdBuilding(this, unitSpawnLocation, buildPosDestination);
-		RemoveUi();
+		//NEEDS CHECK INCASE PRODBUILDING IS DESTROYED WHILST IN BUILD QUEUE
+		//first try find another valid spawn point?? if that fails cancel build and refund player
+		if (unitSpawnLocation == null)
+		{
+			isSpawnPointStillValid = false;
+
+			FindClosestProdBuilding();
+		}
+
+		if (unitSpawnLocation != null)
+		{
+			unitProductionManager.SpawnUnitsAtProdBuilding(this, unitSpawnLocation, buildPosDestination);
+			RemoveUi();
+		}
+		else
+			CancelProduction();
 	}
 	public void CancelProduction()
 	{
-		RemoveUi();
-
 		UnitStateController unit = UnitPrefab.GetComponent<UnitStateController>();
 		UnitCost(unit.moneyCost, unit.alloyCost, unit.crystalCost);
+		GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
+
+		if (isSpawnPointStillValid)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("unit production canceled", 1f);
+		else if (!isSpawnPointStillValid)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("unit production canceled, no valid spawn point", 3f);
+		RemoveUi();
 	}
 	public void RemoveUi()
 	{

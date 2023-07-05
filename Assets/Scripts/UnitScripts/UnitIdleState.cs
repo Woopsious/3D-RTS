@@ -15,13 +15,11 @@ public class UnitIdleState : UnitBaseState
 		}
 		unit.movingSFX.Stop();
 
-		if (unit.unitName != "Scout Vehicle")
+		if (unit.hasMoveAnimation)
 			unit.animatorController.SetBool("isIdle", true);
 
 		if (unit.hasShootAnimation)
 			unit.animatorController.SetBool("isAttacking", false);
-
-		//unit.HideEntity();
 	}
 	public override void Exit(UnitStateController unit)
 	{

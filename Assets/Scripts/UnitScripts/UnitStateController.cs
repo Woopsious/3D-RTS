@@ -17,7 +17,6 @@ public class UnitStateController : Entities
 	public UnitIdleState idleState = new UnitIdleState();
 	public UnitMovingState movingState = new UnitMovingState();
 	public UnitStateAttacking attackState = new UnitStateAttacking();
-
 	public WeaponSystem weaponSystem;
 
 	[Header("Unit Refs")]
@@ -41,18 +40,18 @@ public class UnitStateController : Entities
 	public bool hasMoveAnimation;
 
 	[Header("Unit Dynamic Refs")]
-	public int GroupNum;
-
 	public List<GameObject> targetList;
-	public List<BuildingManager> buildingTargetList;
-	public BuildingManager currentBuildingTarget;
 	public List<UnitStateController> unitTargetList;
+	public List<BuildingManager> buildingTargetList;
+
+	public Entities playerSetTarget;
 	public UnitStateController currentUnitTarget;
+	public BuildingManager currentBuildingTarget;
+
+	public int GroupNum;
 	public Vector3 targetPos;
 	public Vector3 movePos;
 	public NavMeshPath navMeshPath;
-
-	RaycastHit raycastHit;
 
 	public override void Start()
 	{
@@ -60,19 +59,11 @@ public class UnitStateController : Entities
 
 		ChangeStateIdle();
 		//assign correct playercontroller to unit on start
-		PlayerController[] controllers = FindObjectsOfType<PlayerController>();
-		foreach(PlayerController controller in controllers)
+		PlayerController controller = FindObjectOfType<PlayerController>();
+		if (true)
 		{
-			if(controller.isPlayerOne == isPlayerOneEntity)
-			{
-				playerController = controller;
-				playerController.unitListForPlayer.Add(this);
-			}
-			else if (controller.isPlayerOne == !isPlayerOneEntity)
-			{
-				playerController = controller;
-				playerController.unitListForPlayer.Add(this);
-			}
+			playerController = controller;
+			playerController.unitListForPlayer.Add(this);
 		}
 	}
 	public override void Update()
@@ -95,13 +86,13 @@ public class UnitStateController : Entities
 	//SPOTTING SYSTEM FUNCTIONS
 	public void AddTargetsOnFOVEnter(GameObject triggerObj) //filter out everything but enemy Entities
 	{
-		if (triggerObj.GetComponent<UnitStateController>() != null && isPlayerOneEntity != triggerObj.GetComponent<UnitStateController>().isPlayerOneEntity)
+		if (triggerObj.GetComponent<UnitStateController>() !=null && isPlayerOneEntity != triggerObj.GetComponent<UnitStateController>().isPlayerOneEntity)
 		{
 			if (!unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
 				targetList.Add(triggerObj);
 		}
 		else if (triggerObj.GetComponent<BuildingManager>() != null && isPlayerOneEntity != triggerObj.GetComponent<BuildingManager>().isPlayerOneEntity
-			&& triggerObj.GetComponent<CanPlaceBuilding>().isPlaced)    //filter out non placed buildings
+			&& triggerObj.GetComponent<CanPlaceBuilding>().isPlaced)
 		{
 			if (!buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 				targetList.Add(triggerObj);
@@ -112,10 +103,7 @@ public class UnitStateController : Entities
 	public void RemoveTargetsOnFOVExit(GameObject triggerObj)
 	{
 		if (targetList.Contains(triggerObj))
-		{
 			targetList.Remove(triggerObj);
-			//triggerObj.GetComponent<Entities>().HideEntity();
-		}
 
 		if (unitTargetList.Contains(triggerObj.GetComponent<UnitStateController>()))
 			unitTargetList.Remove(triggerObj.GetComponent<UnitStateController>());
@@ -123,43 +111,98 @@ public class UnitStateController : Entities
 		if (buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 			buildingTargetList.Remove(triggerObj.GetComponent<BuildingManager>());
 	}
-	public bool CheckIfEntityInLineOfSight(Entities entity)
-	{
-		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
-
-		if (hit.collider.gameObject == entity.gameObject)
-			return true;
-
-		else
-			return false;
-	}
 	public IEnumerator TrySpotTargetsNotSpotted()
 	{
-		try
+		targetList = targetList.Where(item => item != null).ToList();
+		for (int i = 0; i < targetList.Count; i++)
 		{
-			for (int i = 0; i < targetList.Count; i++)
+			Entities entity = targetList[i].GetComponent<Entities>();
+			if (CheckIfEntityInLineOfSight(entity) && entity != null)
 			{
-				Entities entity = targetList[i].GetComponent<Entities>();
-				if (CheckIfEntityInLineOfSight(entity) && entity != null)
-				{
-					if (!entity.wasRecentlySpotted && ShouldDisplayEventNotifToPlayer())
-						GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
+				if (!entity.wasRecentlySpotted && ShouldDisplaySpottedNotifToPlayer() && entity.GetComponent<CargoShipController>() == null)
+					GameManager.Instance.playerNotifsManager.DisplayEventMessage("New Enemy Spotted", entity.transform.position);
 
-					entity.ShowEntity();
-					entity.ResetEntitySpottedTimer();
-				}
+				if (isUnitArmed)
+					AddSpottedTargetsToListsWhenInAttackRange(entity);
+
+				entity.ShowEntity();
+				entity.ResetEntitySpottedTimer();
 			}
 		}
-		catch (Exception e)
-		{
-			throw e; //error pops up when a target is removed from the list, dont know how to fix
-			//should be fine to leave as null refs from lists get removed after target is destroyed
-		}
-
 		yield return new WaitForSeconds(0.5f);
 
 		if (targetList.Count != 0)
 			StartCoroutine(TrySpotTargetsNotSpotted());
+	}
+	public void AddSpottedTargetsToListsWhenInAttackRange(Entities entity)
+	{
+		if (entity.GetComponent<UnitStateController>() && entity != null && CheckIfInAttackRange(entity.transform.position) &&
+			!unitTargetList.Contains(entity.GetComponent<UnitStateController>()))
+		{
+			unitTargetList.Add(entity.GetComponent<UnitStateController>());
+		}
+		else if (entity.GetComponent<BuildingManager>() && entity != null && CheckIfInAttackRange(entity.transform.position) &&
+			!buildingTargetList.Contains(entity.GetComponent<BuildingManager>()))
+		{
+			buildingTargetList.Add(entity.GetComponent<BuildingManager>());
+		}
+	}
+
+	//HEALTH/HIT FUNCTIONS OVERRIDES
+	public override void TryDisplayEntityHitNotif()
+	{
+		if (!isCargoShip && !wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
+			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", transform.position);
+	}
+	public override void OnDeath()
+	{
+		base.OnDeath();
+		if (!isCargoShip && ShouldDisplaySpottedNotifToPlayer())
+			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT DESTROYED", transform.position);
+	}
+
+	//ATTACK PLAYER SET TARGET FUNCTIONS
+	public void TryAttackPlayerSetTarget(Entities entity)
+	{
+		if (IsPlayerSetTargetSpotted(entity)) //check if already spotted in target lists
+		{
+			playerSetTarget = entity;
+		}
+		else //walk in line of sight of enemy then switch to that target
+		{
+			playerSetTarget = entity;
+			MoveToDestination(entity.transform.position);
+		}
+	}
+	public bool IsPlayerSetTargetSpotted(Entities entity)
+	{
+		if (entity.GetComponent<UnitStateController>() != null)
+		{
+			if (unitTargetList.Contains(entity))
+				return true;
+			else
+				return false;
+		}
+		else if (entity.GetComponent<BuildingManager>() != null)
+		{
+			if (buildingTargetList.Contains(entity))
+				return true;
+			else
+				return false;
+		}
+		else
+			return false;
+	}
+
+	//UNIT MOVE FUNCTION
+	public void MoveToDestination(Vector3 newMovePos)
+	{
+		if (isFlying)
+			movePos = new Vector3(newMovePos.x, newMovePos.y + 7, newMovePos.z);
+		else
+			movePos = newMovePos;
+
+		ChangeStateMoving();
 	}
 
 	//UTILITY FUNCTIONS
@@ -206,7 +249,6 @@ public class UnitStateController : Entities
 		Gizmos.color = Color.red;
 		Gizmos.DrawWireSphere(transform.position, attackRange);
 		Gizmos.DrawWireSphere(transform.position, ViewRange);
-		Gizmos.DrawLine(CenterPoint.transform.position, raycastHit.point);
 	}
 
 	//STATE CHANGE FUNCTIONS
@@ -224,5 +266,26 @@ public class UnitStateController : Entities
 	{
 		currentState = attackState;
 		currentState.Enter(this);
+	}
+
+	//BOOL FUNCTIONS
+	public bool CheckIfEntityInLineOfSight(Entities entity)
+	{
+		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
+
+		if (hit.collider.gameObject == entity.gameObject)
+			return true;
+
+		else
+			return false;
+	}
+	public bool CheckIfInAttackRange(Vector3 targetVector3)
+	{
+		float Distance = Vector3.Distance(transform.position, targetVector3);
+
+		if (Distance <= attackRange)
+			return true;
+		else
+			return false;
 	}
 }

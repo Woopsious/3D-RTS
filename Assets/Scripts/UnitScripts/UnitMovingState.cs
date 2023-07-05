@@ -31,8 +31,6 @@ public class UnitMovingState : UnitBaseState
 			unit.ChangeStateIdle();
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
 		}
-
-		//unit.HideEntity();
 	}
 	public override void Exit(UnitStateController unit)
 	{
@@ -48,10 +46,18 @@ public class UnitMovingState : UnitBaseState
 	}
 	public void CheckDistance(UnitStateController unit)
 	{
-		if (Vector3.Distance(unit.transform.position, unit.movePos) < unit.agentNav.stoppingDistance)
+		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
 			unit.ChangeStateIdle();
 			unit.agentNav.isStopped = true;
+		}
+		else if (unit.playerSetTarget != null && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		{
+			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
+			{
+				unit.ChangeStateIdle();
+				unit.agentNav.isStopped = true;
+			}
 		}
 	}
 	public bool CheckPath(UnitStateController unit)
