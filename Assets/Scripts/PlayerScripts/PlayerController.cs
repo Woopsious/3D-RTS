@@ -85,11 +85,11 @@ public class PlayerController : MonoBehaviour
 		}
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopLightUnitsName]))
 		{
-			gameUIManager.ShowUnitShopUnarmed();
+			gameUIManager.ShowUnitsLightShop();
 		}
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopHeavyUnitsName]))
 		{
-			gameUIManager.ShowUnitShopArmed();
+			gameUIManager.ShowUnitsHeavyShop();
 		}
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindUnitProdQueue]))
 		{
@@ -107,41 +107,41 @@ public class PlayerController : MonoBehaviour
 	//logic path for quick buying units/buildings
 	public void BuyShopItemHotkeys()
 	{
-		if (gameUIManager.unitUiShopOneObj.activeInHierarchy)
+		if (!Input.GetKey(KeyCode.LeftShift) && gameUIManager.unitsLightUiShopOneObj.activeInHierarchy)
 		{
-			if (!Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha1) && unitProductionManager.currentUnitPlacements.Count < 5)
+			if (Input.GetKeyDown(KeyCode.Alpha1) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
 				unitProductionManager.AddScoutVehToBuildQueue();
 			}
-			else if (!Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha2) && unitProductionManager.currentUnitPlacements.Count < 5)
+			else if (Input.GetKeyDown(KeyCode.Alpha2) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
 				unitProductionManager.AddRadarVehToBuildQueue();
 			}
-			if (!Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha3) && unitProductionManager.currentUnitPlacements.Count < 5)
+			if (Input.GetKeyDown(KeyCode.Alpha3) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
 				unitProductionManager.AddLightMechToBuildQueue();
 			}
 		}
-		else if (gameUIManager.unitUiShopTwoObj.activeInHierarchy)
+		else if (!Input.GetKey(KeyCode.LeftShift) && gameUIManager.unitsHeavyUiShopTwoObj.activeInHierarchy)
 		{
-			if (!Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha1) && unitProductionManager.currentUnitPlacements.Count < 5)
+			if (Input.GetKeyDown(KeyCode.Alpha1) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
 				unitProductionManager.AddHeavyMechKnightToBuildQueue();
 			}
-			if (!Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha2) && unitProductionManager.currentUnitPlacements.Count < 5)
+			if (Input.GetKeyDown(KeyCode.Alpha2) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
 				unitProductionManager.AddHeavyMechTankToBuildQueue();
 			}
-			if (!Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha3) && unitProductionManager.currentUnitPlacements.Count < 5)
+			if (Input.GetKeyDown(KeyCode.Alpha3) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
 				unitProductionManager.AddVTOLToBuildQueue();
 			}
-			if (!Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Alpha4) && unitProductionManager.currentUnitPlacements.Count < 5)
+			if (Input.GetKeyDown(KeyCode.Alpha4) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
 				Debug.LogError("Future Defense Turret not added");
 			}
 		}
-		else if (!Input.GetKey(KeyCode.LeftShift) && gameUIManager.buildingsUiShopObj.activeInHierarchy)
+		else if (!Input.GetKey(KeyCode.LeftShift) && gameUIManager.buildingsBaseUiShopObj.activeInHierarchy)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
@@ -179,7 +179,6 @@ public class PlayerController : MonoBehaviour
 			}
 		}
 	}
-
 	public bool IsMouseOverUI()
 	{
 		return EventSystem.current.IsPointerOverGameObject();

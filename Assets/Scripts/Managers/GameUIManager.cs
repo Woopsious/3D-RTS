@@ -15,9 +15,10 @@ public class GameUIManager : MonoBehaviour
 	[Header("User UI Refs")]
 	public GameObject playerUiInfoObj;
 	public GameObject settingsObj;
-	public GameObject buildingsUiShopObj;
-	public GameObject unitUiShopOneObj;
-	public GameObject unitUiShopTwoObj;
+	public GameObject buildingsBaseUiShopObj;
+	public GameObject buildingsVehicleProdUiShopObj;
+	public GameObject unitsLightUiShopOneObj;
+	public GameObject unitsHeavyUiShopTwoObj;
 
 	public GameObject unitGroupsObj;
 	public GameObject unitProdQueuesObj;
@@ -125,21 +126,21 @@ public class GameUIManager : MonoBehaviour
 	//show tab menu functions
 	public void ShowBuildingShop()
 	{
-		buildingsUiShopObj.SetActive(true);
-		unitUiShopOneObj.SetActive(false);
-		unitUiShopTwoObj.SetActive(false);
+		buildingsBaseUiShopObj.SetActive(true);
+		unitsLightUiShopOneObj.SetActive(false);
+		unitsHeavyUiShopTwoObj.SetActive(false);
 	}
-	public void ShowUnitShopUnarmed()
+	public void ShowUnitsLightShop()
 	{
-		buildingsUiShopObj.SetActive(false);
-		unitUiShopOneObj.SetActive(true);
-		unitUiShopTwoObj.SetActive(false);
+		buildingsBaseUiShopObj.SetActive(false);
+		unitsLightUiShopOneObj.SetActive(true);
+		unitsHeavyUiShopTwoObj.SetActive(false);
 	}
-	public void ShowUnitShopArmed()
+	public void ShowUnitsHeavyShop()
 	{
-		buildingsUiShopObj.SetActive(false);
-		unitUiShopOneObj.SetActive(false);
-		unitUiShopTwoObj.SetActive(true);
+		buildingsBaseUiShopObj.SetActive(false);
+		unitsLightUiShopOneObj.SetActive(false);
+		unitsHeavyUiShopTwoObj.SetActive(true);
 	}
 	public void ShowGroupedUnits()
 	{
