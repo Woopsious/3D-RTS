@@ -242,6 +242,7 @@ public class GameManager : MonoBehaviour
 			gameUIManager.ResetUi();
 			gameUIManager.ResetUnitGroupUI();
 			gameUIManager.SetUpUnitShopUi();
+			gameUIManager.SetUpBuildingsShopUi();
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
 	}

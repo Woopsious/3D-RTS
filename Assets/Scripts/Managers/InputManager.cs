@@ -12,7 +12,8 @@ public class InputManager : MonoBehaviour
 	public List<string> keybindNames;
 
 	[Header("hotKey Name Refs")]
-	public readonly string keyBindShopBuildingsName = "Building Shop";
+	public readonly string keyBindShopBaseBuildingsName = "Building Shop";
+	public readonly string keyBindShopVehProdBuildingsName = "Veh Prod Shop";
 	public readonly string keyBindShopLightUnitsName = "Light Unit Shop";
 	public readonly string keyBindShopHeavyUnitsName = "Heavy Unit Shop";
 	public readonly string keyBindMiniMapName = "Minimap";
@@ -59,7 +60,8 @@ public class InputManager : MonoBehaviour
 	{
 		keybindNames = new List<string>
 		{
-			keyBindShopBuildingsName,
+			keyBindShopBaseBuildingsName,
+			keyBindShopVehProdBuildingsName,
 			keyBindShopLightUnitsName,
 			keyBindShopHeavyUnitsName,
 			keyBindMiniMapName,
@@ -82,12 +84,13 @@ public class InputManager : MonoBehaviour
 	{
 		keyBindDictionary = new Dictionary<string, KeyCode>
 		{
-			[keyBindShopBuildingsName] = KeyCode.B,
-			[keyBindShopLightUnitsName] = KeyCode.G,
-			[keyBindShopHeavyUnitsName] = KeyCode.H,
+			[keyBindShopBaseBuildingsName] = KeyCode.F1,
+			[keyBindShopVehProdBuildingsName] = KeyCode.F2,
+			[keyBindShopLightUnitsName] = KeyCode.F3,
+			[keyBindShopHeavyUnitsName] = KeyCode.F4,
 			[keyBindMiniMapName] = KeyCode.M,
-			[keyBindUnitProdQueue] = KeyCode.C,
-			[keyBindUnitGroupsList] = KeyCode.V,
+			[keyBindUnitProdQueue] = KeyCode.Tab,
+			[keyBindUnitGroupsList] = KeyCode.CapsLock,
 
 			[keyBindCameraForwardName] = KeyCode.W,
 			[keyBindCameraBackwardsName] = KeyCode.S,

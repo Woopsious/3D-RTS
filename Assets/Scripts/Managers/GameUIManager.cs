@@ -4,6 +4,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
+using static UnityEngine.ParticleSystem;
+using static UnityEngine.UI.CanvasScaler;
 
 public class GameUIManager : MonoBehaviour
 {
@@ -192,10 +194,10 @@ public class GameUIManager : MonoBehaviour
 			unitProdQueuesObj.transform.position = new Vector3(0, 575, 0);
 	}
 
-	//SETUP UI ELEMENTS
+	//SETUP UI SHOP ELEMENTS
 	public void SetUpBuildingsShopUi()
 	{
-		for (int i = 0; i < GameManager.Instance.PlayerOneBuildingsList.Count - 1; i++)
+		for (int i = 0; i < GameManager.Instance.PlayerOneBuildingsList.Count; i++)
 		{
 			if (i < 3)
 			{
@@ -232,24 +234,50 @@ public class GameUIManager : MonoBehaviour
 		entityTitleText.text = entitysList[i].GetComponent<Entities>().entityName;
 		//entityImage = List of images in GameManager at some point
 
-		GrabUnitInfo(i, entityInfoText);
+		if (entitysList == GameManager.Instance.PlayerOneBuildingsList)
+			GrabBuildingInfo(i, entityInfoText);
+		else if (entitysList == GameManager.Instance.PlayerOneUnitsList)
+			GrabUnitInfo(i, entityInfoText);
 
 		LinkBuyButtons(i, entityBuyButton, entitysList);
 	}
 	public void GrabBuildingInfo(int i, Text textInfo)
 	{
+		BuildingManager building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<BuildingManager>();
 
+		string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
+		string healthInfo = "Stats:\n Health " + building.maxHealth + ", Armour " + building.armour + "\n";
+		string specialInfo = "";
+
+		if (building.isGeneratorBuilding)
+			specialInfo = "Special: \n Provides power so other \n buildings can work";
+		if (building.isRefineryBuilding)
+			specialInfo = "Special: \n Houses two cargoships \n that collect resources";
+		if (building.isGeneratorBuilding)
+			specialInfo = "Special: \n Provides power so other \n buildings can work";
+		if (building.isLightVehProdBuilding)
+			specialInfo = "Special: \n Allows production of \n light vehicle units";
+		if (building.isHeavyVehProdBuilding)
+			specialInfo = "Special: \n Allows production of \n heavy vehicle units";
+		if (building.isVTOLProdBuilding)
+			specialInfo = "Special: \n Allows production of \n VTOL Gunship units";
+
+		textInfo.text = costInfo + healthInfo + specialInfo;
 	}
 	public void GrabUnitInfo(int i, Text textInfo)
 	{
 		UnitStateController unit = GameManager.Instance.PlayerOneUnitsList[i].GetComponent<UnitStateController>();
 		NavMeshAgent unitNavMesh = unit.GetComponent<NavMeshAgent>(); 
 
-		string costInfo = "Cost:\n Money " + unit.moneyCost + "Alloys " + unit.alloyCost + ", Crystals " + unit.crystalCost + "\n";
+		string costInfo = "Cost:\n Money " + unit.moneyCost + ", Alloys " + unit.alloyCost + ", Crystals " + unit.crystalCost + "\n";
 		string healthInfo = "Stats:\n Health " + unit.maxHealth + ", Armour " + unit.armour + ", View Range " + unit.ViewRange + "\n";
 		string specialInfo = "Is Armed: NO, Can Fly: NO, Speed " + unitNavMesh.speed * 5 + "MPH \n";
+		string prodInfo = "Built at Light Vehicle Production Building";
 		if (unit.isFlying)
+		{
 			specialInfo = "Is Armed: NO, Can Fly: Yes, Speed " + unitNavMesh.speed * 5 + "MPH \n";
+			prodInfo = "Built at VTOL Production Building";
+		}
 
 		string combatInfo = "";
 		if (unit.isUnitArmed)
@@ -259,11 +287,13 @@ public class GameUIManager : MonoBehaviour
 			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage / weaponSystem.secondaryWeaponAttackSpeed;
 			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
 
-			combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + unit.attackRange;
-		}
-		textInfo.text = costInfo + healthInfo + specialInfo + combatInfo;
-	}
+			combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + unit.attackRange + "\n";
 
+			if (weaponSystem.secondaryWeaponDamage != 0)
+				prodInfo = "Built at Heavy Vehicle Production Building";
+		}
+		textInfo.text = costInfo + healthInfo + specialInfo + combatInfo + prodInfo;
+	}
 	public void LinkBuyButtons(int i, Button buttonToLink, List<GameObject> listType)
 	{
 		if (listType == GameManager.Instance.PlayerOneBuildingsList) //|| listType = GameManager.Instance. PLAYERTWOLIST
@@ -272,21 +302,27 @@ public class GameUIManager : MonoBehaviour
 			{
 				case 0:
 				buyEnergyGenBuilding = buttonToLink;
+				buyEnergyGenBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceEnergyGenBuilding(); });
 				break;
 				case 1:
 				buyRefineryBuilding = buttonToLink;
+				buyRefineryBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceRefineryBuilding(); });
 				break;
 				case 2:
 				buyEnergyGenBuilding = buttonToLink; //needs to be defense turrent in future
+				buyEnergyGenBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceEnergyGenBuilding(); });
 				break;
 				case 3:
 				buyLightVehProdBuilding = buttonToLink;
+				buyLightVehProdBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceLightVehProdBuilding(); });
 				break;
 				case 4:
 				buyHeavyVehProdBuilding = buttonToLink;
+				buyHeavyVehProdBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceHeavyVehProdBuilding(); });
 				break;
 				case 5:
 				buyVTOLVehProdBuilding = buttonToLink;
+				buyVTOLVehProdBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceVTOLProdBuilding(); });
 				break;
 			}
 		}
@@ -296,21 +332,27 @@ public class GameUIManager : MonoBehaviour
 			{
 				case 0:
 				buyScoutVehicle = buttonToLink;
+				buyScoutVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddScoutVehToBuildQueue(); });
 				break;
 				case 1:
 				buyRadarVehicle = buttonToLink;
+				buyRadarVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddRadarVehToBuildQueue(); });
 				break;
 				case 2:
 				buyLightMechVehicle = buttonToLink;
+				buyLightMechVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddLightMechToBuildQueue(); });
 				break;
 				case 3:
 				buyHeavyMechKnightVehicle = buttonToLink;
+				buyHeavyMechKnightVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechKnightToBuildQueue(); });
 				break;
 				case 4:
 				buyHeavyMechTankVehicle = buttonToLink;
+				buyHeavyMechTankVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechTankToBuildQueue(); });
 				break;
 				case 5:
 				buyVTOLVehicle = buttonToLink;
+				buyVTOLVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddVTOLToBuildQueue(); });
 				break;
 			}
 		}

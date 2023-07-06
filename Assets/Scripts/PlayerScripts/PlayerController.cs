@@ -79,9 +79,13 @@ public class PlayerController : MonoBehaviour
 			else
 				gameUIManager.OpenSettings();
 		}
-		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopBuildingsName]))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopBaseBuildingsName]))
 		{
 			gameUIManager.ShowBuildingsBaseShop();
+		}
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopVehProdBuildingsName]))
+		{
+			gameUIManager.ShowBuildingsVehicleProdShop();
 		}
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopLightUnitsName]))
 		{
