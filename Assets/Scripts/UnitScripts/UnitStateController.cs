@@ -13,10 +13,13 @@ using static UnityEngine.UI.CanvasScaler;
 public class UnitStateController : Entities
 {
 	public LayerMask ignoreMe;
+
 	public UnitBaseState currentState;
 	public UnitIdleState idleState = new UnitIdleState();
 	public UnitMovingState movingState = new UnitMovingState();
 	public UnitStateAttacking attackState = new UnitStateAttacking();
+
+	public TurretController turretController;
 	public WeaponSystem weaponSystem;
 
 	[Header("Unit Refs")]
@@ -35,8 +38,10 @@ public class UnitStateController : Entities
 	public bool isFlying;
 	public bool hasRadar;
 	public bool isCargoShip;
+	public bool isTurret;
 	public bool hasShootAnimation;
 	public bool hasMoveAnimation;
+	public bool hasReachedPlayerSetTarget;
 
 	[Header("Unit Dynamic Refs")]
 	public List<GameObject> targetList;
@@ -170,6 +175,8 @@ public class UnitStateController : Entities
 	//ATTACK PLAYER SET TARGET FUNCTIONS
 	public void TryAttackPlayerSetTarget(Entities entity)
 	{
+		hasReachedPlayerSetTarget = false;
+
 		if (IsPlayerSetTargetSpotted(entity)) //check if already spotted in target lists
 		{
 			playerSetTarget = entity;
@@ -203,12 +210,15 @@ public class UnitStateController : Entities
 	//UNIT MOVE FUNCTION
 	public void MoveToDestination(Vector3 newMovePos)
 	{
-		if (isFlying)
-			movePos = new Vector3(newMovePos.x, newMovePos.y + 7, newMovePos.z);
-		else
-			movePos = newMovePos;
+		if (!isTurret)
+		{
+			if (isFlying)
+				movePos = new Vector3(newMovePos.x, newMovePos.y + 7, newMovePos.z);
+			else
+				movePos = newMovePos;
 
-		ChangeStateMoving();
+			ChangeStateMoving();
+		}
 	}
 
 	//UTILITY FUNCTIONS
@@ -277,11 +287,15 @@ public class UnitStateController : Entities
 	//BOOL FUNCTIONS
 	public bool CheckIfEntityInLineOfSight(Entities entity)
 	{
-		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
+		if (entity != null)
+		{
+			Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
 
-		if (hit.collider.gameObject == entity.gameObject)
-			return true;
-
+			if (hit.collider.gameObject == entity.gameObject)
+				return true;
+			else
+				return false;
+		}
 		else
 			return false;
 	}

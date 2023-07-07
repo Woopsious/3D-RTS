@@ -51,12 +51,13 @@ public class UnitMovingState : UnitBaseState
 			unit.ChangeStateIdle();
 			unit.agentNav.isStopped = true;
 		}
-		else if (unit.playerSetTarget != null && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		else if (unit.playerSetTarget != null && !unit.hasReachedPlayerSetTarget && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
 			{
 				unit.ChangeStateIdle();
 				unit.agentNav.isStopped = true;
+				unit.hasReachedPlayerSetTarget = true;
 			}
 		}
 	}

@@ -14,7 +14,8 @@ public class UnitStateAttacking : UnitBaseState
 	public override void Enter(UnitStateController unit)
 	{
 		//Debug.Log("Entered Attacking State");
-
+		if (unit.isTurret)
+			unit.animatorController.SetBool("isIdle", false);
 		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
 			unit.weaponSystem.TryFindTarget();
 	}
@@ -35,21 +36,12 @@ public class UnitStateAttacking : UnitBaseState
 	public override void UpdatePhysics(UnitStateController unit)
 	{
 		//only look at target when its within attack range
-		if (unit.playerSetTarget != null)
-		{
-			if (unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position))
-				StopAndLookAtTarget(unit);
-		}
-		else if (unit.currentUnitTarget != null)
-		{
-			if (unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
-				StopAndLookAtTarget(unit);
-		}
-		else if (unit.currentBuildingTarget != null)
-		{
-			if (unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
-				StopAndLookAtTarget(unit);
-		}
+		if (unit.playerSetTarget != null && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position))
+			StopAndLookAtTarget(unit, unit.playerSetTarget);
+		else if (unit.currentUnitTarget != null && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
+			StopAndLookAtTarget(unit, unit.currentUnitTarget);
+		else if (unit.currentBuildingTarget != null && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
+			StopAndLookAtTarget(unit, unit.currentBuildingTarget);
 
 		//continue to last movement destination
 		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
@@ -61,7 +53,7 @@ public class UnitStateAttacking : UnitBaseState
 				unit.movingSFX.Stop();
 			unit.agentNav.isStopped = true;
 		}
-		else if (unit.playerSetTarget != null && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		else if (unit.playerSetTarget != null && !unit.hasReachedPlayerSetTarget && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
 			{
@@ -71,24 +63,20 @@ public class UnitStateAttacking : UnitBaseState
 				if (unit.movingSFX.isPlaying)
 					unit.movingSFX.Stop();
 				unit.agentNav.isStopped = true;
+				unit.hasReachedPlayerSetTarget = true;
 			}
 		}
 	}
-	public void StopAndLookAtTarget(UnitStateController unit)
+	public void StopAndLookAtTarget(UnitStateController unit, Entities entityToLookAt)
 	{
-		if (unit.playerSetTarget != null)
+		if (unit.isTurret)
 		{
-			var lookRotation = Quaternion.LookRotation(unit.playerSetTarget.transform.position - unit.transform.position);
-			unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, unit.agentNav.angularSpeed / 1000);
+			unit.turretController.FaceTarget(entityToLookAt);
+			unit.turretController.ChangeGunElevation(entityToLookAt);
 		}
-		else if (unit.currentUnitTarget != null)
+		else if (!unit.isTurret)
 		{
-			var lookRotation = Quaternion.LookRotation(unit.currentUnitTarget.transform.position - unit.transform.position);
-			unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, unit.agentNav.angularSpeed / 1000);
-		}
-		else if (unit.currentBuildingTarget != null)
-		{
-			var lookRotation = Quaternion.LookRotation(unit.currentBuildingTarget.transform.position - unit.transform.position);
+			var lookRotation = Quaternion.LookRotation(entityToLookAt.transform.position - unit.transform.position);
 			unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, unit.agentNav.angularSpeed / 1000);
 		}
 	}

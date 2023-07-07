@@ -15,9 +15,10 @@ public class UnitIdleState : UnitBaseState
 		}
 		unit.movingSFX.Stop();
 
+		if (unit.isTurret)
+			unit.animatorController.SetBool("isIdle", true);
 		if (unit.hasMoveAnimation)
 			unit.animatorController.SetBool("isIdle", true);
-
 		if (unit.hasShootAnimation)
 			unit.animatorController.SetBool("isAttacking", false);
 	}
