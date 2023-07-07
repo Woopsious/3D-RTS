@@ -49,42 +49,16 @@ public class GameManager : MonoBehaviour
 	public int aiIncomeCrystals;
 
 	[Header("PlayerOne Building Prefabs")]
-	public GameObject buildingHQPlayerOne;
-	public GameObject buildingEnergyGenPlayerOne;
-	public GameObject buildingRefineryPlayerOne;
-	public GameObject buildingLightVehProdPlayerOne;
-	public GameObject buildingHeavyVehProdPlayerOne;
-	public GameObject buildingVTOLProdPlayerOne;
-	public GameObject buildingTurretPlayerOne;
-
 	public List<GameObject> PlayerOneBuildingsList;
 
 	[Header("PlayerOne Unit Prefabs")]
-	public GameObject unitVTOLPlayerOne;
-	public GameObject unitHeavyMechTankPlayerOne;
-	public GameObject unitHeavyMechKnightPlayerOne;
-	public GameObject unitLightMechPlayerOne;
-	public GameObject unitRadarVehiclePlayerOne;
-	public GameObject unitScoutVehiclePlayerOne;
-
 	public List<GameObject> PlayerOneUnitsList;
 
 	[Header("PlayerTwo Building Prefabs")]
-	public GameObject buildingHQPlayerTwo;
-	public GameObject buildingEnergyGenPlayerTwo;
-	public GameObject buildingRefineryPlayerTwo;
-	public GameObject buildingLightVehProdPlayerTwo;
-	public GameObject buildingHeavyVehProdPlayerTwo;
-	public GameObject buildingVTOLProdPlayerTwo;
-	public GameObject buildingTurretPlayerTwo;
+	public List<GameObject> PlayerTwoBuildingsList;
 
 	[Header("PlayerTwo Unit Prefabs")]
-	public GameObject unitVTOLPlayerTwo;
-	public GameObject unitHeavyMechTankPlayerTwo;
-	public GameObject unitHeavyMechKnightPlayerTwo;
-	public GameObject unitLightMechPlayerTwo;
-	public GameObject unitRadarVehiclePlayerTwo;
-	public GameObject unitScoutVehiclePlayerTwo;
+	public List<GameObject> PlayerTwoUnitsList;
 
 	public void Awake()
 	{

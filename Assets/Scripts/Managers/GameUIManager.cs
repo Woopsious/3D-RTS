@@ -404,16 +404,16 @@ public class GameUIManager : MonoBehaviour
 
 		foreach (UnitStateController unit in unitGroup)
 		{
-			if (unit.moneyCost == GameManager.Instance.unitScoutVehiclePlayerOne.GetComponent<UnitStateController>().moneyCost)
+			if (unit.moneyCost == playerController.unitProductionManager.unitScoutVehicle.GetComponent<UnitStateController>().moneyCost)
 				scoutVehicleCount++;
-			else if (unit.moneyCost == GameManager.Instance.unitRadarVehiclePlayerOne.GetComponent<UnitStateController>().moneyCost)
+			else if (unit.moneyCost == playerController.unitProductionManager.unitRadarVehicle.GetComponent<UnitStateController>().moneyCost)
 				radarVehicleCount++;
-			else if (unit.moneyCost == GameManager.Instance.unitLightMechPlayerOne.GetComponent<UnitStateController>().moneyCost)
+			else if (unit.moneyCost == playerController.unitProductionManager.unitLightMech.GetComponent<UnitStateController>().moneyCost)
 				lightMechCount++;
-			else if (unit.moneyCost == GameManager.Instance.unitHeavyMechKnightPlayerOne.GetComponent<UnitStateController>().moneyCost || 
-				unit.moneyCost == GameManager.Instance.unitHeavyMechTankPlayerOne.GetComponent<UnitStateController>().moneyCost)
+			else if (unit.moneyCost == playerController.unitProductionManager.unitHeavyMechKnight.GetComponent<UnitStateController>().moneyCost || 
+				unit.moneyCost == playerController.unitProductionManager.unitHeavyMechTank.GetComponent<UnitStateController>().moneyCost)
 				heavyMechCount++;
-			else if (unit.moneyCost == GameManager.Instance.unitVTOLPlayerOne.GetComponent<UnitStateController>().moneyCost)
+			else if (unit.moneyCost == playerController.unitProductionManager.unitVTOL.GetComponent<UnitStateController>().moneyCost)
 				vtolCount++;
 		}
 

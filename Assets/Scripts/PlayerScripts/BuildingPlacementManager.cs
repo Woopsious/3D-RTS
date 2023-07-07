@@ -26,25 +26,31 @@ public class BuildingPlacementManager : MonoBehaviour
 	{
 		if (playerController.isPlayerOne)
 		{
-			buildingHQ = GameManager.Instance.buildingHQPlayerOne;
-			buildingEnergyGen = GameManager.Instance.buildingEnergyGenPlayerOne;
-			buildingRefinery = GameManager.Instance.buildingRefineryPlayerOne;
-			buildingLightVehProd = GameManager.Instance.buildingLightVehProdPlayerOne;
-			buildingHeavyVehProd = GameManager.Instance.buildingHeavyVehProdPlayerOne;
-			buildingVTOLProd = GameManager.Instance.buildingVTOLProdPlayerOne;
-			//prefabs not made yet
-			buildingHQ = GameManager.Instance.buildingHQPlayerOne;
+			AssignBuildingRefs(GameManager.Instance.PlayerOneBuildingsList);
 		}
 		if (!playerController.isPlayerOne)
 		{
-			buildingHQ = GameManager.Instance.buildingHQPlayerTwo;
-			buildingEnergyGen = GameManager.Instance.buildingEnergyGenPlayerTwo;
-			buildingRefinery = GameManager.Instance.buildingRefineryPlayerTwo;
-			buildingLightVehProd = GameManager.Instance.buildingLightVehProdPlayerTwo;
-			buildingHeavyVehProd = GameManager.Instance.buildingHeavyVehProdPlayerTwo;
-			buildingVTOLProd = GameManager.Instance.buildingVTOLProdPlayerTwo;
-			//prefabs not made yet
-			buildingHQ = GameManager.Instance.buildingHQPlayerTwo;
+			AssignBuildingRefs(GameManager.Instance.PlayerTwoBuildingsList);
+		}
+	}
+	public void AssignBuildingRefs(List<GameObject> buildingList)
+	{
+		foreach (GameObject obj in buildingList)
+		{
+			BuildingManager building = obj.GetComponent<BuildingManager>();
+
+			if (building.isGeneratorBuilding)
+				buildingEnergyGen = building.gameObject;
+			if (building.isRefineryBuilding)
+				buildingRefinery = building.gameObject;
+			if (building.isGeneratorBuilding)
+				buildingEnergyGen = building.gameObject;
+			if (building.isLightVehProdBuilding)
+				buildingLightVehProd = building.gameObject;
+			if (building.isHeavyVehProdBuilding)
+				buildingHeavyVehProd = building.gameObject;
+			if (building.isVTOLProdBuilding)
+				buildingVTOLProd = building.gameObject;
 		}
 	}
 	public void Update()

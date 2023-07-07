@@ -49,24 +49,32 @@ public class UnitProductionManager : MonoBehaviour
 	{
 		if(playerController.isPlayerOne)
 		{
-			unitScoutVehicle = GameManager.Instance.unitScoutVehiclePlayerOne;
-			unitRadarVehicle = GameManager.Instance.unitRadarVehiclePlayerOne;
-			unitLightMech = GameManager.Instance.unitLightMechPlayerOne;
-			unitHeavyMechKnight = GameManager.Instance.unitHeavyMechKnightPlayerOne;
-			unitHeavyMechTank = GameManager.Instance.unitHeavyMechTankPlayerOne;
-			unitVTOL = GameManager.Instance.unitVTOLPlayerOne;
-}
+			AssignUnitRefs(GameManager.Instance.PlayerOneUnitsList);
+		}
 		if(!playerController.isPlayerOne)
 		{
-			unitScoutVehicle = GameManager.Instance.unitScoutVehiclePlayerTwo;
-			unitRadarVehicle = GameManager.Instance.unitRadarVehiclePlayerTwo;
-			unitLightMech = GameManager.Instance.unitLightMechPlayerTwo;
-			unitHeavyMechKnight = GameManager.Instance.unitHeavyMechKnightPlayerTwo;
-			unitHeavyMechTank = GameManager.Instance.unitHeavyMechTankPlayerTwo;
-			unitVTOL = GameManager.Instance.unitVTOLPlayerTwo;
+			AssignUnitRefs(GameManager.Instance.PlayerTwoUnitsList);
 		}
 	}
-
+	public void AssignUnitRefs(List<GameObject> unitlist)
+	{
+		foreach (GameObject obj in unitlist)
+		{
+			UnitStateController unit = obj.GetComponent<UnitStateController>();
+			if (unit.entityName == "Scout Vehicle")
+				unitScoutVehicle = unit.gameObject;
+			if (unit.entityName == "Radar Vehicle")
+				unitRadarVehicle = unit.gameObject;
+			if (unit.entityName == "Light Mech")
+				unitLightMech = unit.gameObject;
+			if (unit.entityName == "Heavy Mech Knight")
+				unitHeavyMechKnight = unit.gameObject;
+			if (unit.entityName == "Heavy Mech Support")
+				unitHeavyMechTank = unit.gameObject;
+			if (unit.entityName == "VTOL Gunship")
+				unitVTOL = unit.gameObject;
+		}
+	}
 	public void Update()
 	{
 		ShowUnitBuildGhostProjections();

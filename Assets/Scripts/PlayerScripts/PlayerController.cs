@@ -157,29 +157,34 @@ public class PlayerController : MonoBehaviour
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				buildingPlacementManager.PlaceLightVehProdBuilding();
-			}
-			else if (Input.GetKeyDown(KeyCode.Alpha4) && buildingPlacementManager.currentBuildingPlacement == null)
-			{
-				buildingPlacementManager.PlaceHeavyVehProdBuilding();
-			}
-			else if (Input.GetKeyDown(KeyCode.Alpha5) && buildingPlacementManager.currentBuildingPlacement == null)
-			{
-				buildingPlacementManager.PlaceVTOLProdBuilding();
-			}
-			else if (Input.GetKeyDown(KeyCode.Alpha6) && buildingPlacementManager.currentBuildingPlacement == null)
-			{
 				buildingPlacementManager.PlaceEnergyGenBuilding();
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement != null 
 				|| Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement != null
-				|| Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement != null 
-				|| Input.GetKeyDown(KeyCode.Alpha4) && buildingPlacementManager.currentBuildingPlacement != null
-				|| Input.GetKeyDown(KeyCode.Alpha5) && buildingPlacementManager.currentBuildingPlacement != null 
-				|| Input.GetKeyDown(KeyCode.Alpha6) && buildingPlacementManager.currentBuildingPlacement != null)
+				|| Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement != null )
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing A Building", 2);
-				//NOTIFY PLAYER CODE HERE
+			}
+		}
+		else if (!Input.GetKey(KeyCode.LeftShift) && gameUIManager.buildingsVehicleProdUiShopObj.activeInHierarchy)
+		{
+			if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement == null)
+			{
+				buildingPlacementManager.PlaceLightVehProdBuilding();
+			}
+			else if (Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement == null)
+			{
+				buildingPlacementManager.PlaceHeavyVehProdBuilding();
+			}
+			else if (Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement == null)
+			{
+				buildingPlacementManager.PlaceVTOLProdBuilding();
+			}
+			else if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement != null
+				|| Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement != null
+				|| Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement != null)
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing A Building", 2);
 			}
 		}
 	}
