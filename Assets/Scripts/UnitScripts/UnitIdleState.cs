@@ -7,7 +7,7 @@ public class UnitIdleState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		//Debug.Log("Entered Idle State");
+		Debug.Log("Entered Idle State");
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[1].Stop();
@@ -16,7 +16,7 @@ public class UnitIdleState : UnitBaseState
 		unit.movingSFX.Stop();
 
 		if (unit.isTurret)
-			unit.animatorController.SetBool("isIdle", true);
+			unit.turretController.DeactivateTurret();
 		if (unit.hasMoveAnimation)
 			unit.animatorController.SetBool("isIdle", true);
 		if (unit.hasShootAnimation)

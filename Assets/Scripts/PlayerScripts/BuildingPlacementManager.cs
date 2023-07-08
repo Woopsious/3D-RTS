@@ -13,13 +13,13 @@ public class BuildingPlacementManager : MonoBehaviour
 	public GameObject buildingHQ;
 	public GameObject buildingEnergyGen;
 	public GameObject buildingRefinery;
+	public GameObject buildingTurret;
 	public GameObject buildingLightVehProd;
 	public GameObject buildingHeavyVehProd;
 	public GameObject buildingVTOLProd;
-	public GameObject buildingTurret;
 
 	[Header("Dynamic Refs")]
-	public BuildingManager currentBuildingPlacement;
+	public Entities currentBuildingPlacement;
 	public CanPlaceBuilding canPlaceBuilding;
 
 	public void Start()
@@ -37,20 +37,23 @@ public class BuildingPlacementManager : MonoBehaviour
 	{
 		foreach (GameObject obj in buildingList)
 		{
-			BuildingManager building = obj.GetComponent<BuildingManager>();
+			if (obj.GetComponent<TurretController>() != null)
+				buildingTurret = obj.GetComponent<TurretController>().gameObject;
+			else
+			{
+				BuildingManager building = obj.GetComponent<BuildingManager>();
 
-			if (building.isGeneratorBuilding)
-				buildingEnergyGen = building.gameObject;
-			if (building.isRefineryBuilding)
-				buildingRefinery = building.gameObject;
-			if (building.isGeneratorBuilding)
-				buildingEnergyGen = building.gameObject;
-			if (building.isLightVehProdBuilding)
-				buildingLightVehProd = building.gameObject;
-			if (building.isHeavyVehProdBuilding)
-				buildingHeavyVehProd = building.gameObject;
-			if (building.isVTOLProdBuilding)
-				buildingVTOLProd = building.gameObject;
+				if (building.isGeneratorBuilding)
+					buildingEnergyGen = building.gameObject;
+				if (building.isRefineryBuilding)
+					buildingRefinery = building.gameObject;
+				if (building.isLightVehProdBuilding)
+					buildingLightVehProd = building.gameObject;
+				if (building.isHeavyVehProdBuilding)
+					buildingHeavyVehProd = building.gameObject;
+				if (building.isVTOLProdBuilding)
+					buildingVTOLProd = building.gameObject;
+			}
 		}
 	}
 	public void Update()
@@ -80,11 +83,20 @@ public class BuildingPlacementManager : MonoBehaviour
 		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
 		{
 			//enable building triggers, navMeshObstacle, set layer and unhighlight, -building cost and update resUI
-			currentBuildingPlacement.GetComponent<BuildingManager>().enabled = true;
-			if(currentBuildingPlacement.isVTOLProdBuilding)
-				currentBuildingPlacement.GetComponent<SphereCollider>().isTrigger = true;
-			else
-				currentBuildingPlacement.GetComponent<BoxCollider>().isTrigger = true;
+			if (currentBuildingPlacement.GetComponent<BuildingManager>() != null)
+			{
+				currentBuildingPlacement.GetComponent<BuildingManager>().enabled = true;
+				currentBuildingPlacement.GetComponent<BuildingManager>().AddBuildingRefs();
+
+				if (currentBuildingPlacement.GetComponent<BuildingManager>().isVTOLProdBuilding)
+					currentBuildingPlacement.GetComponent<SphereCollider>().isTrigger = true;
+				else
+					currentBuildingPlacement.GetComponent<BoxCollider>().isTrigger = true;
+			}
+			else if (currentBuildingPlacement.GetComponent<TurretController>() != null)
+			{
+				currentBuildingPlacement.GetComponent<TurretController>().enabled = true;
+			}
 
 			currentBuildingPlacement.gameObject.layer = buildingLayer;
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
@@ -92,7 +104,6 @@ public class BuildingPlacementManager : MonoBehaviour
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().isPlaced = true;
 
 			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
-			currentBuildingPlacement.AddBuildingRefs();
 			currentBuildingPlacement = null;
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
 			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
@@ -113,6 +124,10 @@ public class BuildingPlacementManager : MonoBehaviour
 	{
 		BuyBuilding(buildingRefinery);
 	}
+	public void PlaceDefenseTurret()
+	{
+		BuyBuilding(buildingTurret);
+	}
 	public void PlaceLightVehProdBuilding()
 	{
 		BuyBuilding(buildingLightVehProd);
@@ -129,16 +144,16 @@ public class BuildingPlacementManager : MonoBehaviour
 	//buy functions
 	public void BuyBuilding(GameObject buildingType)
 	{
-		BuildingManager building = buildingType.GetComponent<BuildingManager>();
+		Entities building = buildingType.GetComponent<Entities>();
 
 		if (currentBuildingPlacement == null)
 		{
 			if (CheckIfCanBuy(building.moneyCost, building.alloyCost, building.crystalCost))
 			{
 				GameObject obj = Instantiate(buildingType, new Vector3(0, 5, 0), Quaternion.identity);
-				currentBuildingPlacement = obj.GetComponent<BuildingManager>();
+				currentBuildingPlacement = obj.GetComponent<Entities>();
 				canPlaceBuilding = obj.GetComponent<CanPlaceBuilding>();
-				obj.GetComponent<BuildingManager>().playerController = playerController;
+				obj.GetComponent<Entities>().playerController = playerController;
 			}
 			else
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford buildings", 2);

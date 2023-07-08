@@ -42,6 +42,7 @@ public class GameUIManager : MonoBehaviour
 	[Header("Building Shop Buy Button Refs")]
 	public Button buyEnergyGenBuilding;
 	public Button buyRefineryBuilding;
+	public Button buyDefenseTurret;
 	public Button buyLightVehProdBuilding;
 	public Button buyHeavyVehProdBuilding;
 	public Button buyVTOLVehProdBuilding;
@@ -55,7 +56,6 @@ public class GameUIManager : MonoBehaviour
 	public Button buyHeavyMechKnightVehicle;
 	public Button buyHeavyMechTankVehicle;
 	public Button buyVTOLVehicle;
-	public Button buyDefenseTurret;
 
 	[Header("Unit Group Ui Refs")]
 	public Text groupOneInfoUI;
@@ -243,26 +243,46 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void GrabBuildingInfo(int i, Text textInfo)
 	{
-		BuildingManager building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<BuildingManager>();
+		if (i == 2)
+		{
+			TurretController building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<TurretController>();
 
-		string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
-		string healthInfo = "Stats:\n Health " + building.maxHealth + ", Armour " + building.armour + "\n";
-		string specialInfo = "";
+			string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
+			string healthInfo = "Stats:\n Health " + building.maxHealth + ", Armour " + building.armour + "\n";
 
-		if (building.isGeneratorBuilding)
-			specialInfo = "Special: \n Provides power so other \n buildings can work";
-		if (building.isRefineryBuilding)
-			specialInfo = "Special: \n Houses two cargoships \n that collect resources";
-		if (building.isGeneratorBuilding)
-			specialInfo = "Special: \n Provides power so other \n buildings can work";
-		if (building.isLightVehProdBuilding)
-			specialInfo = "Special: \n Allows production of \n light vehicle units";
-		if (building.isHeavyVehProdBuilding)
-			specialInfo = "Special: \n Allows production of \n heavy vehicle units";
-		if (building.isVTOLProdBuilding)
-			specialInfo = "Special: \n Allows production of \n VTOL Gunship units";
+			WeaponSystem weaponSystem = building.GetComponent<WeaponSystem>();
+			float mainWeaponDPS = weaponSystem.mainWeaponDamage / weaponSystem.mainWeaponAttackSpeed;
+			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage / weaponSystem.secondaryWeaponAttackSpeed;
+			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
 
-		textInfo.text = costInfo + healthInfo + specialInfo;
+			string combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + building.attackRange + "\n";
+			string specialInfo = "A Defensive Turret";
+
+			textInfo.text = costInfo + healthInfo + combatInfo + specialInfo;
+		}
+		else
+		{
+			BuildingManager building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<BuildingManager>();
+
+			string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
+			string healthInfo = "Stats:\n Health " + building.maxHealth + ", Armour " + building.armour + "\n";
+			string specialInfo = "";
+
+			if (building.isGeneratorBuilding)
+				specialInfo = "Special: \n Provides power so other \n buildings can work";
+			if (building.isRefineryBuilding)
+				specialInfo = "Special: \n Houses two cargoships \n that collect resources";
+			if (building.isGeneratorBuilding)
+				specialInfo = "Special: \n Provides power so other \n buildings can work";
+			if (building.isLightVehProdBuilding)
+				specialInfo = "Special: \n Allows production of \n light vehicle units";
+			if (building.isHeavyVehProdBuilding)
+				specialInfo = "Special: \n Allows production of \n heavy vehicle units";
+			if (building.isVTOLProdBuilding)
+				specialInfo = "Special: \n Allows production of \n VTOL Gunship units";
+
+			textInfo.text = costInfo + healthInfo + specialInfo;
+		}
 	}
 	public void GrabUnitInfo(int i, Text textInfo)
 	{
@@ -309,8 +329,8 @@ public class GameUIManager : MonoBehaviour
 				buyRefineryBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceRefineryBuilding(); });
 				break;
 				case 2:
-				buyEnergyGenBuilding = buttonToLink; //needs to be defense turrent in future
-				buyEnergyGenBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceEnergyGenBuilding(); });
+				buyDefenseTurret = buttonToLink; //needs to be defense turrent in future
+				buyDefenseTurret.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceDefenseTurret(); });
 				break;
 				case 3:
 				buyLightVehProdBuilding = buttonToLink;

@@ -21,11 +21,12 @@ public class PlayerController : MonoBehaviour
 	public bool isPlayerOne;
 
 	[Header("Dynamic Refs")]
-	public List<UnitStateController> unitListForPlayer;
 	public List<UnitStateController> SpottedUnitsList;
+	public List<UnitStateController> unitListForPlayer;
 	public List<BuildingManager> lightVehProdBuildingsList;
 	public List<BuildingManager> heavyVehProdBuildingsList;
 	public List<BuildingManager> vtolVehProdBuildingsList;
+	public List<TurretController> turretDefensesList;
 
 	public void Start()
 	{
@@ -157,7 +158,7 @@ public class PlayerController : MonoBehaviour
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				buildingPlacementManager.PlaceEnergyGenBuilding();
+				buildingPlacementManager.PlaceDefenseTurret();
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement != null 
 				|| Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement != null

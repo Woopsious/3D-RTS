@@ -7,6 +7,7 @@ public class CanPlaceBuilding : MonoBehaviour
 {
 	public CapturePointController pointController;
 
+	public TurretController turret;
 	public BuildingManager building;
 	public GameObject highlighterObj;
 	public NavMeshObstacle navMeshObstacle;
@@ -17,15 +18,28 @@ public class CanPlaceBuilding : MonoBehaviour
 
 	public void Start()
 	{
-		if (!building.isHQ)
-			highlighterObj.SetActive(true);
-		CanPlaceHighliterRed();
+		if (building != null)
+		{
+			if (!building.isHQ)
+				highlighterObj.SetActive(true);
+			CanPlaceHighliterRed();
 
-		if (building.isPlayerOneEntity)
-			building.miniMapRenderObj.layer = 11;
+			if (building.isPlayerOneEntity)
+				building.miniMapRenderObj.layer = 11;
 
-		else if (!building.isPlayerOneEntity)
-			building.miniMapRenderObj.layer = 12;
+			else if (!building.isPlayerOneEntity)
+				building.miniMapRenderObj.layer = 12;
+		}
+		else
+		{
+			CanPlaceHighliterRed();
+
+			if (turret.isPlayerOneEntity)
+				turret.miniMapRenderObj.layer = 11;
+
+			else if (!turret.isPlayerOneEntity)
+				turret.miniMapRenderObj.layer = 12;
+		}
 	}
 	public void Update()
 	{
@@ -47,7 +61,10 @@ public class CanPlaceBuilding : MonoBehaviour
 			else
 				CanPlaceHighliterRed();
 
-			building.capturePointController = pointController;
+			if (turret != null)
+				turret.capturePointController = pointController;
+			else if (building != null)
+				building.capturePointController = pointController;
 		}
 
 		if (other.GetComponent<BuildingManager>())
@@ -74,22 +91,46 @@ public class CanPlaceBuilding : MonoBehaviour
 	{
 		if (pointController != null && !CheckIfCapturePointIsNeutral())
 		{
-			if (building.transform.position.y > 9f && building.transform.position.y < 10.5f)
-				CanPlaceHighliterGreen();
+			if (building != null)
+			{
+				if (building.transform.position.y > 9f && building.transform.position.y < 10.5f)
+					CanPlaceHighliterGreen();
 
+				else
+					CanPlaceHighliterRed();
+			}
 			else
-				CanPlaceHighliterRed();
+			{
+				if (turret.transform.position.y > 9f && turret.transform.position.y < 10.5f)
+					CanPlaceHighliterGreen();
+
+				else
+					CanPlaceHighliterRed();
+			}
 		}
 	}
 	public bool CheckIfCapturePointIsNeutral()
 	{
-		if (pointController.isPlayerOnePoint == building.isPlayerOneEntity && !pointController.isNeutralPoint ||
-			pointController.isPlayerTwoPoint == !building.isPlayerOneEntity && !pointController.isNeutralPoint)
+		if (building != null)
 		{
-			return false;
+			if (pointController.isPlayerOnePoint == building.isPlayerOneEntity && !pointController.isNeutralPoint ||
+				pointController.isPlayerTwoPoint == !building.isPlayerOneEntity && !pointController.isNeutralPoint)
+			{
+				return false;
+			}
+			else
+				return true;
 		}
 		else
-			return true;
+		{
+			if (pointController.isPlayerOnePoint == turret.isPlayerOneEntity && !pointController.isNeutralPoint ||
+				pointController.isPlayerTwoPoint == !turret.isPlayerOneEntity && !pointController.isNeutralPoint)
+			{
+				return false;
+			}
+			else
+				return true;
+		}
 	}
 
 	//change highlighter colour
@@ -108,61 +149,83 @@ public class CanPlaceBuilding : MonoBehaviour
 		if (pointController == null)
 			return canPlace = false;
 
-		if (!pointController.isPlayerOnePoint != building.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
-			building.transform.position.y > 9f && building.transform.position.y < 10.5f)
+		if (building != null)
 		{
-			if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)
+			if (!pointController.isPlayerOnePoint != building.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
+				building.transform.position.y > 9f && building.transform.position.y < 10.5f)
 			{
-				pointController.energyGeneratorBuilding = building;
-				return canPlace = true;
+				if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)
+				{
+					pointController.energyGeneratorBuilding = building;
+					return canPlace = true;
+				}
+				else if (pointController.energyGeneratorBuilding != null && building.isGeneratorBuilding)
+				{
+					return canPlace = false;
+				}
+				else if (pointController.RefinaryBuildings.Count <= 1 && building.isRefineryBuilding)
+				{
+					pointController.RefinaryBuildings.Add(building);
+					return canPlace = true;
+				}
+				else if (pointController.RefinaryBuildings.Count >= 1 && building.isRefineryBuilding)
+				{
+					return canPlace = false;
+				}
+				else if (pointController.lightVehProdBuildings.Count <= 1 && building.isLightVehProdBuilding)
+				{
+					pointController.lightVehProdBuildings.Add(building);
+					building.playerController.lightVehProdBuildingsList.Add(building);
+					return canPlace = true;
+				}
+				else if (pointController.lightVehProdBuildings.Count >= 1 && building.isLightVehProdBuilding)
+				{
+					return canPlace = false;
+				}
+				else if (pointController.heavyVehProdBuildings.Count <= 1 && building.isHeavyVehProdBuilding)
+				{
+					pointController.heavyVehProdBuildings.Add(building);
+					building.playerController.heavyVehProdBuildingsList.Add(building);
+					return canPlace = true;
+				}
+				else if (pointController.heavyVehProdBuildings.Count >= 1 && building.isHeavyVehProdBuilding)
+				{
+					return canPlace = false;
+				}
+				else if (pointController.vtolProdBuildings.Count <= 1 && building.isVTOLProdBuilding)
+				{
+					pointController.vtolProdBuildings.Add(building);
+					building.playerController.vtolVehProdBuildingsList.Add(building);
+					return canPlace = true;
+				}
+				else if (pointController.vtolProdBuildings.Count >= 1 && building.isVTOLProdBuilding)
+				{
+					return canPlace = false;
+				}
+				else
+					return canPlace = false;
 			}
-			else if (pointController.energyGeneratorBuilding != null && building.isGeneratorBuilding)
-			{
-				return canPlace = false;
-			}
-			else if (pointController.RefinaryBuildings.Count <= 1 && building.isRefineryBuilding)
-			{
-				pointController.RefinaryBuildings.Add(building);
-				return canPlace = true;
-			}
-			else if (pointController.RefinaryBuildings.Count >= 1 && building.isRefineryBuilding)
-			{
-				return canPlace = false;
-			}
-			else if (pointController.lightVehProdBuildings.Count <= 1 && building.isLightVehProdBuilding)
-			{
-				pointController.lightVehProdBuildings.Add(building);
-				building.playerController.lightVehProdBuildingsList.Add(building);
-				return canPlace = true;
-			}
-			else if (pointController.lightVehProdBuildings.Count >= 1 && building.isLightVehProdBuilding)
-			{
-				return canPlace = false;
-			}
-			else if (pointController.heavyVehProdBuildings.Count <= 1 && building.isHeavyVehProdBuilding)
-			{
-				pointController.heavyVehProdBuildings.Add(building);
-				building.playerController.heavyVehProdBuildingsList.Add(building);
-				return canPlace = true;
-			}
-			else if (pointController.heavyVehProdBuildings.Count >= 1 && building.isHeavyVehProdBuilding)
-			{
-				return canPlace = false;
-			}
-			else if (pointController.vtolProdBuildings.Count <= 1 && building.isVTOLProdBuilding)
-			{
-				pointController.vtolProdBuildings.Add(building);
-				building.playerController.vtolVehProdBuildingsList.Add(building);
-				return canPlace = true;
-			}
-			else if (pointController.vtolProdBuildings.Count >= 1 && building.isVTOLProdBuilding)
-			{
-				return canPlace = false;
-			}
-			else
-				return canPlace = false;
+			else return false;
 		}
 		else
-			return canPlace = false;
+		{
+			if (!pointController.isPlayerOnePoint != turret.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
+				turret.transform.position.y > 9f && turret.transform.position.y < 10.5f)
+			{
+				if (pointController.TurretDefenses.Count <= 1 && turret.isTurret)
+				{
+					pointController.TurretDefenses.Add(turret);
+					turret.playerController.turretDefensesList.Add(turret);
+					return canPlace = true;
+				}
+				else if (pointController.TurretDefenses.Count >= 1 && turret.isTurret)
+				{
+					return canPlace = false;
+				}
+				else
+					return canPlace = false;
+			}
+			else return false;
+		}
 	}
 }

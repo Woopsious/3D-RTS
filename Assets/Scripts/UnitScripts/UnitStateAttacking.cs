@@ -13,9 +13,9 @@ public class UnitStateAttacking : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		//Debug.Log("Entered Attacking State");
+		Debug.Log("Entered Attacking State");
 		if (unit.isTurret)
-			unit.animatorController.SetBool("isIdle", false);
+			unit.turretController.ActivateTurret();
 		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
 			unit.weaponSystem.TryFindTarget();
 	}

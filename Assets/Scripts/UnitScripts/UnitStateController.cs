@@ -173,7 +173,7 @@ public class UnitStateController : Entities
 	}
 
 	//ATTACK PLAYER SET TARGET FUNCTIONS
-	public void TryAttackPlayerSetTarget(Entities entity)
+	public virtual void TryAttackPlayerSetTarget(Entities entity)
 	{
 		hasReachedPlayerSetTarget = false;
 
@@ -231,34 +231,40 @@ public class UnitStateController : Entities
 	}
 	public override void RemoveEntityRefs()
 	{
-		if (GroupNum == 1)
-		{
-			playerController.unitSelectionManager.unitGroupOne.Remove(this);
-			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupOne, 1);
-		}
-		if (GroupNum == 2)
-		{
-			playerController.unitSelectionManager.unitGroupTwo.Remove(this);
-			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupTwo, 2);
-		}
-		if (GroupNum == 3)
-		{
-			playerController.unitSelectionManager.unitGroupThree.Remove(this);
-			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupThree, 3);
-		}
-		if (GroupNum == 4)
-		{
-			playerController.unitSelectionManager.unitGroupFour.Remove(this);
-			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFour, 4);
-		}
-		if (GroupNum == 5)
-		{
-			playerController.unitSelectionManager.unitGroupFive.Remove(this);
-			playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFive, 5);
-		}
-
-		playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
 		playerController.unitListForPlayer.Remove(this);
+
+		if (!isTurret)
+		{
+			if (GroupNum == 1)
+			{
+				playerController.unitSelectionManager.unitGroupOne.Remove(this);
+				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupOne, 1);
+			}
+			if (GroupNum == 2)
+			{
+				playerController.unitSelectionManager.unitGroupTwo.Remove(this);
+				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupTwo, 2);
+			}
+			if (GroupNum == 3)
+			{
+				playerController.unitSelectionManager.unitGroupThree.Remove(this);
+				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupThree, 3);
+			}
+			if (GroupNum == 4)
+			{
+				playerController.unitSelectionManager.unitGroupFour.Remove(this);
+				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFour, 4);
+			}
+			if (GroupNum == 5)
+			{
+				playerController.unitSelectionManager.unitGroupFive.Remove(this);
+				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFive, 5);
+			}
+
+			playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
+		}
+		else if (isTurret)
+			turretController.capturePointController.TurretDefenses.Remove(turretController);
 	}
 	public void OnDrawGizmosSelected()
 	{
