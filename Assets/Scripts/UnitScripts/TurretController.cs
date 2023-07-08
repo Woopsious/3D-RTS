@@ -34,17 +34,17 @@ public class TurretController : UnitStateController
 		Vector3 lookDirection = new Vector3(entityTarget.transform.position.x, transform.position.y, entityTarget.transform.position.z);
 
 		var lookRotation = Quaternion.LookRotation(lookDirection - transform.position);
-		transform.rotation = Quaternion.Slerp(turretTower.transform.rotation, lookRotation, 1);
+		transform.rotation = Quaternion.Slerp(turretTower.transform.rotation, lookRotation, 1 / 1000);
 	}
 	public void ChangeGunElevation(Entities entityTarget)
 	{
 		Vector3 lookDirection = new Vector3(transform.position.x, entityTarget.transform.position.y, transform.position.z);
 
 		var lookRotation = Quaternion.LookRotation(lookDirection - transform.position);
-		transform.rotation = Quaternion.Slerp(turretGuns.transform.rotation, lookRotation, 1);
+		transform.rotation = Quaternion.Slerp(turretGuns.transform.rotation, lookRotation, 1 / 1000);
 	}
 	public void AddTurretRefs()
 	{
-
+		capturePointController.TurretDefenses.Add(this);
 	}
 }

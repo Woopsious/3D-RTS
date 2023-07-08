@@ -44,7 +44,7 @@ public class UnitStateAttacking : UnitBaseState
 			StopAndLookAtTarget(unit, unit.currentBuildingTarget);
 
 		//continue to last movement destination
-		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
+		if (!unit.isTurret && unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
 			if (unit.hasMoveAnimation)
 				unit.animatorController.SetBool("isIdle", true);
@@ -53,7 +53,8 @@ public class UnitStateAttacking : UnitBaseState
 				unit.movingSFX.Stop();
 			unit.agentNav.isStopped = true;
 		}
-		else if (unit.playerSetTarget != null && !unit.hasReachedPlayerSetTarget && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
+		else if (!unit.isTurret && unit.playerSetTarget != null && !unit.hasReachedPlayerSetTarget && 
+			unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
 			{

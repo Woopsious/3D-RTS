@@ -32,6 +32,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		}
 		else
 		{
+			highlighterObj.SetActive(true);
 			CanPlaceHighliterRed();
 
 			if (turret.isPlayerOneEntity)
@@ -147,7 +148,10 @@ public class CanPlaceBuilding : MonoBehaviour
 	public bool CheckIfCanPlace()
 	{
 		if (pointController == null)
+		{
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Not In Buildable Area", 1f);
 			return canPlace = false;
+		}
 
 		if (building != null)
 		{
@@ -156,56 +160,60 @@ public class CanPlaceBuilding : MonoBehaviour
 			{
 				if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)
 				{
-					pointController.energyGeneratorBuilding = building;
 					return canPlace = true;
 				}
 				else if (pointController.energyGeneratorBuilding != null && building.isGeneratorBuilding)
 				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Energy Generator Already Exists", 1f);
 					return canPlace = false;
 				}
 				else if (pointController.RefinaryBuildings.Count <= 1 && building.isRefineryBuilding)
 				{
-					pointController.RefinaryBuildings.Add(building);
 					return canPlace = true;
 				}
 				else if (pointController.RefinaryBuildings.Count >= 1 && building.isRefineryBuilding)
 				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Refinery Buildings Reached in Control Point", 2f);
 					return canPlace = false;
 				}
 				else if (pointController.lightVehProdBuildings.Count <= 1 && building.isLightVehProdBuilding)
 				{
-					pointController.lightVehProdBuildings.Add(building);
-					building.playerController.lightVehProdBuildingsList.Add(building);
 					return canPlace = true;
 				}
 				else if (pointController.lightVehProdBuildings.Count >= 1 && building.isLightVehProdBuilding)
 				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Light Vehicle Buildings Reached in Control Point", 2f);
 					return canPlace = false;
 				}
 				else if (pointController.heavyVehProdBuildings.Count <= 1 && building.isHeavyVehProdBuilding)
 				{
-					pointController.heavyVehProdBuildings.Add(building);
-					building.playerController.heavyVehProdBuildingsList.Add(building);
 					return canPlace = true;
 				}
 				else if (pointController.heavyVehProdBuildings.Count >= 1 && building.isHeavyVehProdBuilding)
 				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Heavy Vehicle Buildings Reached in Control Point", 2f);
 					return canPlace = false;
 				}
 				else if (pointController.vtolProdBuildings.Count <= 1 && building.isVTOLProdBuilding)
 				{
-					pointController.vtolProdBuildings.Add(building);
-					building.playerController.vtolVehProdBuildingsList.Add(building);
 					return canPlace = true;
 				}
 				else if (pointController.vtolProdBuildings.Count >= 1 && building.isVTOLProdBuilding)
 				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max VTOL Vehicle Buildings Reached in Control Point", 2f);
 					return canPlace = false;
 				}
 				else
+				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 1f);
 					return canPlace = false;
+				}
 			}
-			else return false;
+			else 
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 1f);
+				return false;
+			}
 		}
 		else
 		{
@@ -214,18 +222,24 @@ public class CanPlaceBuilding : MonoBehaviour
 			{
 				if (pointController.TurretDefenses.Count <= 1 && turret.isTurret)
 				{
-					pointController.TurretDefenses.Add(turret);
-					turret.playerController.turretDefensesList.Add(turret);
 					return canPlace = true;
 				}
 				else if (pointController.TurretDefenses.Count >= 1 && turret.isTurret)
 				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Turret Defense Buildings Reached in Control Point", 2f);
 					return canPlace = false;
 				}
 				else
+				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 1f);
 					return canPlace = false;
+				}
 			}
-			else return false;
+			else
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 1f);
+				return false;
+			}
 		}
 	}
 }

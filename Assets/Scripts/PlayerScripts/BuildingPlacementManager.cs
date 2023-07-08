@@ -96,6 +96,11 @@ public class BuildingPlacementManager : MonoBehaviour
 			else if (currentBuildingPlacement.GetComponent<TurretController>() != null)
 			{
 				currentBuildingPlacement.GetComponent<TurretController>().enabled = true;
+				currentBuildingPlacement.GetComponent<TurretController>().AddTurretRefs();
+				if (currentBuildingPlacement.GetComponent<TurretController>().isPlayerOneEntity)
+					currentBuildingPlacement.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
+				else
+					currentBuildingPlacement.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
 			}
 
 			currentBuildingPlacement.gameObject.layer = buildingLayer;
@@ -108,8 +113,6 @@ public class BuildingPlacementManager : MonoBehaviour
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
 			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 		}
-		else if (Input.GetMouseButtonDown(0) && !currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 1f);
 
 		if (Input.GetMouseButtonDown(1))
 			Destroy(currentBuildingPlacement.gameObject);
