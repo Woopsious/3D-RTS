@@ -28,14 +28,10 @@ public class UnitStateAttacking : UnitBaseState
 		if (unit.isUnitArmed)
 		{
 			MainGunTimer(unit);
-			if (unit.isPlayerOneEntity)
-				Debug.Log("main gun shooting");
 
 			if (unit.weaponSystem.hasSecondaryWeapon)
 			{
 				SecondaryGunTimer(unit);
-				if(unit.isPlayerOneEntity)
-					Debug.Log("secondary gun shooting");
 			}
 		}
 	}
