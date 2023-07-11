@@ -30,9 +30,7 @@ public class UnitStateAttacking : UnitBaseState
 			MainGunTimer(unit);
 
 			if (unit.weaponSystem.hasSecondaryWeapon)
-			{
 				SecondaryGunTimer(unit);
-			}
 		}
 	}
 	public override void UpdatePhysics(UnitStateController unit)
@@ -74,8 +72,8 @@ public class UnitStateAttacking : UnitBaseState
 	{
 		if (unit.isTurret)
 		{
-			//unit.turretController.FaceTarget(entityToLookAt);
-			//unit.turretController.ChangeGunElevation(entityToLookAt);
+			unit.turretController.FaceTarget(entityToLookAt);
+			unit.turretController.ChangeGunElevation(entityToLookAt);
 		}
 		else if (!unit.isTurret)
 		{

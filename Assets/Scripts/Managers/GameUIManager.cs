@@ -316,7 +316,7 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void LinkBuyButtons(int i, Button buttonToLink, List<GameObject> listType)
 	{
-		if (listType == GameManager.Instance.PlayerOneBuildingsList) //|| listType = GameManager.Instance. PLAYERTWOLIST
+		if (listType == GameManager.Instance.PlayerOneBuildingsList || listType == GameManager.Instance.PlayerTwoBuildingsList)
 		{
 			switch(i)
 			{
@@ -329,7 +329,7 @@ public class GameUIManager : MonoBehaviour
 				buyRefineryBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceRefineryBuilding(); });
 				break;
 				case 2:
-				buyDefenseTurret = buttonToLink; //needs to be defense turrent in future
+				buyDefenseTurret = buttonToLink;
 				buyDefenseTurret.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceDefenseTurret(); });
 				break;
 				case 3:
@@ -346,7 +346,7 @@ public class GameUIManager : MonoBehaviour
 				break;
 			}
 		}
-		else if (listType == GameManager.Instance.PlayerOneUnitsList) //|| listType = GameManager.Instance. PLAYERTWOLIST
+		else if (listType == GameManager.Instance.PlayerOneUnitsList || listType == GameManager.Instance.PlayerTwoUnitsList)
 		{
 			switch (i)
 			{
