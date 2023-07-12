@@ -187,7 +187,9 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-		if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe) && !playerController.IsMouseOverUI())
+		if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe) && !playerController.IsMouseOverUI() && 
+		playerController.buildingPlacementManager.currentBuildingPlacement == null && 
+		playerController.unitProductionManager.currentUnitPlacements.Count == 0)
 		{	
 			//handle selecting of entities
 			if (hitInfo.collider.gameObject.GetComponent<Entities>() != null)

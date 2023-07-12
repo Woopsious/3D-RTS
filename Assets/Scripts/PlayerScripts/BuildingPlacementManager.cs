@@ -101,11 +101,12 @@ public class BuildingPlacementManager : MonoBehaviour
 					currentBuildingPlacement.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
 				else
 					currentBuildingPlacement.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
+				currentBuildingPlacement.GetComponent<BoxCollider>().isTrigger = true;
 			}
 
 			currentBuildingPlacement.gameObject.layer = buildingLayer;
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
-			//currentBuildingPlacement.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
+			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
 			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().isPlaced = true;
 
 			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);

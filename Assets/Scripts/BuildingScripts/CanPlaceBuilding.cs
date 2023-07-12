@@ -47,18 +47,19 @@ public class CanPlaceBuilding : MonoBehaviour
 		TrackPlacementHeight();
 	}
 
-	//track if colliding with another building or capture point and placement height
+	//track if colliding with another building or capture point and placement height CAN PLACE HIGHLIGHTER DOESNT ALWAYS WORK
+	//functions are called correctly as a console log is produced and can place bool gets ticked/unticked in inspector
+	//CanPlaceHighliterRed/Green also works as it changes colour when building y axis is too high or low or when not colliding with capture point
 	public void OnTriggerEnter(Collider other)
 	{
 		if(other.GetComponent<CapturePointController>())
 		{
+			Debug.Log("capturepoint trigger enter");
 			pointController = other.GetComponent<CapturePointController>();
 			if (!CheckIfCapturePointIsNeutral())
 				CanPlaceHighliterGreen();
-
 			if (pointController.isNeutralPoint)
 				CanPlaceHighliterRed();
-
 			else
 				CanPlaceHighliterRed();
 
@@ -74,11 +75,16 @@ public class CanPlaceBuilding : MonoBehaviour
 			CanPlaceHighliterRed();
 			isCollidingWithAnotherBuilding = true;
 		}
+		else
+		{
+			Debug.Log("trigger enter");
+		}
 	}
 	public void OnTriggerExit(Collider other)
 	{
 		if (other.GetComponent<CapturePointController>())
 		{
+			Debug.Log("capturepoint trigger exit");
 			CanPlaceHighliterRed();
 			pointController = null;
 		}
@@ -88,6 +94,10 @@ public class CanPlaceBuilding : MonoBehaviour
 			Debug.Log("building trigger exit");
 			CanPlaceHighliterGreen();
 			isCollidingWithAnotherBuilding = false;
+		}
+		else
+		{
+			Debug.Log("trigger exit");
 		}
 	}
 	public void TrackPlacementHeight()
