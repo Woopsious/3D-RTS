@@ -68,8 +68,9 @@ public class CanPlaceBuilding : MonoBehaviour
 				building.capturePointController = pointController;
 		}
 
-		if (other.GetComponent<BuildingManager>())
+		if (other.GetComponent<CanPlaceBuilding>() != null)
 		{
+			Debug.Log("building trigger enter");
 			CanPlaceHighliterRed();
 			isCollidingWithAnotherBuilding = true;
 		}
@@ -82,8 +83,9 @@ public class CanPlaceBuilding : MonoBehaviour
 			pointController = null;
 		}
 
-		if (other.GetComponent<BuildingManager>())
+		if (other.GetComponent<CanPlaceBuilding>() != null)
 		{
+			Debug.Log("building trigger exit");
 			CanPlaceHighliterGreen();
 			isCollidingWithAnotherBuilding = false;
 		}

@@ -202,7 +202,7 @@ public class UnitSelectionManager : MonoBehaviour
 				else if (entity.GetComponent<BuildingManager>() != null)
 					TrySelectBuilding(entity.GetComponent<BuildingManager>());
 
-				else if (entity.GetComponent<UnitStateController>() != null && !entity.GetComponent<UnitStateController>().isTurret)
+				else if (entity.GetComponent<UnitStateController>() != null)
 					TrySelectUnits(entity.GetComponent<UnitStateController>());
 			}
 			//handle anything else

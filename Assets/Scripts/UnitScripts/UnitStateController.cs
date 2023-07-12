@@ -232,6 +232,7 @@ public class UnitStateController : Entities
 	public override void RemoveEntityRefs()
 	{
 		playerController.unitListForPlayer.Remove(this);
+		playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
 
 		if (!isTurret)
 		{
@@ -260,8 +261,6 @@ public class UnitStateController : Entities
 				playerController.unitSelectionManager.unitGroupFive.Remove(this);
 				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFive, 5);
 			}
-
-			playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
 		}
 		else if (isTurret)
 			turretController.capturePointController.TurretDefenses.Remove(turretController);
