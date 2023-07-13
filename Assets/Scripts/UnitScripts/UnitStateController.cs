@@ -28,6 +28,7 @@ public class UnitStateController : Entities
 	public NavMeshAgent agentNav;
 	public Rigidbody rb;
 	public GameObject FoVMeshObj;
+	public GameObject attackRangeMeshObj;
 
 	[Header("Unit Stats")]
 	public float attackRange;

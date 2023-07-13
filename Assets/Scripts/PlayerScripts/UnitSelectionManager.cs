@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using static Unity.Collections.AllocatorManager;
 using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.UI.CanvasScaler;
 
 public class UnitSelectionManager : MonoBehaviour
 {
@@ -264,6 +265,7 @@ public class UnitSelectionManager : MonoBehaviour
 				DeselectUnits();
 				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
+				unit.attackRangeMeshObj.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
 				if (unit.isTurret)
@@ -278,6 +280,7 @@ public class UnitSelectionManager : MonoBehaviour
 					{
 						selectedUnit.HideUIHealthBar();
 						selectedUnit.selectedHighlighter.SetActive(false);
+						unit.attackRangeMeshObj.SetActive(false);
 						selectedUnit.isSelected = false;
 						selectedUnitList.Remove(selectedUnit);
 
@@ -292,6 +295,7 @@ public class UnitSelectionManager : MonoBehaviour
 				}
 				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
+				unit.attackRangeMeshObj.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
 				if (unit.isTurret)
@@ -420,6 +424,7 @@ public class UnitSelectionManager : MonoBehaviour
 			{
 				selectedUnit.HideUIHealthBar();
 				selectedUnit.selectedHighlighter.SetActive(false);
+				selectedUnit.attackRangeMeshObj.SetActive(false);
 				selectedUnit.isSelected = false;
 
 				if (selectedUnit.isTurret)

@@ -54,7 +54,7 @@ public class CanPlaceBuilding : MonoBehaviour
 	{
 		if(other.GetComponent<CapturePointController>())
 		{
-			Debug.Log("capturepoint trigger enter");
+			//Debug.Log("capturepoint trigger enter");
 			pointController = other.GetComponent<CapturePointController>();
 			if (!CheckIfCapturePointIsNeutral())
 				CanPlaceHighliterGreen();
@@ -71,33 +71,25 @@ public class CanPlaceBuilding : MonoBehaviour
 
 		if (other.GetComponent<CanPlaceBuilding>() != null)
 		{
-			Debug.Log("building trigger enter");
+			//Debug.Log("building trigger enter");
 			CanPlaceHighliterRed();
 			isCollidingWithAnotherBuilding = true;
-		}
-		else
-		{
-			Debug.Log("trigger enter");
 		}
 	}
 	public void OnTriggerExit(Collider other)
 	{
 		if (other.GetComponent<CapturePointController>())
 		{
-			Debug.Log("capturepoint trigger exit");
+			//Debug.Log("capturepoint trigger exit");
 			CanPlaceHighliterRed();
 			pointController = null;
 		}
 
 		if (other.GetComponent<CanPlaceBuilding>() != null)
 		{
-			Debug.Log("building trigger exit");
+			//Debug.Log("building trigger exit");
 			CanPlaceHighliterGreen();
 			isCollidingWithAnotherBuilding = false;
-		}
-		else
-		{
-			Debug.Log("trigger exit");
 		}
 	}
 	public void TrackPlacementHeight()
