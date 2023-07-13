@@ -27,8 +27,8 @@ public class UnitStateController : Entities
 	public AudioSource movingSFX;
 	public NavMeshAgent agentNav;
 	public Rigidbody rb;
-	public GameObject FoVMeshObj;
 	public GameObject attackRangeMeshObj;
+	public GameObject FoVMeshObj;
 
 	[Header("Unit Stats")]
 	public float attackRange;
