@@ -16,9 +16,10 @@ public class InputManager : MonoBehaviour
 	public readonly string keyBindShopVehProdBuildingsName = "Veh Prod Shop";
 	public readonly string keyBindShopLightUnitsName = "Light Unit Shop";
 	public readonly string keyBindShopHeavyUnitsName = "Heavy Unit Shop";
-	public readonly string keyBindMiniMapName = "Minimap";
+	public readonly string keyBindTechTreeName = "Tech Tree";
 	public readonly string keyBindUnitProdQueue = "Unit Prod Queue";
 	public readonly string keyBindUnitGroupsList = "Unit Group List";
+	public readonly string keyBindMiniMapName = "Minimap";
 
 	public readonly string keyBindCameraForwardName = "Camera Forward";
 	public readonly string keyBindCameraBackwardsName = "Camera Backwards";
@@ -64,9 +65,10 @@ public class InputManager : MonoBehaviour
 			keyBindShopVehProdBuildingsName,
 			keyBindShopLightUnitsName,
 			keyBindShopHeavyUnitsName,
-			keyBindMiniMapName,
+			keyBindTechTreeName,
 			keyBindUnitProdQueue,
 			keyBindUnitGroupsList,
+			keyBindMiniMapName,
 
 			keyBindCameraForwardName,
 			keyBindCameraBackwardsName,
@@ -88,9 +90,10 @@ public class InputManager : MonoBehaviour
 			[keyBindShopVehProdBuildingsName] = KeyCode.F2,
 			[keyBindShopLightUnitsName] = KeyCode.F3,
 			[keyBindShopHeavyUnitsName] = KeyCode.F4,
-			[keyBindMiniMapName] = KeyCode.M,
+			[keyBindTechTreeName] = KeyCode.T,
 			[keyBindUnitProdQueue] = KeyCode.Tab,
 			[keyBindUnitGroupsList] = KeyCode.CapsLock,
+			[keyBindMiniMapName] = KeyCode.M,
 
 			[keyBindCameraForwardName] = KeyCode.W,
 			[keyBindCameraBackwardsName] = KeyCode.S,

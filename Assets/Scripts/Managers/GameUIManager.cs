@@ -10,8 +10,8 @@ using static UnityEngine.UI.CanvasScaler;
 public class GameUIManager : MonoBehaviour
 {
 	public static GameUIManager Instance;
-
 	public PlayerController playerController;
+	public TechTreeManager techTreeManager;
 
 	public MiniMapManager miniMap;
 
@@ -23,8 +23,9 @@ public class GameUIManager : MonoBehaviour
 	public GameObject unitsLightUiShopOneObj;
 	public GameObject unitsHeavyUiShopTwoObj;
 
-	public GameObject unitGroupsObj;
-	public GameObject unitProdQueuesObj;
+	public GameObject techTreeParentObj;
+	public GameObject unitGroupsParentObj;
+	public GameObject unitProdQueuesParentObj;
 	public Button audioBackButton;
 
 	public Text gameTimerText;
@@ -158,40 +159,66 @@ public class GameUIManager : MonoBehaviour
 		unitsLightUiShopOneObj.SetActive(false);
 		unitsHeavyUiShopTwoObj.SetActive(true);
 	}
+	public void ShowTechTree()
+	{
+		if (techTreeParentObj.activeInHierarchy)
+			techTreeParentObj.SetActive(false);
+		else if (!techTreeParentObj.activeInHierarchy)
+			techTreeParentObj.SetActive(true);
+
+		if (unitProdQueuesParentObj.transform.position == new Vector3(0, 575, 0))
+			unitProdQueuesParentObj.transform.position = new Vector3(-500, 575, 0);
+
+		if (unitGroupsParentObj.transform.position == new Vector3(0, 575, 0))
+			unitGroupsParentObj.transform.position = new Vector3(-500, 575, 0);
+	}
 	public void ShowGroupedUnits()
 	{
-		if (unitProdQueuesObj.transform.position == new Vector3(0, 575, 0))
-			unitProdQueuesObj.transform.position = new Vector3(-500, 575, 0);
+		if (techTreeParentObj.activeInHierarchy)
+			techTreeParentObj.SetActive(false);
 
-		if (unitGroupsObj.transform.position == new Vector3(0, 575, 0))
-			unitGroupsObj.transform.position = new Vector3(-500, 575, 0);
-		else if (unitGroupsObj.transform.position != new Vector3(0, 575, 0))
-			unitGroupsObj.transform.position = new Vector3(0, 575, 0);
+		if (unitProdQueuesParentObj.transform.position == new Vector3(0, 575, 0))
+			unitProdQueuesParentObj.transform.position = new Vector3(-500, 575, 0);
+
+		if (unitGroupsParentObj.transform.position == new Vector3(0, 575, 0))
+			unitGroupsParentObj.transform.position = new Vector3(-500, 575, 0);
+		else if (unitGroupsParentObj.transform.position != new Vector3(0, 575, 0))
+			unitGroupsParentObj.transform.position = new Vector3(0, 575, 0);
 	}
 	public void ShowGroupedUnitsWhenCreatingGroup()
 	{
-		if (unitProdQueuesObj.transform.position == new Vector3(0, 575, 0))
-			unitProdQueuesObj.transform.position = new Vector3(-500, 575, 0);
+		if (techTreeParentObj.activeInHierarchy)
+			techTreeParentObj.SetActive(false);
 
-		if (unitGroupsObj.transform.position == new Vector3(-500, 575, 0))
-			unitGroupsObj.transform.position = new Vector3(0, 575, 0);
+		if (unitProdQueuesParentObj.transform.position == new Vector3(0, 575, 0))
+			unitProdQueuesParentObj.transform.position = new Vector3(-500, 575, 0);
+
+		if (unitGroupsParentObj.transform.position == new Vector3(-500, 575, 0))
+			unitGroupsParentObj.transform.position = new Vector3(0, 575, 0);
 	}
 	public void ShowUnitProdQueues()
 	{
-		if (unitGroupsObj.transform.position == new Vector3(0, 575, 0))
-			unitGroupsObj.transform.position = new Vector3(-500, 575, 0);
+		if (techTreeParentObj.activeInHierarchy)
+			techTreeParentObj.SetActive(false);
 
-		if (unitProdQueuesObj.transform.position == new Vector3(0, 575, 0))
-			unitProdQueuesObj.transform.position = new Vector3(-500, 575, 0);
-		else if (unitProdQueuesObj.transform.position != new Vector3(0, 575, 0))
-			unitProdQueuesObj.transform.position = new Vector3(0, 575, 0);
+		if (unitGroupsParentObj.transform.position == new Vector3(0, 575, 0))
+			unitGroupsParentObj.transform.position = new Vector3(-500, 575, 0);
+
+		if (unitProdQueuesParentObj.transform.position == new Vector3(0, 575, 0))
+			unitProdQueuesParentObj.transform.position = new Vector3(-500, 575, 0);
+		else if (unitProdQueuesParentObj.transform.position != new Vector3(0, 575, 0))
+			unitProdQueuesParentObj.transform.position = new Vector3(0, 575, 0);
 	}
 	public void ShowUnitProdQueuesWhenBuyingUnit()
 	{
-		if (unitGroupsObj.transform.position == new Vector3(0, 575, 0))
-			unitGroupsObj.transform.position = new Vector3(-500, 575, 0);
-		if (unitProdQueuesObj.transform.position != new Vector3(0, 575, 0))
-			unitProdQueuesObj.transform.position = new Vector3(0, 575, 0);
+		if (techTreeParentObj.activeInHierarchy)
+			techTreeParentObj.SetActive(false);
+
+		if (unitGroupsParentObj.transform.position == new Vector3(0, 575, 0))
+			unitGroupsParentObj.transform.position = new Vector3(-500, 575, 0);
+
+		if (unitProdQueuesParentObj.transform.position != new Vector3(0, 575, 0))
+			unitProdQueuesParentObj.transform.position = new Vector3(0, 575, 0);
 	}
 
 	//SETUP UI SHOP ELEMENTS

@@ -96,6 +96,10 @@ public class PlayerController : MonoBehaviour
 		{
 			gameUIManager.ShowUnitsHeavyShop();
 		}
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTechTreeName]))
+		{
+			gameUIManager.ShowTechTree();
+		}
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindUnitProdQueue]))
 		{
 			gameUIManager.ShowUnitProdQueues();
