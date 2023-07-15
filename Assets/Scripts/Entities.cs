@@ -32,13 +32,6 @@ public class Entities : MonoBehaviour
 	public float hitCooldown;
 	public float hitTimer;
 
-	[Header("Entity Upgrade stats")]
-	public float healthBonusPercentage;
-	public float armourBonusPercentage;
-	public float damageBonusPercentage;
-	public int attackRangeBonus;
-	public int speedBonus;
-
 	[Header("Entity Bools")]
 	public bool isPlayerOneEntity;
 	public bool wasRecentlyHit;
@@ -48,10 +41,6 @@ public class Entities : MonoBehaviour
 
 	public virtual void Start()
 	{
-		maxHealth *= healthBonusPercentage;
-		currentHealth *= healthBonusPercentage;
-		armour *= armourBonusPercentage;
-
 		spottedTimer = 0;
 		hitTimer = 0;
 		UpdateEntityAudioVolume();

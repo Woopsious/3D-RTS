@@ -288,6 +288,7 @@ public class UnitProductionManager : MonoBehaviour
 		StartCoroutine(OpenCloseDoors(VehSpawnLocation));
 		GameObject go = Instantiate(buildOrder.UnitPrefab, VehSpawnLocation.vehProdSpawnPoint.transform.position, Quaternion.identity);
 
+		playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(go);
 		StartCoroutine(ChangeBuiltUnitState(go.GetComponent<UnitStateController>(), destination));
 	}
 	public IEnumerator ChangeBuiltUnitState(UnitStateController newUnit, Vector3 destination)

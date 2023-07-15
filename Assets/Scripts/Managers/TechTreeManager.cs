@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using static System.Net.Mime.MediaTypeNames;
+using static UnityEngine.UI.CanvasScaler;
 
 public class TechTreeManager : MonoBehaviour
 {
@@ -316,7 +317,6 @@ public class TechTreeManager : MonoBehaviour
 
 		CompleteResearch(techList, index);
 		UnlockNextResearch(techList, index);
-		ApplyTechUpgradesToFutureEntities();
 	}
 	public void CompleteResearch(List<Technology> techList, int index) //update bonus values provided by research
 	{
@@ -446,35 +446,25 @@ public class TechTreeManager : MonoBehaviour
 	}
 
 	//APPLY TECH UPGRADES TO ENTITIES
-	public void ApplyTechUpgradesToFutureEntities()
+	public void ApplyTechUpgradesToNewUnits(GameObject unitObj)
 	{
-		if (GameUIManager.Instance.playerController.isPlayerOne)
-		{
-			foreach (GameObject obj in GameManager.Instance.PlayerOneBuildingsList)
-			{
-				BuildingManager building = obj.GetComponent<BuildingManager>();
+		UnitStateController unit = unitObj.GetComponent<UnitStateController>();
 
-				building.healthBonusPercentage = buildingHealthPercentageBonusValue;
-				building.armourBonusPercentage = buildingArmourPercentageBonusValue;
-			}
-		}
-		else if (!GameUIManager.Instance.playerController.isPlayerOne)
-		{
-			foreach (GameObject obj in GameManager.Instance.PlayerOneUnitsList)
-			{
-				UnitStateController unit = obj.GetComponent<UnitStateController>();
-
-				unit.healthBonusPercentage = unitHealthPercentageBonusValue;
-				unit.armourBonusPercentage = unitArmourPercentageBonusValue;
-				unit.damageBonusPercentage = unitDamagePercentageBonusValue;
-				unit.attackRangeBonus = unitAttackRangeBonusValue;
-				unit.armourBonusPercentage = unitSpeedBonusValue;
-			}
-		}
+		unit.currentHealth *= unitHealthPercentageBonusValue;
+		unit.maxHealth *= unitHealthPercentageBonusValue;
+		unit.armour *= unitArmourPercentageBonusValue;
+		unit.weaponSystem.mainWeaponDamage *= unitDamagePercentageBonusValue;
+		unit.weaponSystem.secondaryWeaponDamage *= unitDamagePercentageBonusValue;
+		unit.attackRange += unitAttackRangeBonusValue;
+		unit.agentNav.speed += unitSpeedBonusValue;
 	}
-	public void ApplyTechUpgradesAlreadyMadeEntities()
+	public void ApplyTechUpgradesToNewBuildings(GameObject buildingObj)
 	{
+		BuildingManager building = buildingObj.GetComponent<BuildingManager>();
 
+		building.currentHealth *= buildingHealthPercentageBonusValue;
+		building.maxHealth *= buildingHealthPercentageBonusValue;
+		building.armour *= buildingArmourPercentageBonusValue;
 	}
 
 	[System.Serializable]

@@ -158,6 +158,7 @@ public class BuildingPlacementManager : MonoBehaviour
 				currentBuildingPlacement = obj.GetComponent<Entities>();
 				canPlaceBuilding = obj.GetComponent<CanPlaceBuilding>();
 				obj.GetComponent<Entities>().playerController = playerController;
+				playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewBuildings(obj);
 			}
 			else
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford buildings", 2);
