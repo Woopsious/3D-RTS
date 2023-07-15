@@ -62,7 +62,7 @@ public class GameUIManager : MonoBehaviour
 	public Text groupOneInfoUI;
 	public Text groupTwoInfoUI;
 	public Text groupThreeInfoUI;
-	public Text groupFourtInfoUI;
+	public Text groupFourInfoUI;
 	public Text groupFiveInfoUI;
 
 	[Header("Game Speed Refs")]
@@ -474,7 +474,7 @@ public class GameUIManager : MonoBehaviour
 		else if (groupToUpdate == 3)
 			groupThreeInfoUI.text = info;
 		else if (groupToUpdate == 4)
-			groupFourtInfoUI.text = info;
+			groupFourInfoUI.text = info;
 		else if (groupToUpdate == 5)
 			groupFiveInfoUI.text = info;
 	}
@@ -485,7 +485,7 @@ public class GameUIManager : MonoBehaviour
 		groupOneInfoUI.text = info;
 		groupTwoInfoUI.text = info;
 		groupThreeInfoUI.text = info;
-		groupFourtInfoUI.text = info;
+		groupFourInfoUI.text = info;
 		groupFiveInfoUI.text = info;
 	}
 

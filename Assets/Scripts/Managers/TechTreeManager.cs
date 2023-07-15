@@ -286,8 +286,6 @@ public class TechTreeManager : MonoBehaviour
 	//TECH RESEARCH FUNCTIONS
 	public void ResearchTech(List<Technology> techList, int index, GameObject UiElement)
 	{
-		Debug.Log(index);
-
 		if (techList == buildingTechList)
 		{
 			if (CheckIfCanReseachTech(techList, index))
@@ -465,6 +463,63 @@ public class TechTreeManager : MonoBehaviour
 		building.currentHealth *= buildingHealthPercentageBonusValue;
 		building.maxHealth *= buildingHealthPercentageBonusValue;
 		building.armour *= buildingArmourPercentageBonusValue;
+	}
+	//using list of all player units, first reset values to base then recalculate values
+	public void ApplyTechUpgradesToExistingEntities()
+	{
+		foreach (UnitStateController unit in GameUIManager.Instance.playerController.unitListForPlayer)
+		{
+			UnitStateController unitTemplate = GameManager.Instance.PlayerOneUnitsList[0].GetComponent<UnitStateController>();
+
+			if (unit.entityName == "Scout Vehicle")
+			{
+				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
+				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
+			}
+			if (unit.entityName == "Radar Vehicle")
+			{
+				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
+				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
+			}
+			if (unit.entityName == "Light Mech")
+			{
+				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
+				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
+				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
+				unit.attackRange = unitTemplate.attackRange * unitAttackRangeBonusValue;
+				unit.agentNav.speed = unitTemplate.agentNav.speed * unitSpeedBonusValue;
+			}
+			if (unit.entityName == "Heavy Mech Knight")
+			{
+				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
+				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
+				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
+				unit.attackRange = unitTemplate.attackRange * unitAttackRangeBonusValue;
+				unit.agentNav.speed = unitTemplate.agentNav.speed * unitSpeedBonusValue;
+			}
+			if (unit.entityName == "Heavy Mech Support")
+			{
+				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
+				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
+				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
+				unit.attackRange = unitTemplate.attackRange * unitAttackRangeBonusValue;
+				unit.agentNav.speed = unitTemplate.agentNav.speed * unitSpeedBonusValue;
+			}
+			if (unit.entityName == "VTOL Gunship")
+			{
+				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
+				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
+				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
+				unit.attackRange = unitTemplate.attackRange * unitAttackRangeBonusValue;
+				unit.agentNav.speed = unitTemplate.agentNav.speed * unitSpeedBonusValue;
+			}
+			if (unit.entityName == "Turret")
+			{
+				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
+				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
+				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
+			}
+		}
 	}
 
 	[System.Serializable]
