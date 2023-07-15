@@ -61,6 +61,10 @@ public class UnitStateController : Entities
 	public override void Start()
 	{
 		base.Start();
+		weaponSystem.mainWeaponDamage *= damageBonusPercentage;
+		weaponSystem.secondaryWeaponDamage *= damageBonusPercentage;
+		attackRange += attackRangeBonus;
+		agentNav.speed += speedBonus;
 
 		ChangeStateIdle();
 		//assign correct playercontroller to unit on start

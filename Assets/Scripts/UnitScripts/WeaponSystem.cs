@@ -14,7 +14,7 @@ public class WeaponSystem : MonoBehaviour
 	public AudioSource mainWeaponAudio;
 	public ParticleSystem mainWeaponParticles;
 	public ParticleSystem mainWeaponProjectileParticle;
-	public int mainWeaponDamage;
+	public float mainWeaponDamage;
 	public float mainWeaponAttackSpeed;
 	[System.NonSerialized]
 	public float mainWeaponAttackSpeedTimer;
@@ -22,7 +22,7 @@ public class WeaponSystem : MonoBehaviour
 	public AudioSource secondaryWeaponAudio;
 	public ParticleSystem secondaryWeaponParticles;
 	public ParticleSystem secondaryWeaponProjectileParticle;
-	public int secondaryWeaponDamage;
+	public float secondaryWeaponDamage;
 	public float secondaryWeaponAttackSpeed;
 	[System.NonSerialized]
 	public float secondaryWeaponAttackSpeedTimer;

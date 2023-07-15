@@ -18,6 +18,9 @@ public class TechTreeManager : MonoBehaviour
 	public List<Technology> buildingTechList;
 	public List<bool> hasResearchedBuildingTechlist;
 
+	public float buildingHealthPercentageBonusValue;
+	public float buildingArmourPercentageBonusValue;
+
 	Technology buildingTechHealthOne = new Technology
 	{
 		TechName = "BuildingTech HealthOne",
@@ -92,6 +95,12 @@ public class TechTreeManager : MonoBehaviour
 	[Header("Unit Tech Tree Info")]
 	public List<Technology> unitTechList;
 	public List<bool> hasResearchedUnitTechlist;
+
+	public float unitHealthPercentageBonusValue;
+	public float unitArmourPercentageBonusValue;
+	public float unitDamagePercentageBonusValue;
+	public int unitAttackRangeBonusValue;
+	public int unitSpeedBonusValue;
 
 	Technology unitTechHealthOne = new Technology
 	{
@@ -305,11 +314,66 @@ public class TechTreeManager : MonoBehaviour
 		UiElement.transform.GetChild(0).GetComponent<UnityEngine.UI.Text>().color = new Color(0, 0.8f, 0, 1);
 		UiElement.transform.GetChild(1).GetComponent<UnityEngine.UI.Text>().color = new Color(0, 0.8f, 0, 1);
 
+		CompleteResearch(techList, index);
 		UnlockNextResearch(techList, index);
+		ApplyTechUpgradesToFutureEntities();
 	}
-	public void UnlockNextResearch(List<Technology> techList, int index)
+	public void CompleteResearch(List<Technology> techList, int index) //update bonus values provided by research
 	{
-		if (techList == buildingTechList) //unlock next building techs
+		if (techList == buildingTechList)
+		{
+			if (index == 0)
+			{
+				buildingHealthPercentageBonusValue += 0.05f;
+			}
+			if (index == 1)
+			{
+				buildingArmourPercentageBonusValue += 0.05f;
+			}
+			if (index == 5)
+			{
+				buildingHealthPercentageBonusValue += 0.1f;
+			}
+			if (index == 6)
+			{
+				buildingArmourPercentageBonusValue += 0.1f;
+			}
+		}
+		else if (techList == unitTechList)
+		{
+			if (index == 0)
+			{
+				unitHealthPercentageBonusValue += 0.05f;
+			}
+			if (index == 1)
+			{
+				unitArmourPercentageBonusValue += 0.05f;
+			}
+			if (index == 2)
+			{
+				unitSpeedBonusValue = 1;
+			}
+			if (index == 4)
+			{
+				unitAttackRangeBonusValue += 1;
+			}
+			if (index == 6)
+			{
+				unitAttackRangeBonusValue += 1;
+			}
+			if (index == 5)
+			{
+				unitDamagePercentageBonusValue += 0.05f;
+			}
+			if (index == 7)
+			{
+				unitDamagePercentageBonusValue += 0.1f;
+			}
+		}
+	}
+	public void UnlockNextResearch(List<Technology> techList, int index) //unlock next techs in respective trees
+	{
+		if (techList == buildingTechList)
 		{
 			if (index == 0 || index == 1)
 			{
@@ -329,7 +393,7 @@ public class TechTreeManager : MonoBehaviour
 				techList[6].canBeReseached = true;
 			}
 		}
-		else if (techList == unitTechList) //unlock next unit techs
+		else if (techList == unitTechList)
 		{
 			if (index == 0 || index == 1)
 			{
@@ -353,10 +417,10 @@ public class TechTreeManager : MonoBehaviour
 				techList[7].canBeReseached = true;
 			}
 		}
-	}
+	} 
 	public bool CheckIfCanReseachTech(List<Technology> techList, int index)
 	{
-		if (!isCurrentlyReseaching && techList[index].hasResearched) //check if already researched
+		if (!isCurrentlyReseaching && techList[index].hasResearched)
 		{
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Technology Already Researched", 2f);
 			return false;
@@ -379,6 +443,38 @@ public class TechTreeManager : MonoBehaviour
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Research Atleast One Previous Tech", 2f);
 			return false;
 		}
+	}
+
+	//APPLY TECH UPGRADES TO ENTITIES
+	public void ApplyTechUpgradesToFutureEntities()
+	{
+		if (GameUIManager.Instance.playerController.isPlayerOne)
+		{
+			foreach (GameObject obj in GameManager.Instance.PlayerOneBuildingsList)
+			{
+				BuildingManager building = obj.GetComponent<BuildingManager>();
+
+				building.healthBonusPercentage = buildingHealthPercentageBonusValue;
+				building.armourBonusPercentage = buildingArmourPercentageBonusValue;
+			}
+		}
+		else if (!GameUIManager.Instance.playerController.isPlayerOne)
+		{
+			foreach (GameObject obj in GameManager.Instance.PlayerOneUnitsList)
+			{
+				UnitStateController unit = obj.GetComponent<UnitStateController>();
+
+				unit.healthBonusPercentage = unitHealthPercentageBonusValue;
+				unit.armourBonusPercentage = unitArmourPercentageBonusValue;
+				unit.damageBonusPercentage = unitDamagePercentageBonusValue;
+				unit.attackRangeBonus = unitAttackRangeBonusValue;
+				unit.armourBonusPercentage = unitSpeedBonusValue;
+			}
+		}
+	}
+	public void ApplyTechUpgradesAlreadyMadeEntities()
+	{
+
 	}
 
 	[System.Serializable]

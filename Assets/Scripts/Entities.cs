@@ -23,14 +23,21 @@ public class Entities : MonoBehaviour
 	public int moneyCost;
 	public int alloyCost;
 	public int crystalCost;
-	public int maxHealth;
-	public int currentHealth;
-	public int armour;
+	public float maxHealth;
+	public float currentHealth;
+	public float armour;
 
 	public float spottedCooldown;
 	public float spottedTimer;
 	public float hitCooldown;
 	public float hitTimer;
+
+	[Header("Entity Upgrade stats")]
+	public float healthBonusPercentage;
+	public float armourBonusPercentage;
+	public float damageBonusPercentage;
+	public int attackRangeBonus;
+	public int speedBonus;
 
 	[Header("Entity Bools")]
 	public bool isPlayerOneEntity;
@@ -41,6 +48,10 @@ public class Entities : MonoBehaviour
 
 	public virtual void Start()
 	{
+		maxHealth *= healthBonusPercentage;
+		currentHealth *= healthBonusPercentage;
+		armour *= armourBonusPercentage;
+
 		spottedTimer = 0;
 		hitTimer = 0;
 		UpdateEntityAudioVolume();
@@ -133,7 +144,7 @@ public class Entities : MonoBehaviour
 		UiObj.SetActive(false);
 	}
 	//health and ui
-	public void RecieveDamage(int dmg)
+	public void RecieveDamage(float dmg)
 	{
 		dmg -= armour;
 		if (dmg < 0)
