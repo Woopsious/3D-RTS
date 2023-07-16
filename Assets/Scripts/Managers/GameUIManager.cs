@@ -9,7 +9,7 @@ using static UnityEngine.UI.CanvasScaler;
 
 public class GameUIManager : MonoBehaviour
 {
-	public static GameUIManager Instance;
+	public GameManager gameManager;
 	public PlayerController playerController;
 	public TechTreeManager techTreeManager;
 

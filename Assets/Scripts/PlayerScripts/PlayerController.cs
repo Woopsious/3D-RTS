@@ -22,11 +22,12 @@ public class PlayerController : MonoBehaviour
 
 	[Header("Dynamic Refs")]
 	public List<UnitStateController> SpottedUnitsList;
+	public List<BuildingManager> buildingListForPlayer;
 	public List<UnitStateController> unitListForPlayer;
+	public List<TurretController> turretDefensesList;
 	public List<BuildingManager> lightVehProdBuildingsList;
 	public List<BuildingManager> heavyVehProdBuildingsList;
 	public List<BuildingManager> vtolVehProdBuildingsList;
-	public List<TurretController> turretDefensesList;
 
 	public void Start()
 	{

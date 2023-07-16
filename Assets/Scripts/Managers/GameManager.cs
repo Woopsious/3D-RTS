@@ -60,6 +60,13 @@ public class GameManager : MonoBehaviour
 	[Header("PlayerTwo Unit Prefabs")]
 	public List<GameObject> PlayerTwoUnitsList;
 
+	public BaseBuildingStats buildingHQStats;
+	public BaseBuildingStats buildingEnergyGenStats;
+	public BaseBuildingStats buildingRefineryStats;
+	public BaseBuildingStats buildingLightVehProdStats;
+	public BaseBuildingStats buildingHeavyVehProdStats;
+	public BaseBuildingStats buildingVtolVehProdStats;
+
 	public void Awake()
 	{
 		if (Instance == null)
@@ -82,6 +89,37 @@ public class GameManager : MonoBehaviour
 		InputManager.Instance.SetUpKeybindDictionary();
 
 		GameManager.Instance.LoadPlayerData();
+
+		buildingHQStats = new BaseBuildingStats
+		{
+			health = 1000,
+			armour = 10
+		};
+		buildingEnergyGenStats = new BaseBuildingStats
+		{
+			health = 500,
+			armour = 0
+		};
+		buildingRefineryStats = new BaseBuildingStats
+		{
+			health = 750,
+			armour = 20
+		};
+		buildingLightVehProdStats = new BaseBuildingStats
+		{
+			health = 500,
+			armour = 10
+		};
+		buildingHeavyVehProdStats = new BaseBuildingStats
+		{
+			health = 1000,
+			armour = 10
+		};
+		buildingVtolVehProdStats = new BaseBuildingStats
+		{
+			health = 750,
+			armour = 15
+		};
 	}
 	public void GetResourcesPerSecond()
 	{
@@ -212,6 +250,9 @@ public class GameManager : MonoBehaviour
 		}
 		else if (sceneIndex == 1)
 		{
+			Debug.Log(PlayerOneBuildingsList[0].GetComponent<BuildingManager>().maxHealth);
+
+			gameUIManager.gameManager = this;
 			GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 			gameUIManager.ResetUi();
 			gameUIManager.ResetUnitGroupUI();
@@ -220,5 +261,19 @@ public class GameManager : MonoBehaviour
 			gameUIManager.techTreeManager.SetUpTechTrees();
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
+	}
+	public class BaseBuildingStats
+	{
+		public float health;
+		public float armour;
+	}
+	public class BaseUnitStats
+	{
+		public float health;
+		public float armour;
+		public float mainWeaponDamage;
+		public float secondaryWeaponDamage;
+		public int attackRange;
+		public int speed;
 	}
 }

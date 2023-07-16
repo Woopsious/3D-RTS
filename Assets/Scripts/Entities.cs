@@ -23,9 +23,9 @@ public class Entities : MonoBehaviour
 	public int moneyCost;
 	public int alloyCost;
 	public int crystalCost;
-	public float maxHealth;
-	public float currentHealth;
-	public float armour;
+	public int maxHealth;
+	public int currentHealth;
+	public int armour;
 
 	public float spottedCooldown;
 	public float spottedTimer;
@@ -138,7 +138,7 @@ public class Entities : MonoBehaviour
 		dmg -= armour;
 		if (dmg < 0)
 			dmg = 0;
-		currentHealth -= dmg;
+		currentHealth -= (int)dmg;
 		UpdateHealthBar();
 		if (currentHealth <= 0)
 			OnEntityDeath();

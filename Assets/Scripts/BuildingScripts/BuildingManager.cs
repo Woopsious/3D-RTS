@@ -101,6 +101,8 @@ public class BuildingManager : Entities
 	}
 	public void AddBuildingRefs()
 	{
+		playerController.buildingListForPlayer.Add(this);
+
 		if (isGeneratorBuilding)
 		{
 			capturePointController.energyGeneratorBuilding = this;
@@ -127,6 +129,8 @@ public class BuildingManager : Entities
 	}
 	public override void RemoveEntityRefs()
 	{
+		playerController.buildingListForPlayer.Remove(this);
+
 		if (isGeneratorBuilding)
 		{
 			GetComponent<EnergyGenController>().UnpowerBuildings();

@@ -8,6 +8,8 @@ using static UnityEngine.UI.CanvasScaler;
 
 public class TechTreeManager : MonoBehaviour
 {
+	public GameUIManager gameUIManager;
+
 	[Header("UI Refs")]
 	public GameObject techTemplate;
 	public GameObject techTemplateEmpty;
@@ -92,6 +94,8 @@ public class TechTreeManager : MonoBehaviour
 		hasResearched = false,
 		hasSpaceBetweenNextTech = 0
 	};
+
+	[Header("building Base Stats Info")]
 
 	[Header("Unit Tech Tree Info")]
 	public List<Technology> unitTechList;
@@ -183,6 +187,8 @@ public class TechTreeManager : MonoBehaviour
 		hasResearched = false,
 		hasSpaceBetweenNextTech = 0
 	};
+
+	[Header("Unit Base Stats Info")]
 
 	[Header("stats")]
 	public bool isCurrentlyReseaching;
@@ -315,6 +321,7 @@ public class TechTreeManager : MonoBehaviour
 
 		CompleteResearch(techList, index);
 		UnlockNextResearch(techList, index);
+		ApplyTechUpgradesToExistingEntities();
 	}
 	public void CompleteResearch(List<Technology> techList, int index) //update bonus values provided by research
 	{
@@ -448,9 +455,9 @@ public class TechTreeManager : MonoBehaviour
 	{
 		UnitStateController unit = unitObj.GetComponent<UnitStateController>();
 
-		unit.currentHealth *= unitHealthPercentageBonusValue;
-		unit.maxHealth *= unitHealthPercentageBonusValue;
-		unit.armour *= unitArmourPercentageBonusValue;
+		unit.currentHealth *= (int)unitHealthPercentageBonusValue;
+		unit.maxHealth *= (int)unitHealthPercentageBonusValue;
+		unit.armour *= (int)unitArmourPercentageBonusValue;
 		unit.weaponSystem.mainWeaponDamage *= unitDamagePercentageBonusValue;
 		unit.weaponSystem.secondaryWeaponDamage *= unitDamagePercentageBonusValue;
 		unit.attackRange += unitAttackRangeBonusValue;
@@ -460,65 +467,47 @@ public class TechTreeManager : MonoBehaviour
 	{
 		BuildingManager building = buildingObj.GetComponent<BuildingManager>();
 
-		building.currentHealth *= buildingHealthPercentageBonusValue;
-		building.maxHealth *= buildingHealthPercentageBonusValue;
-		building.armour *= buildingArmourPercentageBonusValue;
+		building.currentHealth *= (int)buildingHealthPercentageBonusValue;
+		building.maxHealth *= (int)buildingHealthPercentageBonusValue;
+		building.armour *= (int)buildingArmourPercentageBonusValue;
 	}
 	//using list of all player units, first reset values to base then recalculate values
 	public void ApplyTechUpgradesToExistingEntities()
 	{
-		foreach (UnitStateController unit in GameUIManager.Instance.playerController.unitListForPlayer)
+		foreach (BuildingManager building in gameUIManager.playerController.buildingListForPlayer)
 		{
-			UnitStateController unitTemplate = GameManager.Instance.PlayerOneUnitsList[0].GetComponent<UnitStateController>();
+			if (building.entityName == "Energy Generator")
+			{
+				building.maxHealth = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.health * buildingHealthPercentageBonusValue);
+				building.armour = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (building.entityName == "Refinery Building")
+			{
+				building.maxHealth = 1 + (int)(GameManager.Instance.buildingRefineryStats.health * buildingHealthPercentageBonusValue);
+				building.armour = 1 + (int)(GameManager.Instance.buildingRefineryStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (building.entityName == "Light Vehicle Production Building")
+			{
+				building.maxHealth = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.health * buildingHealthPercentageBonusValue);
+				building.armour = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (building.entityName == "Heavy Vehicle Production Building")
+			{
+				building.maxHealth = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.health * buildingHealthPercentageBonusValue);
+				building.armour = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (building.entityName == "VTOL Production Pad")
+			{
+				building.maxHealth = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.health * buildingHealthPercentageBonusValue);
+				building.armour = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (building.entityName == "Player HQ")
+			{
+				building.maxHealth = 1 + (int)(GameManager.Instance.buildingHQStats.health * buildingHealthPercentageBonusValue);
+				building.armour = 1 + (int)(GameManager.Instance.buildingHQStats.armour * buildingArmourPercentageBonusValue);
+			}
 
-			if (unit.entityName == "Scout Vehicle")
-			{
-				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
-				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
-			}
-			if (unit.entityName == "Radar Vehicle")
-			{
-				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
-				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
-			}
-			if (unit.entityName == "Light Mech")
-			{
-				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
-				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
-				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
-				unit.attackRange = unitTemplate.attackRange * unitAttackRangeBonusValue;
-				unit.agentNav.speed = unitTemplate.agentNav.speed * unitSpeedBonusValue;
-			}
-			if (unit.entityName == "Heavy Mech Knight")
-			{
-				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
-				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
-				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
-				unit.attackRange = unitTemplate.attackRange * unitAttackRangeBonusValue;
-				unit.agentNav.speed = unitTemplate.agentNav.speed * unitSpeedBonusValue;
-			}
-			if (unit.entityName == "Heavy Mech Support")
-			{
-				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
-				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
-				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
-				unit.attackRange = unitTemplate.attackRange * unitAttackRangeBonusValue;
-				unit.agentNav.speed = unitTemplate.agentNav.speed * unitSpeedBonusValue;
-			}
-			if (unit.entityName == "VTOL Gunship")
-			{
-				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
-				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
-				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
-				unit.attackRange = unitTemplate.attackRange * unitAttackRangeBonusValue;
-				unit.agentNav.speed = unitTemplate.agentNav.speed * unitSpeedBonusValue;
-			}
-			if (unit.entityName == "Turret")
-			{
-				unit.maxHealth = unitTemplate.maxHealth * unitHealthPercentageBonusValue;
-				unit.armour = unitTemplate.armour * unitArmourPercentageBonusValue;
-				unit.weaponSystem.mainWeaponDamage = unitTemplate.weaponSystem.mainWeaponDamage * unitDamagePercentageBonusValue;
-			}
+			building.UpdateHealthBar();
 		}
 	}
 
