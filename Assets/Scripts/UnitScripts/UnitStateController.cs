@@ -31,8 +31,8 @@ public class UnitStateController : Entities
 	public GameObject FoVMeshObj;
 
 	[Header("Unit Stats")]
-	public float attackRange;
-	public float ViewRange;
+	public int attackRange;
+	public int ViewRange;
 
 	[Header("Unit Bools")]
 	public bool isUnitArmed;

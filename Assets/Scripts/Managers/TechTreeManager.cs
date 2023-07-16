@@ -509,6 +509,40 @@ public class TechTreeManager : MonoBehaviour
 
 			building.UpdateHealthBar();
 		}
+
+		foreach (UnitStateController unit in gameUIManager.playerController.unitListForPlayer)
+		{
+			if (unit.entityName == "Energy Generator")
+			{
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.health * buildingHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (unit.entityName == "Refinery Building")
+			{
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingRefineryStats.health * buildingHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingRefineryStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (unit.entityName == "Light Vehicle Production Building")
+			{
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.health * buildingHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (unit.entityName == "Heavy Vehicle Production Building")
+			{
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.health * buildingHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (unit.entityName == "VTOL Production Pad")
+			{
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.health * buildingHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.armour * buildingArmourPercentageBonusValue);
+			}
+			if (unit.entityName == "Player HQ")
+			{
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingHQStats.health * buildingHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingHQStats.armour * buildingArmourPercentageBonusValue);
+			}
+		}
 	}
 
 	[System.Serializable]

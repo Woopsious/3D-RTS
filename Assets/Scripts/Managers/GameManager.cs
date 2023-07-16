@@ -60,12 +60,22 @@ public class GameManager : MonoBehaviour
 	[Header("PlayerTwo Unit Prefabs")]
 	public List<GameObject> PlayerTwoUnitsList;
 
+	[Header("Base Building Stats")]
 	public BaseBuildingStats buildingHQStats;
 	public BaseBuildingStats buildingEnergyGenStats;
 	public BaseBuildingStats buildingRefineryStats;
 	public BaseBuildingStats buildingLightVehProdStats;
 	public BaseBuildingStats buildingHeavyVehProdStats;
 	public BaseBuildingStats buildingVtolVehProdStats;
+
+	[Header("Base Unit Stats")]
+	public BaseUnitStats unitScoutVehStats;
+	public BaseUnitStats unitRadarVehStats;
+	public BaseUnitStats unitMechLightStats;
+	public BaseUnitStats unitMechHvyKnightStats;
+	public BaseUnitStats unitMechHvyTankStats;
+	public BaseUnitStats unitVtolGunshipStats;
+	public BaseUnitStats unitTurretStats;
 
 	public void Awake()
 	{
@@ -90,35 +100,95 @@ public class GameManager : MonoBehaviour
 
 		GameManager.Instance.LoadPlayerData();
 
+		//assign base building stats
 		buildingHQStats = new BaseBuildingStats
 		{
-			health = 1000,
-			armour = 10
+			health = PlayerOneBuildingsList[6].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[6].GetComponent<BuildingManager>().armour
 		};
 		buildingEnergyGenStats = new BaseBuildingStats
 		{
-			health = 500,
-			armour = 0
+			health = PlayerOneBuildingsList[0].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[0].GetComponent<BuildingManager>().armour
 		};
 		buildingRefineryStats = new BaseBuildingStats
 		{
-			health = 750,
-			armour = 20
+			health = PlayerOneBuildingsList[1].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[1].GetComponent<BuildingManager>().armour
 		};
 		buildingLightVehProdStats = new BaseBuildingStats
 		{
-			health = 500,
-			armour = 10
+			health = PlayerOneBuildingsList[3].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[3].GetComponent<BuildingManager>().armour
 		};
 		buildingHeavyVehProdStats = new BaseBuildingStats
 		{
-			health = 1000,
-			armour = 10
+			health = PlayerOneBuildingsList[4].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[4].GetComponent<BuildingManager>().armour
 		};
 		buildingVtolVehProdStats = new BaseBuildingStats
 		{
-			health = 750,
-			armour = 15
+			health = PlayerOneBuildingsList[5].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[5].GetComponent<BuildingManager>().armour
+		};
+
+		//assign base unit stats
+		unitScoutVehStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[0].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[0].GetComponent<UnitStateController>().armour,
+			speed = PlayerOneUnitsList[0].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitRadarVehStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[1].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[1].GetComponent<UnitStateController>().armour,
+			speed = PlayerOneUnitsList[1].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitMechLightStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[2].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[2].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneUnitsList[2].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneUnitsList[2].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneUnitsList[2].GetComponent<UnitStateController>().attackRange,
+			speed = PlayerOneUnitsList[2].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitMechHvyKnightStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[3].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[3].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneUnitsList[3].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneUnitsList[3].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneUnitsList[3].GetComponent<UnitStateController>().attackRange,
+			speed = PlayerOneUnitsList[3].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitMechHvyTankStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[4].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[4].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneUnitsList[4].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneUnitsList[4].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneUnitsList[4].GetComponent<UnitStateController>().attackRange,
+			speed = PlayerOneUnitsList[4].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitVtolGunshipStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[5].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[5].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneUnitsList[5].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneUnitsList[5].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneUnitsList[5].GetComponent<UnitStateController>().attackRange,
+			speed = PlayerOneUnitsList[5].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitTurretStats = new BaseUnitStats
+		{
+			health = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().attackRange,
+			speed = 0
 		};
 	}
 	public void GetResourcesPerSecond()
@@ -262,11 +332,13 @@ public class GameManager : MonoBehaviour
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
 	}
+	[System.Serializable]
 	public class BaseBuildingStats
 	{
 		public float health;
 		public float armour;
 	}
+	[System.Serializable]
 	public class BaseUnitStats
 	{
 		public float health;
@@ -274,6 +346,6 @@ public class GameManager : MonoBehaviour
 		public float mainWeaponDamage;
 		public float secondaryWeaponDamage;
 		public int attackRange;
-		public int speed;
+		public float speed;
 	}
 }
