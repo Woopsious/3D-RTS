@@ -195,13 +195,13 @@ public class GameManager : MonoBehaviour
 
 		testUnit = PlayerOneUnitsList[4].GetComponent<UnitStateController>();
 
-		Debug.Log(testUnit.maxHealth);
-		Debug.Log(testUnit.armour);
-		Debug.Log(testUnit.weaponSystem.mainWeaponDamage);
-		Debug.Log(testUnit.weaponSystem.mainWeaponAttackSpeed);
-		Debug.Log(testUnit.weaponSystem.secondaryWeaponDamage);
-		Debug.Log(testUnit.weaponSystem.secondaryWeaponAttackSpeed);
-		Debug.Log(testUnit.agentNav.speed);
+		//Debug.Log(testUnit.maxHealth);
+		//Debug.Log(testUnit.armour);
+		//Debug.Log(testUnit.weaponSystem.mainWeaponDamage);
+		//Debug.Log(testUnit.weaponSystem.mainWeaponAttackSpeed);
+		//Debug.Log(testUnit.weaponSystem.secondaryWeaponDamage);
+		//Debug.Log(testUnit.weaponSystem.secondaryWeaponAttackSpeed);
+		//Debug.Log(testUnit.agentNav.speed);
 	}
 	public void GetResourcesPerSecond()
 	{

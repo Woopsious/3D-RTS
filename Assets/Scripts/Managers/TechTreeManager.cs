@@ -383,19 +383,25 @@ public class TechTreeManager : MonoBehaviour
 			if (index == 0 || index == 1)
 			{
 				techList[2].canBeReseached = true;
+				UpdateUiTextColour(4, techList, 2);
 			}
 			else if (index == 2)
 			{
 				techList[3].canBeReseached = true;
+				UpdateUiTextColour(6, techList, 3);
+
 				techList[4].canBeReseached = true;
+				UpdateUiTextColour(8, techList, 4);
 			}
 			else if (index == 3 || index == 4)
 			{
 				techList[5].canBeReseached = true;
+				UpdateUiTextColour(10, techList, 5);
 			}
 			else if (index == 5)
 			{
 				techList[6].canBeReseached = true;
+				UpdateUiTextColour(13, techList, 6);
 			}
 		}
 		else if (techList == unitTechList)
@@ -403,23 +409,30 @@ public class TechTreeManager : MonoBehaviour
 			if (index == 0 || index == 1)
 			{
 				techList[2].canBeReseached = true;
+				UpdateUiTextColour(4, techList, 2);
 			}
 			else if (index == 2)
 			{
 				techList[3].canBeReseached = true;
+				UpdateUiTextColour(7, techList, 3);
 			}
 			else if (index == 3)
 			{
 				techList[4].canBeReseached = true;
+				UpdateUiTextColour(9, techList, 4);
+
 				techList[5].canBeReseached = true;
+				UpdateUiTextColour(11, techList, 5);
 			}
 			else if (index == 4)
 			{
 				techList[6].canBeReseached = true;
+				UpdateUiTextColour(12, techList, 6);
 			}
 			else if (index == 5)
 			{
 				techList[7].canBeReseached = true;
+				UpdateUiTextColour(14, techList, 7);
 			}
 		}
 	} 
@@ -449,15 +462,31 @@ public class TechTreeManager : MonoBehaviour
 			return false;
 		}
 	}
+	public void UpdateUiTextColour(int index, List<Technology> techList, int techListIndex)
+	{
+		Debug.Log(techList[techListIndex].hasResearched);
+
+		if (techList[techListIndex].canBeReseached && !techList[techListIndex].hasResearched)
+		{
+			Debug.Log("condition met");
+			GameObject uiObj = unitTechTreeParentObj.transform.GetChild(index).gameObject;
+			uiObj.transform.GetChild(0).GetComponent<UnityEngine.UI.Text>().color = new Color(0.8f, 0.8f, 0, 1);
+			uiObj.transform.GetChild(1).GetComponent<UnityEngine.UI.Text>().color = new Color(0.8f, 0.8f, 0, 1);
+		}
+		else
+		{
+			Debug.Log("condition not met");
+		}
+	}
 
 	//APPLY TECH UPGRADES TO ENTITIES
 	public void ApplyTechUpgradesToNewUnits(GameObject unitObj)
 	{
 		UnitStateController unit = unitObj.GetComponent<UnitStateController>();
 
-		unit.currentHealth *= (int)unitHealthPercentageBonusValue;
-		unit.maxHealth *= (int)unitHealthPercentageBonusValue;
-		unit.armour *= (int)unitArmourPercentageBonusValue;
+		unit.currentHealth = (int)(unit.currentHealth * unitHealthPercentageBonusValue);
+		unit.maxHealth = (int)(unit.maxHealth * unitHealthPercentageBonusValue);
+		unit.armour = (int)(unit.armour * unitArmourPercentageBonusValue);
 		unit.weaponSystem.mainWeaponDamage *= unitDamagePercentageBonusValue;
 		unit.weaponSystem.secondaryWeaponDamage *= unitDamagePercentageBonusValue;
 		unit.attackRange += unitAttackRangeBonusValue;
@@ -467,9 +496,9 @@ public class TechTreeManager : MonoBehaviour
 	{
 		BuildingManager building = buildingObj.GetComponent<BuildingManager>();
 
-		building.currentHealth *= (int)buildingHealthPercentageBonusValue;
-		building.maxHealth *= (int)buildingHealthPercentageBonusValue;
-		building.armour *= (int)buildingArmourPercentageBonusValue;
+		building.currentHealth = (int)(building.currentHealth * buildingHealthPercentageBonusValue);
+		building.maxHealth = (int)(building.maxHealth * buildingHealthPercentageBonusValue);
+		building.armour = (int)(building.armour * buildingArmourPercentageBonusValue);
 	}
 	//using list of all player units, first reset values to base then recalculate values
 	public void ApplyTechUpgradesToExistingEntities()
