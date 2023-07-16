@@ -77,6 +77,8 @@ public class GameManager : MonoBehaviour
 	public BaseUnitStats unitVtolGunshipStats;
 	public BaseUnitStats unitTurretStats;
 
+	public UnitStateController testUnit;
+
 	public void Awake()
 	{
 		if (Instance == null)
@@ -190,6 +192,16 @@ public class GameManager : MonoBehaviour
 			attackRange = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().attackRange,
 			speed = 0
 		};
+
+		testUnit = PlayerOneUnitsList[4].GetComponent<UnitStateController>();
+
+		Debug.Log(testUnit.maxHealth);
+		Debug.Log(testUnit.armour);
+		Debug.Log(testUnit.weaponSystem.mainWeaponDamage);
+		Debug.Log(testUnit.weaponSystem.mainWeaponAttackSpeed);
+		Debug.Log(testUnit.weaponSystem.secondaryWeaponDamage);
+		Debug.Log(testUnit.weaponSystem.secondaryWeaponAttackSpeed);
+		Debug.Log(testUnit.agentNav.speed);
 	}
 	public void GetResourcesPerSecond()
 	{

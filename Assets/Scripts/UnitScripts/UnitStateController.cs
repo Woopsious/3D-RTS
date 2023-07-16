@@ -10,6 +10,7 @@ using UnityEngine.UI;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.CanvasScaler;
 
+[System.Serializable]
 public class UnitStateController : Entities
 {
 	public LayerMask ignoreMe;

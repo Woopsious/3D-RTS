@@ -512,35 +512,37 @@ public class TechTreeManager : MonoBehaviour
 
 		foreach (UnitStateController unit in gameUIManager.playerController.unitListForPlayer)
 		{
-			if (unit.entityName == "Energy Generator")
+			if (unit.entityName == "Scout Vehicle")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.health * buildingHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.armour * buildingArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.unitScoutVehStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.unitScoutVehStats.armour * unitArmourPercentageBonusValue);
+				unit.agentNav.speed = GameManager.Instance.unitScoutVehStats.speed + unitSpeedBonusValue;
 			}
-			if (unit.entityName == "Refinery Building")
+			if (unit.entityName == "Radar Vehicle")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingRefineryStats.health * buildingHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingRefineryStats.armour * buildingArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.unitRadarVehStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.unitRadarVehStats.armour * unitArmourPercentageBonusValue);
+				unit.agentNav.speed = GameManager.Instance.unitRadarVehStats.speed + unitSpeedBonusValue;
 			}
-			if (unit.entityName == "Light Vehicle Production Building")
+			if (unit.entityName == "Light Mech")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.health * buildingHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.armour * buildingArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.armour * unitArmourPercentageBonusValue);
 			}
-			if (unit.entityName == "Heavy Vehicle Production Building")
+			if (unit.entityName == "Heavy Mech Knight")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.health * buildingHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.armour * buildingArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.armour * unitArmourPercentageBonusValue);
 			}
-			if (unit.entityName == "VTOL Production Pad")
+			if (unit.entityName == "Heavy Mech Support")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.health * buildingHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.armour * buildingArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.armour * unitArmourPercentageBonusValue);
 			}
-			if (unit.entityName == "Player HQ")
+			if (unit.entityName == "VTOL Gunship")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingHQStats.health * buildingHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingHQStats.armour * buildingArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingHQStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.buildingHQStats.armour * unitArmourPercentageBonusValue);
 			}
 		}
 	}
