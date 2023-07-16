@@ -462,20 +462,16 @@ public class TechTreeManager : MonoBehaviour
 			return false;
 		}
 	}
+	//update ui color only if not already green (tech researched)
 	public void UpdateUiTextColour(int index, List<Technology> techList, int techListIndex)
 	{
 		Debug.Log(techList[techListIndex].hasResearched);
 
 		if (techList[techListIndex].canBeReseached && !techList[techListIndex].hasResearched)
 		{
-			Debug.Log("condition met");
 			GameObject uiObj = unitTechTreeParentObj.transform.GetChild(index).gameObject;
 			uiObj.transform.GetChild(0).GetComponent<UnityEngine.UI.Text>().color = new Color(0.8f, 0.8f, 0, 1);
 			uiObj.transform.GetChild(1).GetComponent<UnityEngine.UI.Text>().color = new Color(0.8f, 0.8f, 0, 1);
-		}
-		else
-		{
-			Debug.Log("condition not met");
 		}
 	}
 

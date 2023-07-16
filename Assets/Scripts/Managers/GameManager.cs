@@ -332,8 +332,6 @@ public class GameManager : MonoBehaviour
 		}
 		else if (sceneIndex == 1)
 		{
-			Debug.Log(PlayerOneBuildingsList[0].GetComponent<BuildingManager>().maxHealth);
-
 			gameUIManager.gameManager = this;
 			GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 			gameUIManager.ResetUi();
@@ -344,6 +342,7 @@ public class GameManager : MonoBehaviour
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
 	}
+
 	[System.Serializable]
 	public class BaseBuildingStats
 	{
