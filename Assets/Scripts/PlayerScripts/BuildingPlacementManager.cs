@@ -102,6 +102,7 @@ public class BuildingPlacementManager : MonoBehaviour
 				else
 					currentBuildingPlacement.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
 				currentBuildingPlacement.GetComponent<BoxCollider>().isTrigger = true;
+				currentBuildingPlacement.transform.GetChild(4).GetComponent<SphereCollider>().enabled = true;
 			}
 
 			currentBuildingPlacement.gameObject.layer = buildingLayer;
@@ -158,7 +159,11 @@ public class BuildingPlacementManager : MonoBehaviour
 				currentBuildingPlacement = obj.GetComponent<Entities>();
 				canPlaceBuilding = obj.GetComponent<CanPlaceBuilding>();
 				obj.GetComponent<Entities>().playerController = playerController;
-				playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewBuildings(obj);
+
+				if (obj.GetComponent<BuildingManager>() != null)
+					playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewBuildings(obj);
+				else
+					playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
 			}
 			else
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford buildings", 2);

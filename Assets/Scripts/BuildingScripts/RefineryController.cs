@@ -24,20 +24,21 @@ public class RefineryController : MonoBehaviour
 	}
 	public void RefineResources(CargoShipController cargoShip)
 	{
+		float bonus = building.playerController.gameUIManager.techTreeManager.buildingBonusToResourceIncome;
 		int moneyToAdd = 0;
 		int alloysToAdd = 0;
 		int crystalsToAdd = 0;
 
 		if (cargoShip.crystalsCount != 0)
 		{
-			moneyToAdd = cargoShip.crystalsCount * 5;
+			moneyToAdd = (int)(cargoShip.crystalsCount * 3 * bonus);
 			alloysToAdd = 0;
-			crystalsToAdd = cargoShip.crystalsCount;
+			crystalsToAdd = (int)(cargoShip.crystalsCount * bonus);
 		}
 		else if (cargoShip.alloysCount != 0)
 		{
-			moneyToAdd = cargoShip.alloysCount * (int)1.2f;
-			alloysToAdd = cargoShip.alloysCount;
+			moneyToAdd = (int)(cargoShip.alloysCount * 1.2f * bonus);
+			alloysToAdd = (int)(cargoShip.alloysCount * bonus);
 			crystalsToAdd = 0;
 		}
 

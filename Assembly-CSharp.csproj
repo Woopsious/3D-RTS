@@ -62,7 +62,6 @@
     <Compile Include="Assets\Scripts\TriggerCollision.cs" />
     <Compile Include="Assets\Scripts\BuildTime.cs" />
     <Compile Include="Assets\Scripts\DestroyInSeconds.cs" />
-    <Compile Include="Assets\Scripts\Managers\Technology.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\UnitStateController.cs" />
     <Compile Include="Assets\Scripts\Managers\InputManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\UnitMovingState.cs" />

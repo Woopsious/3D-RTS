@@ -28,9 +28,8 @@ public class GameUIManager : MonoBehaviour
 	public GameObject unitProdQueuesParentObj;
 	public Button audioBackButton;
 
-	public Text gameTimerText;
-
 	public GameObject entityInfoTemplatePrefab;
+	public Text gameTimerText;
 
 	[Header("User Resource Refs")]
 	public Text CurrentMoneyText;

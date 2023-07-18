@@ -3,31 +3,28 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static System.Net.Mime.MediaTypeNames;
-using static UnityEngine.UI.CanvasScaler;
 
 public class TechTreeManager : MonoBehaviour
 {
 	public GameUIManager gameUIManager;
 
 	[Header("UI Refs")]
-	public GameObject techTemplate;
-	public GameObject techTemplateEmpty;
-
+	public Technology currentReseachingTech;
+	public Text currentResearchInfoText;
 	public GameObject buildingTechTreeParentObj;
 	public GameObject unitTechTreeParentObj;
+
+	public GameObject techTemplate;
+	public GameObject techTemplateEmpty;
 
 	[Header("Building Tech Tree Info")]
 	public List<Technology> buildingTechList;
 	public List<bool> hasResearchedBuildingTechlist;
 
-	public float buildingHealthPercentageBonusValue;
-	public float buildingArmourPercentageBonusValue;
-
 	Technology buildingTechHealthOne = new Technology
 	{
 		TechName = "BuildingTech HealthOne",
-		TechInfo = "Increases Health by 5%",
+		TechInfo = "Increases Health by 10%",
 		TimeToResearchSec = 10,
 		canBeReseached = true,
 		isBuildingTech = true,
@@ -37,7 +34,7 @@ public class TechTreeManager : MonoBehaviour
 	Technology buildingTechArmourOne = new Technology
 	{
 		TechName = "BuildingTech ArmourOne",
-		TechInfo = "Increases Armour by 5%",
+		TechInfo = "Increases Armour by 10%",
 		TimeToResearchSec = 10,
 		canBeReseached = true,
 		isBuildingTech = true,
@@ -77,7 +74,7 @@ public class TechTreeManager : MonoBehaviour
 	Technology buildingTechHealthTwo = new Technology
 	{
 		TechName = "BuildingTech HealthTwo",
-		TechInfo = "Increases Health by 5%",
+		TechInfo = "Increases Health by 15%",
 		TimeToResearchSec = 15,
 		canBeReseached = false,
 		isBuildingTech = true,
@@ -87,7 +84,7 @@ public class TechTreeManager : MonoBehaviour
 	Technology buildingTechArmourTwo = new Technology
 	{
 		TechName = "BuildingTech ArmourTwo",
-		TechInfo = "Increases Armour by 5%",
+		TechInfo = "Increases Armour by 15%",
 		TimeToResearchSec = 15,
 		canBeReseached = false,
 		isBuildingTech = true,
@@ -100,12 +97,6 @@ public class TechTreeManager : MonoBehaviour
 	[Header("Unit Tech Tree Info")]
 	public List<Technology> unitTechList;
 	public List<bool> hasResearchedUnitTechlist;
-
-	public float unitHealthPercentageBonusValue;
-	public float unitArmourPercentageBonusValue;
-	public float unitDamagePercentageBonusValue;
-	public int unitAttackRangeBonusValue;
-	public int unitSpeedBonusValue;
 
 	Technology unitTechHealthOne = new Technology
 	{
@@ -120,7 +111,7 @@ public class TechTreeManager : MonoBehaviour
 	Technology unitTechArmourOne = new Technology
 	{
 		TechName = "UnitTech ArmourOne",
-		TechInfo = "Increases Armour by 5%",
+		TechInfo = "Increases Armour by 10%",
 		TimeToResearchSec = 10,
 		canBeReseached = true,
 		isBuildingTech = false,
@@ -140,7 +131,7 @@ public class TechTreeManager : MonoBehaviour
 	Technology unitTechHealthTwo = new Technology
 	{
 		TechName = "UnitTech HealthTwo",
-		TechInfo = "Increases Health by 5%",
+		TechInfo = "Increases Health by 10%",
 		TimeToResearchSec = 20,
 		canBeReseached = false,
 		isBuildingTech = false,
@@ -188,10 +179,28 @@ public class TechTreeManager : MonoBehaviour
 		hasSpaceBetweenNextTech = 0
 	};
 
-	[Header("Unit Base Stats Info")]
-
-	[Header("stats")]
+	[Header("STATS")]
 	public bool isCurrentlyReseaching;
+
+	[Header("Buildings")]
+	public float buildingHealthPercentageBonusValue;
+	public float buildingArmourPercentageBonusValue;
+	public float buildingBonusToResourceIncome;
+	public bool buildingHasUnlockedHeavyMechs;
+	public bool buildingHasUnlockedVtols;
+
+	[Header("Units")]
+	public float unitHealthPercentageBonusValue;
+	public float unitArmourPercentageBonusValue;
+	public float unitDamagePercentageBonusValue;
+	public int unitAttackRangeBonusValue;
+	public int unitSpeedBonusValue;
+
+	public void Update()
+	{
+		if (isCurrentlyReseaching)
+			UpdateTechUi();
+	}
 
 	//SET UP TECH TREE AND THE UI
 	public void SetUpTechTrees()
@@ -296,6 +305,7 @@ public class TechTreeManager : MonoBehaviour
 		{
 			if (CheckIfCanReseachTech(techList, index))
 			{
+				currentReseachingTech = techList[index];
 				isCurrentlyReseaching = true;
 				StartCoroutine(ResearchCountdownTimer(techList, index, buildingTechList[index].TimeToResearchSec, UiElement));
 			}
@@ -304,10 +314,21 @@ public class TechTreeManager : MonoBehaviour
 		{
 			if (CheckIfCanReseachTech(techList, index))
 			{
+				currentReseachingTech = techList[index];
 				isCurrentlyReseaching = true;
 				StartCoroutine(ResearchCountdownTimer(techList, index, unitTechList[index].TimeToResearchSec, UiElement));
 			}
 		}
+	}
+	public void UpdateTechUi()
+	{
+		if (currentReseachingTech.TimeToResearchSec > 0)
+		{
+			currentReseachingTech.TimeToResearchSec -= Time.deltaTime;
+			currentResearchInfoText.text = currentReseachingTech.TechName + "\n Complete In: " + currentReseachingTech.TimeToResearchSec + "s";
+		}
+		else
+			currentResearchInfoText.text = currentReseachingTech.TechName + "\n COMPLETE";
 	}
 	public IEnumerator ResearchCountdownTimer(List<Technology> techList, int index, float researchTime, GameObject UiElement)
 	{
@@ -316,8 +337,8 @@ public class TechTreeManager : MonoBehaviour
 		techList[index].hasResearched = true;
 		isCurrentlyReseaching = false;
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage(techList[index].TechName + " Researched", 3f);
-		UiElement.transform.GetChild(0).GetComponent<UnityEngine.UI.Text>().color = new Color(0, 0.8f, 0, 1);
-		UiElement.transform.GetChild(1).GetComponent<UnityEngine.UI.Text>().color = new Color(0, 0.8f, 0, 1);
+		UiElement.transform.GetChild(0).GetComponent<Text>().color = new Color(0, 0.8f, 0, 1);
+		UiElement.transform.GetChild(1).GetComponent<Text>().color = new Color(0, 0.8f, 0, 1);
 
 		CompleteResearch(techList, index);
 		UnlockNextResearch(techList, index);
@@ -329,19 +350,31 @@ public class TechTreeManager : MonoBehaviour
 		{
 			if (index == 0)
 			{
-				buildingHealthPercentageBonusValue += 0.05f;
+				buildingHealthPercentageBonusValue += 0.1f;
 			}
 			if (index == 1)
 			{
-				buildingArmourPercentageBonusValue += 0.05f;
+				buildingArmourPercentageBonusValue += 0.1f;
+			}
+			if (index == 2)
+			{
+				buildingBonusToResourceIncome += 0.1f;
+			}
+			if (index == 3)
+			{
+				buildingHasUnlockedHeavyMechs = true;
+			}
+			if (index == 4)
+			{
+				buildingHasUnlockedVtols = true;
 			}
 			if (index == 5)
 			{
-				buildingHealthPercentageBonusValue += 0.1f;
+				buildingHealthPercentageBonusValue += 0.15f;
 			}
 			if (index == 6)
 			{
-				buildingArmourPercentageBonusValue += 0.1f;
+				buildingArmourPercentageBonusValue += 0.15f;
 			}
 		}
 		else if (techList == unitTechList)
@@ -352,11 +385,15 @@ public class TechTreeManager : MonoBehaviour
 			}
 			if (index == 1)
 			{
-				unitArmourPercentageBonusValue += 0.05f;
+				unitArmourPercentageBonusValue += 0.1f;
 			}
 			if (index == 2)
 			{
 				unitSpeedBonusValue = 1;
+			}
+			if (index == 3)
+			{
+				unitHealthPercentageBonusValue += 0.1f;
 			}
 			if (index == 4)
 			{
@@ -380,6 +417,7 @@ public class TechTreeManager : MonoBehaviour
 	{
 		if (techList == buildingTechList)
 		{
+			Debug.Log("building tech list");
 			if (index == 0 || index == 1)
 			{
 				techList[2].canBeReseached = true;
@@ -406,6 +444,7 @@ public class TechTreeManager : MonoBehaviour
 		}
 		else if (techList == unitTechList)
 		{
+			Debug.Log("unit tech list");
 			if (index == 0 || index == 1)
 			{
 				techList[2].canBeReseached = true;
@@ -463,15 +502,18 @@ public class TechTreeManager : MonoBehaviour
 		}
 	}
 	//update ui color only if not already green (tech researched)
-	public void UpdateUiTextColour(int index, List<Technology> techList, int techListIndex)
+	public void UpdateUiTextColour(int TechUiindex, List<Technology> techList, int techListIndex)
 	{
-		Debug.Log(techList[techListIndex].hasResearched);
-
 		if (techList[techListIndex].canBeReseached && !techList[techListIndex].hasResearched)
 		{
-			GameObject uiObj = unitTechTreeParentObj.transform.GetChild(index).gameObject;
-			uiObj.transform.GetChild(0).GetComponent<UnityEngine.UI.Text>().color = new Color(0.8f, 0.8f, 0, 1);
-			uiObj.transform.GetChild(1).GetComponent<UnityEngine.UI.Text>().color = new Color(0.8f, 0.8f, 0, 1);
+			GameObject uiObj;
+			if (techList == buildingTechList)
+				uiObj = buildingTechTreeParentObj.transform.GetChild(TechUiindex).gameObject;
+			else
+				uiObj = unitTechTreeParentObj.transform.GetChild(TechUiindex).gameObject;
+
+			uiObj.transform.GetChild(0).GetComponent<Text>().color = new Color(0.8f, 0.8f, 0, 1);
+			uiObj.transform.GetChild(1).GetComponent<Text>().color = new Color(0.8f, 0.8f, 0, 1);
 		}
 	}
 
@@ -483,10 +525,14 @@ public class TechTreeManager : MonoBehaviour
 		unit.currentHealth = (int)(unit.currentHealth * unitHealthPercentageBonusValue);
 		unit.maxHealth = (int)(unit.maxHealth * unitHealthPercentageBonusValue);
 		unit.armour = (int)(unit.armour * unitArmourPercentageBonusValue);
-		unit.weaponSystem.mainWeaponDamage *= unitDamagePercentageBonusValue;
-		unit.weaponSystem.secondaryWeaponDamage *= unitDamagePercentageBonusValue;
-		unit.attackRange += unitAttackRangeBonusValue;
-		unit.agentNav.speed += unitSpeedBonusValue;
+		if (unit.isUnitArmed)
+		{
+			unit.weaponSystem.mainWeaponDamage *= unitDamagePercentageBonusValue;
+			unit.weaponSystem.secondaryWeaponDamage *= unitDamagePercentageBonusValue;
+			unit.attackRange += unitAttackRangeBonusValue;
+			if (!unit.isTurret)
+				unit.agentNav.speed += unitSpeedBonusValue;
+		}
 	}
 	public void ApplyTechUpgradesToNewBuildings(GameObject buildingObj)
 	{
@@ -551,24 +597,50 @@ public class TechTreeManager : MonoBehaviour
 			}
 			if (unit.entityName == "Light Mech")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.armour * unitArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.unitMechLightStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.unitMechLightStats.armour * unitArmourPercentageBonusValue);
+				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitMechLightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitMechLightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.attackRange = GameManager.Instance.unitMechLightStats.attackRange + unitAttackRangeBonusValue;
+				unit.agentNav.speed = GameManager.Instance.unitMechLightStats.speed + unitSpeedBonusValue;
 			}
 			if (unit.entityName == "Heavy Mech Knight")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.armour * unitArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.armour * unitArmourPercentageBonusValue);
+				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.attackRange = GameManager.Instance.unitMechHvyKnightStats.attackRange + unitAttackRangeBonusValue;
+				unit.agentNav.speed = GameManager.Instance.unitMechHvyKnightStats.speed + unitSpeedBonusValue;
 			}
 			if (unit.entityName == "Heavy Mech Support")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.armour * unitArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.armour * unitArmourPercentageBonusValue);
+				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.attackRange = GameManager.Instance.unitMechHvyTankStats.attackRange + unitAttackRangeBonusValue;
+				unit.agentNav.speed = GameManager.Instance.unitMechHvyTankStats.speed + unitSpeedBonusValue;
 			}
 			if (unit.entityName == "VTOL Gunship")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.buildingHQStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.buildingHQStats.armour * unitArmourPercentageBonusValue);
+				unit.maxHealth = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.armour * unitArmourPercentageBonusValue);
+				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.attackRange = GameManager.Instance.unitVtolGunshipStats.attackRange + unitAttackRangeBonusValue;
+				unit.agentNav.speed = GameManager.Instance.unitVtolGunshipStats.speed + unitSpeedBonusValue;
 			}
+			if (unit.entityName == "Turret")
+			{
+				unit.maxHealth = 1 + (int)(GameManager.Instance.unitTurretStats.health * unitHealthPercentageBonusValue);
+				unit.armour = 1 + (int)(GameManager.Instance.unitTurretStats.armour * unitArmourPercentageBonusValue);
+				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitTurretStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitTurretStats.mainWeaponDamage * unitDamagePercentageBonusValue);
+				unit.attackRange = GameManager.Instance.unitTurretStats.attackRange + unitAttackRangeBonusValue;
+				unit.agentNav.speed = GameManager.Instance.unitTurretStats.speed + unitSpeedBonusValue;
+			}
+			unit.UpdateHealthBar();
 		}
 	}
 

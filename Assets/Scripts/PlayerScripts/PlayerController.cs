@@ -180,11 +180,17 @@ public class PlayerController : MonoBehaviour
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				buildingPlacementManager.PlaceHeavyVehProdBuilding();
+				if (gameUIManager.techTreeManager.buildingHasUnlockedHeavyMechs)
+					buildingPlacementManager.PlaceHeavyVehProdBuilding();
+				else
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Heavy Mechs Tech Not Researched", 2f);
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				buildingPlacementManager.PlaceVTOLProdBuilding();
+				if (gameUIManager.techTreeManager.buildingHasUnlockedVtols)
+					buildingPlacementManager.PlaceVTOLProdBuilding();
+				else
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("VTOLS Tech Not Researched", 2f);
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement != null
 				|| Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement != null
