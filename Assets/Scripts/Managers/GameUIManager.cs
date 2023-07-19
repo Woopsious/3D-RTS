@@ -88,6 +88,9 @@ public class GameUIManager : MonoBehaviour
 		UpdateInGameTimerUI();
 		GameManager.Instance.GetResourcesPerSecond();
 		GameManager.Instance.GameClock();
+
+		if(techTreeManager.isCurrentlyReseaching)
+			UpdateTechUi();
 	}
 	public void ResetUi()
 	{
@@ -405,6 +408,17 @@ public class GameUIManager : MonoBehaviour
 	}
 
 	//UI UPDATES
+	public void UpdateTechUi()
+	{
+		if (techTreeManager.currentReseachingTech.TimeToResearchSec > 0)
+		{
+			techTreeManager.currentReseachingTech.TimeToResearchSec -= Time.deltaTime;
+			techTreeManager.currentResearchInfoText.text = techTreeManager.currentReseachingTech.TechName + 
+				"\n Complete In: " + techTreeManager.currentReseachingTech.TimeToResearchSec + "s";
+		}
+		else
+			techTreeManager.currentResearchInfoText.text = techTreeManager.currentReseachingTech.TechName + "\n COMPLETE";
+	}
 	public void UpdateInGameTimerUI()
 	{
 		int seconds = (int)GameManager.Instance.secondsCount;

@@ -29,7 +29,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = true,
 		isBuildingTech = true,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 1
+		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 1000,
+		techCostAlloys = 50,
+		techCostCrystals = 10
 	};
 	Technology buildingTechArmourOne = new Technology
 	{
@@ -39,7 +42,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = true,
 		isBuildingTech = true,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 1
+		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 1000,
+		techCostAlloys = 250,
+		techCostCrystals = 100
 	};
 	Technology buildingTechRefineryBoost = new Technology
 	{
@@ -50,6 +56,9 @@ public class TechTreeManager : MonoBehaviour
 		isBuildingTech = true,
 		hasResearched = false,
 		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 5000,
+		techCostAlloys = 0,
+		techCostCrystals = 0
 	};
 	Technology buildingTechHeavyMechs = new Technology
 	{
@@ -59,7 +68,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = true,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 1
+		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 1000,
+		techCostAlloys = 50,
+		techCostCrystals = 50
 	};
 	Technology buildingTechVTOLS = new Technology
 	{
@@ -69,7 +81,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = true,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 1
+		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 1000,
+		techCostAlloys = 50,
+		techCostCrystals = 50
 	};
 	Technology buildingTechHealthTwo = new Technology
 	{
@@ -79,7 +94,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = true,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 2
+		hasSpaceBetweenNextTech = 2,
+		techCostMoney = 2500,
+		techCostAlloys = 100,
+		techCostCrystals = 25
 	};
 	Technology buildingTechArmourTwo = new Technology
 	{
@@ -89,7 +107,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = true,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 0
+		hasSpaceBetweenNextTech = 0,
+		techCostMoney = 5000,
+		techCostAlloys = 500,
+		techCostCrystals = 250
 	};
 
 	[Header("building Base Stats Info")]
@@ -106,7 +127,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = true,
 		isBuildingTech = false,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 1
+		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 750,
+		techCostAlloys = 50,
+		techCostCrystals = 0
 	};
 	Technology unitTechArmourOne = new Technology
 	{
@@ -116,7 +140,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = true,
 		isBuildingTech = false,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 1
+		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 1000,
+		techCostAlloys = 50,
+		techCostCrystals = 25
 	};
 	Technology unitTechSpeedOne = new Technology
 	{
@@ -126,7 +153,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 2
+		hasSpaceBetweenNextTech = 2,
+		techCostMoney = 650,
+		techCostAlloys = 0,
+		techCostCrystals = 50
 	};
 	Technology unitTechHealthTwo = new Technology
 	{
@@ -136,7 +166,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 1
+		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 2000,
+		techCostAlloys = 100,
+		techCostCrystals = 10
 	};
 	Technology unitTechAttackRangeOne = new Technology
 	{
@@ -146,7 +179,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 1
+		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 2500,
+		techCostAlloys = 50,
+		techCostCrystals = 100
 	};
 	Technology unitTechAttackDamageOne = new Technology
 	{
@@ -156,7 +192,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 0
+		hasSpaceBetweenNextTech = 0,
+		techCostMoney = 2500,
+		techCostAlloys = 100,
+		techCostCrystals = 50
 	};
 	Technology unitTechAttackRangeTwo = new Technology
 	{
@@ -166,7 +205,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 1
+		hasSpaceBetweenNextTech = 1,
+		techCostMoney = 4000,
+		techCostAlloys = 75,
+		techCostCrystals = 200
 	};
 	Technology unitTechAttackDamageTwo = new Technology
 	{
@@ -176,7 +218,10 @@ public class TechTreeManager : MonoBehaviour
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
-		hasSpaceBetweenNextTech = 0
+		hasSpaceBetweenNextTech = 0,
+		techCostMoney = 4000,
+		techCostAlloys = 250,
+		techCostCrystals = 50
 	};
 
 	[Header("STATS")]
@@ -195,12 +240,6 @@ public class TechTreeManager : MonoBehaviour
 	public float unitDamagePercentageBonusValue;
 	public int unitAttackRangeBonusValue;
 	public int unitSpeedBonusValue;
-
-	public void Update()
-	{
-		if (isCurrentlyReseaching)
-			UpdateTechUi();
-	}
 
 	//SET UP TECH TREE AND THE UI
 	public void SetUpTechTrees()
@@ -274,12 +313,13 @@ public class TechTreeManager : MonoBehaviour
 	}
 	public void SetUpTechTemplate(GameObject obj, Technology tech, int index)
 	{
-		UnityEngine.UI.Text TitleText = obj.transform.GetChild(0).GetComponent<UnityEngine.UI.Text>();
+		Text TitleText = obj.transform.GetChild(0).GetComponent<Text>();
 		TitleText.text = tech.TechName;
 		TitleText.color = new Color(0.8f, 0, 0, 1);
 
-		UnityEngine.UI.Text infoText = obj.transform.GetChild(1).GetComponent<UnityEngine.UI.Text>();
-		infoText.text = tech.TechInfo;
+		Text infoText = obj.transform.GetChild(1).GetComponent<Text>();
+		infoText.text = tech.TechInfo + "\n Research Cost: \n" + tech.techCostMoney + " Money, " + 
+			tech.techCostAlloys + " Alloys, " + tech.techCostCrystals + " Crystals";
 		infoText.color = new Color(0.8f, 0, 0, 1);
 
 		if (tech.canBeReseached)
@@ -319,16 +359,18 @@ public class TechTreeManager : MonoBehaviour
 				StartCoroutine(ResearchCountdownTimer(techList, index, unitTechList[index].TimeToResearchSec, UiElement));
 			}
 		}
-	}
-	public void UpdateTechUi()
-	{
-		if (currentReseachingTech.TimeToResearchSec > 0)
+		if (gameUIManager.playerController.isPlayerOne)
 		{
-			currentReseachingTech.TimeToResearchSec -= Time.deltaTime;
-			currentResearchInfoText.text = currentReseachingTech.TechName + "\n Complete In: " + currentReseachingTech.TimeToResearchSec + "s";
+			GameManager.Instance.playerOneCurrentMoney -= techList[index].techCostMoney;
+			GameManager.Instance.playerOneCurrentAlloys -= techList[index].techCostAlloys;
+			GameManager.Instance.playerOneCurrentCrystals -= techList[index].techCostCrystals;
 		}
-		else
-			currentResearchInfoText.text = currentReseachingTech.TechName + "\n COMPLETE";
+		else if (!gameUIManager.playerController.isPlayerOne)
+		{
+			GameManager.Instance.aiCurrentMoney -= techList[index].techCostMoney;
+			GameManager.Instance.aiCurrentAlloys -= techList[index].techCostAlloys;
+			GameManager.Instance.aiCurrentCrystals -= techList[index].techCostCrystals;
+		}
 	}
 	public IEnumerator ResearchCountdownTimer(List<Technology> techList, int index, float researchTime, GameObject UiElement)
 	{
@@ -486,8 +528,42 @@ public class TechTreeManager : MonoBehaviour
 		{
 			if (!isCurrentlyReseaching)
 			{
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Researching Tech", 1.5f);
-				return true;
+				if (gameUIManager.playerController.isPlayerOne) //check if can afford cost depending on if is player one or two/ai
+				{
+					int moneyCost = gameUIManager.gameManager.playerOneCurrentMoney;
+					int alloyCost = gameUIManager.gameManager.playerOneCurrentAlloys;
+					int crystalCost = gameUIManager.gameManager.playerOneCurrentCrystals;
+
+					if (techList[index].techCostMoney <= moneyCost && techList[index].techCostAlloys <= alloyCost && 
+						techList[index].techCostCrystals <= crystalCost)
+					{
+						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Researching Tech", 1.5f);
+						return true;
+					}
+					else
+					{
+						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford To Research Tech", 2f);
+						return false;
+					}
+				}
+				else
+				{
+					int moneyCost = gameUIManager.gameManager.aiCurrentMoney;
+					int alloyCost = gameUIManager.gameManager.aiCurrentAlloys;
+					int crystalCost = gameUIManager.gameManager.aiCurrentCrystals;
+
+					if (techList[index].techCostMoney <= moneyCost && techList[index].techCostAlloys <= alloyCost && 
+						techList[index].techCostCrystals <= crystalCost)
+					{
+						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Researching Tech", 1.5f);
+						return true;
+					}
+					else
+					{
+						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford To Research Tech", 2f);
+						return false;
+					}
+				}
 			}
 			else
 			{
@@ -654,5 +730,8 @@ public class TechTreeManager : MonoBehaviour
 		public bool isBuildingTech;
 		public bool hasResearched;
 		public int hasSpaceBetweenNextTech;
+		public int techCostMoney;
+		public int techCostAlloys;
+		public int techCostCrystals;
 	}
 }
