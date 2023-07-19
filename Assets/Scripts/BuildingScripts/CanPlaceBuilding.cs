@@ -94,13 +94,12 @@ public class CanPlaceBuilding : MonoBehaviour
 	}
 	public void TrackPlacementHeight()
 	{
-		if (pointController != null && !CheckIfCapturePointIsNeutral())
+		if (pointController != null && !CheckIfCapturePointIsNeutral() && !isCollidingWithAnotherBuilding)
 		{
 			if (building != null)
 			{
 				if (building.transform.position.y > 9f && building.transform.position.y < 10.5f)
 					CanPlaceHighliterGreen();
-
 				else
 					CanPlaceHighliterRed();
 			}
@@ -108,7 +107,6 @@ public class CanPlaceBuilding : MonoBehaviour
 			{
 				if (turret.transform.position.y > 9f && turret.transform.position.y < 10.5f)
 					CanPlaceHighliterGreen();
-
 				else
 					CanPlaceHighliterRed();
 			}
