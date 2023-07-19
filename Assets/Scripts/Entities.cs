@@ -19,6 +19,7 @@ public class Entities : MonoBehaviour
 	public GameObject miniMapRenderObj;
 
 	[Header("Entity Stats")]
+	public string entityName;
 	public int moneyCost;
 	public int alloyCost;
 	public int crystalCost;
@@ -132,12 +133,12 @@ public class Entities : MonoBehaviour
 		UiObj.SetActive(false);
 	}
 	//health and ui
-	public void RecieveDamage(int dmg)
+	public void RecieveDamage(float dmg)
 	{
 		dmg -= armour;
 		if (dmg < 0)
 			dmg = 0;
-		currentHealth -= dmg;
+		currentHealth -= (int)dmg;
 		UpdateHealthBar();
 		if (currentHealth <= 0)
 			OnEntityDeath();

@@ -101,28 +101,36 @@ public class BuildingManager : Entities
 	}
 	public void AddBuildingRefs()
 	{
+		playerController.buildingListForPlayer.Add(this);
+
 		if (isGeneratorBuilding)
 		{
 			capturePointController.energyGeneratorBuilding = this;
 		}
 		else if (isRefineryBuilding)
 		{
-			if (!capturePointController.RefinaryBuildings.Contains(this))
 				capturePointController.RefinaryBuildings.Add(this);
 		}
 		else if (isLightVehProdBuilding)
 		{
-			if (!capturePointController.lightVehProdBuildings.Contains(this))
+			playerController.lightVehProdBuildingsList.Add(this);
 				capturePointController.lightVehProdBuildings.Add(this);
 		}
 		else if (isHeavyVehProdBuilding)
 		{
-			if (!capturePointController.heavyVehProdBuildings.Contains(this))
+			playerController.heavyVehProdBuildingsList.Add(this);
 				capturePointController.heavyVehProdBuildings.Add(this);
+		}
+		else if (isVTOLProdBuilding)
+		{
+			playerController.vtolVehProdBuildingsList.Add(this);
+				capturePointController.vtolProdBuildings.Add(this);
 		}
 	}
 	public override void RemoveEntityRefs()
 	{
+		playerController.buildingListForPlayer.Remove(this);
+
 		if (isGeneratorBuilding)
 		{
 			GetComponent<EnergyGenController>().UnpowerBuildings();

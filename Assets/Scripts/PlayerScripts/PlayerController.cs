@@ -21,8 +21,10 @@ public class PlayerController : MonoBehaviour
 	public bool isPlayerOne;
 
 	[Header("Dynamic Refs")]
-	public List<UnitStateController> unitListForPlayer;
 	public List<UnitStateController> SpottedUnitsList;
+	public List<BuildingManager> buildingListForPlayer;
+	public List<UnitStateController> unitListForPlayer;
+	public List<TurretController> turretDefensesList;
 	public List<BuildingManager> lightVehProdBuildingsList;
 	public List<BuildingManager> heavyVehProdBuildingsList;
 	public List<BuildingManager> vtolVehProdBuildingsList;
@@ -79,9 +81,13 @@ public class PlayerController : MonoBehaviour
 			else
 				gameUIManager.OpenSettings();
 		}
-		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopBuildingsName]))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopBaseBuildingsName]))
 		{
-			gameUIManager.ShowBuildingShop();
+			gameUIManager.ShowBuildingsBaseShop();
+		}
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopVehProdBuildingsName]))
+		{
+			gameUIManager.ShowBuildingsVehicleProdShop();
 		}
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopLightUnitsName]))
 		{
@@ -90,6 +96,10 @@ public class PlayerController : MonoBehaviour
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopHeavyUnitsName]))
 		{
 			gameUIManager.ShowUnitsHeavyShop();
+		}
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTechTreeName]))
+		{
+			gameUIManager.ShowTechTree();
 		}
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindUnitProdQueue]))
 		{
@@ -153,29 +163,40 @@ public class PlayerController : MonoBehaviour
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				buildingPlacementManager.PlaceLightVehProdBuilding();
-			}
-			else if (Input.GetKeyDown(KeyCode.Alpha4) && buildingPlacementManager.currentBuildingPlacement == null)
-			{
-				buildingPlacementManager.PlaceHeavyVehProdBuilding();
-			}
-			else if (Input.GetKeyDown(KeyCode.Alpha5) && buildingPlacementManager.currentBuildingPlacement == null)
-			{
-				buildingPlacementManager.PlaceVTOLProdBuilding();
-			}
-			else if (Input.GetKeyDown(KeyCode.Alpha6) && buildingPlacementManager.currentBuildingPlacement == null)
-			{
-				buildingPlacementManager.PlaceEnergyGenBuilding();
+				buildingPlacementManager.PlaceDefenseTurret();
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement != null 
 				|| Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement != null
-				|| Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement != null 
-				|| Input.GetKeyDown(KeyCode.Alpha4) && buildingPlacementManager.currentBuildingPlacement != null
-				|| Input.GetKeyDown(KeyCode.Alpha5) && buildingPlacementManager.currentBuildingPlacement != null 
-				|| Input.GetKeyDown(KeyCode.Alpha6) && buildingPlacementManager.currentBuildingPlacement != null)
+				|| Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement != null )
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing A Building", 2);
-				//NOTIFY PLAYER CODE HERE
+			}
+		}
+		else if (!Input.GetKey(KeyCode.LeftShift) && gameUIManager.buildingsVehicleProdUiShopObj.activeInHierarchy)
+		{
+			if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement == null)
+			{
+				buildingPlacementManager.PlaceLightVehProdBuilding();
+			}
+			else if (Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement == null)
+			{
+				if (gameUIManager.techTreeManager.buildingHasUnlockedHeavyMechs)
+					buildingPlacementManager.PlaceHeavyVehProdBuilding();
+				else
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Heavy Mechs Tech Not Researched", 2f);
+			}
+			else if (Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement == null)
+			{
+				if (gameUIManager.techTreeManager.buildingHasUnlockedVtols)
+					buildingPlacementManager.PlaceVTOLProdBuilding();
+				else
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("VTOLS Tech Not Researched", 2f);
+			}
+			else if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement != null
+				|| Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement != null
+				|| Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement != null)
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing A Building", 2);
 			}
 		}
 	}

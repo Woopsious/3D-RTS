@@ -11,6 +11,7 @@ using UnityEngine.UI;
 using static Unity.Collections.AllocatorManager;
 using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
+using static UnityEngine.UI.CanvasScaler;
 
 public class UnitSelectionManager : MonoBehaviour
 {
@@ -58,7 +59,6 @@ public class UnitSelectionManager : MonoBehaviour
 		transparentGreen = new Color(0, 1, 0, 0.1f);
 		transparentRed = new Color(1, 0, 0, 0.1f);
 	}
-
 	public void Update()
 	{
 		ShowUnitGhostProjections();
@@ -187,7 +187,9 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-		if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe) && !playerController.IsMouseOverUI())
+		if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe) && !playerController.IsMouseOverUI() && 
+		playerController.buildingPlacementManager.currentBuildingPlacement == null && 
+		playerController.unitProductionManager.currentUnitPlacements.Count == 0)
 		{	
 			//handle selecting of entities
 			if (hitInfo.collider.gameObject.GetComponent<Entities>() != null)
@@ -223,46 +225,16 @@ public class UnitSelectionManager : MonoBehaviour
 			}
 		}
 	}
-	public void TrySelectUnits(UnitStateController unit)
+	public void TrySelectCargoShip(CargoShipController cargoShip)
 	{
-		DeselectBuilding();
-		DeselectCargoShip();
-
-		if(unit.isPlayerOneEntity != !playerController.isPlayerOne)
+		if (CheckForCargoShip(cargoShip) && cargoShip.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
-			//reselect new unit
-			if (!Input.GetKey(KeyCode.LeftShift))
-			{
-				DeselectUnits();
-				unit.ShowUIHealthBar();
-				unit.selectedHighlighter.SetActive(true);
-				unit.isSelected = true;
-				selectedUnitList.Add(unit);
-			}
-			//check if unit is already in selectedUnitList, if it was remove it, else add it
-			if (Input.GetKey(KeyCode.LeftShift))
-			{
-				foreach (UnitStateController selectedUnit in selectedUnitList)
-				{
-					if (UnitAlreadyInList(selectedUnit, unit))
-					{
-						selectedUnit.HideUIHealthBar();
-						selectedUnit.selectedHighlighter.SetActive(false);
-						selectedUnit.isSelected = false;
-						selectedUnitList.Remove(selectedUnit);
-					}
-					foreach (GameObject obj in movePosHighlighterObj)
-					{
-						if (obj.activeInHierarchy)
-							obj.SetActive(false);
-					}
-				}
-				unit.ShowUIHealthBar();
-				unit.selectedHighlighter.SetActive(true);
-				unit.isSelected = true;
-				selectedUnitList.Add(unit);
-			}
-			SetUnitRefundButtonActiveUnactive();
+			DeselectBuilding();
+			DeselectUnits();
+			DeselectCargoShip();
+			SelectedCargoShip = cargoShip;
+			SelectedCargoShip.selectedHighlighter.SetActive(true);
+			SelectedCargoShip.isSelected = true;
 		}
 	}
 	public void TrySelectBuilding(BuildingManager building)
@@ -279,16 +251,56 @@ public class UnitSelectionManager : MonoBehaviour
 			selectedBuilding.isSelected = true;
 		}
 	}
-	public void TrySelectCargoShip(CargoShipController cargoShip)
+	public void TrySelectUnits(UnitStateController unit)
 	{
-		if (CheckForCargoShip(cargoShip) && cargoShip.isPlayerOneEntity != !playerController.isPlayerOne)
+		DeselectBuilding();
+		DeselectCargoShip();
+
+		if (unit.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
-			DeselectBuilding();
-			DeselectUnits();
-			DeselectCargoShip();
-			SelectedCargoShip = cargoShip;
-			SelectedCargoShip.selectedHighlighter.SetActive(true);
-			SelectedCargoShip.isSelected = true;
+			//reselect new unit
+			if (!Input.GetKey(KeyCode.LeftShift))
+			{
+				DeselectUnits();
+				unit.ShowUIHealthBar();
+				unit.selectedHighlighter.SetActive(true);
+				unit.attackRangeMeshObj.SetActive(true);
+				unit.isSelected = true;
+				selectedUnitList.Add(unit);
+				if (unit.isTurret)
+					unit.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(true);
+			}
+			//check if unit is already in selectedUnitList, if it was remove it, else add it
+			if (Input.GetKey(KeyCode.LeftShift))
+			{
+				foreach (UnitStateController selectedUnit in selectedUnitList)
+				{
+					if (UnitAlreadyInList(selectedUnit, unit))
+					{
+						selectedUnit.HideUIHealthBar();
+						selectedUnit.selectedHighlighter.SetActive(false);
+						unit.attackRangeMeshObj.SetActive(false);
+						selectedUnit.isSelected = false;
+						selectedUnitList.Remove(selectedUnit);
+
+						if (selectedUnit.isTurret)
+							selectedUnit.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(false);
+					}
+					foreach (GameObject obj in movePosHighlighterObj)
+					{
+						if (obj.activeInHierarchy)
+							obj.SetActive(false);
+					}
+				}
+				unit.ShowUIHealthBar();
+				unit.selectedHighlighter.SetActive(true);
+				unit.attackRangeMeshObj.SetActive(true);
+				unit.isSelected = true;
+				selectedUnitList.Add(unit);
+				if (unit.isTurret)
+					unit.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(true);
+			}
+			SetUnitRefundButtonActiveUnactive();
 		}
 	}
 	public void TryMoveSelectedEntities(GameObject Obj)
@@ -362,7 +374,7 @@ public class UnitSelectionManager : MonoBehaviour
 		foreach (UnitStateController unit in playerController.unitListForPlayer)
 		{
 			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf && 
-				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne)
+				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne && !unit.isTurret)
 			{
 				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
@@ -391,7 +403,7 @@ public class UnitSelectionManager : MonoBehaviour
 		}
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{
-			if(unit.isPlayerOneEntity != !playerController.isPlayerOne)
+			if(unit.isPlayerOneEntity != !playerController.isPlayerOne && !unit.isTurret)
 				selectedUnitList.Add(unit);
 		}
 		dragSelectedUnitList.Clear();
@@ -411,7 +423,11 @@ public class UnitSelectionManager : MonoBehaviour
 			{
 				selectedUnit.HideUIHealthBar();
 				selectedUnit.selectedHighlighter.SetActive(false);
+				selectedUnit.attackRangeMeshObj.SetActive(false);
 				selectedUnit.isSelected = false;
+
+				if (selectedUnit.isTurret)
+					selectedUnit.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(false);
 			}
 
 			foreach (GameObject obj in movePosHighlighterObj)

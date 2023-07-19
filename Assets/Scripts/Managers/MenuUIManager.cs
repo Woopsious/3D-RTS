@@ -178,5 +178,4 @@ public class MenuUIManager : MonoBehaviour
 	{
 		StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
-
 }

@@ -19,6 +19,7 @@ public class CapturePointController : MonoBehaviour
 	public List<BuildingManager> lightVehProdBuildings;
 	public List<BuildingManager> heavyVehProdBuildings;
 	public List<BuildingManager> vtolProdBuildings;
+	public List<TurretController> TurretDefenses;
 
 	public List<UnitStateController> playerOneUnitList;
 	public List<UnitStateController> playerTwoUnitList;

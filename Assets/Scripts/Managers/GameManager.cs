@@ -49,38 +49,35 @@ public class GameManager : MonoBehaviour
 	public int aiIncomeCrystals;
 
 	[Header("PlayerOne Building Prefabs")]
-	public GameObject buildingHQPlayerOne;
-	public GameObject buildingEnergyGenPlayerOne;
-	public GameObject buildingRefineryPlayerOne;
-	public GameObject buildingLightVehProdPlayerOne;
-	public GameObject buildingHeavyVehProdPlayerOne;
-	public GameObject buildingVTOLProdPlayerOne;
-	public GameObject buildingTurretPlayerOne;
+	public List<GameObject> PlayerOneBuildingsList;
 
 	[Header("PlayerOne Unit Prefabs")]
-	public GameObject unitVTOLPlayerOne;
-	public GameObject unitHeavyMechTankPlayerOne;
-	public GameObject unitHeavyMechKnightPlayerOne;
-	public GameObject unitLightMechPlayerOne;
-	public GameObject unitRadarVehiclePlayerOne;
-	public GameObject unitScoutVehiclePlayerOne;
+	public List<GameObject> PlayerOneUnitsList;
 
 	[Header("PlayerTwo Building Prefabs")]
-	public GameObject buildingHQPlayerTwo;
-	public GameObject buildingEnergyGenPlayerTwo;
-	public GameObject buildingRefineryPlayerTwo;
-	public GameObject buildingLightVehProdPlayerTwo;
-	public GameObject buildingHeavyVehProdPlayerTwo;
-	public GameObject buildingVTOLProdPlayerTwo;
-	public GameObject buildingTurretPlayerTwo;
+	public List<GameObject> PlayerTwoBuildingsList;
 
 	[Header("PlayerTwo Unit Prefabs")]
-	public GameObject unitVTOLPlayerTwo;
-	public GameObject unitHeavyMechTankPlayerTwo;
-	public GameObject unitHeavyMechKnightPlayerTwo;
-	public GameObject unitLightMechPlayerTwo;
-	public GameObject unitRadarVehiclePlayerTwo;
-	public GameObject unitScoutVehiclePlayerTwo;
+	public List<GameObject> PlayerTwoUnitsList;
+
+	[Header("Base Building Stats")]
+	public BaseBuildingStats buildingHQStats;
+	public BaseBuildingStats buildingEnergyGenStats;
+	public BaseBuildingStats buildingRefineryStats;
+	public BaseBuildingStats buildingLightVehProdStats;
+	public BaseBuildingStats buildingHeavyVehProdStats;
+	public BaseBuildingStats buildingVtolVehProdStats;
+
+	[Header("Base Unit Stats")]
+	public BaseUnitStats unitScoutVehStats;
+	public BaseUnitStats unitRadarVehStats;
+	public BaseUnitStats unitMechLightStats;
+	public BaseUnitStats unitMechHvyKnightStats;
+	public BaseUnitStats unitMechHvyTankStats;
+	public BaseUnitStats unitVtolGunshipStats;
+	public BaseUnitStats unitTurretStats;
+
+	public UnitStateController testUnit;
 
 	public void Awake()
 	{
@@ -104,6 +101,107 @@ public class GameManager : MonoBehaviour
 		InputManager.Instance.SetUpKeybindDictionary();
 
 		GameManager.Instance.LoadPlayerData();
+
+		//assign base building stats
+		buildingHQStats = new BaseBuildingStats
+		{
+			health = PlayerOneBuildingsList[6].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[6].GetComponent<BuildingManager>().armour
+		};
+		buildingEnergyGenStats = new BaseBuildingStats
+		{
+			health = PlayerOneBuildingsList[0].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[0].GetComponent<BuildingManager>().armour
+		};
+		buildingRefineryStats = new BaseBuildingStats
+		{
+			health = PlayerOneBuildingsList[1].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[1].GetComponent<BuildingManager>().armour
+		};
+		buildingLightVehProdStats = new BaseBuildingStats
+		{
+			health = PlayerOneBuildingsList[3].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[3].GetComponent<BuildingManager>().armour
+		};
+		buildingHeavyVehProdStats = new BaseBuildingStats
+		{
+			health = PlayerOneBuildingsList[4].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[4].GetComponent<BuildingManager>().armour
+		};
+		buildingVtolVehProdStats = new BaseBuildingStats
+		{
+			health = PlayerOneBuildingsList[5].GetComponent<BuildingManager>().maxHealth,
+			armour = PlayerOneBuildingsList[5].GetComponent<BuildingManager>().armour
+		};
+
+		//assign base unit stats
+		unitScoutVehStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[0].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[0].GetComponent<UnitStateController>().armour,
+			speed = PlayerOneUnitsList[0].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitRadarVehStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[1].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[1].GetComponent<UnitStateController>().armour,
+			speed = PlayerOneUnitsList[1].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitMechLightStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[2].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[2].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneUnitsList[2].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneUnitsList[2].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneUnitsList[2].GetComponent<UnitStateController>().attackRange,
+			speed = PlayerOneUnitsList[2].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitMechHvyKnightStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[3].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[3].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneUnitsList[3].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneUnitsList[3].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneUnitsList[3].GetComponent<UnitStateController>().attackRange,
+			speed = PlayerOneUnitsList[3].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitMechHvyTankStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[4].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[4].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneUnitsList[4].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneUnitsList[4].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneUnitsList[4].GetComponent<UnitStateController>().attackRange,
+			speed = PlayerOneUnitsList[4].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitVtolGunshipStats = new BaseUnitStats
+		{
+			health = PlayerOneUnitsList[5].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneUnitsList[5].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneUnitsList[5].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneUnitsList[5].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneUnitsList[5].GetComponent<UnitStateController>().attackRange,
+			speed = PlayerOneUnitsList[5].GetComponent<UnitStateController>().agentNav.speed
+		};
+		unitTurretStats = new BaseUnitStats
+		{
+			health = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().maxHealth,
+			armour = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().armour,
+			mainWeaponDamage = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
+			secondaryWeaponDamage = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			attackRange = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().attackRange,
+			speed = 0
+		};
+
+		testUnit = PlayerOneUnitsList[4].GetComponent<UnitStateController>();
+
+		//Debug.Log(testUnit.maxHealth);
+		//Debug.Log(testUnit.armour);
+		//Debug.Log(testUnit.weaponSystem.mainWeaponDamage);
+		//Debug.Log(testUnit.weaponSystem.mainWeaponAttackSpeed);
+		//Debug.Log(testUnit.weaponSystem.secondaryWeaponDamage);
+		//Debug.Log(testUnit.weaponSystem.secondaryWeaponAttackSpeed);
+		//Debug.Log(testUnit.agentNav.speed);
 	}
 	public void GetResourcesPerSecond()
 	{
@@ -234,10 +332,31 @@ public class GameManager : MonoBehaviour
 		}
 		else if (sceneIndex == 1)
 		{
+			gameUIManager.gameManager = this;
 			GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 			gameUIManager.ResetUi();
 			gameUIManager.ResetUnitGroupUI();
+			gameUIManager.SetUpUnitShopUi();
+			gameUIManager.SetUpBuildingsShopUi();
+			gameUIManager.techTreeManager.SetUpTechTrees();
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
+	}
+
+	[System.Serializable]
+	public class BaseBuildingStats
+	{
+		public float health;
+		public float armour;
+	}
+	[System.Serializable]
+	public class BaseUnitStats
+	{
+		public float health;
+		public float armour;
+		public float mainWeaponDamage;
+		public float secondaryWeaponDamage;
+		public int attackRange;
+		public float speed;
 	}
 }

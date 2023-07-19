@@ -69,7 +69,7 @@ public class CargoShipController : UnitStateController
 	public IEnumerator DecreaseHeightToResourceNode()
 	{
 		canChangeOrders = true;
-		SetDestination(new Vector3(targetResourceNode.transform.position.x, targetResourceNode.transform.position.y + 3,
+		SetDestination(new Vector3(targetResourceNode.transform.position.x, targetResourceNode.transform.position.y + 4f,
 			targetResourceNode.transform.position.z));
 
 		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);

@@ -12,12 +12,14 @@ public class InputManager : MonoBehaviour
 	public List<string> keybindNames;
 
 	[Header("hotKey Name Refs")]
-	public readonly string keyBindShopBuildingsName = "Building Shop";
+	public readonly string keyBindShopBaseBuildingsName = "Building Shop";
+	public readonly string keyBindShopVehProdBuildingsName = "Veh Prod Shop";
 	public readonly string keyBindShopLightUnitsName = "Light Unit Shop";
 	public readonly string keyBindShopHeavyUnitsName = "Heavy Unit Shop";
-	public readonly string keyBindMiniMapName = "Minimap";
+	public readonly string keyBindTechTreeName = "Tech Tree";
 	public readonly string keyBindUnitProdQueue = "Unit Prod Queue";
 	public readonly string keyBindUnitGroupsList = "Unit Group List";
+	public readonly string keyBindMiniMapName = "Minimap";
 
 	public readonly string keyBindCameraForwardName = "Camera Forward";
 	public readonly string keyBindCameraBackwardsName = "Camera Backwards";
@@ -59,12 +61,14 @@ public class InputManager : MonoBehaviour
 	{
 		keybindNames = new List<string>
 		{
-			keyBindShopBuildingsName,
+			keyBindShopBaseBuildingsName,
+			keyBindShopVehProdBuildingsName,
 			keyBindShopLightUnitsName,
 			keyBindShopHeavyUnitsName,
-			keyBindMiniMapName,
+			keyBindTechTreeName,
 			keyBindUnitProdQueue,
 			keyBindUnitGroupsList,
+			keyBindMiniMapName,
 
 			keyBindCameraForwardName,
 			keyBindCameraBackwardsName,
@@ -82,12 +86,14 @@ public class InputManager : MonoBehaviour
 	{
 		keyBindDictionary = new Dictionary<string, KeyCode>
 		{
-			[keyBindShopBuildingsName] = KeyCode.B,
-			[keyBindShopLightUnitsName] = KeyCode.G,
-			[keyBindShopHeavyUnitsName] = KeyCode.H,
+			[keyBindShopBaseBuildingsName] = KeyCode.F1,
+			[keyBindShopVehProdBuildingsName] = KeyCode.F2,
+			[keyBindShopLightUnitsName] = KeyCode.F3,
+			[keyBindShopHeavyUnitsName] = KeyCode.F4,
+			[keyBindTechTreeName] = KeyCode.T,
+			[keyBindUnitProdQueue] = KeyCode.Tab,
+			[keyBindUnitGroupsList] = KeyCode.CapsLock,
 			[keyBindMiniMapName] = KeyCode.M,
-			[keyBindUnitProdQueue] = KeyCode.C,
-			[keyBindUnitGroupsList] = KeyCode.V,
 
 			[keyBindCameraForwardName] = KeyCode.W,
 			[keyBindCameraBackwardsName] = KeyCode.S,
