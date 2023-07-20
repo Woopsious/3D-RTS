@@ -1,7 +1,9 @@
 using Newtonsoft.Json.Converters;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,6 +19,13 @@ public class MenuUIManager : MonoBehaviour
 	public GameObject SettingsObj;
 	public GameObject SettingsVolumeObj;
 	public GameObject SettingsKeybindsObj;
+
+	[Header("Multiplayer Ui Refs")]
+	public GameObject LobbyScreenUiObj;
+	public Button hostNewGameButton;
+	public Button startGameButton;
+	public Button joinNewGameButton;
+	public Text LobbyInfoText;
 
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
@@ -99,6 +108,16 @@ public class MenuUIManager : MonoBehaviour
 		SettingsKeybindsObj.SetActive(false);
 		GameManager.Instance.SavePlayerData();
 	}
+	public void MultiplayerBackBackButton()
+	{
+		mainMenuObj.SetActive(false);
+		SettingsObj.SetActive(false);
+		highScoreObj.SetActive(false);
+		singlePlayerScreenObj.SetActive(false);
+		multiPlayerScreenObj.SetActive(true);
+		LobbyScreenUiObj.SetActive(false);
+		GameManager.Instance.SavePlayerData();
+	}
 	public void QuitGame()
 	{
 		GameManager.Instance.SavePlayerData();
@@ -170,6 +189,26 @@ public class MenuUIManager : MonoBehaviour
 	}
 
 	//multi player button functions
+	public void HostNewMultiplayerGame()
+	{
+		NetworkManager.Singleton.StartHost();
+		multiPlayerScreenObj.SetActive(false);
+		LobbyScreenUiObj.SetActive(true);
+
+		LobbyInfoText.text = "hosting";
+	}
+	public void JoinMultiplayerGame()
+	{
+		NetworkManager.Singleton.StartClient();
+		multiPlayerScreenObj.SetActive(false);
+		LobbyScreenUiObj.SetActive(true);
+
+		LobbyInfoText.text = "joining";
+	}
+	public void StartMultiplayerGame()
+	{
+		StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
+	}
 	public void PlayNewMultiPlayerGame()
 	{
 		StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));

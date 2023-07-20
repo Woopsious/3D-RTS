@@ -42,7 +42,6 @@ public class PlayerController : MonoBehaviour
 			miniMapCameraRenderer.cullingMask |=  (1 << playerTwoMiniMapLayer);
 		}
 	}
-
 	public void Update()
 	{
 		if (SceneManager.GetActiveScene().buildIndex == 1)

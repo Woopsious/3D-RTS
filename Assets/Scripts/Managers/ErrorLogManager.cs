@@ -147,6 +147,9 @@ public class ErrorLogManager : MonoBehaviour
 
 		if (File.Exists(playerLogPath))
 		{
+			File.Delete(playerLogPath);
+		}
+			/*
 			if (File.Exists(prevPlayeLogPath)) //delete prevPlayerError.log, rename playerError.log to prevPlayerError.log
 				FileUtil.ReplaceFile(playerLogPath, prevPlayeLogPath);
 
@@ -156,7 +159,8 @@ public class ErrorLogManager : MonoBehaviour
 			CreateLogFile(playerLogPath);
 		}
 		else
-			CreateLogFile(playerLogPath);
+			*/
+		CreateLogFile(playerLogPath);
 	}
 	public void CreateLogFile(string path) //create log file and system info of user
 	{
