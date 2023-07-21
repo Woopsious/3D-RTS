@@ -150,4 +150,8 @@ public class BuildTime : MonoBehaviour
 		GameManager.Instance.playerOneCurrentAlloys += alloyCost;
 		GameManager.Instance.playerOneCurrentCrystals += crystalCost;
 	}
+	public void TestDebugLog()
+	{
+		Debug.Log("Test Log");
+	}
 }
