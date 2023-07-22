@@ -33,6 +33,9 @@ public class GameManager : MonoBehaviour
 
 	public string PlayerControllerTag = "PlayerController";
 
+	public string mainMenuSceneName = "MainMenu";
+	public string mapOneSceneName = "MapOne";
+
 	[Header("player One Stats")]
 	public int playerOneCurrentMoney;
 	public int playerOneIncomeMoney;

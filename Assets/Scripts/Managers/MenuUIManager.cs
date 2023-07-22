@@ -181,11 +181,13 @@ public class MenuUIManager : MonoBehaviour
 	//single player button functions
 	public void PlayNewSinglePlayerGame()
 	{
-		StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
+		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
 	public void LoadSinglePlayerGame()
 	{
-		StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
+		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
 
 	//multi player button functions
@@ -207,8 +209,10 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void StartMultiplayerGame()
 	{
-		StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
+		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
+	//UNUSED
 	public void PlayNewMultiPlayerGame()
 	{
 		StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
