@@ -192,8 +192,6 @@ public class BuildingPlacementManager : NetworkBehaviour
 			GameObject obj = Instantiate(GameManager.Instance.PlayerOneBuildingsList[buildingIndex], new Vector3(0, 5, 0), Quaternion.identity);
 			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
 
-
-
 			if (obj.GetComponent<BuildingManager>() != null)
 				playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewBuildings(obj);
 			else
@@ -203,6 +201,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 		{
 			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoBuildingsList[buildingIndex], new Vector3(0, 5, 0), Quaternion.identity);
 			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+
 			if (obj.GetComponent<BuildingManager>() != null)
 				playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewBuildings(obj);
 			else
