@@ -109,14 +109,14 @@ public class GameUIManager : MonoBehaviour
 	{
 		AudioManager.Instance.menuSFX.Play();
 		GameManager.Instance.SavePlayerData();
-		StartCoroutine(GameManager.Instance.WaitForSceneLoad(0));
+		StartCoroutine(GameManager.Instance.LoadScene(0));
 	}
 	public void SaveAndExitGame()
 	{
 		AudioManager.Instance.menuSFX.Play();
 		GameManager.Instance.SavePlayerData();
 		//save game data function
-		StartCoroutine(GameManager.Instance.WaitForSceneLoad(0));
+		StartCoroutine(GameManager.Instance.LoadScene(0));
 	}
 	public void OpenSettings()
 	{

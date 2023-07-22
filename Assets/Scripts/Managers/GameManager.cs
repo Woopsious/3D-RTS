@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -318,6 +319,11 @@ public class GameManager : MonoBehaviour
 	}
 
 	//scene changes functions
+
+	public void LoadScene(string sceneName)
+	{
+		NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+	}
 	public IEnumerator WaitForSceneLoad(int sceneIndex)
 	{
 		var asyncLoadLevel = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Single);
@@ -341,6 +347,7 @@ public class GameManager : MonoBehaviour
 			gameUIManager.techTreeManager.SetUpTechTrees();
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
+		AudioManager.Instance.LoadSoundSettings();
 	}
 
 	[System.Serializable]
