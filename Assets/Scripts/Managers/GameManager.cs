@@ -32,6 +32,7 @@ public class GameManager : MonoBehaviour
 	static string playerGameDataPath;
 
 	public string PlayerControllerTag = "PlayerController";
+	public bool isPlayerOne;
 
 	public string mainMenuSceneName = "MainMenu";
 	public string mapOneSceneName = "MapOne";
@@ -341,7 +342,9 @@ public class GameManager : MonoBehaviour
 		}
 		else if (sceneIndex == 1)
 		{
+			gameUIManager = FindObjectOfType<GameUIManager>();
 			gameUIManager.gameManager = this;
+
 			GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 			gameUIManager.ResetUi();
 			gameUIManager.ResetUnitGroupUI();

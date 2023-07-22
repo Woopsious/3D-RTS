@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
 	public LayerMask ignoreMe;
 
@@ -31,6 +32,7 @@ public class PlayerController : MonoBehaviour
 
 	public void Start()
 	{
+		isPlayerOne = GameManager.Instance.isPlayerOne;
 		if (isPlayerOne)
 		{
 			int playerOneMiniMapLayer = LayerMask.NameToLayer("PlayerOneMiniMapRender");

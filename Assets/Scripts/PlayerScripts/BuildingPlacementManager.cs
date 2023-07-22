@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Rendering;
 
-public class BuildingPlacementManager : MonoBehaviour
+public class BuildingPlacementManager : NetworkBehaviour
 {
 	[Header("Game Ui + Refs")]
 	public PlayerController playerController;
@@ -21,6 +24,7 @@ public class BuildingPlacementManager : MonoBehaviour
 	[Header("Dynamic Refs")]
 	public Entities currentBuildingPlacement;
 	public CanPlaceBuilding canPlaceBuilding;
+	public ulong currentBuildingPlacementNetworkId;
 
 	public void Start()
 	{
@@ -71,9 +75,8 @@ public class BuildingPlacementManager : MonoBehaviour
 		{
 			if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe))
 			{
-				currentBuildingPlacement.transform.position = hitInfo.point;
 				float mouseWheelRotation = Input.mouseScrollDelta.y;
-				currentBuildingPlacement.transform.Rotate(10 * mouseWheelRotation * Vector3.up);
+				MovePlayerBuildingServerRPC(hitInfo.point, mouseWheelRotation, currentBuildingPlacementNetworkId);
 			}
 		}
 	}
@@ -123,51 +126,43 @@ public class BuildingPlacementManager : MonoBehaviour
 	//buy Invidual buildings
 	public void PlaceEnergyGenBuilding()
 	{
-		BuyBuilding(buildingEnergyGen);
+		BuyBuilding(0);
 	}
 	public void PlaceRefineryBuilding()
 	{
-		BuyBuilding(buildingRefinery);
+		BuyBuilding(1);
 	}
 	public void PlaceDefenseTurret()
 	{
-		BuyBuilding(buildingTurret);
+		BuyBuilding(2);
 	}
 	public void PlaceLightVehProdBuilding()
 	{
-		BuyBuilding(buildingLightVehProd);
+		BuyBuilding(3);
 	}
 	public void PlaceHeavyVehProdBuilding()
 	{
-		BuyBuilding(buildingHeavyVehProd);
+		BuyBuilding(4);
 	}
 	public void PlaceVTOLProdBuilding()
 	{
-		BuyBuilding(buildingVTOLProd);
+		BuyBuilding(5);
 	}
 
 	//buy functions
-	public void BuyBuilding(GameObject buildingType)
+	public void BuyBuilding(int buildingIndex)
 	{
-		Entities building = buildingType.GetComponent<Entities>();
+		Entities building = GameManager.Instance.PlayerOneBuildingsList[buildingIndex].GetComponent<Entities>();
 
 		if (currentBuildingPlacement == null)
 		{
 			if (CheckIfCanBuy(building.moneyCost, building.alloyCost, building.crystalCost))
-			{
-				GameObject obj = Instantiate(buildingType, new Vector3(0, 5, 0), Quaternion.identity);
-				currentBuildingPlacement = obj.GetComponent<Entities>();
-				canPlaceBuilding = obj.GetComponent<CanPlaceBuilding>();
-				obj.GetComponent<Entities>().playerController = playerController;
-
-				if (obj.GetComponent<BuildingManager>() != null)
-					playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewBuildings(obj);
-				else
-					playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
-			}
+				SpawnPlayerBuildingServerRPC(buildingIndex);
 			else
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford buildings", 2);
 		}
+		else
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing a Building", 2);
 	}
 	public void BuildingCost(int moneyCost, int alloyCost, int crystalCost)
 	{
@@ -185,5 +180,40 @@ public class BuildingPlacementManager : MonoBehaviour
 			return false;
 		}
 		return true;
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	public void SpawnPlayerBuildingServerRPC(int buildingIndex, ServerRpcParams serverRpcParams = default)
+	{
+		ulong clientId = serverRpcParams.Receive.SenderClientId;
+
+		if (clientId == 0)
+		{
+			GameObject obj = Instantiate(GameManager.Instance.PlayerOneBuildingsList[buildingIndex], new Vector3(0, 5, 0), Quaternion.identity);
+			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+
+
+
+			if (obj.GetComponent<BuildingManager>() != null)
+				playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewBuildings(obj);
+			else
+				playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
+		}
+		else if (clientId == 1)
+		{
+			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoBuildingsList[buildingIndex], new Vector3(0, 5, 0), Quaternion.identity);
+			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+			if (obj.GetComponent<BuildingManager>() != null)
+				playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewBuildings(obj);
+			else
+				playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
+		}
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	public void MovePlayerBuildingServerRPC(Vector3 vector3Position, float RotationSpeed, ulong networkObjId)
+	{
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].transform.position = vector3Position;
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].transform.Rotate(10 * RotationSpeed * Vector3.up);
 	}
 }

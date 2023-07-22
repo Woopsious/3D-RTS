@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -29,6 +31,9 @@ public class CanPlaceBuilding : MonoBehaviour
 
 			else if (!building.isPlayerOneEntity)
 				building.miniMapRenderObj.layer = 12;
+
+			if (!building.isHQ)
+				AssignPlayerController(building.GetComponent<Entities>());
 		}
 		else
 		{
@@ -40,11 +45,27 @@ public class CanPlaceBuilding : MonoBehaviour
 
 			else if (!turret.isPlayerOneEntity)
 				turret.miniMapRenderObj.layer = 12;
+
+			AssignPlayerController(turret.GetComponent<Entities>());
 		}
 	}
 	public void Update()
 	{
 		TrackPlacementHeight();
+	}
+	public void AssignPlayerController(Entities entity)
+	{
+		PlayerController playerController = FindObjectOfType<PlayerController>();
+
+		if (playerController.isPlayerOne == entity.isPlayerOneEntity || !playerController.isPlayerOne == !entity.isPlayerOneEntity)
+		{
+			entity.playerController = playerController;
+			entity.playerController.buildingPlacementManager.currentBuildingPlacement = entity;
+			entity.playerController.buildingPlacementManager.canPlaceBuilding = this;
+
+			entity.playerController.buildingPlacementManager.currentBuildingPlacementNetworkId =
+				entity.GetComponent<NetworkObject>().NetworkObjectId;
+		}
 	}
 
 	//track if colliding with another building or capture point and placement height CAN PLACE HIGHLIGHTER DOESNT ALWAYS WORK

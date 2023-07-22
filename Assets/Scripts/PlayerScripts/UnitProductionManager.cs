@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UnitProductionManager : MonoBehaviour
+public class UnitProductionManager : NetworkBehaviour
 {
 	[Header("Game Ui + Refs")]
 	public PlayerController playerController;

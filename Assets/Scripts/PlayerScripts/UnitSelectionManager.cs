@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using Unity.AI.Navigation;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -13,7 +14,7 @@ using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.CanvasScaler;
 
-public class UnitSelectionManager : MonoBehaviour
+public class UnitSelectionManager : NetworkBehaviour
 {
 	NavMeshQueryFilter filter = new NavMeshQueryFilter();
 

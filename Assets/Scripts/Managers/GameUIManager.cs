@@ -69,19 +69,12 @@ public class GameUIManager : MonoBehaviour
 	public bool isGamePaused;
 	public float gameSpeed;
 
-	//may need to delegate on click functions for buy buttons depending on if PlayerController isPlayerOne or !isPlayerOne
-	public void Awake()
-	{
-		GameManager.Instance.gameUIManager = this;
-		playerController.gameUIManager = this;
-		audioBackButton.onClick.AddListener(delegate { AudioManager.Instance.AdjustAudioVolume(); });
-		//WIP soulution for multiplayer
-		PlayerController[] playerControllers = FindObjectsOfType<PlayerController>();
-	}
 	public void Start()
 	{
 		GameManager.Instance.OnSceneLoad(1);
 		GameManager.Instance.LoadPlayerData();
+
+		audioBackButton.onClick.AddListener(delegate { AudioManager.Instance.AdjustAudioVolume(); });
 	}
 	public void Update()
 	{
