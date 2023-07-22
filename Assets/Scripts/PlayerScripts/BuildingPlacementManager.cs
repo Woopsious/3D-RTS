@@ -76,7 +76,8 @@ public class BuildingPlacementManager : NetworkBehaviour
 			if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe))
 			{
 				float mouseWheelRotation = Input.mouseScrollDelta.y;
-				MovePlayerBuildingServerRPC(hitInfo.point, mouseWheelRotation, currentBuildingPlacementNetworkId);
+				currentBuildingPlacement.transform.position = hitInfo.point;
+				currentBuildingPlacement.transform.Rotate(10 * mouseWheelRotation * Vector3.up);
 			}
 		}
 	}
@@ -85,42 +86,11 @@ public class BuildingPlacementManager : NetworkBehaviour
 	{
 		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
 		{
-			//enable building triggers, navMeshObstacle, set layer and unhighlight, -building cost and update resUI
-			if (currentBuildingPlacement.GetComponent<BuildingManager>() != null)
-			{
-				currentBuildingPlacement.GetComponent<BuildingManager>().enabled = true;
-				currentBuildingPlacement.GetComponent<BuildingManager>().AddBuildingRefs();
-
-				if (currentBuildingPlacement.GetComponent<BuildingManager>().isVTOLProdBuilding)
-					currentBuildingPlacement.GetComponent<SphereCollider>().isTrigger = true;
-				else
-					currentBuildingPlacement.GetComponent<BoxCollider>().isTrigger = true;
-			}
-			else if (currentBuildingPlacement.GetComponent<TurretController>() != null)
-			{
-				currentBuildingPlacement.GetComponent<TurretController>().enabled = true;
-				currentBuildingPlacement.GetComponent<TurretController>().AddTurretRefs();
-				if (currentBuildingPlacement.GetComponent<TurretController>().isPlayerOneEntity)
-					currentBuildingPlacement.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
-				else
-					currentBuildingPlacement.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
-				currentBuildingPlacement.GetComponent<BoxCollider>().isTrigger = true;
-				currentBuildingPlacement.transform.GetChild(4).GetComponent<SphereCollider>().enabled = true;
-			}
-
-			currentBuildingPlacement.gameObject.layer = buildingLayer;
-			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
-			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
-			currentBuildingPlacement.GetComponent<CanPlaceBuilding>().isPlaced = true;
-
-			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
-			currentBuildingPlacement = null;
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
-			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
+			TryPlaceCurrentBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
 		}
 
 		if (Input.GetMouseButtonDown(1))
-			Destroy(currentBuildingPlacement.gameObject);
+			CancelBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
 	}
 
 	//buy Invidual buildings
@@ -159,7 +129,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 			if (CheckIfCanBuy(building.moneyCost, building.alloyCost, building.crystalCost))
 				SpawnPlayerBuildingServerRPC(buildingIndex);
 			else
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford buildings", 2);
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford building", 2);
 		}
 		else
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing a Building", 2);
@@ -210,9 +180,58 @@ public class BuildingPlacementManager : NetworkBehaviour
 	}
 
 	[ServerRpc(RequireOwnership = false)]
-	public void MovePlayerBuildingServerRPC(Vector3 vector3Position, float RotationSpeed, ulong networkObjId)
+	public void TryPlaceCurrentBuildingPlacementServerRPC(ulong networkObjId, ServerRpcParams serverRpcParams = default)
 	{
-		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].transform.position = vector3Position;
-		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].transform.Rotate(10 * RotationSpeed * Vector3.up);
+		if (!IsServer) return;
+		ulong clientId = serverRpcParams.Receive.SenderClientId;
+		Debug.Log("running server code");
+		BuildingPlacedClientRPC(networkObjId, clientId);
+	}
+	[ClientRpc]
+	public void BuildingPlacedClientRPC(ulong networkObjId, ulong clientId)
+	{
+		NetworkObject buildingObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId];
+		//enable building triggers, navMeshObstacle, set layer and unhighlight, -building cost and update resUI
+		if (buildingObj.GetComponent<BuildingManager>() != null)
+		{
+			buildingObj.GetComponent<BuildingManager>().enabled = true;
+			buildingObj.GetComponent<BuildingManager>().AddBuildingRefs();
+
+			if (buildingObj.GetComponent<BuildingManager>().isVTOLProdBuilding)
+				buildingObj.GetComponent<SphereCollider>().isTrigger = true;
+			else
+				buildingObj.GetComponent<BoxCollider>().isTrigger = true;
+		}
+		else if (buildingObj.GetComponent<TurretController>() != null)
+		{
+			buildingObj.GetComponent<TurretController>().enabled = true;
+			buildingObj.GetComponent<TurretController>().AddTurretRefs();
+			if (buildingObj.GetComponent<TurretController>().isPlayerOneEntity)
+				buildingObj.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
+			else
+				buildingObj.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
+			buildingObj.GetComponent<BoxCollider>().isTrigger = true;
+			buildingObj.transform.GetChild(4).GetComponent<SphereCollider>().enabled = true;
+		}
+
+		buildingObj.gameObject.layer = buildingLayer;
+		buildingObj.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
+		buildingObj.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
+		buildingObj.GetComponent<CanPlaceBuilding>().isPlaced = true;
+
+		if (currentBuildingPlacement != null && currentBuildingPlacement.GetComponent<NetworkObject>().IsOwner)
+		{
+			Debug.Log("recieved server reply");
+			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
+			currentBuildingPlacement = null;
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
+			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
+		}
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	public void CancelBuildingPlacementServerRPC(ulong networkObjId)
+	{
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].Despawn(true);
 	}
 }

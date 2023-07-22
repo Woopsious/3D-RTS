@@ -101,36 +101,40 @@ public class BuildingManager : Entities
 	}
 	public void AddBuildingRefs()
 	{
-		playerController.buildingListForPlayer.Add(this);
-
+		if (playerController != null)
+		{
+			playerController.buildingListForPlayer.Add(this);
+		}
 		if (isGeneratorBuilding)
 		{
 			capturePointController.energyGeneratorBuilding = this;
 		}
 		else if (isRefineryBuilding)
 		{
-				capturePointController.RefinaryBuildings.Add(this);
+			capturePointController.RefinaryBuildings.Add(this);
 		}
 		else if (isLightVehProdBuilding)
 		{
 			playerController.lightVehProdBuildingsList.Add(this);
-				capturePointController.lightVehProdBuildings.Add(this);
+			capturePointController.lightVehProdBuildings.Add(this);
 		}
 		else if (isHeavyVehProdBuilding)
 		{
 			playerController.heavyVehProdBuildingsList.Add(this);
-				capturePointController.heavyVehProdBuildings.Add(this);
+			capturePointController.heavyVehProdBuildings.Add(this);
 		}
 		else if (isVTOLProdBuilding)
 		{
 			playerController.vtolVehProdBuildingsList.Add(this);
-				capturePointController.vtolProdBuildings.Add(this);
+			capturePointController.vtolProdBuildings.Add(this);
 		}
 	}
 	public override void RemoveEntityRefs()
 	{
-		playerController.buildingListForPlayer.Remove(this);
-
+		if (playerController != null)
+		{
+			playerController.buildingListForPlayer.Remove(this);
+		}
 		if (isGeneratorBuilding)
 		{
 			GetComponent<EnergyGenController>().UnpowerBuildings();
@@ -143,7 +147,7 @@ public class BuildingManager : Entities
 			if (GetComponent<RefineryController>().CargoShipList.Count == 1)
 				GetComponent<RefineryController>().CargoShipList[0].DeleteSelf();
 
-			capturePointController.RefinaryBuildings.Remove(this);			
+			capturePointController.RefinaryBuildings.Remove(this);
 		}
 		else if (isLightVehProdBuilding)
 		{

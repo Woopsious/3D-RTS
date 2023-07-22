@@ -138,7 +138,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		if (building != null)
 		{
 			if (pointController.isPlayerOnePoint == building.isPlayerOneEntity && !pointController.isNeutralPoint ||
-				!pointController.isPlayerTwoPoint == !building.isPlayerOneEntity && !pointController.isNeutralPoint)
+				pointController.isPlayerTwoPoint == !building.isPlayerOneEntity && !pointController.isNeutralPoint)
 			{
 				return false;
 			}
@@ -148,7 +148,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		else
 		{
 			if (pointController.isPlayerOnePoint == turret.isPlayerOneEntity && !pointController.isNeutralPoint ||
-				!pointController.isPlayerTwoPoint == !turret.isPlayerOneEntity && !pointController.isNeutralPoint)
+				pointController.isPlayerTwoPoint == !turret.isPlayerOneEntity && !pointController.isNeutralPoint)
 			{
 				return false;
 			}
