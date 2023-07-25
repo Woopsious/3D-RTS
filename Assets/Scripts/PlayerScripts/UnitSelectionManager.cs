@@ -265,7 +265,8 @@ public class UnitSelectionManager : NetworkBehaviour
 				DeselectUnits();
 				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
-				unit.attackRangeMeshObj.SetActive(true);
+				if (unit.isUnitArmed)
+					unit.attackRangeMeshObj.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
 				if (unit.isTurret)

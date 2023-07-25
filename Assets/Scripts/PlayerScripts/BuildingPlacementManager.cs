@@ -69,10 +69,10 @@ public class BuildingPlacementManager : NetworkBehaviour
 	}
 	public void BuildingFollowsMouseCursor()
 	{
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
 		if (currentBuildingPlacement != null)
 		{
+			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
 			if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe))
 			{
 				float mouseWheelRotation = Input.mouseScrollDelta.y;
@@ -85,9 +85,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 	public void PlaceBuildingManager()
 	{
 		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
-		{
 			TryPlaceCurrentBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
-		}
 
 		if (Input.GetMouseButtonDown(1))
 			CancelBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
@@ -155,6 +153,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void SpawnPlayerBuildingServerRPC(int buildingIndex, ServerRpcParams serverRpcParams = default)
 	{
+		if (!IsServer) return;
 		ulong clientId = serverRpcParams.Receive.SenderClientId;
 
 		if (clientId == 0)
@@ -187,9 +186,11 @@ public class BuildingPlacementManager : NetworkBehaviour
 		Debug.Log("running server code");
 		BuildingPlacedClientRPC(networkObjId, clientId);
 	}
+
 	[ClientRpc]
 	public void BuildingPlacedClientRPC(ulong networkObjId, ulong clientId)
 	{
+		Debug.LogError("Building placement Setup Running");
 		NetworkObject buildingObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId];
 		//enable building triggers, navMeshObstacle, set layer and unhighlight, -building cost and update resUI
 		if (buildingObj.GetComponent<BuildingManager>() != null)
@@ -221,7 +222,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 
 		if (currentBuildingPlacement != null && currentBuildingPlacement.GetComponent<NetworkObject>().IsOwner)
 		{
-			Debug.Log("recieved server reply");
+			Debug.LogError("Building cost deduction Running");
 			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
 			currentBuildingPlacement = null;
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
@@ -232,6 +233,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void CancelBuildingPlacementServerRPC(ulong networkObjId)
 	{
+		if (!IsServer) return;
 		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].Despawn(true);
 	}
 }

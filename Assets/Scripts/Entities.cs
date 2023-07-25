@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
 
-public class Entities : MonoBehaviour
+public class Entities : NetworkBehaviour
 {
 	[Header("Entity Refs")]
 	public PlayerController playerController;
@@ -44,23 +45,19 @@ public class Entities : MonoBehaviour
 		spottedTimer = 0;
 		hitTimer = 0;
 		UpdateEntityAudioVolume();
-
-		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
+		ReParentUiServerRPC();
 		HideUIHealthBar();
 		UpdateHealthBar();
-		UiObj.transform.rotation = Quaternion.identity;
 
 		if (isPlayerOneEntity)
 			miniMapRenderObj.layer = 11;
 		else if (!isPlayerOneEntity)
 			miniMapRenderObj.layer = 12;
-
 		//FoVMeshObj.SetActive(true);
 	}
 	public virtual void Update()
 	{
-		if (UiObj.activeInHierarchy)
-			UiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
+		MoveEntityUiServerRPC();
 
 		IsEntityHitTimer();
 		IsEntitySpottedTimer();
@@ -153,8 +150,9 @@ public class Entities : MonoBehaviour
 	{
 		RemoveEntityRefs();
 		Instantiate(DeathObj, transform.position, Quaternion.identity);
-		Destroy(UiObj);
-		Destroy(gameObject);
+
+		UiObj.GetComponent<NetworkObject>().Despawn();
+		gameObject.GetComponent<NetworkObject>().Despawn();
 	}
 
 	//UTILITY FUNCTIONS
@@ -200,5 +198,31 @@ public class Entities : MonoBehaviour
 			foreach (AudioSource audio in audioSFXs)
 				audio.volume = AudioManager.Instance.gameSFX.volume;
 		}
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	public void ReParentUiServerRPC()
+	{
+		if (!IsServer) return;
+		ReParentUiClientRPC();
+	}
+
+	[ClientRpc]
+	public void ReParentUiClientRPC()
+	{
+		UiObj.GetComponent<NetworkObject>().TrySetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void MoveEntityUiServerRPC()
+	{
+		if (!IsServer) return;
+		if (UiObj.activeInHierarchy)
+			UiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
+	}
+
+	[ClientRpc]
+	public void MoveEntityClientRPC()
+	{
+		UiObj.GetComponent<NetworkObject>().TrySetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
 	}
 }
