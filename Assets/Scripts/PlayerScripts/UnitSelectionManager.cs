@@ -331,9 +331,10 @@ public class UnitSelectionManager : NetworkBehaviour
 
 			for (int i = 0; i < selectedUnitList.Count; i++)
 			{
-				UnitStateController unit = selectedUnitList[i];
+				//UnitStateController unit = selectedUnitList[i];
 				Vector3 movePos = movePosHighlighterObj[i].transform.position;
-				unit.MoveToDestination(movePos);
+				Debug.LogError(selectedUnitList[i].GetComponent<NetworkObject>().NetworkObjectId);
+				MoveUnitsServerRPC(selectedUnitList[i].GetComponent<NetworkObject>().NetworkObjectId, movePos);
 			}
 		}
 	}
@@ -660,5 +661,19 @@ public class UnitSelectionManager : NetworkBehaviour
 	{
 		return position.x > bounds.min.x && position.x < bounds.max.x
 			&& position.y > bounds.min.y && position.y < bounds.max.y;
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	public void MoveUnitsServerRPC(ulong NetworkObjId, Vector3 destination)
+	{
+		Debug.Log("server call");
+		if (!IsServer) return;
+		MoveUnitsClientRPC(NetworkObjId, destination);
+	}
+	[ClientRpc]
+	public void MoveUnitsClientRPC(ulong NetworkObjId, Vector3 destination)
+	{
+		Debug.Log("client call");
+		NetworkManager.SpawnManager.SpawnedObjects[NetworkObjId].gameObject.GetComponent<UnitStateController>().MoveToDestination(destination);
 	}
 }

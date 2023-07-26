@@ -198,12 +198,13 @@ public class UnitProductionManager : NetworkBehaviour
 
 	//BUY UNIT FUNCTIONS (Called from Ui button or Hotkey in PlayerController), spawns ui, Ghost Projections and sets refs/stats
 	//possible to add an if statement to switch prefab to playerTwo unit prefab based on is playerOne bool
-	public void AddScoutVehToBuildQueue()
+	public void AddScoutVehToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, lightVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitScoutVehicle;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 1;
@@ -212,12 +213,13 @@ public class UnitProductionManager : NetworkBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddRadarVehToBuildQueue()
+	public void AddRadarVehToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, lightVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitRadarVehicle;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 1;
@@ -226,12 +228,13 @@ public class UnitProductionManager : NetworkBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddLightMechToBuildQueue()
+	public void AddLightMechToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, lightVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitLightMech;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 1;
@@ -240,12 +243,13 @@ public class UnitProductionManager : NetworkBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddHeavyMechKnightToBuildQueue()
+	public void AddHeavyMechKnightToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, heavyVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitHeavyMechKnight;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 2;
@@ -254,12 +258,13 @@ public class UnitProductionManager : NetworkBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddHeavyMechTankToBuildQueue()
+	public void AddHeavyMechTankToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, heavyVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitHeavyMechTank;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 2;
@@ -268,12 +273,13 @@ public class UnitProductionManager : NetworkBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddVTOLToBuildQueue()
+	public void AddVTOLToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, vtolVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitVTOL;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 3;
@@ -284,19 +290,14 @@ public class UnitProductionManager : NetworkBehaviour
 	}
 
 	//SPAWN BUILT UNITS FUNCTIONS
-	public void SpawnUnitsAtProdBuilding(BuildTime buildOrder, VehProdSpawnLocation VehSpawnLocation, Vector3 destination)
+	public void SpawnUnitsAtProdBuilding(int buildOrderIndex, ulong buildingNetworkObjId, Vector3 destination)
 	{
-		StartCoroutine(OpenCloseDoors(VehSpawnLocation));
-		GameObject go = Instantiate(buildOrder.UnitPrefab, VehSpawnLocation.vehProdSpawnPoint.transform.position, Quaternion.identity);
-
-		playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(go);
-		StartCoroutine(ChangeBuiltUnitState(go.GetComponent<UnitStateController>(), destination));
+		SpawnUnitsAtProdBuildingServerRPC(buildOrderIndex, buildingNetworkObjId, destination);
 	}
-	public IEnumerator ChangeBuiltUnitState(UnitStateController newUnit, Vector3 destination)
+	public IEnumerator ChangeBuiltUnitState(ulong NetworkUnitId, Vector3 destination)
 	{
 		yield return new WaitForSeconds(0.1f);
-		newUnit.movePos = destination;
-		newUnit.ChangeStateMoving();
+		playerController.unitSelectionManager.MoveUnitsServerRPC(NetworkUnitId, destination);
 	}
 	public IEnumerator OpenCloseDoors(VehProdSpawnLocation VehSpawnLocation)
 	{
@@ -348,5 +349,34 @@ public class UnitProductionManager : NetworkBehaviour
 		GameManager.Instance.playerOneCurrentCrystals -= crystalCost;
 
 		playerController.gameUIManager.UpdateCurrentResourcesUI();
+	}
+
+	//NETWORKING FUNCTIONS
+	[ServerRpc(RequireOwnership = false)]
+	public void SpawnUnitsAtProdBuildingServerRPC(int buildOrderIndex, ulong buildingNetworkObjId, Vector3 destination,
+		ServerRpcParams serverRpcParams = default)
+	{
+		ulong clientId = serverRpcParams.Receive.SenderClientId;
+		if (!IsServer) return;
+
+		Vector3 vehSpawnPos = NetworkManager.Singleton.SpawnManager.SpawnedObjects[buildingNetworkObjId].gameObject.
+			GetComponent<VehProdSpawnLocation>().transform.position;
+
+		if (clientId == 0)
+		{
+			//StartCoroutine(OpenCloseDoors(VehSpawnLocation));
+			GameObject obj = Instantiate(GameManager.Instance.PlayerOneUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
+			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+			playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
+			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
+		}
+		else if (clientId == 1)
+		{
+			//StartCoroutine(OpenCloseDoors(VehSpawnLocation));
+			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
+			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
+			playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
+			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
+		}
 	}
 }

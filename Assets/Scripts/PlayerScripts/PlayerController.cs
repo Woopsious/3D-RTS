@@ -122,30 +122,30 @@ public class PlayerController : NetworkBehaviour
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddScoutVehToBuildQueue();
+				unitProductionManager.AddScoutVehToBuildQueue(0);
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha2) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddRadarVehToBuildQueue();
+				unitProductionManager.AddRadarVehToBuildQueue(1);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha3) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddLightMechToBuildQueue();
+				unitProductionManager.AddLightMechToBuildQueue(2);
 			}
 		}
 		else if (!Input.GetKey(KeyCode.LeftShift) && gameUIManager.unitsHeavyUiShopTwoObj.activeInHierarchy)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddHeavyMechKnightToBuildQueue();
+				unitProductionManager.AddHeavyMechKnightToBuildQueue(3);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha2) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddHeavyMechTankToBuildQueue();
+				unitProductionManager.AddHeavyMechTankToBuildQueue(4);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha3) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddVTOLToBuildQueue();
+				unitProductionManager.AddVTOLToBuildQueue(5);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha4) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{

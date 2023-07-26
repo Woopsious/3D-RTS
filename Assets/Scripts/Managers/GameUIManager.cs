@@ -376,27 +376,27 @@ public class GameUIManager : MonoBehaviour
 			{
 				case 0:
 				buyScoutVehicle = buttonToLink;
-				buyScoutVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddScoutVehToBuildQueue(); });
+				buyScoutVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddScoutVehToBuildQueue(0); });
 				break;
 				case 1:
 				buyRadarVehicle = buttonToLink;
-				buyRadarVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddRadarVehToBuildQueue(); });
+				buyRadarVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddRadarVehToBuildQueue(1); });
 				break;
 				case 2:
 				buyLightMechVehicle = buttonToLink;
-				buyLightMechVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddLightMechToBuildQueue(); });
+				buyLightMechVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddLightMechToBuildQueue(2); });
 				break;
 				case 3:
 				buyHeavyMechKnightVehicle = buttonToLink;
-				buyHeavyMechKnightVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechKnightToBuildQueue(); });
+				buyHeavyMechKnightVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechKnightToBuildQueue(3); });
 				break;
 				case 4:
 				buyHeavyMechTankVehicle = buttonToLink;
-				buyHeavyMechTankVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechTankToBuildQueue(); });
+				buyHeavyMechTankVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechTankToBuildQueue(4); });
 				break;
 				case 5:
 				buyVTOLVehicle = buttonToLink;
-				buyVTOLVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddVTOLToBuildQueue(); });
+				buyVTOLVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddVTOLToBuildQueue(5); });
 				break;
 			}
 		}

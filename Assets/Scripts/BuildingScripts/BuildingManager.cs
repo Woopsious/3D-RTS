@@ -115,18 +115,21 @@ public class BuildingManager : Entities
 		}
 		else if (isLightVehProdBuilding)
 		{
-			playerController.lightVehProdBuildingsList.Add(this);
 			capturePointController.lightVehProdBuildings.Add(this);
+			if (playerController != null)
+				playerController.lightVehProdBuildingsList.Add(this);
 		}
 		else if (isHeavyVehProdBuilding)
 		{
-			playerController.heavyVehProdBuildingsList.Add(this);
 			capturePointController.heavyVehProdBuildings.Add(this);
+			if (playerController != null)
+				playerController.heavyVehProdBuildingsList.Add(this);
 		}
 		else if (isVTOLProdBuilding)
 		{
-			playerController.vtolVehProdBuildingsList.Add(this);
 			capturePointController.vtolProdBuildings.Add(this);
+			if (playerController != null)
+				playerController.vtolVehProdBuildingsList.Add(this);
 		}
 	}
 	public override void RemoveEntityRefs()

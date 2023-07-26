@@ -150,6 +150,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 		return true;
 	}
 
+	//NETWORKING FUNCTIONS
 	[ServerRpc(RequireOwnership = false)]
 	public void SpawnPlayerBuildingServerRPC(int buildingIndex, ServerRpcParams serverRpcParams = default)
 	{
@@ -179,18 +180,22 @@ public class BuildingPlacementManager : NetworkBehaviour
 	}
 
 	[ServerRpc(RequireOwnership = false)]
+	public void CancelBuildingPlacementServerRPC(ulong networkObjId)
+	{
+		if (!IsServer) return;
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].Despawn(true);
+	}
+
+	[ServerRpc(RequireOwnership = false)]
 	public void TryPlaceCurrentBuildingPlacementServerRPC(ulong networkObjId, ServerRpcParams serverRpcParams = default)
 	{
 		if (!IsServer) return;
-		ulong clientId = serverRpcParams.Receive.SenderClientId;
-		Debug.Log("running server code");
-		BuildingPlacedClientRPC(networkObjId, clientId);
+		BuildingPlacedClientRPC(networkObjId);
 	}
 
 	[ClientRpc]
-	public void BuildingPlacedClientRPC(ulong networkObjId, ulong clientId)
+	public void BuildingPlacedClientRPC(ulong networkObjId)
 	{
-		Debug.LogError("Building placement Setup Running");
 		NetworkObject buildingObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId];
 		//enable building triggers, navMeshObstacle, set layer and unhighlight, -building cost and update resUI
 		if (buildingObj.GetComponent<BuildingManager>() != null)
@@ -222,18 +227,10 @@ public class BuildingPlacementManager : NetworkBehaviour
 
 		if (currentBuildingPlacement != null && currentBuildingPlacement.GetComponent<NetworkObject>().IsOwner)
 		{
-			Debug.LogError("Building cost deduction Running");
 			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
 			currentBuildingPlacement = null;
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
 			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 		}
-	}
-
-	[ServerRpc(RequireOwnership = false)]
-	public void CancelBuildingPlacementServerRPC(ulong networkObjId)
-	{
-		if (!IsServer) return;
-		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].Despawn(true);
 	}
 }

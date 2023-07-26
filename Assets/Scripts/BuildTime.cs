@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +16,7 @@ public class BuildTime : MonoBehaviour
 	public Text buildTimeText;
 
 	public GameObject UnitPrefab;
+	public int BuildOrderIndex;
 	public int listNumRef;
 	public float buildTime;
 	public float buildTimer;
@@ -112,7 +114,8 @@ public class BuildTime : MonoBehaviour
 
 		if (unitSpawnLocation != null)
 		{
-			unitProductionManager.SpawnUnitsAtProdBuilding(this, unitSpawnLocation, buildPosDestination);
+			unitProductionManager.SpawnUnitsAtProdBuilding(BuildOrderIndex, 
+				unitSpawnLocation.gameObject.GetComponent<NetworkObject>().NetworkObjectId, buildPosDestination);
 			RemoveUi();
 		}
 		else
