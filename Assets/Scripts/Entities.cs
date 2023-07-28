@@ -25,7 +25,7 @@ public class Entities : NetworkBehaviour
 	public int alloyCost;
 	public int crystalCost;
 	public int maxHealth;
-	public int currentHealth;
+	public NetworkVariable<int> currentHealth = new NetworkVariable<int>();
 	public int armour;
 
 	public float spottedCooldown;
@@ -42,6 +42,7 @@ public class Entities : NetworkBehaviour
 
 	public virtual void Start()
 	{
+		SetHealthServerRPC();
 		spottedTimer = 0;
 		hitTimer = 0;
 		UpdateEntityAudioVolume();
@@ -138,24 +139,27 @@ public class Entities : NetworkBehaviour
 		dmg -= armour;
 		if (dmg < 0)
 			dmg = 0;
-		currentHealth -= (int)dmg;
+
+		currentHealth.Value -= (int)dmg;
 		UpdateHealthBar();
-		if (currentHealth <= 0)
+
+		if (currentHealth.Value <= 0)
 			OnEntityDeath();
+
 	}
 	public void UpdateHealthBar()
 	{
-		float healthPercentage = (float)currentHealth / (float)maxHealth * 100;
+		float healthPercentage = (float)currentHealth.Value / (float)maxHealth * 100;
 		HealthSlider.value = healthPercentage;
-		HealthText.text = currentHealth.ToString() + " / " + maxHealth.ToString();
+		HealthText.text = currentHealth.Value.ToString() + " / " + maxHealth.ToString();
 	}
 	public virtual void OnEntityDeath()
 	{
 		RemoveEntityRefs();
 		Instantiate(DeathObj, transform.position, Quaternion.identity);
 
-		//spawned object doesnt exist
 		Destroy(gameObject.GetComponent<NetworkObject>().gameObject.GetComponent<Entities>().UiObj.gameObject);
+		if (!IsServer) return;
 		gameObject.GetComponent<NetworkObject>().Despawn();
 	}
 
@@ -202,5 +206,23 @@ public class Entities : NetworkBehaviour
 			foreach (AudioSource audio in audioSFXs)
 				audio.volume = AudioManager.Instance.gameSFX.volume;
 		}
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	public void RecieveDamageServerRPC(float dmg)
+	{
+		if (!IsServer) return;
+		RecieveDamage(dmg);
+		//UpdateHealthUiClientRPC();
+	}
+	[ClientRpc]
+	public void UpdateHealthUiClientRPC()
+	{
+		UpdateHealthBar();
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void SetHealthServerRPC()
+	{
+		currentHealth.Value = maxHealth;
 	}
 }

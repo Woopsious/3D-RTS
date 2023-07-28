@@ -333,7 +333,6 @@ public class UnitSelectionManager : NetworkBehaviour
 			{
 				//UnitStateController unit = selectedUnitList[i];
 				Vector3 movePos = movePosHighlighterObj[i].transform.position;
-				Debug.LogError(selectedUnitList[i].GetComponent<NetworkObject>().NetworkObjectId);
 				MoveUnitsServerRPC(selectedUnitList[i].GetComponent<NetworkObject>().NetworkObjectId, movePos);
 			}
 		}
@@ -675,6 +674,6 @@ public class UnitSelectionManager : NetworkBehaviour
 	public void MoveUnitsClientRPC(ulong NetworkObjId, Vector3 destination)
 	{
 		Debug.Log("client call");
-		NetworkManager.SpawnManager.SpawnedObjects[NetworkObjId].gameObject.GetComponent<UnitStateController>().MoveToDestination(destination);
+		NetworkManager.SpawnManager.SpawnedObjects[NetworkObjId].GetComponent<UnitStateController>().MoveToDestination(destination);
 	}
 }

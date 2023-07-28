@@ -19,7 +19,7 @@ public class UnitStateAttacking : UnitBaseState
 		if (unit.isTurret)
 			unit.turretController.ActivateTurret();
 		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
-			unit.weaponSystem.TryFindTarget();
+			unit.weaponSystem.TryFindTargetsServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId); //unit.weaponSystem.TryFindTarget();
 	}
 	public override void Exit(UnitStateController unit)
 	{
@@ -89,7 +89,8 @@ public class UnitStateAttacking : UnitBaseState
 			unit.weaponSystem.mainWeaponAttackSpeedTimer -= Time.deltaTime;
 		else
 		{
-			unit.weaponSystem.ShootMainWeapon();
+			//unit.weaponSystem.ShootMainWeapon();
+			unit.weaponSystem.ShootMainWeapServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
 			unit.weaponSystem.mainWeaponAttackSpeedTimer = unit.weaponSystem.mainWeaponAttackSpeed;
 		}
 	}
@@ -102,7 +103,10 @@ public class UnitStateAttacking : UnitBaseState
 			if (unit.hasShootAnimation)
 				unit.StartCoroutine(unit.DelaySecondaryAttack(unit, 1));
 			else
-				unit.weaponSystem.ShootSecondaryWeapon();
+			{
+				//unit.weaponSystem.ShootSecondaryWeapon();
+				unit.weaponSystem.ShootSeconWeapServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
+			}
 
 			unit.weaponSystem.secondaryWeaponAttackSpeedTimer = unit.weaponSystem.secondaryWeaponAttackSpeed;
 		}

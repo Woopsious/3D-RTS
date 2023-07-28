@@ -598,7 +598,7 @@ public class TechTreeManager : MonoBehaviour
 	{
 		UnitStateController unit = unitObj.GetComponent<UnitStateController>();
 
-		unit.currentHealth = (int)(unit.currentHealth * unitHealthPercentageBonusValue);
+		unit.currentHealth.Value = (int)(unit.currentHealth.Value * unitHealthPercentageBonusValue);
 		unit.maxHealth = (int)(unit.maxHealth * unitHealthPercentageBonusValue);
 		unit.armour = (int)(unit.armour * unitArmourPercentageBonusValue);
 		if (unit.isUnitArmed)
@@ -614,7 +614,7 @@ public class TechTreeManager : MonoBehaviour
 	{
 		BuildingManager building = buildingObj.GetComponent<BuildingManager>();
 
-		building.currentHealth = (int)(building.currentHealth * buildingHealthPercentageBonusValue);
+		building.currentHealth.Value = (int)(building.currentHealth.Value * buildingHealthPercentageBonusValue);
 		building.maxHealth = (int)(building.maxHealth * buildingHealthPercentageBonusValue);
 		building.armour = (int)(building.armour * buildingArmourPercentageBonusValue);
 	}

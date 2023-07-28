@@ -239,7 +239,7 @@ public class CargoShipController : UnitStateController
 	}
 	public void DeleteSelf()
 	{
-		currentHealth = -10;
+		currentHealth.Value = -10;
 		OnEntityDeath();
 	}
 

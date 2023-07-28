@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 public class TurretController : UnitStateController
@@ -15,7 +16,8 @@ public class TurretController : UnitStateController
 	{
 		animatorController.SetBool("isIdle", false);
 		audioSFXs[0].Play();
-		weaponSystem.TryFindTarget();
+		//weaponSystem.TryFindTarget();
+		weaponSystem.TryFindTargetsServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 	public void DeactivateTurret()
 	{

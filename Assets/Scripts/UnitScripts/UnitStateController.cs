@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Burst.CompilerServices;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -229,7 +230,7 @@ public class UnitStateController : Entities
 		unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
 		unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
 		yield return new WaitForSeconds(seconds);
-		unit.weaponSystem.ShootSecondaryWeapon();
+		unit.weaponSystem.ShootSeconWeapServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
 	}
 	public override void RemoveEntityRefs()
 	{

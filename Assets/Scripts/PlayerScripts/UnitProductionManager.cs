@@ -359,7 +359,7 @@ public class UnitProductionManager : NetworkBehaviour
 		ulong clientId = serverRpcParams.Receive.SenderClientId;
 		if (!IsServer) return;
 
-		Vector3 vehSpawnPos = NetworkManager.Singleton.SpawnManager.SpawnedObjects[buildingNetworkObjId].gameObject.
+		Vector3 vehSpawnPos = NetworkManager.Singleton.SpawnManager.SpawnedObjects[buildingNetworkObjId].
 			GetComponent<VehProdSpawnLocation>().transform.position;
 
 		if (clientId == 0)
