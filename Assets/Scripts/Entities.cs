@@ -45,7 +45,8 @@ public class Entities : NetworkBehaviour
 		spottedTimer = 0;
 		hitTimer = 0;
 		UpdateEntityAudioVolume();
-		ReParentUiServerRPC();
+		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
+		UiObj.transform.rotation = Quaternion.identity;
 		HideUIHealthBar();
 		UpdateHealthBar();
 
@@ -57,7 +58,8 @@ public class Entities : NetworkBehaviour
 	}
 	public virtual void Update()
 	{
-		MoveEntityUiServerRPC();
+		if (UiObj != null && UiObj.activeInHierarchy)
+			UiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
 
 		IsEntityHitTimer();
 		IsEntitySpottedTimer();
@@ -129,6 +131,7 @@ public class Entities : NetworkBehaviour
 	{
 		UiObj.SetActive(false);
 	}
+
 	//health and ui
 	public void RecieveDamage(float dmg)
 	{
@@ -151,7 +154,8 @@ public class Entities : NetworkBehaviour
 		RemoveEntityRefs();
 		Instantiate(DeathObj, transform.position, Quaternion.identity);
 
-		UiObj.GetComponent<NetworkObject>().Despawn();
+		//spawned object doesnt exist
+		Destroy(gameObject.GetComponent<NetworkObject>().gameObject.GetComponent<Entities>().UiObj.gameObject);
 		gameObject.GetComponent<NetworkObject>().Despawn();
 	}
 
@@ -198,31 +202,5 @@ public class Entities : NetworkBehaviour
 			foreach (AudioSource audio in audioSFXs)
 				audio.volume = AudioManager.Instance.gameSFX.volume;
 		}
-	}
-
-	[ServerRpc(RequireOwnership = false)]
-	public void ReParentUiServerRPC()
-	{
-		if (!IsServer) return;
-		ReParentUiClientRPC();
-	}
-
-	[ClientRpc]
-	public void ReParentUiClientRPC()
-	{
-		UiObj.GetComponent<NetworkObject>().TrySetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
-	}
-	[ServerRpc(RequireOwnership = false)]
-	public void MoveEntityUiServerRPC()
-	{
-		if (!IsServer) return;
-		if (UiObj.activeInHierarchy)
-			UiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
-	}
-
-	[ClientRpc]
-	public void MoveEntityClientRPC()
-	{
-		UiObj.GetComponent<NetworkObject>().TrySetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
 	}
 }

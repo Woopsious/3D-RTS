@@ -1,13 +1,15 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Burst.CompilerServices;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 
-public class WeaponSystem : MonoBehaviour
+public class WeaponSystem : NetworkBehaviour
 {
 	public UnitStateController unit;
 
@@ -166,5 +168,17 @@ public class WeaponSystem : MonoBehaviour
 		if (unit.currentBuildingTarget != null)
 			return true;
 		return false;
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	public void TryShootTargetServerRPC(ulong networkObjId, ServerRpcParams serverRpcParams = default)
+	{
+		ShootTargetClientRPC(networkObjId);
+	}
+
+	[ClientRpc]
+	public void ShootTargetClientRPC(ulong networkObjId)
+	{
+
 	}
 }

@@ -663,6 +663,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			&& position.y > bounds.min.y && position.y < bounds.max.y;
 	}
 
+	//NETWORKING FUNCTIONS
 	[ServerRpc(RequireOwnership = false)]
 	public void MoveUnitsServerRPC(ulong NetworkObjId, Vector3 destination)
 	{
