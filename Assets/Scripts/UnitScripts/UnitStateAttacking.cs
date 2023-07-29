@@ -29,10 +29,7 @@ public class UnitStateAttacking : UnitBaseState
 	{
 		if (unit.isUnitArmed)
 		{
-			MainGunTimer(unit);
-
-			if (unit.weaponSystem.hasSecondaryWeapon)
-				SecondaryGunTimer(unit);
+			unit.GunTimersServerRPC();
 		}
 	}
 	public override void UpdatePhysics(UnitStateController unit)
@@ -81,34 +78,6 @@ public class UnitStateAttacking : UnitBaseState
 		{
 			var lookRotation = Quaternion.LookRotation(entityToLookAt.transform.position - unit.transform.position);
 			unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, unit.agentNav.angularSpeed / 1000);
-		}
-	}
-	public void MainGunTimer(UnitStateController unit)
-	{
-		if (unit.weaponSystem.mainWeaponAttackSpeedTimer > 0)
-			unit.weaponSystem.mainWeaponAttackSpeedTimer -= Time.deltaTime;
-		else
-		{
-			//unit.weaponSystem.ShootMainWeapon();
-			unit.weaponSystem.ShootMainWeapServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
-			unit.weaponSystem.mainWeaponAttackSpeedTimer = unit.weaponSystem.mainWeaponAttackSpeed;
-		}
-	}
-	public void SecondaryGunTimer(UnitStateController unit)
-	{
-		if (unit.weaponSystem.secondaryWeaponAttackSpeedTimer > 0)
-				unit.weaponSystem.secondaryWeaponAttackSpeedTimer -= Time.deltaTime;
-		else
-		{
-			if (unit.hasShootAnimation)
-				unit.StartCoroutine(unit.DelaySecondaryAttack(unit, 1));
-			else
-			{
-				//unit.weaponSystem.ShootSecondaryWeapon();
-				unit.weaponSystem.ShootSeconWeapServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
-			}
-
-			unit.weaponSystem.secondaryWeaponAttackSpeedTimer = unit.weaponSystem.secondaryWeaponAttackSpeed;
 		}
 	}
 }

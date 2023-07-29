@@ -224,14 +224,61 @@ public class UnitStateController : Entities
 		}
 	}
 
-	//UTILITY FUNCTIONS
-	public IEnumerator DelaySecondaryAttack(UnitStateController unit, float seconds)
+	//ATTACK FUNCTIONS
+	[ServerRpc(RequireOwnership = false)]
+	public void GunTimersServerRPC()
 	{
-		unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
-		unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
-		yield return new WaitForSeconds(seconds);
-		unit.weaponSystem.ShootSeconWeapServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
+		if (!IsServer) return;
+		MainGunTimer();
+
+		if (weaponSystem.hasSecondaryWeapon)
+			SecondaryGunTimer();
 	}
+	[ClientRpc]
+	public void GunTimersClientRPC()
+	{
+		MainGunTimer();
+
+		if (weaponSystem.hasSecondaryWeapon)
+			SecondaryGunTimer();
+	}
+	public void MainGunTimer()
+	{
+		if (weaponSystem.mainWeaponAttackSpeedTimer.Value > 0)
+			weaponSystem.mainWeaponAttackSpeedTimer.Value -= Time.deltaTime;
+		else
+		{
+			//weaponSystem.ShootMainWeapon();
+			weaponSystem.ShootMainWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
+			weaponSystem.mainWeaponAttackSpeedTimer.Value = weaponSystem.mainWeaponAttackSpeed;
+		}
+	}
+	public void SecondaryGunTimer()
+	{
+		if (weaponSystem.secondaryWeaponAttackSpeedTimer.Value > 0)
+			weaponSystem.secondaryWeaponAttackSpeedTimer.Value -= Time.deltaTime;
+		else
+		{
+			if (hasShootAnimation)
+				StartCoroutine(DelaySecondaryAttack(1));
+			else
+			{
+				//weaponSystem.ShootSecondaryWeapon();
+				weaponSystem.ShootSeconWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
+			}
+
+			weaponSystem.secondaryWeaponAttackSpeedTimer.Value = weaponSystem.secondaryWeaponAttackSpeed;
+		}
+	}
+	public IEnumerator DelaySecondaryAttack(float seconds)
+	{
+		weaponSystem.secondaryWeaponAttackSpeedTimer.Value++;
+		weaponSystem.secondaryWeaponAttackSpeedTimer.Value %= weaponSystem.secondaryWeaponAttackSpeed - 1;
+		yield return new WaitForSeconds(seconds);
+		weaponSystem.ShootSeconWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
+	}
+
+	//UTILITY FUNCTIONS
 	public override void RemoveEntityRefs()
 	{
 		playerController.unitListForPlayer.Remove(this);

@@ -16,7 +16,6 @@ public class TurretController : UnitStateController
 	{
 		animatorController.SetBool("isIdle", false);
 		audioSFXs[0].Play();
-		//weaponSystem.TryFindTarget();
 		weaponSystem.TryFindTargetsServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 	public void DeactivateTurret()

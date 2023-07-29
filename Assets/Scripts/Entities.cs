@@ -141,10 +141,10 @@ public class Entities : NetworkBehaviour
 			dmg = 0;
 
 		currentHealth.Value -= (int)dmg;
-		//UpdateHealthBar();
+		UpdateHealthBar();
 
-		//if (currentHealth.Value <= 0)
-			//OnEntityDeath();
+		if (currentHealth.Value <= 0)
+			OnEntityDeath();
 	}
 	public void UpdateHealthBar()
 	{
