@@ -359,24 +359,30 @@ public class UnitProductionManager : NetworkBehaviour
 		ulong clientId = serverRpcParams.Receive.SenderClientId;
 		if (!IsServer) return;
 
-		Vector3 vehSpawnPos = NetworkManager.Singleton.SpawnManager.SpawnedObjects[buildingNetworkObjId].
-			GetComponent<VehProdSpawnLocation>().transform.position;
+		VehProdSpawnLocation spawnLocationScript = NetworkManager.Singleton.SpawnManager.SpawnedObjects[buildingNetworkObjId].
+			GetComponent<VehProdSpawnLocation>();
+
+		Vector3 vehSpawnPos = spawnLocationScript.vehProdSpawnPoint.transform.position;
 
 		if (clientId == 0)
 		{
-			//StartCoroutine(OpenCloseDoors(VehSpawnLocation));
+			StartCoroutine(OpenCloseDoors(spawnLocationScript));
 			GameObject obj = Instantiate(GameManager.Instance.PlayerOneUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
 			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
 			playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
 			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
+
+			//Debug.LogWarning("Unit Spawn Coords" + vehSpawnPos);
 		}
 		else if (clientId == 1)
 		{
-			//StartCoroutine(OpenCloseDoors(VehSpawnLocation));
+			StartCoroutine(OpenCloseDoors(spawnLocationScript));
 			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
 			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
 			playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
 			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
+
+			//Debug.LogWarning("Unit Spawn Coords" + vehSpawnPos);
 		}
 	}
 }
