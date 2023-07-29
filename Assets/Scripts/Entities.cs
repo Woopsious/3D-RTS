@@ -141,26 +141,27 @@ public class Entities : NetworkBehaviour
 			dmg = 0;
 
 		currentHealth.Value -= (int)dmg;
-		UpdateHealthBar();
+		//UpdateHealthBar();
 
-		if (currentHealth.Value <= 0)
-			OnEntityDeath();
-
+		//if (currentHealth.Value <= 0)
+			//OnEntityDeath();
 	}
 	public void UpdateHealthBar()
 	{
-		float healthPercentage = currentHealth.Value / maxHealth * 100;
-		Debug.LogWarning(healthPercentage);
+		float health = currentHealth.Value;
+		Debug.LogWarning("health Value: " + health);
+		float healthPercentage = health / maxHealth * 100;
+		Debug.LogWarning("Health %: " + healthPercentage);
 		HealthSlider.value = healthPercentage;
-		Debug.LogWarning(HealthSlider.value);
-		HealthText.text = currentHealth.Value.ToString() + " / " + maxHealth.ToString();
+		Debug.LogWarning("Health Slider Value: " + HealthSlider.value);
+		HealthText.text = health.ToString() + " / " + maxHealth.ToString();
 	}
 	public virtual void OnEntityDeath()
 	{
 		RemoveEntityRefs();
 		Instantiate(DeathObj, transform.position, Quaternion.identity);
 
-		Destroy(gameObject.GetComponent<NetworkObject>().gameObject.GetComponent<Entities>().UiObj.gameObject);
+		Destroy(UiObj);
 		if (!IsServer) return;
 		gameObject.GetComponent<NetworkObject>().Despawn();
 	}
@@ -211,16 +212,22 @@ public class Entities : NetworkBehaviour
 	}
 
 	[ServerRpc(RequireOwnership = false)]
-	public void RecieveDamageServerRPC(float dmg)
+	public void RecieveDamageServerRPC(float dmg, ServerRpcParams serverRpcParams = default)
 	{
 		if (!IsServer) return;
 		RecieveDamage(dmg);
-		//UpdateHealthUiClientRPC();
+		RecieveDamageClientRPC(GetComponent<NetworkObject>().NetworkObjectId, serverRpcParams.Receive.SenderClientId);
 	}
 	[ClientRpc]
-	public void UpdateHealthUiClientRPC()
+	public void RecieveDamageClientRPC(ulong networkObjId, ulong clientId)
 	{
-		UpdateHealthBar();
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<Entities>().UpdateHealthBar();
+
+		if (NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].IsOwner)
+		{
+			if (currentHealth.Value <= 0)
+				OnEntityDeath();
+		}
 	}
 	[ServerRpc(RequireOwnership = false)]
 	public void SetHealthServerRPC()

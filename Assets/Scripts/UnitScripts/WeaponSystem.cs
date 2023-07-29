@@ -195,6 +195,12 @@ public class WeaponSystem : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void ShootMainWeapServerRPC(ulong networkObjId)
 	{
+		if (!IsServer)
+		{
+			Debug.LogWarning("isnt server, returning");
+			return;
+		}
+		Debug.LogWarning("is server");
 		ShootMainWeapClientRPC(networkObjId);
 	}
 
@@ -209,6 +215,12 @@ public class WeaponSystem : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void ShootSeconWeapServerRPC(ulong networkObjId)
 	{
+		if (!IsServer)
+		{
+			Debug.LogWarning("isnt server, returning");
+			return;
+		}
+		Debug.LogWarning("is server");
 		ShootSeconWeapClientRPC(networkObjId);
 	}
 
