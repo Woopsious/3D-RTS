@@ -12,7 +12,7 @@ using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.CanvasScaler;
 
 public class UnitStateAttacking : UnitBaseState
-{
+{	
 	public override void Enter(UnitStateController unit)
 	{
 		Debug.Log("Entered Attacking State");
