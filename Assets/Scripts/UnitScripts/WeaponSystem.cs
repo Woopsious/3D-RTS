@@ -195,4 +195,56 @@ public class WeaponSystem : NetworkBehaviour
 			return true;
 		return false;
 	}
+
+	//ATTACK FUNCTIONS
+	[ServerRpc(RequireOwnership = false)]
+	public void GunTimersServerRPC()
+	{
+		if (!IsServer) return;
+		MainGunTimer();
+
+		if (hasSecondaryWeapon)
+			SecondaryGunTimer();
+	}
+	[ClientRpc]
+	public void GunTimersClientRPC()
+	{
+		MainGunTimer();
+
+		if (hasSecondaryWeapon)
+			SecondaryGunTimer();
+	}
+	public void MainGunTimer()
+	{
+		if (mainWeaponAttackSpeedTimer.Value > 0)
+			mainWeaponAttackSpeedTimer.Value -= Time.deltaTime;
+		else
+		{
+			ShootMainWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
+			mainWeaponAttackSpeedTimer.Value = mainWeaponAttackSpeed;
+		}
+	}
+	public void SecondaryGunTimer()
+	{
+		if (secondaryWeaponAttackSpeedTimer.Value > 0)
+			secondaryWeaponAttackSpeedTimer.Value -= Time.deltaTime;
+		else
+		{
+			if (unit.hasShootAnimation)
+				StartCoroutine(DelaySecondaryAttack(1));
+			else
+			{
+				ShootSeconWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
+			}
+
+			secondaryWeaponAttackSpeedTimer.Value = secondaryWeaponAttackSpeed;
+		}
+	}
+	public IEnumerator DelaySecondaryAttack(float seconds)
+	{
+		secondaryWeaponAttackSpeedTimer.Value++;
+		secondaryWeaponAttackSpeedTimer.Value %= secondaryWeaponAttackSpeed - 1;
+		yield return new WaitForSeconds(seconds);
+		ShootSeconWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
+	}
 }

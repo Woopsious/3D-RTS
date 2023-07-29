@@ -234,14 +234,6 @@ public class UnitStateController : Entities
 		if (weaponSystem.hasSecondaryWeapon)
 			SecondaryGunTimer();
 	}
-	[ClientRpc]
-	public void GunTimersClientRPC()
-	{
-		MainGunTimer();
-
-		if (weaponSystem.hasSecondaryWeapon)
-			SecondaryGunTimer();
-	}
 	public void MainGunTimer()
 	{
 		if (weaponSystem.mainWeaponAttackSpeedTimer.Value > 0)

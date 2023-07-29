@@ -29,7 +29,7 @@ public class UnitStateAttacking : UnitBaseState
 	{
 		if (unit.isUnitArmed)
 		{
-			unit.GunTimersServerRPC();
+			unit.weaponSystem.GunTimersServerRPC();
 		}
 	}
 	public override void UpdatePhysics(UnitStateController unit)
