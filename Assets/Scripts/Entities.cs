@@ -214,7 +214,7 @@ public class Entities : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void RecieveDamageServerRPC(float dmg, ServerRpcParams serverRpcParams = default)
 	{
-		if (!IsServer) return;
+		if (!IsServer) return;	
 		RecieveDamage(dmg);
 		RecieveDamageClientRPC(GetComponent<NetworkObject>().NetworkObjectId, serverRpcParams.Receive.SenderClientId);
 	}
