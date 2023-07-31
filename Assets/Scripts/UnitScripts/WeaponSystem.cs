@@ -31,11 +31,22 @@ public class WeaponSystem : NetworkBehaviour
 
 	public bool hasSecondaryWeapon;
 
-	//if found then grab closest one
+	//try find targets if found then grab closest one
+	public void TryFindTargets()
+	{
+		RemoveNullRefsFromTargetLists();
+		unit.currentUnitTarget = GrabClosestUnit();
+		unit.currentBuildingTarget = GrabClosestBuilding();
+	}
+
 	[ServerRpc(RequireOwnership = false)]
 	public void TryFindTargetsServerRPC(ulong networkObjId)
 	{
-		TryFindTargetsClientRPC(networkObjId);
+		UnitStateController unitNetwork = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>();
+
+		unitNetwork.weaponSystem.RemoveNullRefsFromTargetLists();
+		unitNetwork.currentUnitTarget = GrabClosestUnit();
+		unitNetwork.currentBuildingTarget = GrabClosestBuilding();
 	}
 	[ClientRpc]
 	public void TryFindTargetsClientRPC(ulong networkObjId)
@@ -123,8 +134,11 @@ public class WeaponSystem : NetworkBehaviour
 			if (!IsServer) return;
 			unit.currentBuildingTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
-		else //TryFindTarget();
-			TryFindTargetsServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		else
+		{
+			TryFindTargets();
+			//TryFindTargetsServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		}
 	}
 	[ClientRpc]
 	public void ShootSeconWeapClientRPC(ulong networkObjId)
