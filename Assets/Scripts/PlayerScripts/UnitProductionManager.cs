@@ -351,7 +351,7 @@ public class UnitProductionManager : NetworkBehaviour
 		playerController.gameUIManager.UpdateCurrentResourcesUI();
 	}
 
-	//NETWORKING FUNCTIONS
+	//server spawns unit in
 	[ServerRpc(RequireOwnership = false)]
 	public void SpawnUnitsAtProdBuildingServerRPC(int buildOrderIndex, ulong buildingNetworkObjId, Vector3 destination,
 		ServerRpcParams serverRpcParams = default)
@@ -370,7 +370,7 @@ public class UnitProductionManager : NetworkBehaviour
 			GameObject obj = Instantiate(GameManager.Instance.PlayerOneUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
 			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
 			playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
-			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
+			//StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
 
 			//Debug.LogWarning("Unit Spawn Coords" + vehSpawnPos);
 		}
@@ -380,7 +380,7 @@ public class UnitProductionManager : NetworkBehaviour
 			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
 			obj.GetComponent<NetworkObject>().SpawnWithOwnership(clientId);
 			playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
-			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
+			//StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
 
 			//Debug.LogWarning("Unit Spawn Coords" + vehSpawnPos);
 		}
