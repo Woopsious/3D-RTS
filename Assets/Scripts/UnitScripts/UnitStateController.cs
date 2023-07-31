@@ -64,7 +64,7 @@ public class UnitStateController : Entities
 	{
 		base.Start();
 
-		ChangeStateIdle();
+		ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 		//assign correct playercontroller to unit on start
 		PlayerController controller = FindObjectOfType<PlayerController>();
 		if (true)
@@ -84,10 +84,10 @@ public class UnitStateController : Entities
 		currentState.UpdatePhysics(this);
 
 		if (targetList.Count != 0 && isUnitArmed && !isCargoShip && currentState != attackState) //switch to attack state if targets found
-			ChangeStateAttacking();
+			ChangeStateAttackingServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 
 		else if (targetList.Count == 0 && currentState == attackState)
-			ChangeStateIdle();
+			ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 
 	//SPOTTING SYSTEM FUNCTIONS
@@ -220,54 +220,8 @@ public class UnitStateController : Entities
 			else
 				movePos = newMovePos;
 
-			ChangeStateMoving();
+			ChangeStateMovingServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 		}
-	}
-
-	//ATTACK FUNCTIONS
-	[ServerRpc(RequireOwnership = false)]
-	public void GunTimersServerRPC()
-	{
-		if (!IsServer) return;
-		MainGunTimer();
-
-		if (weaponSystem.hasSecondaryWeapon)
-			SecondaryGunTimer();
-	}
-	public void MainGunTimer()
-	{
-		if (weaponSystem.mainWeaponAttackSpeedTimer.Value > 0)
-			weaponSystem.mainWeaponAttackSpeedTimer.Value -= Time.deltaTime;
-		else
-		{
-			//weaponSystem.ShootMainWeapon();
-			weaponSystem.ShootMainWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
-			weaponSystem.mainWeaponAttackSpeedTimer.Value = weaponSystem.mainWeaponAttackSpeed;
-		}
-	}
-	public void SecondaryGunTimer()
-	{
-		if (weaponSystem.secondaryWeaponAttackSpeedTimer.Value > 0)
-			weaponSystem.secondaryWeaponAttackSpeedTimer.Value -= Time.deltaTime;
-		else
-		{
-			if (hasShootAnimation)
-				StartCoroutine(DelaySecondaryAttack(1));
-			else
-			{
-				//weaponSystem.ShootSecondaryWeapon();
-				weaponSystem.ShootSeconWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
-			}
-
-			weaponSystem.secondaryWeaponAttackSpeedTimer.Value = weaponSystem.secondaryWeaponAttackSpeed;
-		}
-	}
-	public IEnumerator DelaySecondaryAttack(float seconds)
-	{
-		weaponSystem.secondaryWeaponAttackSpeedTimer.Value++;
-		weaponSystem.secondaryWeaponAttackSpeedTimer.Value %= weaponSystem.secondaryWeaponAttackSpeed - 1;
-		yield return new WaitForSeconds(seconds);
-		weaponSystem.ShootSeconWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 
 	//UTILITY FUNCTIONS
@@ -315,17 +269,35 @@ public class UnitStateController : Entities
 	}
 
 	//STATE CHANGE FUNCTIONS
-	public void ChangeStateIdle()
+	[ServerRpc(RequireOwnership = false)]
+	public void ChangeStateIdleServerRPC(ulong networkObjId)
+	{
+		NetworkManager.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>().ChangeStateIdleClientRPC();
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void ChangeStateMovingServerRPC(ulong networkObjId)
+	{
+		NetworkManager.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>().ChangeStateMovingClientRPC();
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void ChangeStateAttackingServerRPC(ulong networkObjId)
+	{
+		NetworkManager.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>().ChangeStateAttackingClientRPC();
+	}
+	[ClientRpc]
+	public void ChangeStateIdleClientRPC()
 	{
 		currentState = idleState;
 		currentState.Enter(this);
 	}
-	public void ChangeStateMoving()
+	[ClientRpc]
+	public void ChangeStateMovingClientRPC()
 	{
 		currentState = movingState;
 		currentState.Enter(this);
 	}
-	public void ChangeStateAttacking()
+	[ClientRpc]
+	public void ChangeStateAttackingClientRPC()
 	{
 		currentState = attackState;
 		currentState.Enter(this);

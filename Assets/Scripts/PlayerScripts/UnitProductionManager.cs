@@ -351,7 +351,7 @@ public class UnitProductionManager : NetworkBehaviour
 		playerController.gameUIManager.UpdateCurrentResourcesUI();
 	}
 
-	//NETWORKING FUNCTIONS
+	//server spawns unit in
 	[ServerRpc(RequireOwnership = false)]
 	public void SpawnUnitsAtProdBuildingServerRPC(int buildOrderIndex, ulong buildingNetworkObjId, Vector3 destination,
 		ServerRpcParams serverRpcParams = default)

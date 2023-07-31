@@ -19,7 +19,10 @@ public class UnitStateAttacking : UnitBaseState
 		if (unit.isTurret)
 			unit.turretController.ActivateTurret();
 		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
-			unit.weaponSystem.TryFindTargetsServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId); //unit.weaponSystem.TryFindTarget();
+		{
+			unit.weaponSystem.TryFindTargets();
+			//unit.weaponSystem.TryFindTargetsServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
+		}
 	}
 	public override void Exit(UnitStateController unit)
 	{

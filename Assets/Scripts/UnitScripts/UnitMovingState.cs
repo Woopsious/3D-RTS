@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations;
@@ -28,7 +29,7 @@ public class UnitMovingState : UnitBaseState
 			unit.agentNav.SetPath(unit.navMeshPath);
 		else
 		{
-			unit.ChangeStateIdle();
+			unit.ChangeStateIdleServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
 		}
 	}
@@ -48,14 +49,14 @@ public class UnitMovingState : UnitBaseState
 	{
 		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
-			unit.ChangeStateIdle();
+			unit.ChangeStateIdleServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
 			unit.agentNav.isStopped = true;
 		}
 		else if (unit.playerSetTarget != null && !unit.hasReachedPlayerSetTarget && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
 			{
-				unit.ChangeStateIdle();
+				unit.ChangeStateIdleServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
 				unit.agentNav.isStopped = true;
 				unit.hasReachedPlayerSetTarget = true;
 			}
