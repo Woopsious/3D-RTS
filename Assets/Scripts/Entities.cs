@@ -149,11 +149,11 @@ public class Entities : NetworkBehaviour
 	public void UpdateHealthBar()
 	{
 		float health = currentHealth.Value;
-		Debug.LogWarning("health Value: " + health);
+		//Debug.LogWarning("health Value: " + health);
 		float healthPercentage = health / maxHealth * 100;
-		Debug.LogWarning("Health %: " + healthPercentage);
+		//Debug.LogWarning("Health %: " + healthPercentage);
 		HealthSlider.value = healthPercentage;
-		Debug.LogWarning("Health Slider Value: " + HealthSlider.value);
+		//Debug.LogWarning("Health Slider Value: " + HealthSlider.value);
 		HealthText.text = health.ToString() + " / " + maxHealth.ToString();
 	}
 	public virtual void OnEntityDeath()

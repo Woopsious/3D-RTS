@@ -85,9 +85,6 @@ public class UnitStateController : Entities
 
 		if (targetList.Count != 0 && isUnitArmed && !isCargoShip && currentState != attackState) //switch to attack state if targets found
 			ChangeStateAttackingServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
-
-		else if (targetList.Count == 0 && currentState == attackState)
-			ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 
 	//SPOTTING SYSTEM FUNCTIONS

@@ -10,7 +10,7 @@ public class UnitMovingState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		Debug.Log("Entered Moving State");
+		Debug.LogWarning("Entered Moving State");
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[2].Stop();

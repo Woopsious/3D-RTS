@@ -37,6 +37,9 @@ public class WeaponSystem : NetworkBehaviour
 		RemoveNullRefsFromTargetLists();
 		unit.currentUnitTarget = GrabClosestUnit();
 		unit.currentBuildingTarget = GrabClosestBuilding();
+
+		if (unit.playerSetTarget == null && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
+			unit.ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 
 	[ServerRpc(RequireOwnership = false)]
