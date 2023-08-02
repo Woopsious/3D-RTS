@@ -42,6 +42,10 @@ public class Entities : NetworkBehaviour
 
 	public virtual void Start()
 	{
+		PlayerController controller = FindObjectOfType<PlayerController>();
+		if (controller.isPlayerOne == isPlayerOneEntity || !controller.isPlayerOne == !isPlayerOneEntity)
+			playerController = controller;
+
 		SetHealthServerRPC();
 		spottedTimer = 0;
 		hitTimer = 0;
@@ -49,7 +53,6 @@ public class Entities : NetworkBehaviour
 		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
 		UiObj.transform.rotation = Quaternion.identity;
 		HideUIHealthBar();
-		UpdateHealthBar();
 
 		if (isPlayerOneEntity)
 			miniMapRenderObj.layer = 11;
@@ -127,6 +130,7 @@ public class Entities : NetworkBehaviour
 	public void ShowUIHealthBar()
 	{
 		UiObj.SetActive(true);
+		UpdateHealthBar();
 	}
 	public void HideUIHealthBar()
 	{
@@ -152,10 +156,7 @@ public class Entities : NetworkBehaviour
 	{
 		RemoveEntityRefs();
 		Instantiate(DeathObj, transform.position, Quaternion.identity);
-
-		Destroy(UiObj);
-		if (!IsServer) return;
-		gameObject.GetComponent<NetworkObject>().Despawn();
+		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 
 	//UTILITY FUNCTIONS
@@ -191,8 +192,7 @@ public class Entities : NetworkBehaviour
 		}
 		playerController.gameUIManager.UpdateCurrentResourcesUI();
 		RemoveEntityRefs();
-		Destroy(UiObj);
-		Destroy(gameObject);
+		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 	public void UpdateEntityAudioVolume()
 	{

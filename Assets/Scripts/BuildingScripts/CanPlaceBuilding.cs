@@ -55,11 +55,10 @@ public class CanPlaceBuilding : MonoBehaviour
 	}
 	public void AssignPlayerController(Entities entity)
 	{
-		PlayerController playerController = FindObjectOfType<PlayerController>();
-
-		if (playerController.isPlayerOne == entity.isPlayerOneEntity || !playerController.isPlayerOne == !entity.isPlayerOneEntity)
+		PlayerController controller = FindObjectOfType<PlayerController>();
+		if (controller.isPlayerOne == entity.isPlayerOneEntity || !controller.isPlayerOne == !entity.isPlayerOneEntity)
 		{
-			entity.playerController = playerController;
+			entity.playerController = controller;
 			entity.playerController.buildingPlacementManager.currentBuildingPlacement = entity;
 			entity.playerController.buildingPlacementManager.canPlaceBuilding = this;
 
@@ -119,14 +118,14 @@ public class CanPlaceBuilding : MonoBehaviour
 		{
 			if (building != null)
 			{
-				if (building.transform.position.y > 9f && building.transform.position.y < 10.5f)
+				if (building.transform.position.y > 8f && building.transform.position.y < 11f)
 					CanPlaceHighliterGreen();
 				else
 					CanPlaceHighliterRed();
 			}
 			else
 			{
-				if (turret.transform.position.y > 9f && turret.transform.position.y < 10.5f)
+				if (turret.transform.position.y > 8f && turret.transform.position.y < 11f)
 					CanPlaceHighliterGreen();
 				else
 					CanPlaceHighliterRed();
@@ -179,7 +178,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		if (building != null)
 		{
 			if (!pointController.isPlayerOnePoint != building.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
-				building.transform.position.y > 9f && building.transform.position.y < 10.5f)
+				building.transform.position.y > 8f && building.transform.position.y < 11f)
 			{
 				if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)
 				{
@@ -241,7 +240,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		else
 		{
 			if (!pointController.isPlayerOnePoint != turret.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
-				turret.transform.position.y > 9f && turret.transform.position.y < 10.5f)
+				turret.transform.position.y > 8f && turret.transform.position.y < 11f)
 			{
 				if (pointController.TurretDefenses.Count <= 1 && turret.isTurret)
 				{

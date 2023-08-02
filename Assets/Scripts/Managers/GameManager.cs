@@ -324,7 +324,6 @@ public class GameManager : NetworkBehaviour
 	}
 
 	//scene changes functions
-
 	public void LoadScene(string sceneName)
 	{
 		NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
@@ -355,6 +354,18 @@ public class GameManager : NetworkBehaviour
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
 		AudioManager.Instance.LoadSoundSettings();
+	}
+
+	[ServerRpc(RequireOwnership = false)]
+	public void RemoveEntityServerRPC(ulong networkObjId)
+	{
+		RemoveEntityUiClientRPC(networkObjId);
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<NetworkObject>().Despawn();
+	}
+	[ClientRpc]
+	public void RemoveEntityUiClientRPC(ulong networkObjId)
+	{
+		Destroy(NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<Entities>().UiObj);
 	}
 
 	[System.Serializable]

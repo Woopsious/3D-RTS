@@ -63,11 +63,10 @@ public class UnitStateController : Entities
 	public override void Start()
 	{
 		base.Start();
-
 		ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
-		//assign correct playercontroller to unit on start
+
 		PlayerController controller = FindObjectOfType<PlayerController>();
-		if (true)
+		if (controller.isPlayerOne == isPlayerOneEntity || !controller.isPlayerOne == !isPlayerOneEntity)
 		{
 			playerController = controller;
 			playerController.unitListForPlayer.Add(this);
