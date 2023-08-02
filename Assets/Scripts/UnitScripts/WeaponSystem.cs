@@ -105,7 +105,6 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponParticles.Play();
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
-			unit.playerSetTarget.ResetIsEntityHitTimer();
 			if (!IsServer) return;
 			unit.playerSetTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
@@ -119,7 +118,6 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponParticles.Play();
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
-			unit.currentUnitTarget.ResetIsEntityHitTimer();
 			if (!IsServer) return;
 			unit.currentUnitTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
@@ -133,15 +131,11 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponParticles.Play();
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
-			unit.currentBuildingTarget.ResetIsEntityHitTimer();
 			if (!IsServer) return;
 			unit.currentBuildingTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
 		else
-		{
 			TryFindTargets();
-			//TryFindTargetsServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
-		}
 	}
 	[ClientRpc]
 	public void ShootSeconWeapClientRPC(ulong networkObjId)

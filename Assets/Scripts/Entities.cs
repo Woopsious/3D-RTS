@@ -139,21 +139,13 @@ public class Entities : NetworkBehaviour
 		dmg -= armour;
 		if (dmg < 0)
 			dmg = 0;
-
 		currentHealth.Value -= (int)dmg;
-		UpdateHealthBar();
-
-		if (currentHealth.Value <= 0)
-			OnEntityDeath();
 	}
 	public void UpdateHealthBar()
 	{
 		float health = currentHealth.Value;
-		//Debug.LogWarning("health Value: " + health);
 		float healthPercentage = health / maxHealth * 100;
-		//Debug.LogWarning("Health %: " + healthPercentage);
 		HealthSlider.value = healthPercentage;
-		//Debug.LogWarning("Health Slider Value: " + HealthSlider.value);
 		HealthText.text = health.ToString() + " / " + maxHealth.ToString();
 	}
 	public virtual void OnEntityDeath()
@@ -221,6 +213,7 @@ public class Entities : NetworkBehaviour
 	[ClientRpc]
 	public void RecieveDamageClientRPC(ulong networkObjId, ulong clientId)
 	{
+		ResetIsEntityHitTimer();
 		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<Entities>().UpdateHealthBar();
 
 		if (NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].IsOwner)

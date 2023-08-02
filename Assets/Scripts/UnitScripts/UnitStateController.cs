@@ -76,11 +76,11 @@ public class UnitStateController : Entities
 	public override void Update()
 	{
 		base.Update();
-
 		currentState.UpdateLogic(this);
 	}
 	public virtual void FixedUpdate()
 	{
+		base.Update();
 		currentState.UpdatePhysics(this);
 
 		if (targetList.Count != 0 && isUnitArmed && !isCargoShip && currentState != attackState) //switch to attack state if targets found
