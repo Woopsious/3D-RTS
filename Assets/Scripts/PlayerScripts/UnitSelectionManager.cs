@@ -312,16 +312,16 @@ public class UnitSelectionManager : NetworkBehaviour
 		{
 			ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
 
-			if (resourceNode.isBeingMined)
+			if (resourceNode.isBeingMined.Value)
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
 
-			else if (resourceNode.isEmpty)
+			else if (resourceNode.isEmpty.Value)
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
 
 			else //else mine selected node
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
-				SelectedCargoShip.SetResourceNodeFromPlayerInput(resourceNode);
+				SelectedCargoShip.SetResourceNodeFromPlayerInputServerRPC(resourceNode.GetComponent<NetworkObject>().NetworkObjectId);
 			}
 		}
 		//move selected units to mouse pos

@@ -65,22 +65,21 @@ public class UnitStateController : Entities
 		base.Start();
 		ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 
-		PlayerController controller = FindObjectOfType<PlayerController>();
-		if (controller.isPlayerOne == isPlayerOneEntity || !controller.isPlayerOne == !isPlayerOneEntity)
-		{
-			playerController = controller;
+		playerController = FindObjectOfType<PlayerController>();
+		if (playerController.isPlayerOne == isPlayerOneEntity || !playerController.isPlayerOne == !isPlayerOneEntity)
 			playerController.unitListForPlayer.Add(this);
-		}
 	}
 	public override void Update()
 	{
 		base.Update();
-		currentState.UpdateLogic(this);
+		if (!isCargoShip)
+			currentState.UpdateLogic(this);
 	}
 	public virtual void FixedUpdate()
 	{
 		base.Update();
-		currentState.UpdatePhysics(this);
+		if (!isCargoShip)
+			currentState.UpdatePhysics(this);
 
 		if (targetList.Count != 0 && isUnitArmed && !isCargoShip && currentState != attackState) //switch to attack state if targets found
 			ChangeStateAttackingServerRPC(GetComponent<NetworkObject>().NetworkObjectId);

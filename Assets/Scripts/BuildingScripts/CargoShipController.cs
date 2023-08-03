@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -34,16 +35,14 @@ public class CargoShipController : UnitStateController
 	public override void Start()
 	{
 		base.Start();
-		FindClosestTargetResourcesNode();
-
-		if (refineryControllerParent.building.isPowered)
-			StartCoroutine(IncreaseHeightFromRefinery());
-		else
-			PauseMining();
+		Debug.LogWarning("CargoShip StartUp 1");
+		FindClosestTargetResourcesNodeServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		Debug.LogWarning("CargoShip StartUp 2");
 	}
 	public override void FixedUpdate()
 	{
-		transform.position = Vector3.MoveTowards(transform.position, movePos, moveSpeed * Time.deltaTime);
+		if (targetResourceNode != null)
+			transform.position = Vector3.MoveTowards(transform.position, movePos, moveSpeed * Time.deltaTime);
 	}
 
 	//FUNCTIONS FOR LOOPING RESOURCE GATHERING
@@ -81,10 +80,10 @@ public class CargoShipController : UnitStateController
 	{
 		canChangeOrders = false;
 		yield return new WaitForSeconds(15);                                                                                //mine resources for 15s
-		MineResourcesFromNode();
+		MineResourcesFromNodeServerRPC();
 
 		if (CheckIfNodeIsEmpty()) //check to make sure resources are still avalable
-			FindClosestTargetResourcesNode(); //if not find new closest resource node from parent refinery
+			FindClosestTargetResourcesNodeServerRPC(GetComponent<NetworkObject>().NetworkObjectId); //if not find new closest resource node from parent refinery
 
 		SetDestination(new Vector3(gameObject.transform.position.x, 22, gameObject.transform.position.z));
 
@@ -101,7 +100,7 @@ public class CargoShipController : UnitStateController
 		yield return new WaitForSeconds(5);
 
 		if (hasNewOrders)
-			ChangeResourceNode();																	//if neworders are avalable switch to them here
+			ChangeResourceNodeServerRPC();																	//if neworders are avalable switch to them here
 
 		if (!hasPauseOperation) //continue loop if not paused (parent refinery is unpowered)
 			StartCoroutine(IncreaseHeightFromRefinery());
@@ -118,47 +117,70 @@ public class CargoShipController : UnitStateController
 	}
 
 	//function to find res nodes
-	public void SetResourceNodeFromPlayerInput(ResourceNodes resourceNode)
+	[ServerRpc(RequireOwnership = false)]
+	public void SetResourceNodeFromPlayerInputServerRPC(ulong resourceNodeObjId)
 	{
-		playerSetResourceNode = resourceNode;
+		SetResourceNodeFromPlayerInputClientRPC(GetComponent<NetworkObject>().NetworkObjectId, resourceNodeObjId);
+	}
+	[ClientRpc]
+	public void SetResourceNodeFromPlayerInputClientRPC(ulong cargoShipObjId, ulong resourceNodeObjId)
+	{
+		CargoShipController cargoShip = NetworkManager.Singleton.SpawnManager.SpawnedObjects[resourceNodeObjId].GetComponent<CargoShipController>();
+		playerSetResourceNode = NetworkManager.Singleton.SpawnManager.SpawnedObjects[resourceNodeObjId].GetComponent<ResourceNodes>();
 
-		if (canChangeOrders)
+		if (cargoShip.canChangeOrders)
 		{
-			ChangeResourceNode();
-			StopAllCoroutines();
-			StartCoroutine(IncreaseHeight());
+			cargoShip.ChangeResourceNodeServerRPC();
+			cargoShip.StopAllCoroutines();
+			cargoShip.StartCoroutine(IncreaseHeight());
 		}
 		else
-			hasNewOrders = true;
+			cargoShip.hasNewOrders = true;
 	}
-	public void ChangeResourceNode()
+	[ServerRpc(RequireOwnership = false)]
+	public void ChangeResourceNodeServerRPC()
 	{
-		targetResourceNode.isBeingMined = false;
+		targetResourceNode.isBeingMined.Value = false;
 		targetResourceNode = playerSetResourceNode;
-		targetResourceNode.isBeingMined = true;
+		targetResourceNode.isBeingMined.Value = true;
 		hasNewOrders = false;
 	}
-	public void FindClosestTargetResourcesNode()
+	[ServerRpc(RequireOwnership = false)]
+	public void FindClosestTargetResourcesNodeServerRPC(ulong cargoShipNetworkObjId)
 	{
+		Debug.LogWarning("CargoShip Find Nodes Server");
+		FindClosestTargetResourcesNodeClientRPC(cargoShipNetworkObjId);
+	}
+	[ClientRpc]
+	public void FindClosestTargetResourcesNodeClientRPC(ulong cargoShipNetworkObjId)
+	{
+		CargoShipController cargoShip = NetworkManager.SpawnManager.SpawnedObjects[cargoShipNetworkObjId].GetComponent<CargoShipController>();
 		List<ResourceNodes> PossibleNodes = new List<ResourceNodes>();
 
-		foreach (ResourceNodes resourceNode in refineryControllerParent.resourceNodesList)
+		Debug.LogWarning("Refinery List of Resource Nodes: " + cargoShip.refineryControllerParent.resourceNodesList);
+		Debug.LogWarning("List of Resource Nodes: " + PossibleNodes);
+
+		foreach (ResourceNodes resourceNode in cargoShip.refineryControllerParent.resourceNodesList)
 		{
-			if (!resourceNode.isBeingMined && !resourceNode.isEmpty)
+			if (!resourceNode.isBeingMined.Value && !resourceNode.isEmpty.Value)
 				PossibleNodes.Add(resourceNode);
 		}
 
-		if(PossibleNodes.Count == 0)
-			Debug.LogError("No Free Resource Nodes");
+		if (PossibleNodes.Count == 0)
+			Debug.LogWarning("No Free Resource Nodes");
 
 		else
 		{
-			PossibleNodes = PossibleNodes.OrderBy(newtarget => Vector3.Distance(refineryControllerParent.transform.position,
+			PossibleNodes = PossibleNodes.OrderBy(newtarget => Vector3.Distance(cargoShip.refineryControllerParent.transform.position,
 				newtarget.transform.position)).ToList();
 
-			targetResourceNode = PossibleNodes[0];
-			targetResourceNode.isBeingMined = true;
+			cargoShip.targetResourceNode = PossibleNodes[0];
+			cargoShip.targetResourceNode.isBeingMined.Value = true;
+
+			Debug.LogWarning("Closest Resource Node: " + PossibleNodes[0]);
 		}
+
+		cargoShip.StartCoroutine(IncreaseHeightFromRefinery());
 	}
 
 	//HEALTH/HIT FUNCTIONS OVERRIDES
@@ -177,40 +199,41 @@ public class CargoShipController : UnitStateController
 	//UTILITY FUNCTIONS
 	public override void RemoveEntityRefs()
 	{
-		targetResourceNode.isBeingMined = false;
+		targetResourceNode.isBeingMined.Value = false;
 		playerController.unitListForPlayer.Remove(this);
 		refineryControllerParent.CargoShipList.Remove(this);
 		refineryControllerParent.CheckCargoShipsCount();
 	}
-	public void MineResourcesFromNode()
+	[ServerRpc(RequireOwnership = false)]
+	public void MineResourcesFromNodeServerRPC()
 	{
-		if(targetResourceNode.isCrystalNode)
+		if(targetResourceNode.isCrystalNode.Value)
 		{
-			if (targetResourceNode.resourcesAmount > maxCrystalCarryCapacity)
+			if (targetResourceNode.resourcesAmount.Value > maxCrystalCarryCapacity)
 			{
 				crystalsCount = maxCrystalCarryCapacity;
-				targetResourceNode.resourcesAmount -= maxCrystalCarryCapacity;
+				targetResourceNode.resourcesAmount.Value -= maxCrystalCarryCapacity;
 			}
 			else
 			{
-				crystalsCount = targetResourceNode.resourcesAmount;
-				targetResourceNode.resourcesAmount -= targetResourceNode.resourcesAmount;
+				crystalsCount = targetResourceNode.resourcesAmount.Value;
+				targetResourceNode.resourcesAmount.Value -= targetResourceNode.resourcesAmount.Value;
 			}
 		}
 		else
 		{
-			if (targetResourceNode.resourcesAmount > alloysCount)
+			if (targetResourceNode.resourcesAmount.Value > alloysCount)
 			{
 				alloysCount = maxAlloyCarryCapacity;
-				targetResourceNode.resourcesAmount -= maxAlloyCarryCapacity;
+				targetResourceNode.resourcesAmount.Value -= maxAlloyCarryCapacity;
 			}
 			else
 			{
-				alloysCount = targetResourceNode.resourcesAmount;
-				targetResourceNode.resourcesAmount -= targetResourceNode.resourcesAmount;
+				alloysCount = targetResourceNode.resourcesAmount.Value;
+				targetResourceNode.resourcesAmount.Value -= targetResourceNode.resourcesAmount.Value;
 			}
 		}
-		targetResourceNode.CheckResourceCount();
+		targetResourceNode.CheckResourceCountServerRpc();
 	}
 	public void RefineResourcesFromInventroy()
 	{
@@ -246,7 +269,7 @@ public class CargoShipController : UnitStateController
 	//BOOL CHECKS
 	public bool CheckIfNodeIsEmpty()
 	{
-		if (targetResourceNode.isEmpty)
+		if (targetResourceNode.isEmpty.Value)
 			return true;
 		else return false;
 	}

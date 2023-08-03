@@ -102,7 +102,7 @@ public class Entities : NetworkBehaviour
 		spottedTimer = spottedCooldown;
 	}
 
-	//HEALTH/HIT AND UI FUNCTIONS
+	//HEALTH + DEATH/HIT AND UI FUNCTIONS
 	//hit and ui
 	public void IsEntityHitTimer()
 	{
@@ -137,7 +137,26 @@ public class Entities : NetworkBehaviour
 		UiObj.SetActive(false);
 	}
 
-	//health and ui
+	//health and death functions
+	[ServerRpc(RequireOwnership = false)]
+	public void RecieveDamageServerRPC(float dmg, ServerRpcParams serverRpcParams = default)
+	{
+		if (!IsServer) return;
+		RecieveDamage(dmg);
+		RecieveDamageClientRPC(GetComponent<NetworkObject>().NetworkObjectId, serverRpcParams.Receive.SenderClientId);
+	}
+	[ClientRpc]
+	public void RecieveDamageClientRPC(ulong networkObjId, ulong clientId)
+	{
+		ResetIsEntityHitTimer();
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<Entities>().UpdateHealthBar();
+
+		if (NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].IsOwner)
+		{
+			if (currentHealth.Value <= 0)
+				OnEntityDeath();
+		}
+	}
 	public void RecieveDamage(float dmg)
 	{
 		dmg -= armour;
@@ -151,6 +170,10 @@ public class Entities : NetworkBehaviour
 		float healthPercentage = health / maxHealth * 100;
 		HealthSlider.value = healthPercentage;
 		HealthText.text = health.ToString() + " / " + maxHealth.ToString();
+	}
+	public virtual void RemoveEntityRefs()
+	{
+
 	}
 	public virtual void OnEntityDeath()
 	{
@@ -166,10 +189,6 @@ public class Entities : NetworkBehaviour
 			return false;
 		else
 			return true;
-	}
-	public virtual void RemoveEntityRefs()
-	{
-
 	}
 	public void RefundEntity()
 	{
@@ -200,26 +219,6 @@ public class Entities : NetworkBehaviour
 		{
 			foreach (AudioSource audio in audioSFXs)
 				audio.volume = AudioManager.Instance.gameSFX.volume;
-		}
-	}
-
-	[ServerRpc(RequireOwnership = false)]
-	public void RecieveDamageServerRPC(float dmg, ServerRpcParams serverRpcParams = default)
-	{
-		if (!IsServer) return;	
-		RecieveDamage(dmg);
-		RecieveDamageClientRPC(GetComponent<NetworkObject>().NetworkObjectId, serverRpcParams.Receive.SenderClientId);
-	}
-	[ClientRpc]
-	public void RecieveDamageClientRPC(ulong networkObjId, ulong clientId)
-	{
-		ResetIsEntityHitTimer();
-		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<Entities>().UpdateHealthBar();
-
-		if (NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].IsOwner)
-		{
-			if (currentHealth.Value <= 0)
-				OnEntityDeath();
 		}
 	}
 	[ServerRpc(RequireOwnership = false)]

@@ -55,10 +55,10 @@ public class CanPlaceBuilding : MonoBehaviour
 	}
 	public void AssignPlayerController(Entities entity)
 	{
-		PlayerController controller = FindObjectOfType<PlayerController>();
-		if (controller.isPlayerOne == entity.isPlayerOneEntity || !controller.isPlayerOne == !entity.isPlayerOneEntity)
+		entity.playerController = FindObjectOfType<PlayerController>();
+		if (entity.playerController.isPlayerOne == entity.isPlayerOneEntity || 
+			!entity.playerController.isPlayerOne == !entity.isPlayerOneEntity)
 		{
-			entity.playerController = controller;
 			entity.playerController.buildingPlacementManager.currentBuildingPlacement = entity;
 			entity.playerController.buildingPlacementManager.canPlaceBuilding = this;
 
