@@ -20,4 +20,14 @@ public class ResourceNodes : NetworkBehaviour
 			isBeingMined.Value = false;
 		}
 	}
+	[ServerRpc(RequireOwnership = false)]
+	public void IsBeingMinedServerRPC()
+	{
+		isBeingMined.Value = true;
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void IsntBeingMinedServerRPC()
+	{
+		isBeingMined.Value = false;
+	}
 }

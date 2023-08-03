@@ -362,11 +362,10 @@ public class UnitProductionManager : NetworkBehaviour
 		VehProdSpawnLocation spawnLocationScript = NetworkManager.Singleton.SpawnManager.SpawnedObjects[buildingNetworkObjId].
 			GetComponent<VehProdSpawnLocation>();
 
-		Vector3 vehSpawnPos = spawnLocationScript.vehProdSpawnPoint.transform.position;
-
 		///client 2 units spawn at the center of the map (Example on 50x50 map)
 		///Unit Spawn Coords = (45, 5, 45) | Unit Coords = (45, 5, 45), unit coords will be correct for 100 logs
 		///Unit Spawn Coords = (45, 5, 45) | Unit Coords = (25, 5, 25), suddenly its sent to the center of the map for some reason
+		Vector3 vehSpawnPos = spawnLocationScript.vehProdSpawnPoint.transform.position;
 
 		if (clientId == 0)
 		{

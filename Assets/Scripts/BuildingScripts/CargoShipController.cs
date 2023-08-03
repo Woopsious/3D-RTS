@@ -140,9 +140,9 @@ public class CargoShipController : UnitStateController
 	[ServerRpc(RequireOwnership = false)]
 	public void ChangeResourceNodeServerRPC()
 	{
-		targetResourceNode.isBeingMined.Value = false;
+		targetResourceNode.IsntBeingMinedServerRPC();
 		targetResourceNode = playerSetResourceNode;
-		targetResourceNode.isBeingMined.Value = true;
+		targetResourceNode.IsBeingMinedServerRPC();
 		hasNewOrders = false;
 	}
 	[ServerRpc(RequireOwnership = false)]
@@ -175,7 +175,7 @@ public class CargoShipController : UnitStateController
 				newtarget.transform.position)).ToList();
 
 			cargoShip.targetResourceNode = PossibleNodes[0];
-			cargoShip.targetResourceNode.isBeingMined.Value = true;
+			cargoShip.targetResourceNode.IsBeingMinedServerRPC();
 
 			Debug.LogWarning("Closest Resource Node: " + PossibleNodes[0]);
 		}
@@ -199,7 +199,7 @@ public class CargoShipController : UnitStateController
 	//UTILITY FUNCTIONS
 	public override void RemoveEntityRefs()
 	{
-		targetResourceNode.isBeingMined.Value = false;
+		targetResourceNode.IsntBeingMinedServerRPC();
 		playerController.unitListForPlayer.Remove(this);
 		refineryControllerParent.CargoShipList.Remove(this);
 		refineryControllerParent.CheckCargoShipsCount();
@@ -262,7 +262,7 @@ public class CargoShipController : UnitStateController
 	}
 	public void DeleteSelf()
 	{
-		currentHealth.Value = -10;
+		//currentHealth.Value = -10;
 		OnEntityDeath();
 	}
 
