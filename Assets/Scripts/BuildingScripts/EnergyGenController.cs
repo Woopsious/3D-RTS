@@ -12,12 +12,6 @@ public class EnergyGenController : MonoBehaviour
 	{
 		//StartCoroutine(UpdatePoweredBuildings());
 	}
-	IEnumerator UpdatePoweredBuildings()
-	{
-		yield return new WaitForSeconds(0.5f);
-		PowerBuildings();
-		//Debug.Log("powering buildings");
-	}
 	public void PowerBuildings()
 	{
 		if (!buildingRef.capturePointController.HQRef.isPowered)

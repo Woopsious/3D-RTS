@@ -38,10 +38,6 @@ public class GameManager : NetworkBehaviour
 	public string mainMenuSceneName = "MainMenu";
 	public string mapOneSceneName = "MapOne";
 
-	[Header("Player One Networked Stats")]
-
-	[Header("Player Two Networked Stats")]
-
 	[Header("player One Stats")]
 	public NetworkVariable<int> playerOneCurrentMoney = new NetworkVariable<int>();
 	public NetworkVariable<int> playerOneIncomeMoney = new NetworkVariable<int>();
