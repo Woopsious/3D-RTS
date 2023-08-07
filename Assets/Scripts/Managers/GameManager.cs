@@ -43,20 +43,20 @@ public class GameManager : NetworkBehaviour
 	[Header("Player Two Networked Stats")]
 
 	[Header("player One Stats")]
-	public int playerOneCurrentMoney;
-	public int playerOneIncomeMoney;
-	public int playerOneCurrentAlloys;
-	public int playerOneIncomeAlloys;
-	public int playerOneCurrentCrystals;
-	public int playerOneIncomeCrystals;
+	public NetworkVariable<int> playerOneCurrentMoney = new NetworkVariable<int>();
+	public NetworkVariable<int> playerOneIncomeMoney = new NetworkVariable<int>();
+	public NetworkVariable<int> playerOneCurrentAlloys = new NetworkVariable<int>();
+	public NetworkVariable<int> playerOneIncomeAlloys = new NetworkVariable<int>();
+	public NetworkVariable<int> playerOneCurrentCrystals = new NetworkVariable<int>();
+	public NetworkVariable<int> playerOneIncomeCrystals = new NetworkVariable<int>();
 
 	[Header("player Two Stats")]
-	public int aiCurrentMoney;
-	public int aiIncomeMoney;
-	public int aiCurrentAlloys;
-	public int aiIncomeAlloys;
-	public int aiCurrentCrystals;
-	public int aiIncomeCrystals;
+	public NetworkVariable<int> playerTwoCurrentMoney = new NetworkVariable<int>();
+	public NetworkVariable<int> playerTwoIncomeMoney = new NetworkVariable<int>();
+	public NetworkVariable<int> playerTwoCurrentAlloys = new NetworkVariable<int>();
+	public NetworkVariable<int> playerTwoIncomeAlloys = new NetworkVariable<int>();
+	public NetworkVariable<int> playerTwoCurrentCrystals = new NetworkVariable<int>();
+	public NetworkVariable<int> playerTwoIncomeCrystals = new NetworkVariable<int>();
 
 	[Header("PlayerOne Building Prefabs")]
 	public List<GameObject> PlayerOneBuildingsList;

@@ -25,8 +25,12 @@ public class RefineryController : NetworkBehaviour
 			resourceNodesList.Add(resourceNode);
 		}
 	}
-	public void RefineResources(CargoShipController cargoShip)
+	[ServerRpc(RequireOwnership = false)]
+	public void RefineResourcesServerRPC(ulong cargoShipNetworkObjId, ServerRpcParams serverRpcParams = default)
 	{
+		CargoShipController cargoShip = NetworkManager.SpawnManager.SpawnedObjects[cargoShipNetworkObjId].GetComponent<CargoShipController>();
+		ulong clientId = serverRpcParams.Receive.SenderClientId;
+		//get what res to increase and by how much
 		float bonus = building.playerController.gameUIManager.techTreeManager.buildingBonusToResourceIncome;
 		int moneyToAdd = 0;
 		int alloysToAdd = 0;
@@ -45,14 +49,23 @@ public class RefineryController : NetworkBehaviour
 			crystalsToAdd = 0;
 		}
 
-		GameManager.Instance.playerOneCurrentMoney += moneyToAdd;
-		GameManager.Instance.playerOneCurrentAlloys += alloysToAdd;
-		GameManager.Instance.playerOneCurrentCrystals += crystalsToAdd;
-
-		GameManager.Instance.playerOneIncomeMoney += moneyToAdd;
-		GameManager.Instance.playerOneIncomeAlloys += alloysToAdd;
-		GameManager.Instance.playerOneIncomeCrystals += crystalsToAdd;
-
+		if (clientId == 0)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += moneyToAdd;
+			GameManager.Instance.playerOneCurrentAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerOneCurrentCrystals.Value += crystalsToAdd;
+		}
+		else if (clientId == 1)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += moneyToAdd;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalsToAdd;
+		}
+		RefineResourcesClientRPC();
+	}
+	[ClientRpc]
+	public void RefineResourcesClientRPC()
+	{
 		GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 	}
 	public void CheckCargoShipsCount()
