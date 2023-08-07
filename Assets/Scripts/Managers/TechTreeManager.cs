@@ -359,18 +359,8 @@ public class TechTreeManager : MonoBehaviour
 				StartCoroutine(ResearchCountdownTimer(techList, index, unitTechList[index].TimeToResearchSec, UiElement));
 			}
 		}
-		if (gameUIManager.playerController.isPlayerOne)
-		{
-			GameManager.Instance.playerOneCurrentMoney -= techList[index].techCostMoney;
-			GameManager.Instance.playerOneCurrentAlloys -= techList[index].techCostAlloys;
-			GameManager.Instance.playerOneCurrentCrystals -= techList[index].techCostCrystals;
-		}
-		else if (!gameUIManager.playerController.isPlayerOne)
-		{
-			GameManager.Instance.aiCurrentMoney -= techList[index].techCostMoney;
-			GameManager.Instance.aiCurrentAlloys -= techList[index].techCostAlloys;
-			GameManager.Instance.aiCurrentCrystals -= techList[index].techCostCrystals;
-		}
+		gameUIManager.playerController.EntityCostServerRPC(
+			techList[index].techCostMoney, techList[index].techCostAlloys, techList[index].techCostCrystals);
 	}
 	public IEnumerator ResearchCountdownTimer(List<Technology> techList, int index, float researchTime, GameObject UiElement)
 	{
@@ -530,9 +520,9 @@ public class TechTreeManager : MonoBehaviour
 			{
 				if (gameUIManager.playerController.isPlayerOne) //check if can afford cost depending on if is player one or two/ai
 				{
-					int moneyCost = gameUIManager.gameManager.playerOneCurrentMoney;
-					int alloyCost = gameUIManager.gameManager.playerOneCurrentAlloys;
-					int crystalCost = gameUIManager.gameManager.playerOneCurrentCrystals;
+					int moneyCost = gameUIManager.gameManager.playerOneCurrentMoney.Value;
+					int alloyCost = gameUIManager.gameManager.playerOneCurrentAlloys.Value;
+					int crystalCost = gameUIManager.gameManager.playerOneCurrentCrystals.Value;
 
 					if (techList[index].techCostMoney <= moneyCost && techList[index].techCostAlloys <= alloyCost && 
 						techList[index].techCostCrystals <= crystalCost)
@@ -548,9 +538,9 @@ public class TechTreeManager : MonoBehaviour
 				}
 				else
 				{
-					int moneyCost = gameUIManager.gameManager.aiCurrentMoney;
-					int alloyCost = gameUIManager.gameManager.aiCurrentAlloys;
-					int crystalCost = gameUIManager.gameManager.aiCurrentCrystals;
+					int moneyCost = gameUIManager.gameManager.playerTwoCurrentMoney.Value;
+					int alloyCost = gameUIManager.gameManager.playerTwoCurrentAlloys.Value;
+					int crystalCost = gameUIManager.gameManager.playerTwoCurrentCrystals.Value;
 
 					if (techList[index].techCostMoney <= moneyCost && techList[index].techCostAlloys <= alloyCost && 
 						techList[index].techCostCrystals <= crystalCost)
