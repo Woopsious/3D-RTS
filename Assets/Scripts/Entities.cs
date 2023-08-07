@@ -193,25 +193,10 @@ public class Entities : NetworkBehaviour
 	public void RefundEntity()
 	{
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Refunded 75% of resources", 1f);
-		int refundMoney = (int)(moneyCost / 1.5);
-		int refundAlloy = (int)(alloyCost / 1.5);
-		int refundCrystal = (int)(crystalCost / 1.5);
-
-		if (isPlayerOneEntity)
-		{
-			GameManager.Instance.playerOneCurrentMoney += refundMoney;
-			GameManager.Instance.playerOneCurrentAlloys += refundAlloy;
-			GameManager.Instance.playerOneCurrentCrystals += refundCrystal;
-		}
-		else if (!isPlayerOneEntity)
-		{
-			GameManager.Instance.aiCurrentMoney += refundMoney;
-			GameManager.Instance.aiCurrentAlloys += refundAlloy;
-			GameManager.Instance.aiCurrentCrystals += refundCrystal;
-		}
-		playerController.gameUIManager.UpdateCurrentResourcesUI();
 		RemoveEntityRefs();
+		playerController.gameUIManager.gameManager.RefundEntityCostServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		playerController.gameUIManager.UpdateCurrentResourcesUI();
 	}
 	public void UpdateEntityAudioVolume()
 	{

@@ -255,6 +255,30 @@ public class GameManager : NetworkBehaviour
 		}
 	}
 
+	//EDITS TO NETWORKED GAMEOBJECTS 
+	[ServerRpc(RequireOwnership = false)]
+	public void RefundEntityCostServerRPC(ulong entityNetworkedObjId)
+	{
+		Entities entity = NetworkManager.SpawnManager.SpawnedObjects[entityNetworkedObjId].GetComponent<Entities>();
+
+		int refundMoney = (int)(entity.moneyCost / 1.5);
+		int refundAlloy = (int)(entity.alloyCost / 1.5);
+		int refundCrystal = (int)(entity.crystalCost / 1.5);
+
+		if (entity.isPlayerOneEntity)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerOneCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerOneCurrentCrystals.Value += refundCrystal;
+		}
+		else if (!entity.isPlayerOneEntity)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += refundCrystal;
+		}
+	}
+
 	//save/load player and game data
 	public void CreatePlayerData()
 	{
