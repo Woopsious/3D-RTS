@@ -124,7 +124,7 @@ public class BuildTime : MonoBehaviour
 	public void CancelProduction()
 	{
 		UnitStateController unit = UnitPrefab.GetComponent<UnitStateController>();
-		UnitRefundCost(unit.moneyCost, unit.alloyCost, unit.crystalCost);
+		UnitRefundCostServerRPC(unit.moneyCost, unit.alloyCost, unit.crystalCost);
 		GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 
 		if (isSpawnPointStillValid)
@@ -148,7 +148,7 @@ public class BuildTime : MonoBehaviour
 		Destroy(gameObject);
 	}
 	[ServerRpc(RequireOwnership = false)]
-	public void UnitRefundCost(int moneyCost, int alloyCost, int crystalCost)
+	public void UnitRefundCostServerRPC(int moneyCost, int alloyCost, int crystalCost)
 	{
 		if (isPlayerOne)
 		{
@@ -162,9 +162,5 @@ public class BuildTime : MonoBehaviour
 			GameManager.Instance.playerTwoCurrentAlloys.Value += alloyCost;
 			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalCost;
 		}
-	}
-	public void TestDebugLog()
-	{
-		Debug.Log("Test Log");
 	}
 }
