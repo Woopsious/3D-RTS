@@ -132,13 +132,21 @@ public class BuildingPlacementManager : NetworkBehaviour
 		else
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing a Building", 2);
 	}
-	public void BuildingCost(int moneyCost, int alloyCost, int crystalCost)
+	[ServerRpc(RequireOwnership = false)]
+	public void BuildingCostServerRPC(int moneyCost, int alloyCost, int crystalCost)
 	{
-		GameManager.Instance.playerOneCurrentMoney -= moneyCost;
-		GameManager.Instance.playerOneCurrentAlloys -= alloyCost;
-		GameManager.Instance.playerOneCurrentCrystals -= crystalCost;
-
-		playerController.gameUIManager.UpdateCurrentResourcesUI();
+		if (playerController.isPlayerOne)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value -= moneyCost;
+			GameManager.Instance.playerOneCurrentAlloys.Value -= alloyCost;
+			GameManager.Instance.playerOneCurrentCrystals.Value -= crystalCost;
+		}
+		else if (!playerController.isPlayerOne)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value -= moneyCost;
+			GameManager.Instance.playerTwoCurrentAlloys.Value -= alloyCost;
+			GameManager.Instance.playerTwoCurrentCrystals.Value -= crystalCost;
+		}
 	}
 	public bool CheckIfCanBuy(int MoneyCost, int AlloyCost, int CrystalCost)
 	{
@@ -227,8 +235,9 @@ public class BuildingPlacementManager : NetworkBehaviour
 
 		if (currentBuildingPlacement != null && currentBuildingPlacement.GetComponent<NetworkObject>().IsOwner)
 		{
-			BuildingCost(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
+			BuildingCostServerRPC(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
 			currentBuildingPlacement = null;
+			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
 			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 		}
