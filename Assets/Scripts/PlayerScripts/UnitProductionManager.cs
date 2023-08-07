@@ -127,15 +127,16 @@ public class UnitProductionManager : NetworkBehaviour
 			{
 				//run check to see if a building of the correct type for a unit is built in future
 				build.buildPosDestination = unitBuildHighlighterParent.transform.position;
+				build.isPlayerOne = playerController.isPlayerOne;
 
-				if(build.FindClosestProdBuilding())
+				if (build.FindClosestProdBuilding())
 				{
 					UnitStateController broughtUnit = build.UnitPrefab.GetComponent<UnitStateController>();
-
-					if (CheckIfCanBuy(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost)) //if player can afford them 
+					//if player can afford them
+					if (playerController.CheckIfCanBuyEntity(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost))
 					{
 						//then -unit prices and add to correct queue list and start production on first one if not already started, then update resUI
-						UnitCost(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
+						playerController.EntityCostServerRPC(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
 
 						if (build.listNumRef == 1)
 						{
@@ -332,23 +333,6 @@ public class UnitProductionManager : NetworkBehaviour
 			baseBuildTime = 10;
 
 		return baseBuildTime;
-	}
-	public bool CheckIfCanBuy(int MoneyCost, int AlloyCost, int CrystalCost)
-	{
-		if (MoneyCost > GameManager.Instance.playerOneCurrentMoney || AlloyCost > GameManager.Instance.playerOneCurrentAlloys
-			|| CrystalCost > GameManager.Instance.playerOneCurrentCrystals)
-		{
-			return false;
-		}
-		return true;
-	}
-	public void UnitCost(int moneyCost, int alloyCost, int crystalCost)
-	{
-		GameManager.Instance.playerOneCurrentMoney -= moneyCost;
-		GameManager.Instance.playerOneCurrentAlloys -= alloyCost;
-		GameManager.Instance.playerOneCurrentCrystals -= crystalCost;
-
-		playerController.gameUIManager.UpdateCurrentResourcesUI();
 	}
 
 	//server spawns unit in

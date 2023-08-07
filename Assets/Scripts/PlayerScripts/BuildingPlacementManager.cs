@@ -124,38 +124,13 @@ public class BuildingPlacementManager : NetworkBehaviour
 
 		if (currentBuildingPlacement == null)
 		{
-			if (CheckIfCanBuy(building.moneyCost, building.alloyCost, building.crystalCost))
+			if (playerController.CheckIfCanBuyEntity(building.moneyCost, building.alloyCost, building.crystalCost))
 				SpawnPlayerBuildingServerRPC(buildingIndex);
 			else
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford building", 2);
 		}
 		else
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing a Building", 2);
-	}
-	[ServerRpc(RequireOwnership = false)]
-	public void BuildingCostServerRPC(int moneyCost, int alloyCost, int crystalCost)
-	{
-		if (playerController.isPlayerOne)
-		{
-			GameManager.Instance.playerOneCurrentMoney.Value -= moneyCost;
-			GameManager.Instance.playerOneCurrentAlloys.Value -= alloyCost;
-			GameManager.Instance.playerOneCurrentCrystals.Value -= crystalCost;
-		}
-		else if (!playerController.isPlayerOne)
-		{
-			GameManager.Instance.playerTwoCurrentMoney.Value -= moneyCost;
-			GameManager.Instance.playerTwoCurrentAlloys.Value -= alloyCost;
-			GameManager.Instance.playerTwoCurrentCrystals.Value -= crystalCost;
-		}
-	}
-	public bool CheckIfCanBuy(int MoneyCost, int AlloyCost, int CrystalCost)
-	{
-		if (MoneyCost > GameManager.Instance.playerOneCurrentMoney || AlloyCost > GameManager.Instance.playerOneCurrentAlloys
-			|| CrystalCost > GameManager.Instance.playerOneCurrentCrystals)
-		{
-			return false;
-		}
-		return true;
 	}
 
 	//NETWORKING FUNCTIONS
@@ -235,7 +210,8 @@ public class BuildingPlacementManager : NetworkBehaviour
 
 		if (currentBuildingPlacement != null && currentBuildingPlacement.GetComponent<NetworkObject>().IsOwner)
 		{
-			BuildingCostServerRPC(currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
+			playerController.EntityCostServerRPC(
+				currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
 			currentBuildingPlacement = null;
 			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);

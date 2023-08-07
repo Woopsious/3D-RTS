@@ -205,4 +205,47 @@ public class PlayerController : NetworkBehaviour
 	{
 		return EventSystem.current.IsPointerOverGameObject();
 	}
+
+	public bool CheckIfCanBuyEntity(int MoneyCost, int AlloyCost, int CrystalCost)
+	{
+		if (isPlayerOne)
+		{
+			if (MoneyCost > GameManager.Instance.playerOneCurrentMoney.Value || AlloyCost > GameManager.Instance.playerOneCurrentAlloys.Value
+				|| CrystalCost > GameManager.Instance.playerOneCurrentCrystals.Value)
+			{
+				return false;
+			}
+			return true;
+		}
+		else if (!isPlayerOne)
+		{
+			if (MoneyCost > GameManager.Instance.playerTwoCurrentMoney.Value || AlloyCost > GameManager.Instance.playerTwoCurrentAlloys.Value
+				|| CrystalCost > GameManager.Instance.playerTwoCurrentCrystals.Value)
+			{
+				return false;
+			}
+			return true;
+		}
+		else
+		{
+			Debug.LogError("This error shouldnt happen");
+			return false;
+		}
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void EntityCostServerRPC(int moneyCost, int alloyCost, int crystalCost)
+	{
+		if (isPlayerOne)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value -= moneyCost;
+			GameManager.Instance.playerOneCurrentAlloys.Value -= alloyCost;
+			GameManager.Instance.playerOneCurrentCrystals.Value -= crystalCost;
+		}
+		else if (!isPlayerOne)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value -= moneyCost;
+			GameManager.Instance.playerTwoCurrentAlloys.Value -= alloyCost;
+			GameManager.Instance.playerTwoCurrentCrystals.Value -= crystalCost;
+		}
+	}
 }
