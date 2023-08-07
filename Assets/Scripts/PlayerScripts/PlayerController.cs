@@ -233,19 +233,25 @@ public class PlayerController : NetworkBehaviour
 		}
 	}
 	[ServerRpc(RequireOwnership = false)]
-	public void EntityCostServerRPC(int moneyCost, int alloyCost, int crystalCost)
+	public void EntityCostServerRPC(bool isPlayerOneCall, int moneyCost, int alloyCost, int crystalCost)
 	{
-		if (isPlayerOne)
+		if (isPlayerOneCall)
 		{
 			GameManager.Instance.playerOneCurrentMoney.Value -= moneyCost;
 			GameManager.Instance.playerOneCurrentAlloys.Value -= alloyCost;
 			GameManager.Instance.playerOneCurrentCrystals.Value -= crystalCost;
 		}
-		else if (!isPlayerOne)
+		else if (!isPlayerOneCall)
 		{
 			GameManager.Instance.playerTwoCurrentMoney.Value -= moneyCost;
 			GameManager.Instance.playerTwoCurrentAlloys.Value -= alloyCost;
 			GameManager.Instance.playerTwoCurrentCrystals.Value -= crystalCost;
 		}
+		UpdateClientUiClientRPC();
+	}
+	[ClientRpc]
+	public void UpdateClientUiClientRPC()
+	{
+		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(1f));
 	}
 }

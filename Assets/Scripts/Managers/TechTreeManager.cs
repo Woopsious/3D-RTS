@@ -359,7 +359,7 @@ public class TechTreeManager : MonoBehaviour
 				StartCoroutine(ResearchCountdownTimer(techList, index, unitTechList[index].TimeToResearchSec, UiElement));
 			}
 		}
-		gameUIManager.playerController.EntityCostServerRPC(
+		gameUIManager.playerController.EntityCostServerRPC(gameUIManager.playerController.isPlayerOne,
 			techList[index].techCostMoney, techList[index].techCostAlloys, techList[index].techCostCrystals);
 	}
 	public IEnumerator ResearchCountdownTimer(List<Technology> techList, int index, float researchTime, GameObject UiElement)

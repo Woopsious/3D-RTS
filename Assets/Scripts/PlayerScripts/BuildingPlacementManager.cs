@@ -210,12 +210,10 @@ public class BuildingPlacementManager : NetworkBehaviour
 
 		if (currentBuildingPlacement != null && currentBuildingPlacement.GetComponent<NetworkObject>().IsOwner)
 		{
-			playerController.EntityCostServerRPC(
+			playerController.EntityCostServerRPC(playerController.isPlayerOne,
 				currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
 			currentBuildingPlacement = null;
-			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
-			GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
 		}
 	}
 }

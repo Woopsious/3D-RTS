@@ -196,7 +196,7 @@ public class Entities : NetworkBehaviour
 		RemoveEntityRefs();
 		playerController.gameUIManager.gameManager.RefundEntityCostServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
-		playerController.gameUIManager.UpdateCurrentResourcesUI();
+		StartCoroutine(playerController.gameUIManager.UpdateCurrentResourcesUI(0f));
 	}
 	public void UpdateEntityAudioVolume()
 	{

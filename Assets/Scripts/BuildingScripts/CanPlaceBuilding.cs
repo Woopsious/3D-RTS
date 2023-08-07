@@ -66,8 +66,6 @@ public class CanPlaceBuilding : MonoBehaviour
 			entity.playerController.buildingPlacementManager.currentBuildingPlacementNetworkId =
 				entity.GetComponent<NetworkObject>().NetworkObjectId;
 		}
-		Debug.LogWarning(entity.isPlayerOneEntity);
-		Debug.LogWarning(entity.playerController.isPlayerOne);
 	}
 
 	//track if colliding with another building or capture point and placement height CAN PLACE HIGHLIGHTER DOESNT ALWAYS WORK

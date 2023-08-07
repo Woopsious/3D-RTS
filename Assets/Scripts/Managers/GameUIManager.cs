@@ -89,7 +89,7 @@ public class GameUIManager : MonoBehaviour
 	{
 		gameSpeed = 1;
 		UpdateGameSpeedUi();
-		UpdateCurrentResourcesUI();
+		StartCoroutine(UpdateCurrentResourcesUI(0f));
 		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
 	}
 	public void PlayButtonSound()
@@ -424,13 +424,20 @@ public class GameUIManager : MonoBehaviour
 	{
 		gameSpeedText.text = "x" + gameSpeed.ToString() + " speed";
 	}
-	public void UpdateCurrentResourcesUI()
+	public IEnumerator UpdateCurrentResourcesUI(float secondsToWait)
 	{
-		if (playerController != null)
+		yield return new WaitForSeconds(secondsToWait);
+		if (playerController.isPlayerOne)
 		{
-			CurrentMoneyText.text = GameManager.Instance.playerOneCurrentMoney.ToString();
-			CurrentAlloysText.text = GameManager.Instance.playerOneCurrentAlloys.ToString();
-			CurrentCrystalsText.text = GameManager.Instance.playerOneCurrentCrystals.ToString();
+			CurrentMoneyText.text = GameManager.Instance.playerOneCurrentMoney.Value.ToString();
+			CurrentAlloysText.text = GameManager.Instance.playerOneCurrentAlloys.Value.ToString();
+			CurrentCrystalsText.text = GameManager.Instance.playerOneCurrentCrystals.Value.ToString();
+		}
+		else if (!playerController.isPlayerOne)
+		{
+			CurrentMoneyText.text = GameManager.Instance.playerTwoCurrentMoney.Value.ToString();
+			CurrentAlloysText.text = GameManager.Instance.playerTwoCurrentAlloys.Value.ToString();
+			CurrentCrystalsText.text = GameManager.Instance.playerTwoCurrentCrystals.Value.ToString();
 		}
 	}
 	public void UpdateIncomeResourcesUI(int playerOneMoneyPerSecond, int playerOneAlloysPerSecond, int playerOneCrystalsPerSecond,

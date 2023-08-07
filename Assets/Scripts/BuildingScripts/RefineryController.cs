@@ -26,47 +26,50 @@ public class RefineryController : NetworkBehaviour
 		}
 	}
 	[ServerRpc(RequireOwnership = false)]
-	public void RefineResourcesServerRPC(ulong cargoShipNetworkObjId, ServerRpcParams serverRpcParams = default)
+	public void RefineResourcesServerRPC(ulong cargoShipNetworkObjId, ulong refineryNetworkObjId,
+		ServerRpcParams serverRpcParams = default)
 	{
 		CargoShipController cargoShip = NetworkManager.SpawnManager.SpawnedObjects[cargoShipNetworkObjId].GetComponent<CargoShipController>();
+		RefineryController refinery = NetworkManager.SpawnManager.SpawnedObjects[refineryNetworkObjId].GetComponent<RefineryController>();
 		ulong clientId = serverRpcParams.Receive.SenderClientId;
 		//get what res to increase and by how much
-		float bonus = building.playerController.gameUIManager.techTreeManager.buildingBonusToResourceIncome;
+		//float bonus = refinery.building.playerController.gameUIManager.techTreeManager.buildingBonusToResourceIncome;
 		int moneyToAdd = 0;
 		int alloysToAdd = 0;
 		int crystalsToAdd = 0;
 
 		if (cargoShip.crystalsCount != 0)
 		{
-			moneyToAdd = (int)(cargoShip.crystalsCount * 3 * bonus);
+			moneyToAdd = (int)(cargoShip.crystalsCount * 3);// * bonus);
 			alloysToAdd = 0;
-			crystalsToAdd = (int)(cargoShip.crystalsCount * bonus);
+			crystalsToAdd = (int)(cargoShip.crystalsCount);// * bonus);
 		}
 		else if (cargoShip.alloysCount != 0)
 		{
-			moneyToAdd = (int)(cargoShip.alloysCount * 1.2f * bonus);
-			alloysToAdd = (int)(cargoShip.alloysCount * bonus);
+			moneyToAdd = (int)(cargoShip.alloysCount * 1.2f);// * bonus);
+			alloysToAdd = (int)(cargoShip.alloysCount);// * bonus);
 			crystalsToAdd = 0;
 		}
 
-		if (clientId == 0)
+		if (cargoShip.isPlayerOneEntity)
 		{
 			GameManager.Instance.playerOneCurrentMoney.Value += moneyToAdd;
 			GameManager.Instance.playerOneCurrentAlloys.Value += alloysToAdd;
 			GameManager.Instance.playerOneCurrentCrystals.Value += crystalsToAdd;
+			RefineResourcesClientRPC();
 		}
-		else if (clientId == 1)
+		else if (!cargoShip.isPlayerOneEntity)
 		{
 			GameManager.Instance.playerTwoCurrentMoney.Value += moneyToAdd;
 			GameManager.Instance.playerTwoCurrentAlloys.Value += alloysToAdd;
 			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalsToAdd;
+			RefineResourcesClientRPC();
 		}
-		RefineResourcesClientRPC();
 	}
 	[ClientRpc]
 	public void RefineResourcesClientRPC()
 	{
-		GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
+		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(0.5f));
 	}
 	public void CheckCargoShipsCount()
 	{
@@ -78,14 +81,6 @@ public class RefineryController : NetworkBehaviour
 		yield return new WaitForSeconds(5);
 		if (CargoShipList.Count < 2)
 			SpawnCargoShipsServerRPC(GetComponent<NetworkObject>().NetworkObjectId, vehSpawnLocation.transform.position);
-
-		//GameObject go = Instantiate(cargoShipPrefab, vehSpawnLocation.transform.position, Quaternion.identity);
-		//CargoShipController script = go.GetComponent<CargoShipController>();
-		//script.refineryControllerParent = this;
-
-		//CargoShipList.Add(script);
-
-		//CheckCargoShipsCount();
 	}
 	[ServerRpc(RequireOwnership = false)]
 	public void SpawnCargoShipsServerRPC(ulong buildingNetworkObjId, Vector3 spawnLocation)

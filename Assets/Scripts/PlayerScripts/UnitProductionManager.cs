@@ -136,7 +136,8 @@ public class UnitProductionManager : NetworkBehaviour
 					if (playerController.CheckIfCanBuyEntity(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost))
 					{
 						//then -unit prices and add to correct queue list and start production on first one if not already started, then update resUI
-						playerController.EntityCostServerRPC(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
+						playerController.EntityCostServerRPC(playerController.isPlayerOne, 
+							broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
 
 						if (build.listNumRef == 1)
 						{
