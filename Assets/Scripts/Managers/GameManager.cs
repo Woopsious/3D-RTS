@@ -218,27 +218,31 @@ public class GameManager : NetworkBehaviour
 		timer += Time.deltaTime;
 		if (timer >= 60)
 		{
-			int playerOneMoneyPerSecond = playerOneIncomeMoney / 60;
-			int playerOneAlloysPerSecond = playerOneIncomeAlloys / 60;
-			int playerOneCrystalsPerSecond = playerOneIncomeCrystals / 60;
+			int playerOneMoneyPerSecond = playerOneIncomeMoney.Value / 60;
+			int playerOneAlloysPerSecond = playerOneIncomeAlloys.Value / 60;
+			int playerOneCrystalsPerSecond = playerOneIncomeCrystals.Value / 60;
 
-			int aiMoneyPerSecond = aiIncomeMoney / 60;
-			int aiAlloysPerSecond = aiIncomeAlloys / 60;
-			int aiCrystalsPerSecond = aiIncomeCrystals / 60;
+			int playerTwoMoneyPerSecond = playerTwoIncomeMoney.Value / 60;
+			int playerTwoAlloysPerSecond = playerTwoIncomeAlloys.Value / 60;
+			int playerTwoCrystalsPerSecond = playerTwoIncomeCrystals.Value / 60;
 
 			gameUIManager.UpdateIncomeResourcesUI(playerOneMoneyPerSecond, playerOneAlloysPerSecond, playerOneCrystalsPerSecond,
-				aiMoneyPerSecond, aiAlloysPerSecond, aiCrystalsPerSecond);
+				playerTwoMoneyPerSecond, playerTwoAlloysPerSecond, playerTwoCrystalsPerSecond);
 
-			playerOneIncomeMoney = 0;
-			playerOneIncomeAlloys = 0;
-			playerOneIncomeCrystals = 0;
-
-			aiIncomeMoney = 0;
-			aiIncomeAlloys = 0;
-			aiIncomeCrystals = 0;
-
+			ResetIncomeCountServerRPC();
 			timer = 0;
 		}
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void ResetIncomeCountServerRPC()
+	{
+		playerOneIncomeMoney.Value = 0;
+		playerOneIncomeAlloys.Value = 0;
+		playerOneIncomeCrystals.Value = 0;
+
+		playerTwoIncomeMoney.Value = 0;
+		playerTwoIncomeAlloys.Value = 0;
+		playerTwoIncomeCrystals.Value = 0;
 	}
 	public void GameClock() //game timer in hrs, mins and secs
 	{
