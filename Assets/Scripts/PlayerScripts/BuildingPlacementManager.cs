@@ -187,7 +187,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 	}
 
 	[ServerRpc(RequireOwnership = false)]
-	public void TryPlaceCurrentBuildingPlacementServerRPC(ulong networkObjId, ServerRpcParams serverRpcParams = default)
+	public void TryPlaceCurrentBuildingPlacementServerRPC(ulong networkObjId)
 	{
 		if (!IsServer) return;
 		BuildingPlacedClientRPC(networkObjId);

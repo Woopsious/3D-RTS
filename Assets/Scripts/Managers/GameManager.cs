@@ -38,6 +38,10 @@ public class GameManager : NetworkBehaviour
 	public string mainMenuSceneName = "MainMenu";
 	public string mapOneSceneName = "MapOne";
 
+	[Header("Player One Networked Stats")]
+
+	[Header("Player Two Networked Stats")]
+
 	[Header("player One Stats")]
 	public int playerOneCurrentMoney;
 	public int playerOneIncomeMoney;
@@ -357,7 +361,7 @@ public class GameManager : NetworkBehaviour
 	}
 
 	[ServerRpc(RequireOwnership = false)]
-	public void RemoveEntityServerRPC(ulong networkObjId)
+	public void RemoveEntityServerRPC(ulong networkObjId)	
 	{
 		RemoveEntityUiClientRPC(networkObjId);
 		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<NetworkObject>().Despawn();

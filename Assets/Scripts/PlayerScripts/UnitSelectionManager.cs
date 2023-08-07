@@ -197,7 +197,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			{
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
 				if (entity.GetComponent<UnitStateController>() != null && entity.isPlayerOneEntity != playerController.isPlayerOne)
-					TryAttackEnemyEntity(entity);
+					TryAttackEnemyEntity(entity.GetComponent<NetworkObject>().NetworkObjectId);
 
 				else if (entity.GetComponent<CargoShipController>() != null)
 					TrySelectCargoShip(entity.GetComponent<CargoShipController>());
@@ -321,7 +321,8 @@ public class UnitSelectionManager : NetworkBehaviour
 			else //else mine selected node
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
-				SelectedCargoShip.SetResourceNodeFromPlayerInputServerRPC(resourceNode.GetComponent<NetworkObject>().NetworkObjectId);
+				SelectedCargoShip.SetResourceNodeFromPlayerInputServerRPC(SelectedCargoShip.GetComponent<NetworkObject>().NetworkObjectId, 
+					resourceNode.GetComponent<NetworkObject>().NetworkObjectId);
 			}
 		}
 		//move selected units to mouse pos
@@ -336,13 +337,13 @@ public class UnitSelectionManager : NetworkBehaviour
 			}
 		}
 	}
-	public void TryAttackEnemyEntity(Entities entity)
+	public void TryAttackEnemyEntity(ulong targetEntityNetworkObjId)
 	{
 		//move selected units closer to target and attack it
 		for (int i = 0; i < selectedUnitList.Count; i++)
 		{
 			UnitStateController unit = selectedUnitList[i];
-			unit.TryAttackPlayerSetTarget(entity);
+			unit.TryAttackPlayerSetTargetServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId, targetEntityNetworkObjId);
 		}
 	}
 

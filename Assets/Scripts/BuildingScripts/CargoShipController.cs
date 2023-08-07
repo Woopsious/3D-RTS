@@ -119,27 +119,19 @@ public class CargoShipController : UnitStateController
 
 	//function to find res nodes
 	[ServerRpc(RequireOwnership = false)]
-	public void SetResourceNodeFromPlayerInputServerRPC(ulong resourceNodeObjId)
+	public void SetResourceNodeFromPlayerInputServerRPC(ulong cargoShipObjId, ulong resourceNodeObjId)
 	{
-		SetResourceNodeFromPlayerInputClientRPC(GetComponent<NetworkObject>().NetworkObjectId, resourceNodeObjId);
-	}
-	[ClientRpc]
-	public void SetResourceNodeFromPlayerInputClientRPC(ulong cargoShipObjId, ulong resourceNodeObjId)
-	{
-		CargoShipController cargoShip = NetworkManager.Singleton.SpawnManager.SpawnedObjects[resourceNodeObjId].GetComponent<CargoShipController>();
-		playerSetResourceNode = NetworkManager.Singleton.SpawnManager.SpawnedObjects[resourceNodeObjId].GetComponent<ResourceNodes>();
+		CargoShipController cargoShip = NetworkManager.Singleton.SpawnManager.SpawnedObjects[cargoShipObjId].GetComponent<CargoShipController>();
+		cargoShip.playerSetResourceNode = NetworkManager.Singleton.SpawnManager.SpawnedObjects[resourceNodeObjId].GetComponent<ResourceNodes>();
 
-		if (IsServer)
+		if (cargoShip.canChangeOrders)
 		{
-			if (cargoShip.canChangeOrders)
-			{
-				cargoShip.ChangeResourceNodeServerRPC();
-				cargoShip.StopAllCoroutines();
-				cargoShip.StartCoroutine(IncreaseHeight());
-			}
-			else
-				cargoShip.hasNewOrders = true;
+			cargoShip.ChangeResourceNodeServerRPC();
+			cargoShip.StopAllCoroutines();
+			cargoShip.StartCoroutine(IncreaseHeight());
 		}
+		else
+			cargoShip.hasNewOrders = true;
 	}
 	[ServerRpc(RequireOwnership = false)]
 	public void ChangeResourceNodeServerRPC()

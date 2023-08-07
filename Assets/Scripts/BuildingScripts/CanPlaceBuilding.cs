@@ -55,16 +55,19 @@ public class CanPlaceBuilding : MonoBehaviour
 	}
 	public void AssignPlayerController(Entities entity)
 	{
-		entity.playerController = FindObjectOfType<PlayerController>();
-		if (entity.playerController.isPlayerOne == entity.isPlayerOneEntity || 
-			!entity.playerController.isPlayerOne == !entity.isPlayerOneEntity)
+		PlayerController playerCon = FindObjectOfType<PlayerController>();
+
+		if (playerCon.isPlayerOne != !entity.isPlayerOneEntity)
 		{
+			entity.playerController = playerCon;
 			entity.playerController.buildingPlacementManager.currentBuildingPlacement = entity;
 			entity.playerController.buildingPlacementManager.canPlaceBuilding = this;
 
 			entity.playerController.buildingPlacementManager.currentBuildingPlacementNetworkId =
 				entity.GetComponent<NetworkObject>().NetworkObjectId;
 		}
+		Debug.LogWarning(entity.isPlayerOneEntity);
+		Debug.LogWarning(entity.playerController.isPlayerOne);
 	}
 
 	//track if colliding with another building or capture point and placement height CAN PLACE HIGHLIGHTER DOESNT ALWAYS WORK

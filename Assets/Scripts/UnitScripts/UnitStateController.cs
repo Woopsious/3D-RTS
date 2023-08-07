@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Unity.Burst.CompilerServices;
 using Unity.Netcode;
 using Unity.VisualScripting;
@@ -171,18 +172,22 @@ public class UnitStateController : Entities
 	}
 
 	//ATTACK PLAYER SET TARGET FUNCTIONS
-	public virtual void TryAttackPlayerSetTarget(Entities entity)
+	[ServerRpc(RequireOwnership = false)]
+	public virtual void TryAttackPlayerSetTargetServerRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId,
+		ServerRpcParams serverRpcParams = default)
 	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkObjId].GetComponent<UnitStateController>();
+		Entities targetEntity = NetworkManager.SpawnManager.SpawnedObjects[targetEntityNetworkObjId].GetComponent<Entities>();
 		hasReachedPlayerSetTarget = false;
 
-		if (IsPlayerSetTargetSpotted(entity)) //check if already spotted in target lists
+		if (unit.IsPlayerSetTargetSpotted(targetEntity)) //check if already spotted in target lists
 		{
-			playerSetTarget = entity;
+			unit.playerSetTarget = targetEntity;
 		}
 		else //walk in line of sight of enemy then switch to that target
 		{
-			playerSetTarget = entity;
-			MoveToDestination(entity.transform.position);
+			unit.playerSetTarget = targetEntity;
+			MoveToDestination(targetEntity.transform.position);
 		}
 	}
 	public bool IsPlayerSetTargetSpotted(Entities entity)
