@@ -197,7 +197,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			{
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
 				if (entity.GetComponent<UnitStateController>() != null && entity.isPlayerOneEntity != playerController.isPlayerOne)
-					TryAttackEnemyEntity(entity.GetComponent<NetworkObject>().NetworkObjectId);
+					TryAttackEnemyEntity(entity.NetworkObjectId);
 
 				else if (entity.GetComponent<CargoShipController>() != null)
 					TrySelectCargoShip(entity.GetComponent<CargoShipController>());
@@ -343,7 +343,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		for (int i = 0; i < selectedUnitList.Count; i++)
 		{
 			UnitStateController unit = selectedUnitList[i];
-			unit.TryAttackPlayerSetTargetServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId, targetEntityNetworkObjId);
+			unit.TryAttackPlayerSetTargetServerRPC(unit.EntityNetworkObjId, targetEntityNetworkObjId);
 		}
 	}
 

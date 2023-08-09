@@ -18,14 +18,14 @@ public class WeaponSystem : NetworkBehaviour
 	public ParticleSystem mainWeaponProjectileParticle;
 	public float mainWeaponDamage;
 	public float mainWeaponAttackSpeed;
-	public NetworkVariable<float> mainWeaponAttackSpeedTimer = new NetworkVariable<float>();
+	public float mainWeaponAttackSpeedTimer;
 
 	public AudioSource secondaryWeaponAudio;
 	public ParticleSystem secondaryWeaponParticles;
 	public ParticleSystem secondaryWeaponProjectileParticle;
 	public float secondaryWeaponDamage;
 	public float secondaryWeaponAttackSpeed;
-	public NetworkVariable<float> secondaryWeaponAttackSpeedTimer = new NetworkVariable<float>();
+	public float secondaryWeaponAttackSpeedTimer;
 
 	public bool hasSecondaryWeapon;
 
@@ -38,6 +38,11 @@ public class WeaponSystem : NetworkBehaviour
 		if (unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
 		unit.currentBuildingTarget = GrabClosestBuilding();
 
+		if (unit.currentUnitTarget != null)
+			SyncCurrentUnitTargetServerRPC(unit.EntityNetworkObjId, unit.currentUnitTarget.EntityNetworkObjId);
+		if (unit.currentBuildingTarget != null)
+			SyncCurrentBuildingTargetServerRPC(unit.EntityNetworkObjId, unit.currentBuildingTarget.EntityNetworkObjId);
+
 		if (unit.targetList.Count == 0)
 		{
 			unit.ChangeStateIdleClientRPC();
@@ -45,24 +50,6 @@ public class WeaponSystem : NetworkBehaviour
 		}
 	}
 
-	[ServerRpc(RequireOwnership = false)]
-	public void TryFindTargetsServerRPC(ulong networkObjId)
-	{
-		UnitStateController unitNetwork = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>();
-
-		unitNetwork.weaponSystem.RemoveNullRefsFromTargetLists();
-		unitNetwork.currentUnitTarget = GrabClosestUnit();
-		unitNetwork.currentBuildingTarget = GrabClosestBuilding();
-	}
-	[ClientRpc]
-	public void TryFindTargetsClientRPC(ulong networkObjId)
-	{
-		UnitStateController unitNetwork = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>();
-
-		unitNetwork.weaponSystem.RemoveNullRefsFromTargetLists();
-		unitNetwork.currentUnitTarget = GrabClosestUnit();
-		unitNetwork.currentBuildingTarget = GrabClosestBuilding();
-	}
 	//sort targets from closest to furthest, check if target in view + attack range, once a valid target found, return target then end loop
 	public UnitStateController GrabClosestUnit()
 	{
@@ -90,11 +77,11 @@ public class WeaponSystem : NetworkBehaviour
 	}
 
 	//server/host checks if entity exists + in attack range, if true shoot it, else try get new target and remove null refs from lists
-	[ClientRpc]
-	public void ShootMainWeapClientRPC(ulong networkObjId)
+	[ServerRpc(RequireOwnership = false)]
+	public void ShootMainWeapServerRPC(ulong networkObjId)
 	{
-		UnitStateController unitNetwork = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>();
-		unitNetwork.weaponSystem.ShootMainWeapon();
+		UnitStateController unit = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>();
+		unit.weaponSystem.ShootMainWeapon();
 	}
 	public void ShootMainWeapon()
 	{
@@ -140,8 +127,8 @@ public class WeaponSystem : NetworkBehaviour
 		else
 			TryFindTargets();
 	}
-	[ClientRpc]
-	public void ShootSeconWeapClientRPC(ulong networkObjId)
+	[ServerRpc(RequireOwnership = false)]
+	public void ShootSeconWeapServerRPC(ulong networkObjId)
 	{
 		UnitStateController unitNetwork = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>();
 		unitNetwork.weaponSystem.ShootSecondaryWeapon();
@@ -178,6 +165,27 @@ public class WeaponSystem : NetworkBehaviour
 	}
 
 	//UTILITY FUNCTIONS
+	[ServerRpc(RequireOwnership = false)]
+	public void SyncPlayerSetTargetServerRPC(ulong unitId, ulong PlayerSetTargetId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
+		Entities entity = NetworkManager.SpawnManager.SpawnedObjects[PlayerSetTargetId].GetComponent<UnitStateController>();
+		unit.playerSetTarget = entity;
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void SyncCurrentUnitTargetServerRPC(ulong unitId, ulong UnitTargetId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
+		UnitStateController unitTarget = NetworkManager.SpawnManager.SpawnedObjects[UnitTargetId].GetComponent<UnitStateController>();
+		unit.currentUnitTarget = unitTarget;
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void SyncCurrentBuildingTargetServerRPC(ulong unitId, ulong BuildingTargetId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
+		BuildingManager BuildingTarget = NetworkManager.SpawnManager.SpawnedObjects[BuildingTargetId].GetComponent<BuildingManager>();
+		unit.currentBuildingTarget = BuildingTarget;
+	}
 	public void AimProjectileAtTarget(GameObject particleObject, Vector3 targetPos) //function to shoot projectile at target center
 	{
 		var lookRotation = Quaternion.LookRotation(targetPos - particleObject.transform.position);
@@ -211,46 +219,35 @@ public class WeaponSystem : NetworkBehaviour
 	}
 
 	//ATTACK FUNCTIONS
-	[ServerRpc(RequireOwnership = false)]
-	public void GunTimersServerRPC()
-	{
-		if (IsServer)
-		{
-			MainGunTimer();
-
-			if (hasSecondaryWeapon)
-				SecondaryGunTimer();
-		}
-	}
 	public void MainGunTimer()
 	{
-		if (mainWeaponAttackSpeedTimer.Value > 0)
-			mainWeaponAttackSpeedTimer.Value -= Time.deltaTime;
+		if (mainWeaponAttackSpeedTimer > 0)
+			mainWeaponAttackSpeedTimer -= Time.deltaTime;
 		else
 		{
-			ShootMainWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
-			mainWeaponAttackSpeedTimer.Value = mainWeaponAttackSpeed;
+			ShootMainWeapServerRPC(unit.EntityNetworkObjId);
+			mainWeaponAttackSpeedTimer = mainWeaponAttackSpeed;
 		}
 	}
 	public void SecondaryGunTimer()
 	{
-		if (secondaryWeaponAttackSpeedTimer.Value > 0)
-			secondaryWeaponAttackSpeedTimer.Value -= Time.deltaTime;
+		if (secondaryWeaponAttackSpeedTimer > 0)
+			secondaryWeaponAttackSpeedTimer -= Time.deltaTime;
 		else
 		{
 			if (unit.hasShootAnimation)
 				StartCoroutine(DelaySecondaryAttack(1));
 			else
-				ShootSeconWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
+				ShootSeconWeapServerRPC(unit.EntityNetworkObjId);
 
-			secondaryWeaponAttackSpeedTimer.Value = secondaryWeaponAttackSpeed;
+			secondaryWeaponAttackSpeedTimer = secondaryWeaponAttackSpeed;
 		}
 	}
 	public IEnumerator DelaySecondaryAttack(float seconds)
 	{
-		secondaryWeaponAttackSpeedTimer.Value++;
-		secondaryWeaponAttackSpeedTimer.Value %= secondaryWeaponAttackSpeed - 1;
+		secondaryWeaponAttackSpeedTimer++;
+		secondaryWeaponAttackSpeedTimer %= secondaryWeaponAttackSpeed - 1;
 		yield return new WaitForSeconds(seconds);
-		ShootSeconWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		ShootSeconWeapServerRPC(unit.EntityNetworkObjId);
 	}
 }

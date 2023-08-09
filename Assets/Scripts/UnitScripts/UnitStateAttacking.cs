@@ -32,11 +32,15 @@ public class UnitStateAttacking : UnitBaseState
 	{
 		if (unit.isUnitArmed)
 		{
-			unit.weaponSystem.GunTimersServerRPC();
+			unit.weaponSystem.MainGunTimer();
+
+			if (unit.weaponSystem.hasSecondaryWeapon)
+				unit.weaponSystem.SecondaryGunTimer();
 		}
 	}
 	public override void UpdatePhysics(UnitStateController unit)
 	{
+		Debug.LogWarning("Updating Physics");
 		//only look at target when its within attack range
 		if (unit.playerSetTarget != null && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position))
 			StopAndLookAtTarget(unit, unit.playerSetTarget);
@@ -72,6 +76,7 @@ public class UnitStateAttacking : UnitBaseState
 	}
 	public void StopAndLookAtTarget(UnitStateController unit, Entities entityToLookAt)
 	{
+		Debug.LogWarning("looking at target");
 		if (unit.isTurret)
 		{
 			unit.turretController.FaceTarget(entityToLookAt);

@@ -33,6 +33,8 @@ public class Entities : NetworkBehaviour
 	public float hitCooldown;
 	public float hitTimer;
 
+	public ulong EntityNetworkObjId;
+
 	[Header("Entity Bools")]
 	public bool isPlayerOneEntity;
 	public bool wasRecentlyHit;
@@ -42,6 +44,7 @@ public class Entities : NetworkBehaviour
 
 	public virtual void Start()
 	{
+		EntityNetworkObjId = GetComponent<NetworkObject>().NetworkObjectId;
 		PlayerController controller = FindObjectOfType<PlayerController>();
 		if (controller.isPlayerOne == isPlayerOneEntity || !controller.isPlayerOne == !isPlayerOneEntity)
 			playerController = controller;
