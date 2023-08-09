@@ -30,7 +30,7 @@ public class UnitMovingState : UnitBaseState
 		else
 		{
 			unit.ChangeStateIdleClientRPC();
-			unit.ChangeStateIdleServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
+			unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
 		}
 	}
@@ -51,7 +51,7 @@ public class UnitMovingState : UnitBaseState
 		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
 			unit.ChangeStateIdleClientRPC();
-			unit.ChangeStateIdleServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
+			unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
 			unit.agentNav.isStopped = true;
 		}
 		else if (unit.playerSetTarget != null && !unit.hasReachedPlayerSetTarget && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
@@ -59,7 +59,7 @@ public class UnitMovingState : UnitBaseState
 			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
 			{
 				unit.ChangeStateIdleClientRPC();
-				unit.ChangeStateIdleServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
+				unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
 				unit.agentNav.isStopped = true;
 				unit.hasReachedPlayerSetTarget = true;
 			}

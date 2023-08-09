@@ -333,7 +333,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			for (int i = 0; i < selectedUnitList.Count; i++)
 			{
 				Vector3 movePos = movePosHighlighterObj[i].transform.position;	//ask server to move units fo clients
-				MoveUnitsServerRPC(selectedUnitList[i].GetComponent<NetworkObject>().NetworkObjectId, movePos);
+				MoveUnitsServerRPC(selectedUnitList[i].EntityNetworkObjId, movePos);
 			}
 		}
 	}

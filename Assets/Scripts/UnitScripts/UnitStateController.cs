@@ -56,6 +56,10 @@ public class UnitStateController : Entities
 	public UnitStateController currentUnitTarget;
 	public BuildingManager currentBuildingTarget;
 
+	public Entities syncedPlayerSetTarget;
+	public UnitStateController syncedCurrentUnitTarget;
+	public BuildingManager syncedCurrentBuildingTarget;
+
 	public int GroupNum;
 	public Vector3 targetPos;
 	public Vector3 movePos;
@@ -65,7 +69,7 @@ public class UnitStateController : Entities
 	{
 		base.Start();
 		ChangeStateIdleClientRPC();
-		ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		ChangeStateIdleServerRPC(EntityNetworkObjId);
 
 		playerController = FindObjectOfType<PlayerController>();
 		if (playerController.isPlayerOne == isPlayerOneEntity || !playerController.isPlayerOne == !isPlayerOneEntity)
@@ -136,7 +140,7 @@ public class UnitStateController : Entities
 					if (targetList.Count != 0 && currentState != attackState) //switch to attack state if targets found
 					{
 						ChangeStateAttackingClientRPC();
-						ChangeStateAttackingServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+						ChangeStateAttackingServerRPC(EntityNetworkObjId);
 					}
 				}
 
@@ -226,7 +230,7 @@ public class UnitStateController : Entities
 				movePos = newMovePos;
 
 			ChangeStateMovingClientRPC();
-			ChangeStateMovingServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+			ChangeStateMovingServerRPC(EntityNetworkObjId);
 		}
 	}
 

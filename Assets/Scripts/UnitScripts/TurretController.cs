@@ -44,6 +44,7 @@ public class TurretController : UnitStateController
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Target Out of Attack Range", 1.5f);
 		}
 	}
+
 	//functions to make turret tower/guns aim at enemy targets
 	public void FaceTarget(Entities entityTarget)
 	{

@@ -32,21 +32,24 @@ public class WeaponSystem : NetworkBehaviour
 	//try find targets if found then grab closest one
 	public void TryFindTargets()
 	{
-		RemoveNullRefsFromTargetLists();
-		if (unit.currentUnitTarget == null)
-			unit.currentUnitTarget = GrabClosestUnit();
-		if (unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
-		unit.currentBuildingTarget = GrabClosestBuilding();
-
-		if (unit.currentUnitTarget != null)
-			SyncCurrentUnitTargetServerRPC(unit.EntityNetworkObjId, unit.currentUnitTarget.EntityNetworkObjId);
-		if (unit.currentBuildingTarget != null)
-			SyncCurrentBuildingTargetServerRPC(unit.EntityNetworkObjId, unit.currentBuildingTarget.EntityNetworkObjId);
-
-		if (unit.targetList.Count == 0)
+		if (IsServer)
 		{
-			unit.ChangeStateIdleClientRPC();
-			unit.ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+			RemoveNullRefsFromTargetLists();
+			if (unit.currentUnitTarget == null)
+				unit.currentUnitTarget = GrabClosestUnit();
+			if (unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
+				unit.currentBuildingTarget = GrabClosestBuilding();
+
+			if (unit.currentUnitTarget != null)
+				SyncCurrentUnitTargetServerRPC(unit.EntityNetworkObjId, unit.currentUnitTarget.EntityNetworkObjId);
+			if (unit.currentBuildingTarget != null)
+				SyncCurrentBuildingTargetServerRPC(unit.EntityNetworkObjId, unit.currentBuildingTarget.EntityNetworkObjId);
+
+			if (unit.targetList.Count == 0)
+			{
+				unit.ChangeStateIdleClientRPC();
+				unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
+			}
 		}
 	}
 
@@ -168,6 +171,11 @@ public class WeaponSystem : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void SyncPlayerSetTargetServerRPC(ulong unitId, ulong PlayerSetTargetId)
 	{
+		SyncPlayerSetTargetClientRPC(unitId, PlayerSetTargetId);
+	}
+	[ClientRpc]
+	public void SyncPlayerSetTargetClientRPC(ulong unitId, ulong PlayerSetTargetId)
+	{
 		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
 		Entities entity = NetworkManager.SpawnManager.SpawnedObjects[PlayerSetTargetId].GetComponent<UnitStateController>();
 		unit.playerSetTarget = entity;
@@ -175,12 +183,22 @@ public class WeaponSystem : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void SyncCurrentUnitTargetServerRPC(ulong unitId, ulong UnitTargetId)
 	{
+		SyncCurrentUnitTargetClientRPC(unitId, UnitTargetId);
+	}
+	[ClientRpc]
+	public void SyncCurrentUnitTargetClientRPC(ulong unitId, ulong UnitTargetId)
+	{
 		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
 		UnitStateController unitTarget = NetworkManager.SpawnManager.SpawnedObjects[UnitTargetId].GetComponent<UnitStateController>();
 		unit.currentUnitTarget = unitTarget;
 	}
 	[ServerRpc(RequireOwnership = false)]
 	public void SyncCurrentBuildingTargetServerRPC(ulong unitId, ulong BuildingTargetId)
+	{
+		SyncCurrentBuildingTargetClientRPC(unitId, BuildingTargetId);
+	}
+	[ClientRpc]
+	public void SyncCurrentBuildingTargetClientRPC(ulong unitId, ulong BuildingTargetId)
 	{
 		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
 		BuildingManager BuildingTarget = NetworkManager.SpawnManager.SpawnedObjects[BuildingTargetId].GetComponent<BuildingManager>();

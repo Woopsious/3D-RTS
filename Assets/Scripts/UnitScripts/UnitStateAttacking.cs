@@ -48,6 +48,12 @@ public class UnitStateAttacking : UnitBaseState
 			StopAndLookAtTarget(unit, unit.currentUnitTarget);
 		else if (unit.currentBuildingTarget != null && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
 			StopAndLookAtTarget(unit, unit.currentBuildingTarget);
+		else if (unit.syncedPlayerSetTarget != null)
+			StopAndLookAtTarget(unit, unit.syncedPlayerSetTarget);
+		else if (unit.syncedCurrentUnitTarget != null)
+			StopAndLookAtTarget(unit, unit.syncedCurrentUnitTarget);
+		else if (unit.syncedCurrentBuildingTarget != null)
+			StopAndLookAtTarget(unit, unit.syncedCurrentBuildingTarget);
 
 		//continue to last movement destination
 		if (!unit.isTurret && unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
