@@ -18,7 +18,6 @@ public class WeaponSystem : NetworkBehaviour
 	public ParticleSystem mainWeaponProjectileParticle;
 	public float mainWeaponDamage;
 	public float mainWeaponAttackSpeed;
-	[System.NonSerialized]
 	public NetworkVariable<float> mainWeaponAttackSpeedTimer = new NetworkVariable<float>();
 
 	public AudioSource secondaryWeaponAudio;
@@ -26,7 +25,6 @@ public class WeaponSystem : NetworkBehaviour
 	public ParticleSystem secondaryWeaponProjectileParticle;
 	public float secondaryWeaponDamage;
 	public float secondaryWeaponAttackSpeed;
-	[System.NonSerialized]
 	public NetworkVariable<float> secondaryWeaponAttackSpeedTimer = new NetworkVariable<float>();
 
 	public bool hasSecondaryWeapon;
@@ -35,11 +33,16 @@ public class WeaponSystem : NetworkBehaviour
 	public void TryFindTargets()
 	{
 		RemoveNullRefsFromTargetLists();
-		unit.currentUnitTarget = GrabClosestUnit();
+		if (unit.currentUnitTarget == null)
+			unit.currentUnitTarget = GrabClosestUnit();
+		if (unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
 		unit.currentBuildingTarget = GrabClosestBuilding();
 
-		if (unit.playerSetTarget == null && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
+		if (unit.targetList.Count == 0)
+		{
+			unit.ChangeStateIdleClientRPC();
 			unit.ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		}
 	}
 
 	[ServerRpc(RequireOwnership = false)]
@@ -211,19 +214,13 @@ public class WeaponSystem : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void GunTimersServerRPC()
 	{
-		if (!IsServer) return;
-		MainGunTimer();
+		if (IsServer)
+		{
+			MainGunTimer();
 
-		if (hasSecondaryWeapon)
-			SecondaryGunTimer();
-	}
-	[ClientRpc]
-	public void GunTimersClientRPC()
-	{
-		MainGunTimer();
-
-		if (hasSecondaryWeapon)
-			SecondaryGunTimer();
+			if (hasSecondaryWeapon)
+				SecondaryGunTimer();
+		}
 	}
 	public void MainGunTimer()
 	{
@@ -244,9 +241,7 @@ public class WeaponSystem : NetworkBehaviour
 			if (unit.hasShootAnimation)
 				StartCoroutine(DelaySecondaryAttack(1));
 			else
-			{
 				ShootSeconWeapClientRPC(GetComponent<NetworkObject>().NetworkObjectId);
-			}
 
 			secondaryWeaponAttackSpeedTimer.Value = secondaryWeaponAttackSpeed;
 		}

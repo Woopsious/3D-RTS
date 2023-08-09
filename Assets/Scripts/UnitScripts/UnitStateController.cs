@@ -64,6 +64,7 @@ public class UnitStateController : Entities
 	public override void Start()
 	{
 		base.Start();
+		ChangeStateIdleClientRPC();
 		ChangeStateIdleServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 
 		playerController = FindObjectOfType<PlayerController>();
@@ -81,9 +82,6 @@ public class UnitStateController : Entities
 		base.Update();
 		if (!isCargoShip)
 			currentState.UpdatePhysics(this);
-
-		if (targetList.Count != 0 && isUnitArmed && !isCargoShip && currentState != attackState) //switch to attack state if targets found
-			ChangeStateAttackingServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 
 	//SPOTTING SYSTEM FUNCTIONS
@@ -133,7 +131,14 @@ public class UnitStateController : Entities
 				}
 
 				if (isUnitArmed)
+				{
 					AddSpottedTargetsToListsWhenInAttackRange(entity);
+					if (targetList.Count != 0 && currentState != attackState) //switch to attack state if targets found
+					{
+						ChangeStateAttackingClientRPC();
+						ChangeStateAttackingServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+					}
+				}
 
 				entity.ShowEntity();
 				entity.ResetEntitySpottedTimer();
@@ -220,6 +225,7 @@ public class UnitStateController : Entities
 			else
 				movePos = newMovePos;
 
+			ChangeStateMovingClientRPC();
 			ChangeStateMovingServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 		}
 	}
@@ -287,20 +293,29 @@ public class UnitStateController : Entities
 	[ClientRpc]
 	public void ChangeStateIdleClientRPC()
 	{
-		currentState = idleState;
-		currentState.Enter(this);
+		if (currentState != idleState)
+		{
+			currentState = idleState;
+			currentState.Enter(this);
+		}
 	}
 	[ClientRpc]
 	public void ChangeStateMovingClientRPC()
 	{
-		currentState = movingState;
-		currentState.Enter(this);
+		if (currentState != movingState)
+		{
+			currentState = movingState;
+			currentState.Enter(this);
+		}
 	}
 	[ClientRpc]
 	public void ChangeStateAttackingClientRPC()
 	{
-		currentState = attackState;
-		currentState.Enter(this);
+		if (currentState != attackState)
+		{
+			currentState = attackState;
+			currentState.Enter(this);
+		}
 	}
 
 	//BOOL FUNCTIONS
