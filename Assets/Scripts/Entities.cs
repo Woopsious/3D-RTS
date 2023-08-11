@@ -66,11 +66,14 @@ public class Entities : NetworkBehaviour
 	public virtual void Update()
 	{
 		if (UiObj != null && UiObj.activeInHierarchy)
+		{
 			UiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
 
-		if (GetComponent<UnitStateController>() != null && !isPlayerOneEntity)
-		{
-			Debug.LogWarning("Health Bar Pos" + UiObj.transform.position);
+			if (GetComponent<UnitStateController>() != null && !isPlayerOneEntity)
+			{
+				Debug.LogWarning("Health Bar Obj Pos" + UiObj.transform.position);
+				Debug.LogWarning("Unit Obj Pos" + gameObject.transform.position);
+			}
 		}
 
 		IsEntityHitTimer();
