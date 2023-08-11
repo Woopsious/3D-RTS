@@ -306,11 +306,8 @@ public class UnitStateController : Entities
 	[ClientRpc]
 	public void ChangeStateMovingClientRPC()
 	{
-		if (currentState != movingState)
-		{
-			currentState = movingState;
-			currentState.Enter(this);
-		}
+		currentState = movingState;
+		currentState.Enter(this);
 	}
 	[ClientRpc]
 	public void ChangeStateAttackingClientRPC()

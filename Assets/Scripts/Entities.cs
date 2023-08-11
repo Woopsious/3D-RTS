@@ -57,9 +57,9 @@ public class Entities : NetworkBehaviour
 		UiObj.transform.rotation = Quaternion.identity;
 		HideUIHealthBar();
 
-		if (isPlayerOneEntity)
+		if (playerController != null) //set layer of minimap (in future the colour too)
 			miniMapRenderObj.layer = 11;
-		else if (!isPlayerOneEntity)
+		else
 			miniMapRenderObj.layer = 12;
 		//FoVMeshObj.SetActive(true);
 	}
@@ -67,6 +67,11 @@ public class Entities : NetworkBehaviour
 	{
 		if (UiObj != null && UiObj.activeInHierarchy)
 			UiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
+
+		if (GetComponent<UnitStateController>() != null && !isPlayerOneEntity)
+		{
+			Debug.LogWarning("Health Bar Pos" + UiObj.transform.position);
+		}
 
 		IsEntityHitTimer();
 		IsEntitySpottedTimer();
