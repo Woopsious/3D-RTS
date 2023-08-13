@@ -195,15 +195,16 @@ public class BuildingPlacementManager : NetworkBehaviour
 		{
 			buildingObj.GetComponent<TurretController>().enabled = true;
 			buildingObj.GetComponent<TurretController>().AddTurretRefs();
-			if (buildingObj.GetComponent<TurretController>().isPlayerOneEntity)
-				buildingObj.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
-			else
-				buildingObj.GetComponent<TurretController>().gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
+
 			buildingObj.GetComponent<BoxCollider>().isTrigger = true;
 			buildingObj.transform.GetChild(4).GetComponent<SphereCollider>().enabled = true;
 		}
 
-		buildingObj.gameObject.layer = buildingLayer;
+		if (buildingObj.GetComponent<Entities>().isPlayerOneEntity)
+			buildingObj.GetComponent<Entities>().gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
+		else
+			buildingObj.GetComponent<Entities>().gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
+
 		buildingObj.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
 		buildingObj.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
 		buildingObj.GetComponent<CanPlaceBuilding>().isPlaced = true;

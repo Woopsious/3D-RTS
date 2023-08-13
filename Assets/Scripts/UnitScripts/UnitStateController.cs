@@ -9,6 +9,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
+using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.CanvasScaler;
 
@@ -65,15 +66,20 @@ public class UnitStateController : Entities
 	public Vector3 movePos;
 	public NavMeshPath navMeshPath;
 
+	public Vector3 TestLineCastPos;
+
 	public override void Start()
 	{
 		base.Start();
 		ChangeStateIdleClientRPC();
 		ChangeStateIdleServerRPC(EntityNetworkObjId);
 
-		playerController = FindObjectOfType<PlayerController>();
-		if (playerController.isPlayerOne == isPlayerOneEntity || !playerController.isPlayerOne == !isPlayerOneEntity)
+		PlayerController playerCon = FindObjectOfType<PlayerController>();
+		if (playerCon.isPlayerOne != !isPlayerOneEntity)
+		{
+			playerController = playerCon;
 			playerController.unitListForPlayer.Add(this);
+		}
 	}
 	public override void Update()
 	{
@@ -122,7 +128,7 @@ public class UnitStateController : Entities
 		for (int i = 0; i < targetList.Count; i++)
 		{
 			Entities entity = targetList[i].GetComponent<Entities>();
-			if (CheckIfEntityInLineOfSight(entity) && entity != null)
+			if (CheckIfEntityInLineOfSight(entity))
 			{
 				if (!entity.wasRecentlySpotted && ShouldDisplaySpottedNotifToPlayer())
 				{
@@ -237,45 +243,49 @@ public class UnitStateController : Entities
 	//UTILITY FUNCTIONS
 	public override void RemoveEntityRefs()
 	{
-		playerController.unitListForPlayer.Remove(this);
-		playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
-
-		if (!isTurret)
+		if (playerController != null)
 		{
-			if (GroupNum == 1)
+			playerController.unitListForPlayer.Remove(this);
+			playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
+
+			if (!isTurret)
 			{
-				playerController.unitSelectionManager.unitGroupOne.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupOne, 1);
+				if (GroupNum == 1)
+				{
+					playerController.unitSelectionManager.unitGroupOne.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupOne, 1);
+				}
+				if (GroupNum == 2)
+				{
+					playerController.unitSelectionManager.unitGroupTwo.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupTwo, 2);
+				}
+				if (GroupNum == 3)
+				{
+					playerController.unitSelectionManager.unitGroupThree.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupThree, 3);
+				}
+				if (GroupNum == 4)
+				{
+					playerController.unitSelectionManager.unitGroupFour.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFour, 4);
+				}
+				if (GroupNum == 5)
+				{
+					playerController.unitSelectionManager.unitGroupFive.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFive, 5);
+				}
 			}
-			if (GroupNum == 2)
-			{
-				playerController.unitSelectionManager.unitGroupTwo.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupTwo, 2);
-			}
-			if (GroupNum == 3)
-			{
-				playerController.unitSelectionManager.unitGroupThree.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupThree, 3);
-			}
-			if (GroupNum == 4)
-			{
-				playerController.unitSelectionManager.unitGroupFour.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFour, 4);
-			}
-			if (GroupNum == 5)
-			{
-				playerController.unitSelectionManager.unitGroupFive.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFive, 5);
-			}
+			else if (isTurret)
+				turretController.capturePointController.TurretDefenses.Remove(turretController);
 		}
-		else if (isTurret)
-			turretController.capturePointController.TurretDefenses.Remove(turretController);
 	}
 	public void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.red;
 		Gizmos.DrawWireSphere(transform.position, attackRange);
 		Gizmos.DrawWireSphere(transform.position, ViewRange);
+		Gizmos.DrawLine(CenterPoint.transform.position, TestLineCastPos);
 	}
 
 	//STATE CHANGE FUNCTIONS
@@ -326,8 +336,13 @@ public class UnitStateController : Entities
 		{
 			Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
 
-			if (hit.collider.gameObject == entity.gameObject)
+			if (hit.point != null && hit.collider.gameObject == entity.gameObject)
+			{
+				TestLineCastPos = hit.point;
+				Debug.LogWarning("Hit: " + hit.collider.gameObject);
+				Debug.LogWarning("Entity: " + entity);
 				return true;
+			}
 			else
 				return false;
 		}

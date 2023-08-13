@@ -45,10 +45,6 @@ public class Entities : NetworkBehaviour
 	public virtual void Start()
 	{
 		EntityNetworkObjId = GetComponent<NetworkObject>().NetworkObjectId;
-		PlayerController controller = FindObjectOfType<PlayerController>();
-		if (controller.isPlayerOne == isPlayerOneEntity || !controller.isPlayerOne == !isPlayerOneEntity)
-			playerController = controller;
-
 		SetHealthServerRPC();
 		spottedTimer = 0;
 		hitTimer = 0;
@@ -154,11 +150,8 @@ public class Entities : NetworkBehaviour
 		ResetIsEntityHitTimer();
 		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<Entities>().UpdateHealthBar();
 
-		if (NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].IsOwner)
-		{
-			if (currentHealth.Value <= 0)
-				OnEntityDeath();
-		}
+		if (currentHealth.Value <= 0)
+			OnEntityDeath();
 	}
 	public void RecieveDamage(float dmg)
 	{
@@ -182,13 +175,14 @@ public class Entities : NetworkBehaviour
 	{
 		RemoveEntityRefs();
 		Instantiate(DeathObj, transform.position, Quaternion.identity);
+		if (playerController != null)
 		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 
 	//UTILITY FUNCTIONS
 	public bool ShouldDisplaySpottedNotifToPlayer()
 	{
-		if (playerController.isPlayerOne != isPlayerOneEntity)
+		if (playerController != null)
 			return false;
 		else
 			return true;

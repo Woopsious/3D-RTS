@@ -98,7 +98,6 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponParticles.Play();
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
-			if (!IsServer) return;
 			unit.playerSetTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
 		else if (HasUnitTarget() && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position) &&
@@ -111,7 +110,6 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponParticles.Play();
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
-			if (!IsServer) return;
 			unit.currentUnitTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
 		else if (HasBuildingTarget() && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) &&
@@ -124,7 +122,6 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponParticles.Play();
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
-			if (!IsServer) return;
 			unit.currentBuildingTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
 		else
@@ -243,7 +240,7 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponAttackSpeedTimer -= Time.deltaTime;
 		else
 		{
-			ShootMainWeapServerRPC(unit.EntityNetworkObjId);
+			ShootMainWeapon();
 			mainWeaponAttackSpeedTimer = mainWeaponAttackSpeed;
 		}
 	}

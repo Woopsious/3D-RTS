@@ -385,7 +385,7 @@ public class GameManager : NetworkBehaviour
 	}
 
 	[ServerRpc(RequireOwnership = false)]
-	public void RemoveEntityServerRPC(ulong networkObjId)	
+	public void RemoveEntityServerRPC(ulong networkObjId)
 	{
 		RemoveEntityUiClientRPC(networkObjId);
 		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<NetworkObject>().Despawn();
