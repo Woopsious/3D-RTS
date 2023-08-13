@@ -84,9 +84,10 @@ public class WeaponSystem : NetworkBehaviour
 	public void ShootMainWeapServerRPC(ulong networkObjId)
 	{
 		UnitStateController unit = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>();
-		unit.weaponSystem.ShootMainWeapon();
+		unit.weaponSystem.ShootMainWeaponClientRPC();
 	}
-	public void ShootMainWeapon()
+	[ClientRpc]
+	public void ShootMainWeaponClientRPC()
 	{
 		if (HasPlayerSetTarget() && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position) &&
 			unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
@@ -98,7 +99,8 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponParticles.Play();
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
-			unit.playerSetTarget.RecieveDamageServerRPC(mainWeaponDamage);
+			if (IsServer)
+				unit.playerSetTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
 		else if (HasUnitTarget() && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position) &&
 			unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
@@ -110,7 +112,8 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponParticles.Play();
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
-			unit.currentUnitTarget.RecieveDamageServerRPC(mainWeaponDamage);
+			if (IsServer)
+				unit.currentUnitTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
 		else if (HasBuildingTarget() && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) &&
 			unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
@@ -122,7 +125,8 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponParticles.Play();
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
-			unit.currentBuildingTarget.RecieveDamageServerRPC(mainWeaponDamage);
+			if (IsServer)
+				unit.currentBuildingTarget.RecieveDamageServerRPC(mainWeaponDamage);
 		}
 		else
 			TryFindTargets();
@@ -238,9 +242,9 @@ public class WeaponSystem : NetworkBehaviour
 	{
 		if (mainWeaponAttackSpeedTimer > 0)
 			mainWeaponAttackSpeedTimer -= Time.deltaTime;
-		else
+		else if (IsServer)
 		{
-			ShootMainWeapon();
+			ShootMainWeapServerRPC(unit.EntityNetworkObjId);
 			mainWeaponAttackSpeedTimer = mainWeaponAttackSpeed;
 		}
 	}
@@ -248,7 +252,7 @@ public class WeaponSystem : NetworkBehaviour
 	{
 		if (secondaryWeaponAttackSpeedTimer > 0)
 			secondaryWeaponAttackSpeedTimer -= Time.deltaTime;
-		else
+		else if (IsServer)
 		{
 			if (unit.hasShootAnimation)
 				StartCoroutine(DelaySecondaryAttack(1));
