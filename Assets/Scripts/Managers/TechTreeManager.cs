@@ -654,11 +654,6 @@ public class TechTreeManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void ApplyTechUpgradesToNewUnitsServerRPC(ulong unitNetworkedId)
 	{
-		ApplyTechUpgradesToNewUnitsClientRPC(unitNetworkedId);
-	}
-	[ClientRpc]
-	public void ApplyTechUpgradesToNewUnitsClientRPC(ulong unitNetworkedId)
-	{
 		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkedId].GetComponent<UnitStateController>();
 
 		if (unit.isPlayerOneEntity) //apply tech upgrades to player one units using player one bonus tech
@@ -695,16 +690,11 @@ public class TechTreeManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void ApplyTechUpgradesToNewBuildingsServerRPC(ulong buildingNetworkedId)
 	{
-		ApplyTechUpgradesToNewBuildingsClientRPC(buildingNetworkedId);
-	}
-	[ClientRpc]
-	public void ApplyTechUpgradesToNewBuildingsClientRPC(ulong buildingNetworkedId)
-	{
 		BuildingManager building = NetworkManager.SpawnManager.SpawnedObjects[buildingNetworkedId].GetComponent<BuildingManager>();
 
 		if (building.isPlayerOneEntity)
 		{
-			building.currentHealth.Value = (int)(building.currentHealth.Value * 
+			building.currentHealth.Value = (int)(building.currentHealth.Value *
 				gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
 			building.maxHealth.Value = (int)(building.maxHealth.Value * gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
 			building.armour.Value = (int)(building.armour.Value * gameUIManager.gameManager.playerOneBuildingArmourPercentageBonus.Value);
