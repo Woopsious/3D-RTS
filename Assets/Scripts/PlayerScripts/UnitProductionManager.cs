@@ -353,7 +353,8 @@ public class UnitProductionManager : NetworkBehaviour
 			StartCoroutine(OpenCloseDoors(spawnLocationScript));
 			GameObject obj = Instantiate(GameManager.Instance.PlayerOneUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
 			obj.GetComponent<NetworkObject>().Spawn(true);
-			playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
+			playerController.gameUIManager.techTreeManager.
+				ApplyTechUpgradesToNewUnitsServerRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
 			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
 		}
 		else if (clientId == 1)
@@ -361,7 +362,8 @@ public class UnitProductionManager : NetworkBehaviour
 			StartCoroutine(OpenCloseDoors(spawnLocationScript));
 			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
 			obj.GetComponent<NetworkObject>().Spawn(true);
-			playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(obj);
+			playerController.gameUIManager.techTreeManager.
+				ApplyTechUpgradesToNewUnitsServerRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
 			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
 		}
 	}

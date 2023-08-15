@@ -5,8 +5,9 @@ using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.UI.CanvasScaler;
 
-public class TechTreeManager : MonoBehaviour
+public class TechTreeManager : NetworkBehaviour
 {
 	public GameUIManager gameUIManager;
 
@@ -650,33 +651,76 @@ public class TechTreeManager : MonoBehaviour
 	}
 
 	//APPLY TECH UPGRADES TO ENTITIES
-	public void ApplyTechUpgradesToNewUnits(GameObject unitObj)
+	[ServerRpc(RequireOwnership = false)]
+	public void ApplyTechUpgradesToNewUnitsServerRPC(ulong unitNetworkedId)
 	{
-		UnitStateController unit = unitObj.GetComponent<UnitStateController>();
+		ApplyTechUpgradesToNewUnitsClientRPC(unitNetworkedId);
+	}
+	[ClientRpc]
+	public void ApplyTechUpgradesToNewUnitsClientRPC(ulong unitNetworkedId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkedId].GetComponent<UnitStateController>();
 
-		unit.currentHealth.Value = (int)(unit.currentHealth.Value * unitHealthPercentageBonusValue);
-		unit.maxHealth = (int)(unit.maxHealth * unitHealthPercentageBonusValue);
-		unit.armour = (int)(unit.armour * unitArmourPercentageBonusValue);
-		if (unit.isUnitArmed)
+		if (unit.isPlayerOneEntity) //apply tech upgrades to player one units using player one bonus tech
 		{
-			unit.weaponSystem.mainWeaponDamage *= unitDamagePercentageBonusValue;
-			unit.weaponSystem.secondaryWeaponDamage *= unitDamagePercentageBonusValue;
-			unit.attackRange += unitAttackRangeBonusValue;
-			if (!unit.isTurret)
-				unit.agentNav.speed += unitSpeedBonusValue;
+			unit.currentHealth.Value = (int)(unit.currentHealth.Value * gameUIManager.gameManager.playerOneUnitHealthPercentageBonus.Value);
+			unit.maxHealth.Value = (int)(unit.maxHealth.Value * gameUIManager.gameManager.playerOneUnitHealthPercentageBonus.Value);
+			unit.armour.Value = (int)(unit.armour.Value * gameUIManager.gameManager.playerOneUnitArmourPercentageBonus.Value);
+
+			if (unit.isUnitArmed)
+			{
+				unit.weaponSystem.mainWeaponDamage.Value *= gameUIManager.gameManager.playerOneUnitDamagePercentageBonus.Value;
+				unit.weaponSystem.secondaryWeaponDamage.Value *= gameUIManager.gameManager.playerOneUnitDamagePercentageBonus.Value;
+				unit.attackRange += gameUIManager.gameManager.playerOneUnitAttackRangeBonus.Value;
+				if (!unit.isTurret)
+					unit.agentNav.speed += gameUIManager.gameManager.playerOneUnitSpeedBonus.Value;
+			}
+		}
+		if (!unit.isPlayerOneEntity) //apply tech upgrades to player two units using player two bonus tech
+		{
+			unit.currentHealth.Value = (int)(unit.currentHealth.Value * gameUIManager.gameManager.playerTwoUnitHealthPercentageBonus.Value);
+			unit.maxHealth.Value = (int)(unit.maxHealth.Value * gameUIManager.gameManager.playerTwoUnitHealthPercentageBonus.Value);
+			unit.armour.Value = (int)(unit.armour.Value * gameUIManager.gameManager.playerTwoUnitArmourPercentageBonus.Value);
+
+			if (unit.isUnitArmed)
+			{
+				unit.weaponSystem.mainWeaponDamage.Value *= gameUIManager.gameManager.playerTwoUnitDamagePercentageBonus.Value;
+				unit.weaponSystem.secondaryWeaponDamage.Value *= gameUIManager.gameManager.playerTwoUnitDamagePercentageBonus.Value;
+				unit.attackRange += gameUIManager.gameManager.playerTwoUnitAttackRangeBonus.Value;
+				if (!unit.isTurret)
+					unit.agentNav.speed += gameUIManager.gameManager.playerTwoUnitSpeedBonus.Value;
+			}
 		}
 	}
-	public void ApplyTechUpgradesToNewBuildings(GameObject buildingObj)
+	[ServerRpc(RequireOwnership = false)]
+	public void ApplyTechUpgradesToNewBuildingsServerRPC(ulong buildingNetworkedId)
 	{
-		BuildingManager building = buildingObj.GetComponent<BuildingManager>();
+		ApplyTechUpgradesToNewBuildingsClientRPC(buildingNetworkedId);
+	}
+	[ClientRpc]
+	public void ApplyTechUpgradesToNewBuildingsClientRPC(ulong buildingNetworkedId)
+	{
+		BuildingManager building = NetworkManager.SpawnManager.SpawnedObjects[buildingNetworkedId].GetComponent<BuildingManager>();
 
-		building.currentHealth.Value = (int)(building.currentHealth.Value * buildingHealthPercentageBonusValue);
-		building.maxHealth = (int)(building.maxHealth * buildingHealthPercentageBonusValue);
-		building.armour = (int)(building.armour * buildingArmourPercentageBonusValue);
+		if (building.isPlayerOneEntity)
+		{
+			building.currentHealth.Value = (int)(building.currentHealth.Value * 
+				gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
+			building.maxHealth.Value = (int)(building.maxHealth.Value * gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
+			building.armour.Value = (int)(building.armour.Value * gameUIManager.gameManager.playerOneBuildingArmourPercentageBonus.Value);
+		}
+		if (!building.isPlayerOneEntity)
+		{
+			building.currentHealth.Value = (int)(building.currentHealth.Value *
+				gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value);
+			building.maxHealth.Value = (int)(building.maxHealth.Value * gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value);
+			building.armour.Value = (int)(building.armour.Value * gameUIManager.gameManager.playerTwoBuildingArmourPercentageBonus.Value);
+		}
 	}
 	//using list of all player units, first reset values to base then recalculate values
 	public void ApplyTechUpgradesToExistingEntities()
 	{
+		/*
 		foreach (BuildingManager building in gameUIManager.playerController.buildingListForPlayer)
 		{
 			if (building.entityName == "Energy Generator")
@@ -774,6 +818,7 @@ public class TechTreeManager : MonoBehaviour
 			}
 			unit.UpdateHealthBar();
 		}
+		*/
 	}
 
 	[System.Serializable]

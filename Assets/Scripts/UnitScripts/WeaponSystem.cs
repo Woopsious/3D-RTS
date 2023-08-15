@@ -16,14 +16,14 @@ public class WeaponSystem : NetworkBehaviour
 	public AudioSource mainWeaponAudio;
 	public ParticleSystem mainWeaponParticles;
 	public ParticleSystem mainWeaponProjectileParticle;
-	public float mainWeaponDamage;
+	public NetworkVariable<float> mainWeaponDamage = new NetworkVariable<float>();
 	public float mainWeaponAttackSpeed;
 	public float mainWeaponAttackSpeedTimer;
 
 	public AudioSource secondaryWeaponAudio;
 	public ParticleSystem secondaryWeaponParticles;
 	public ParticleSystem secondaryWeaponProjectileParticle;
-	public float secondaryWeaponDamage;
+	public NetworkVariable<float> secondaryWeaponDamage = new NetworkVariable<float>();
 	public float secondaryWeaponAttackSpeed;
 	public float secondaryWeaponAttackSpeedTimer;
 
@@ -100,7 +100,7 @@ public class WeaponSystem : NetworkBehaviour
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
 			if (IsServer)
-				unit.playerSetTarget.RecieveDamageServerRPC(mainWeaponDamage);
+				unit.playerSetTarget.RecieveDamageServerRPC(mainWeaponDamage.Value);
 		}
 		else if (HasUnitTarget() && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position) &&
 			unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
@@ -113,7 +113,7 @@ public class WeaponSystem : NetworkBehaviour
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			if (IsServer)
-				unit.currentUnitTarget.RecieveDamageServerRPC(mainWeaponDamage);
+				unit.currentUnitTarget.RecieveDamageServerRPC(mainWeaponDamage.Value);
 		}
 		else if (HasBuildingTarget() && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) &&
 			unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
@@ -126,7 +126,7 @@ public class WeaponSystem : NetworkBehaviour
 
 			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			if (IsServer)
-				unit.currentBuildingTarget.RecieveDamageServerRPC(mainWeaponDamage);
+				unit.currentBuildingTarget.RecieveDamageServerRPC(mainWeaponDamage.Value);
 		}
 		else
 			TryFindTargets();
@@ -146,7 +146,7 @@ public class WeaponSystem : NetworkBehaviour
 
 			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
 			if (!IsServer) return;
-			unit.playerSetTarget.RecieveDamageServerRPC(secondaryWeaponDamage);
+			unit.playerSetTarget.RecieveDamageServerRPC(secondaryWeaponDamage.Value);
 		}
 		else if (HasUnitTarget())
 		{
@@ -155,7 +155,7 @@ public class WeaponSystem : NetworkBehaviour
 
 			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
 			if (!IsServer) return;
-			unit.currentUnitTarget.RecieveDamageServerRPC(secondaryWeaponDamage);
+			unit.currentUnitTarget.RecieveDamageServerRPC(secondaryWeaponDamage.Value);
 		}
 		else if (HasBuildingTarget())
 		{
@@ -164,7 +164,7 @@ public class WeaponSystem : NetworkBehaviour
 
 			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
 			if (!IsServer) return;
-			unit.currentBuildingTarget.RecieveDamageServerRPC(secondaryWeaponDamage);
+			unit.currentBuildingTarget.RecieveDamageServerRPC(secondaryWeaponDamage.Value);
 		}
 	}
 

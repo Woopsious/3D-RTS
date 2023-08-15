@@ -275,8 +275,8 @@ public class GameUIManager : MonoBehaviour
 			string healthInfo = "Stats:\n Health " + building.maxHealth + ", Armour " + building.armour + "\n";
 
 			WeaponSystem weaponSystem = building.GetComponent<WeaponSystem>();
-			float mainWeaponDPS = weaponSystem.mainWeaponDamage / weaponSystem.mainWeaponAttackSpeed;
-			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage / weaponSystem.secondaryWeaponAttackSpeed;
+			float mainWeaponDPS = weaponSystem.mainWeaponDamage.Value / weaponSystem.mainWeaponAttackSpeed;
+			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage.Value / weaponSystem.secondaryWeaponAttackSpeed;
 			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
 
 			string combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + building.attackRange + "\n";
@@ -327,13 +327,13 @@ public class GameUIManager : MonoBehaviour
 		if (unit.isUnitArmed)
 		{
 			WeaponSystem weaponSystem = unit.GetComponent<WeaponSystem>();
-			float mainWeaponDPS = weaponSystem.mainWeaponDamage / weaponSystem.mainWeaponAttackSpeed;
-			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage / weaponSystem.secondaryWeaponAttackSpeed;
+			float mainWeaponDPS = weaponSystem.mainWeaponDamage.Value / weaponSystem.mainWeaponAttackSpeed;
+			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage.Value / weaponSystem.secondaryWeaponAttackSpeed;
 			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
 
 			combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + unit.attackRange + "\n";
 
-			if (weaponSystem.secondaryWeaponDamage != 0)
+			if (weaponSystem.secondaryWeaponDamage.Value != 0)
 				prodInfo = "Built at Heavy Vehicle Production Building";
 		}
 		textInfo.text = costInfo + healthInfo + specialInfo + combatInfo + prodInfo;

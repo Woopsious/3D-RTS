@@ -135,90 +135,90 @@ public class GameManager : NetworkBehaviour
 		//assign base building stats
 		buildingHQStats = new BaseBuildingStats
 		{
-			health = PlayerOneBuildingsList[6].GetComponent<BuildingManager>().maxHealth,
-			armour = PlayerOneBuildingsList[6].GetComponent<BuildingManager>().armour
+			health = PlayerOneBuildingsList[6].GetComponent<BuildingManager>().maxHealth.Value,
+			armour = PlayerOneBuildingsList[6].GetComponent<BuildingManager>().armour.Value
 		};
 		buildingEnergyGenStats = new BaseBuildingStats
 		{
-			health = PlayerOneBuildingsList[0].GetComponent<BuildingManager>().maxHealth,
-			armour = PlayerOneBuildingsList[0].GetComponent<BuildingManager>().armour
+			health = PlayerOneBuildingsList[0].GetComponent<BuildingManager>().maxHealth.Value,
+			armour = PlayerOneBuildingsList[0].GetComponent<BuildingManager>().armour.Value
 		};
 		buildingRefineryStats = new BaseBuildingStats
 		{
-			health = PlayerOneBuildingsList[1].GetComponent<BuildingManager>().maxHealth,
-			armour = PlayerOneBuildingsList[1].GetComponent<BuildingManager>().armour
+			health = PlayerOneBuildingsList[1].GetComponent<BuildingManager>().maxHealth.Value,
+			armour = PlayerOneBuildingsList[1].GetComponent<BuildingManager>().armour.Value
 		};
 		buildingLightVehProdStats = new BaseBuildingStats
 		{
-			health = PlayerOneBuildingsList[3].GetComponent<BuildingManager>().maxHealth,
-			armour = PlayerOneBuildingsList[3].GetComponent<BuildingManager>().armour
+			health = PlayerOneBuildingsList[3].GetComponent<BuildingManager>().maxHealth.Value,
+			armour = PlayerOneBuildingsList[3].GetComponent<BuildingManager>().armour.Value
 		};
 		buildingHeavyVehProdStats = new BaseBuildingStats
 		{
-			health = PlayerOneBuildingsList[4].GetComponent<BuildingManager>().maxHealth,
-			armour = PlayerOneBuildingsList[4].GetComponent<BuildingManager>().armour
+			health = PlayerOneBuildingsList[4].GetComponent<BuildingManager>().maxHealth.Value,
+			armour = PlayerOneBuildingsList[4].GetComponent<BuildingManager>().armour.Value
 		};
 		buildingVtolVehProdStats = new BaseBuildingStats
 		{
-			health = PlayerOneBuildingsList[5].GetComponent<BuildingManager>().maxHealth,
-			armour = PlayerOneBuildingsList[5].GetComponent<BuildingManager>().armour
+			health = PlayerOneBuildingsList[5].GetComponent<BuildingManager>().maxHealth.Value,
+			armour = PlayerOneBuildingsList[5].GetComponent<BuildingManager>().armour.Value
 		};
 
 		//assign base unit stats
 		unitScoutVehStats = new BaseUnitStats
 		{
-			health = PlayerOneUnitsList[0].GetComponent<UnitStateController>().maxHealth,
-			armour = PlayerOneUnitsList[0].GetComponent<UnitStateController>().armour,
+			health = PlayerOneUnitsList[0].GetComponent<UnitStateController>().maxHealth.Value,
+			armour = PlayerOneUnitsList[0].GetComponent<UnitStateController>().armour.Value,
 			speed = PlayerOneUnitsList[0].GetComponent<UnitStateController>().agentNav.speed
 		};
 		unitRadarVehStats = new BaseUnitStats
 		{
-			health = PlayerOneUnitsList[1].GetComponent<UnitStateController>().maxHealth,
-			armour = PlayerOneUnitsList[1].GetComponent<UnitStateController>().armour,
+			health = PlayerOneUnitsList[1].GetComponent<UnitStateController>().maxHealth.Value,
+			armour = PlayerOneUnitsList[1].GetComponent<UnitStateController>().armour.Value,
 			speed = PlayerOneUnitsList[1].GetComponent<UnitStateController>().agentNav.speed
 		};
 		unitMechLightStats = new BaseUnitStats
 		{
-			health = PlayerOneUnitsList[2].GetComponent<UnitStateController>().maxHealth,
-			armour = PlayerOneUnitsList[2].GetComponent<UnitStateController>().armour,
-			mainWeaponDamage = PlayerOneUnitsList[2].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
-			secondaryWeaponDamage = PlayerOneUnitsList[2].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			health = PlayerOneUnitsList[2].GetComponent<UnitStateController>().maxHealth.Value,
+			armour = PlayerOneUnitsList[2].GetComponent<UnitStateController>().armour.Value,
+			mainWeaponDamage = PlayerOneUnitsList[2].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage.Value,
+			secondaryWeaponDamage = PlayerOneUnitsList[2].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage.Value,
 			attackRange = PlayerOneUnitsList[2].GetComponent<UnitStateController>().attackRange,
 			speed = PlayerOneUnitsList[2].GetComponent<UnitStateController>().agentNav.speed
 		};
 		unitMechHvyKnightStats = new BaseUnitStats
 		{
-			health = PlayerOneUnitsList[3].GetComponent<UnitStateController>().maxHealth,
-			armour = PlayerOneUnitsList[3].GetComponent<UnitStateController>().armour,
-			mainWeaponDamage = PlayerOneUnitsList[3].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
-			secondaryWeaponDamage = PlayerOneUnitsList[3].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			health = PlayerOneUnitsList[3].GetComponent<UnitStateController>().maxHealth.Value,
+			armour = PlayerOneUnitsList[3].GetComponent<UnitStateController>().armour.Value,
+			mainWeaponDamage = PlayerOneUnitsList[3].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage.Value,
+			secondaryWeaponDamage = PlayerOneUnitsList[3].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage.Value,
 			attackRange = PlayerOneUnitsList[3].GetComponent<UnitStateController>().attackRange,
 			speed = PlayerOneUnitsList[3].GetComponent<UnitStateController>().agentNav.speed
 		};
 		unitMechHvyTankStats = new BaseUnitStats
 		{
-			health = PlayerOneUnitsList[4].GetComponent<UnitStateController>().maxHealth,
-			armour = PlayerOneUnitsList[4].GetComponent<UnitStateController>().armour,
-			mainWeaponDamage = PlayerOneUnitsList[4].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
-			secondaryWeaponDamage = PlayerOneUnitsList[4].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			health = PlayerOneUnitsList[4].GetComponent<UnitStateController>().maxHealth.Value,
+			armour = PlayerOneUnitsList[4].GetComponent<UnitStateController>().armour.Value,
+			mainWeaponDamage = PlayerOneUnitsList[4].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage.Value,
+			secondaryWeaponDamage = PlayerOneUnitsList[4].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage.Value,
 			attackRange = PlayerOneUnitsList[4].GetComponent<UnitStateController>().attackRange,
 			speed = PlayerOneUnitsList[4].GetComponent<UnitStateController>().agentNav.speed
 		};
 		unitVtolGunshipStats = new BaseUnitStats
 		{
-			health = PlayerOneUnitsList[5].GetComponent<UnitStateController>().maxHealth,
-			armour = PlayerOneUnitsList[5].GetComponent<UnitStateController>().armour,
-			mainWeaponDamage = PlayerOneUnitsList[5].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
-			secondaryWeaponDamage = PlayerOneUnitsList[5].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			health = PlayerOneUnitsList[5].GetComponent<UnitStateController>().maxHealth.Value,
+			armour = PlayerOneUnitsList[5].GetComponent<UnitStateController>().armour.Value,
+			mainWeaponDamage = PlayerOneUnitsList[5].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage.Value,
+			secondaryWeaponDamage = PlayerOneUnitsList[5].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage.Value,
 			attackRange = PlayerOneUnitsList[5].GetComponent<UnitStateController>().attackRange,
 			speed = PlayerOneUnitsList[5].GetComponent<UnitStateController>().agentNav.speed
 		};
 		unitTurretStats = new BaseUnitStats
 		{
-			health = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().maxHealth,
-			armour = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().armour,
-			mainWeaponDamage = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage,
-			secondaryWeaponDamage = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage,
+			health = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().maxHealth.Value,
+			armour = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().armour.Value,
+			mainWeaponDamage = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().weaponSystem.mainWeaponDamage.Value,
+			secondaryWeaponDamage = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().weaponSystem.secondaryWeaponDamage.Value,
 			attackRange = PlayerOneBuildingsList[2].GetComponent<UnitStateController>().attackRange,
 			speed = 0
 		};

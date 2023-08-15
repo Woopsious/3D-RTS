@@ -24,9 +24,9 @@ public class Entities : NetworkBehaviour
 	public int moneyCost;
 	public int alloyCost;
 	public int crystalCost;
-	public int maxHealth;
+	public NetworkVariable<int> maxHealth = new NetworkVariable<int>();
 	public NetworkVariable<int> currentHealth = new NetworkVariable<int>();
-	public int armour;
+	public NetworkVariable<int> armour = new NetworkVariable<int>();
 
 	public float spottedCooldown;
 	public float spottedTimer;
@@ -45,7 +45,6 @@ public class Entities : NetworkBehaviour
 	public virtual void Start()
 	{
 		EntityNetworkObjId = GetComponent<NetworkObject>().NetworkObjectId;
-		SetHealthServerRPC();
 		spottedTimer = 0;
 		hitTimer = 0;
 		UpdateEntityAudioVolume();
@@ -154,7 +153,7 @@ public class Entities : NetworkBehaviour
 	}
 	public void RecieveDamage(float dmg)
 	{
-		dmg -= armour;
+		dmg -= armour.Value;
 		if (dmg < 0)
 			dmg = 0;
 		currentHealth.Value -= (int)dmg;
@@ -162,7 +161,7 @@ public class Entities : NetworkBehaviour
 	public void UpdateHealthBar()
 	{
 		float health = currentHealth.Value;
-		float healthPercentage = health / maxHealth * 100;
+		float healthPercentage = health / maxHealth.Value * 100;
 		HealthSlider.value = healthPercentage;
 		HealthText.text = health.ToString() + " / " + maxHealth.ToString();
 	}
@@ -201,10 +200,5 @@ public class Entities : NetworkBehaviour
 			foreach (AudioSource audio in audioSFXs)
 				audio.volume = AudioManager.Instance.gameSFX.volume;
 		}
-	}
-	[ServerRpc(RequireOwnership = false)]
-	public void SetHealthServerRPC()
-	{
-		currentHealth.Value = maxHealth;
 	}
 }
