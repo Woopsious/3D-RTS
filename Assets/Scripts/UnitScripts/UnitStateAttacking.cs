@@ -61,7 +61,7 @@ public class UnitStateAttacking : UnitBaseState
 		else if (!unit.isTurret && unit.playerSetTarget != null && !unit.hasReachedPlayerSetTarget && 
 			unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
-			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
+			if (unit.agentNav.remainingDistance < unit.attackRange.Value - 5)
 			{
 				if (unit.hasMoveAnimation)
 					unit.animatorController.SetBool("isIdle", true);

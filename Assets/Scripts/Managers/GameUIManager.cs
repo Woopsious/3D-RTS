@@ -272,7 +272,7 @@ public class GameUIManager : MonoBehaviour
 			TurretController building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<TurretController>();
 
 			string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
-			string healthInfo = "Stats:\n Health " + building.maxHealth + ", Armour " + building.armour + "\n";
+			string healthInfo = "Stats:\n Health " + building.maxHealth.Value + ", Armour " + building.armour.Value + "\n";
 
 			WeaponSystem weaponSystem = building.GetComponent<WeaponSystem>();
 			float mainWeaponDPS = weaponSystem.mainWeaponDamage.Value / weaponSystem.mainWeaponAttackSpeed;
@@ -289,7 +289,7 @@ public class GameUIManager : MonoBehaviour
 			BuildingManager building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<BuildingManager>();
 
 			string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
-			string healthInfo = "Stats:\n Health " + building.maxHealth + ", Armour " + building.armour + "\n";
+			string healthInfo = "Stats:\n Health " + building.maxHealth.Value + ", Armour " + building.armour.Value + "\n";
 			string specialInfo = "";
 
 			if (building.isGeneratorBuilding)
@@ -314,7 +314,8 @@ public class GameUIManager : MonoBehaviour
 		NavMeshAgent unitNavMesh = unit.GetComponent<NavMeshAgent>(); 
 
 		string costInfo = "Cost:\n Money " + unit.moneyCost + ", Alloys " + unit.alloyCost + ", Crystals " + unit.crystalCost + "\n";
-		string healthInfo = "Stats:\n Health " + unit.maxHealth + ", Armour " + unit.armour + ", View Range " + unit.ViewRange + "\n";
+		string healthInfo = "Stats:\n Health " + unit.maxHealth.Value + ", Armour " + unit.armour.Value + 
+			", View Range " + unit.ViewRange + "\n";
 		string specialInfo = "Is Armed: NO, Can Fly: NO, Speed " + unitNavMesh.speed * 5 + "MPH \n";
 		string prodInfo = "Built at Light Vehicle Production Building";
 		if (unit.isFlying)
@@ -331,7 +332,7 @@ public class GameUIManager : MonoBehaviour
 			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage.Value / weaponSystem.secondaryWeaponAttackSpeed;
 			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
 
-			combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + unit.attackRange + "\n";
+			combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + unit.attackRange.Value + "\n";
 
 			if (weaponSystem.secondaryWeaponDamage.Value != 0)
 				prodInfo = "Built at Heavy Vehicle Production Building";

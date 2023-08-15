@@ -90,6 +90,36 @@ public class BuildingPlacementManager : NetworkBehaviour
 		if (Input.GetMouseButtonDown(1))
 			CancelBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
 	}
+	[ServerRpc(RequireOwnership = false)]
+	public void ApplyTechUpgradesToNewBuildingsServerRPC(ulong buildingNetworkedId)
+	{
+		if (NetworkManager.SpawnManager.SpawnedObjects[buildingNetworkedId].GetComponent<BuildingManager>() != null)
+		{
+			Debug.LogWarning("BuildingManager Script Found");
+			BuildingManager building = NetworkManager.SpawnManager.SpawnedObjects[buildingNetworkedId].GetComponent<BuildingManager>();
+
+			if (building.isPlayerOneEntity)
+			{
+				building.currentHealth.Value = (int)(building.currentHealth.Value *
+					playerController.gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
+				building.maxHealth.Value = (int)(building.maxHealth.Value * 
+					playerController.gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
+				building.armour.Value = (int)(building.armour.Value * 
+					playerController.gameUIManager.gameManager.playerOneBuildingArmourPercentageBonus.Value);
+			}
+			if (!building.isPlayerOneEntity)
+			{
+				building.currentHealth.Value = (int)(building.currentHealth.Value *
+					playerController.gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value);
+				building.maxHealth.Value = (int)(building.maxHealth.Value * 
+					playerController.gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value);
+				building.armour.Value = (int)(building.armour.Value * 
+					playerController.gameUIManager.gameManager.playerTwoBuildingArmourPercentageBonus.Value);
+			}
+		}
+		else
+			playerController.unitProductionManager.ApplyTechUpgradesToNewUnitsServerRPC(buildingNetworkedId);
+	}
 
 	//buy Invidual buildings
 	public void PlaceEnergyGenBuilding()
@@ -163,11 +193,8 @@ public class BuildingPlacementManager : NetworkBehaviour
 	public void TryPlaceCurrentBuildingPlacementServerRPC(ulong networkObjId)
 	{
 		if (!IsServer) return;
+		ApplyTechUpgradesToNewBuildingsServerRPC(networkObjId);
 		BuildingPlacedClientRPC(networkObjId);
-
-		Debug.LogWarning("network ID:" + networkObjId);
-		playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewBuildingsServerRPC(networkObjId);
-		Debug.LogWarning("network ID:" + networkObjId);
 	}
 
 	[ClientRpc]

@@ -35,7 +35,7 @@ public class UnitStateController : Entities
 	public GameObject FoVMeshObj;
 
 	[Header("Unit Stats")]
-	public int attackRange;
+	public NetworkVariable<int> attackRange = new NetworkVariable<int>();
 	public int ViewRange;
 
 	[Header("Unit Bools")]
@@ -283,7 +283,7 @@ public class UnitStateController : Entities
 	public void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.red;
-		Gizmos.DrawWireSphere(transform.position, attackRange);
+		Gizmos.DrawWireSphere(transform.position, attackRange.Value);
 		Gizmos.DrawWireSphere(transform.position, ViewRange);
 		Gizmos.DrawLine(CenterPoint.transform.position, TestLineCastPos);
 	}
@@ -353,7 +353,7 @@ public class UnitStateController : Entities
 	{
 		float Distance = Vector3.Distance(transform.position, targetVector3);
 
-		if (Distance <= attackRange)
+		if (Distance <= attackRange.Value)
 			return true;
 		else
 			return false;

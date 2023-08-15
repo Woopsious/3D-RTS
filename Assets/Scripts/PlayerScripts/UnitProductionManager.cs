@@ -309,7 +309,7 @@ public class UnitProductionManager : NetworkBehaviour
 	}
 
 	//QUEUE UPDATE FUNCTIONS
-	//once first production is done remove it, (hopefully index 1 will now be index 0) and then if condition met start new index 0 production
+	//once first production is done remove it, (index 1 should be index 0 now) and then if condition met start new index 0 production
 	public void RemoveFromQueueAndStartNextBuild(List<BuildTime> list, BuildTime buildNum)
 	{
 		list.Remove(buildNum);
@@ -353,8 +353,7 @@ public class UnitProductionManager : NetworkBehaviour
 			StartCoroutine(OpenCloseDoors(spawnLocationScript));
 			GameObject obj = Instantiate(GameManager.Instance.PlayerOneUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
 			obj.GetComponent<NetworkObject>().Spawn(true);
-			playerController.gameUIManager.techTreeManager.
-				ApplyTechUpgradesToNewUnitsServerRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
+			ApplyTechUpgradesToNewUnitsServerRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
 			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
 		}
 		else if (clientId == 1)
@@ -362,9 +361,54 @@ public class UnitProductionManager : NetworkBehaviour
 			StartCoroutine(OpenCloseDoors(spawnLocationScript));
 			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
 			obj.GetComponent<NetworkObject>().Spawn(true);
-			playerController.gameUIManager.techTreeManager.
-				ApplyTechUpgradesToNewUnitsServerRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
+			ApplyTechUpgradesToNewUnitsServerRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
 			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
+		}
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void ApplyTechUpgradesToNewUnitsServerRPC(ulong unitNetworkedId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkedId].GetComponent<UnitStateController>();
+
+		if (unit.isPlayerOneEntity) //apply tech upgrades to player one units using player one bonus tech
+		{
+			unit.currentHealth.Value = (int)(unit.currentHealth.Value * 
+				playerController.gameUIManager.gameManager.playerOneUnitHealthPercentageBonus.Value);
+			unit.maxHealth.Value = (int)(unit.maxHealth.Value * 
+				playerController.gameUIManager.gameManager.playerOneUnitHealthPercentageBonus.Value);
+			unit.armour.Value = (int)(unit.armour.Value * 
+				playerController.gameUIManager.gameManager.playerOneUnitArmourPercentageBonus.Value);
+
+			if (unit.isUnitArmed)
+			{
+				unit.weaponSystem.mainWeaponDamage.Value *= 
+					playerController.gameUIManager.gameManager.playerOneUnitDamagePercentageBonus.Value;
+				unit.weaponSystem.secondaryWeaponDamage.Value *= 
+					playerController.gameUIManager.gameManager.playerOneUnitDamagePercentageBonus.Value;
+				unit.attackRange.Value += playerController.gameUIManager.gameManager.playerOneUnitAttackRangeBonus.Value;
+				if (!unit.isTurret)
+					unit.agentNav.speed += playerController.gameUIManager.gameManager.playerOneUnitSpeedBonus.Value;
+			}
+		}
+		if (!unit.isPlayerOneEntity) //apply tech upgrades to player two units using player two bonus tech
+		{
+			unit.currentHealth.Value = (int)(unit.currentHealth.Value * 
+				playerController.gameUIManager.gameManager.playerTwoUnitHealthPercentageBonus.Value);
+			unit.maxHealth.Value = (int)(unit.maxHealth.Value * 
+				playerController.gameUIManager.gameManager.playerTwoUnitHealthPercentageBonus.Value);
+			unit.armour.Value = (int)(unit.armour.Value * 
+				playerController.gameUIManager.gameManager.playerTwoUnitArmourPercentageBonus.Value);
+
+			if (unit.isUnitArmed)
+			{
+				unit.weaponSystem.mainWeaponDamage.Value *= 
+					playerController.gameUIManager.gameManager.playerTwoUnitDamagePercentageBonus.Value;
+				unit.weaponSystem.secondaryWeaponDamage.Value *= 
+					playerController.gameUIManager.gameManager.playerTwoUnitDamagePercentageBonus.Value;
+				unit.attackRange.Value += playerController.gameUIManager.gameManager.playerTwoUnitAttackRangeBonus.Value;
+				if (!unit.isTurret)
+					unit.agentNav.speed += playerController.gameUIManager.gameManager.playerTwoUnitSpeedBonus.Value;
+			}
 		}
 	}
 }
