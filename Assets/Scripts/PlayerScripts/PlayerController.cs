@@ -181,14 +181,16 @@ public class PlayerController : NetworkBehaviour
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				if (gameUIManager.techTreeManager.buildingHasUnlockedHeavyMechs)
+				if (isPlayerOne && gameUIManager.gameManager.playerOneBuildingHasUnlockedHeavyMechs.Value ||
+					!isPlayerOne && gameUIManager.gameManager.playerTwoBuildingHasUnlockedHeavyMechs.Value)
 					buildingPlacementManager.PlaceHeavyVehProdBuilding();
 				else
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Heavy Mechs Tech Not Researched", 2f);
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				if (gameUIManager.techTreeManager.buildingHasUnlockedVtols)
+				if (isPlayerOne && gameUIManager.gameManager.playerOneBuildingHasUnlockedVtols.Value ||
+					!isPlayerOne && gameUIManager.gameManager.playerTwoBuildingHasUnlockedVtols.Value)
 					buildingPlacementManager.PlaceVTOLProdBuilding();
 				else
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("VTOLS Tech Not Researched", 2f);

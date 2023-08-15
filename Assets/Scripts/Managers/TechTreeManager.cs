@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -227,20 +229,6 @@ public class TechTreeManager : MonoBehaviour
 	[Header("STATS")]
 	public bool isCurrentlyReseaching;
 
-	[Header("Buildings")]
-	public float buildingHealthPercentageBonusValue;
-	public float buildingArmourPercentageBonusValue;
-	public float buildingBonusToResourceIncome;
-	public bool buildingHasUnlockedHeavyMechs;
-	public bool buildingHasUnlockedVtols;
-
-	[Header("Units")]
-	public float unitHealthPercentageBonusValue;
-	public float unitArmourPercentageBonusValue;
-	public float unitDamagePercentageBonusValue;
-	public int unitAttackRangeBonusValue;
-	public int unitSpeedBonusValue;
-
 	//SET UP TECH TREE AND THE UI
 	public void SetUpTechTrees()
 	{
@@ -380,68 +368,146 @@ public class TechTreeManager : MonoBehaviour
 	{
 		if (techList == buildingTechList)
 		{
-			if (index == 0)
-			{
-				buildingHealthPercentageBonusValue += 0.1f;
-			}
-			if (index == 1)
-			{
-				buildingArmourPercentageBonusValue += 0.1f;
-			}
-			if (index == 2)
-			{
-				buildingBonusToResourceIncome += 0.1f;
-			}
-			if (index == 3)
-			{
-				buildingHasUnlockedHeavyMechs = true;
-			}
-			if (index == 4)
-			{
-				buildingHasUnlockedVtols = true;
-			}
-			if (index == 5)
-			{
-				buildingHealthPercentageBonusValue += 0.15f;
-			}
-			if (index == 6)
-			{
-				buildingArmourPercentageBonusValue += 0.15f;
-			}
+			UpdateTechBonusesServerRPC(true, index);
 		}
 		else if (techList == unitTechList)
 		{
+			UpdateTechBonusesServerRPC(false, index);
+		}
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void UpdateTechBonusesServerRPC(bool isBuildingTech, int index, ServerRpcParams serverRpcParams = default)
+	{
+		if (isBuildingTech && serverRpcParams.Receive.SenderClientId == 0)
+		{
 			if (index == 0)
 			{
-				unitHealthPercentageBonusValue += 0.05f;
+				gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value += 0.1f;
 			}
 			if (index == 1)
 			{
-				unitArmourPercentageBonusValue += 0.1f;
+				gameUIManager.gameManager.playerOneBuildingArmourPercentageBonus.Value+= 0.1f;
 			}
 			if (index == 2)
 			{
-				unitSpeedBonusValue = 1;
+				gameUIManager.gameManager.playerOneBuildingBonusToResourceIncome.Value += 0.1f;
 			}
 			if (index == 3)
 			{
-				unitHealthPercentageBonusValue += 0.1f;
+				gameUIManager.gameManager.playerOneBuildingHasUnlockedHeavyMechs.Value = true;
 			}
 			if (index == 4)
 			{
-				unitAttackRangeBonusValue += 1;
-			}
-			if (index == 6)
-			{
-				unitAttackRangeBonusValue += 1;
+				gameUIManager.gameManager.playerOneBuildingHasUnlockedVtols.Value = true;
 			}
 			if (index == 5)
 			{
-				unitDamagePercentageBonusValue += 0.05f;
+				gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value += 0.15f;
+			}
+			if (index == 6)
+			{
+				gameUIManager.gameManager.playerOneBuildingArmourPercentageBonus.Value += 0.15f;
+			}
+		}
+		else if (!isBuildingTech && serverRpcParams.Receive.SenderClientId == 0)
+		{
+			if (index == 0)
+			{
+				gameUIManager.gameManager.playerOneUnitHealthPercentageBonus.Value += 0.05f;
+			}
+			if (index == 1)
+			{
+				gameUIManager.gameManager.playerOneUnitArmourPercentageBonus.Value += 0.1f;
+			}
+			if (index == 2)
+			{
+				gameUIManager.gameManager.playerOneUnitSpeedBonus.Value = 1;
+			}
+			if (index == 3)
+			{
+				gameUIManager.gameManager.playerOneUnitHealthPercentageBonus.Value += 0.1f;
+			}
+			if (index == 4)
+			{
+				gameUIManager.gameManager.playerOneUnitAttackRangeBonus.Value += 1;
+			}
+			if (index == 6)
+			{
+				gameUIManager.gameManager.playerOneUnitAttackRangeBonus.Value += 1;
+			}
+			if (index == 5)
+			{
+				gameUIManager.gameManager.playerOneUnitDamagePercentageBonus.Value += 0.05f;
 			}
 			if (index == 7)
 			{
-				unitDamagePercentageBonusValue += 0.1f;
+				gameUIManager.gameManager.playerOneUnitDamagePercentageBonus.Value += 0.1f;
+			}
+		}
+		else if (isBuildingTech && serverRpcParams.Receive.SenderClientId == 1)
+		{
+			if (index == 0)
+			{
+				gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value += 0.1f;
+			}
+			if (index == 1)
+			{
+				gameUIManager.gameManager.playerTwoBuildingArmourPercentageBonus.Value += 0.1f;
+			}
+			if (index == 2)
+			{
+				gameUIManager.gameManager.playerTwoBuildingBonusToResourceIncome.Value += 0.1f;
+			}
+			if (index == 3)
+			{
+				gameUIManager.gameManager.playerTwoBuildingHasUnlockedHeavyMechs.Value = true;
+			}
+			if (index == 4)
+			{
+				gameUIManager.gameManager.playerTwoBuildingHasUnlockedVtols.Value = true;
+			}
+			if (index == 5)
+			{
+				gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value += 0.15f;
+			}
+			if (index == 6)
+			{
+				gameUIManager.gameManager.playerTwoBuildingArmourPercentageBonus.Value += 0.15f;
+			}
+		}
+		else if (!isBuildingTech && serverRpcParams.Receive.SenderClientId == 1)
+		{
+			if (index == 0)
+			{
+				gameUIManager.gameManager.playerTwoUnitHealthPercentageBonus.Value += 0.05f;
+			}
+			if (index == 1)
+			{
+				gameUIManager.gameManager.playerTwoUnitArmourPercentageBonus.Value += 0.1f;
+			}
+			if (index == 2)
+			{
+				gameUIManager.gameManager.playerTwoUnitSpeedBonus.Value = 1;
+			}
+			if (index == 3)
+			{
+				gameUIManager.gameManager.playerTwoUnitHealthPercentageBonus.Value += 0.1f;
+			}
+			if (index == 4)
+			{
+				gameUIManager.gameManager.playerTwoUnitAttackRangeBonus.Value += 1;
+			}
+			if (index == 6)
+			{
+				gameUIManager.gameManager.playerTwoUnitAttackRangeBonus.Value += 1;
+			}
+			if (index == 5)
+			{
+				gameUIManager.gameManager.playerTwoUnitDamagePercentageBonus.Value += 0.05f;
+			}
+			if (index == 7)
+			{
+				gameUIManager.gameManager.playerTwoUnitDamagePercentageBonus.Value += 0.1f;
 			}
 		}
 	}

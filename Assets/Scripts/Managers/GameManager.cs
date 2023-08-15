@@ -46,6 +46,18 @@ public class GameManager : NetworkBehaviour
 	public NetworkVariable<int> playerOneCurrentCrystals = new NetworkVariable<int>();
 	public NetworkVariable<int> playerOneIncomeCrystals = new NetworkVariable<int>();
 
+	[Header("Player One Tech Bonus")]
+	public NetworkVariable<float> playerOneBuildingHealthPercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<float> playerOneBuildingArmourPercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<float> playerOneBuildingBonusToResourceIncome = new NetworkVariable<float>();
+	public NetworkVariable<bool> playerOneBuildingHasUnlockedHeavyMechs = new NetworkVariable<bool>();
+	public NetworkVariable<bool> playerOneBuildingHasUnlockedVtols = new NetworkVariable<bool>();
+	public NetworkVariable<float> playerOneUnitHealthPercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<float> playerOneUnitArmourPercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<float> playerOneUnitDamagePercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<int> playerOneUnitAttackRangeBonus = new NetworkVariable<int>();
+	public NetworkVariable<int> playerOneUnitSpeedBonus = new NetworkVariable<int>();
+
 	[Header("player Two Stats")]
 	public NetworkVariable<int> playerTwoCurrentMoney = new NetworkVariable<int>();
 	public NetworkVariable<int> playerTwoIncomeMoney = new NetworkVariable<int>();
@@ -53,6 +65,18 @@ public class GameManager : NetworkBehaviour
 	public NetworkVariable<int> playerTwoIncomeAlloys = new NetworkVariable<int>();
 	public NetworkVariable<int> playerTwoCurrentCrystals = new NetworkVariable<int>();
 	public NetworkVariable<int> playerTwoIncomeCrystals = new NetworkVariable<int>();
+
+	[Header("Player Two Tech Bonus")]
+	public NetworkVariable<float> playerTwoBuildingHealthPercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<float> playerTwoBuildingArmourPercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<float> playerTwoBuildingBonusToResourceIncome = new NetworkVariable<float>();
+	public NetworkVariable<bool> playerTwoBuildingHasUnlockedHeavyMechs = new NetworkVariable<bool>();
+	public NetworkVariable<bool> playerTwoBuildingHasUnlockedVtols = new NetworkVariable<bool>();
+	public NetworkVariable<float> playerTwoUnitHealthPercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<float> playerTwoUnitArmourPercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<float> playerTwoUnitDamagePercentageBonus = new NetworkVariable<float>();
+	public NetworkVariable<int> playerTwoUnitAttackRangeBonus = new NetworkVariable<int>();
+	public NetworkVariable<int> playerTwoUnitSpeedBonus = new NetworkVariable<int>();
 
 	[Header("PlayerOne Building Prefabs")]
 	public List<GameObject> PlayerOneBuildingsList;
