@@ -690,23 +690,32 @@ public class TechTreeManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void ApplyTechUpgradesToNewBuildingsServerRPC(ulong buildingNetworkedId)
 	{
-		BuildingManager building = NetworkManager.SpawnManager.SpawnedObjects[buildingNetworkedId].GetComponent<BuildingManager>();
+		Debug.LogWarning(buildingNetworkedId);
 
-		if (building.isPlayerOneEntity)
+		if (NetworkManager.SpawnManager.SpawnedObjects[buildingNetworkedId].GetComponent<BuildingManager>() != null)
 		{
-			building.currentHealth.Value = (int)(building.currentHealth.Value *
-				gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
-			building.maxHealth.Value = (int)(building.maxHealth.Value * gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
-			building.armour.Value = (int)(building.armour.Value * gameUIManager.gameManager.playerOneBuildingArmourPercentageBonus.Value);
+			Debug.LogWarning("BuildingManager Script Found");
+			BuildingManager building = NetworkManager.SpawnManager.SpawnedObjects[buildingNetworkedId].GetComponent<BuildingManager>();
+
+			if (building.isPlayerOneEntity)
+			{
+				building.currentHealth.Value = (int)(building.currentHealth.Value *
+					gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
+				building.maxHealth.Value = (int)(building.maxHealth.Value * gameUIManager.gameManager.playerOneBuildingHealthPercentageBonus.Value);
+				building.armour.Value = (int)(building.armour.Value * gameUIManager.gameManager.playerOneBuildingArmourPercentageBonus.Value);
+			}
+			if (!building.isPlayerOneEntity)
+			{
+				building.currentHealth.Value = (int)(building.currentHealth.Value *
+					gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value);
+				building.maxHealth.Value = (int)(building.maxHealth.Value * gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value);
+				building.armour.Value = (int)(building.armour.Value * gameUIManager.gameManager.playerTwoBuildingArmourPercentageBonus.Value);
+			}
 		}
-		if (!building.isPlayerOneEntity)
-		{
-			building.currentHealth.Value = (int)(building.currentHealth.Value *
-				gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value);
-			building.maxHealth.Value = (int)(building.maxHealth.Value * gameUIManager.gameManager.playerTwoBuildingHealthPercentageBonus.Value);
-			building.armour.Value = (int)(building.armour.Value * gameUIManager.gameManager.playerTwoBuildingArmourPercentageBonus.Value);
-		}
+		Debug.LogWarning("BuildingManager Script Found");
+		ApplyTechUpgradesToNewUnitsServerRPC(buildingNetworkedId);
 	}
+
 	//using list of all player units, first reset values to base then recalculate values
 	public void ApplyTechUpgradesToExistingEntities()
 	{
