@@ -560,13 +560,17 @@ public class GameManager : NetworkBehaviour
 				playerTwoUnitDamagePercentageBonus.Value += 0.1f;
 			}
 		}
+
+		if (isBuildingTech)
+			ApplyTechUpgradesToExistingBuildingsServerRPC();
+		else if (!isBuildingTech)
+			ApplyTechUpgradesToExistingUnitsServerRPC();
 	}
 	//using list of all player units, first reset values to base then recalculate values
 	[ServerRpc(RequireOwnership = false)]
 	public void ApplyTechUpgradesToExistingBuildingsServerRPC()
 	{
 		playerBuildingsList = playerBuildingsList.Where(item => item != null).ToList();
-		playerUnitsList = playerUnitsList.Where(item => item != null).ToList();
 
 		foreach (BuildingManager building in playerBuildingsList)
 		{
@@ -589,179 +593,224 @@ public class GameManager : NetworkBehaviour
 			{
 				if (building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingRefineryStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingRefineryStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingRefineryStats.armour * playerOneBuildingArmourPercentageBonus.Value);
 				}
 				else if (!building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingRefineryStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingRefineryStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingRefineryStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
 				}
 			}
 			if (building.entityName == "Light Vehicle Production Building")
 			{
 				if (building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingLightVehProdStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingLightVehProdStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingLightVehProdStats.armour * playerOneBuildingArmourPercentageBonus.Value);
 				}
 				else if (!building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingLightVehProdStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingLightVehProdStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingLightVehProdStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
 				}
 			}
 			if (building.entityName == "Heavy Vehicle Production Building")
 			{
 				if (building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingHeavyVehProdStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingHeavyVehProdStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingHeavyVehProdStats.armour * playerOneBuildingArmourPercentageBonus.Value);
 				}
 				else if (!building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingHeavyVehProdStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingHeavyVehProdStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingHeavyVehProdStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
 				}
 			}
 			if (building.entityName == "VTOL Production Pad")
 			{
 				if (building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingVtolVehProdStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingVtolVehProdStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingVtolVehProdStats.armour * playerOneBuildingArmourPercentageBonus.Value);
 				}
 				else if (!building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingVtolVehProdStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingVtolVehProdStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingVtolVehProdStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
 				}
 			}
 			if (building.entityName == "Player HQ")
 			{
 				if (building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingHQStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingHQStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingHQStats.armour * playerOneBuildingArmourPercentageBonus.Value);
 				}
 				else if (!building.isPlayerOneEntity)
 				{
-					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
-					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+					building.maxHealth.Value = 1 + (int)(buildingHQStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingHQStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingHQStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
 				}
 			}
 			building.UpdateHealthBar();
 		}
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void ApplyTechUpgradesToExistingUnitsServerRPC()
+	{
+		playerUnitsList = playerUnitsList.Where(item => item != null).ToList();
 
-		/*
-		foreach (BuildingManager building in gameUIManager.playerController.buildingListForPlayer)
-		{
-			if (building.entityName == "Energy Generator")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "Refinery Building")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingRefineryStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingRefineryStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "Light Vehicle Production Building")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "Heavy Vehicle Production Building")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "VTOL Production Pad")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "Player HQ")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingHQStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingHQStats.armour * buildingArmourPercentageBonusValue);
-			}
-
-			building.UpdateHealthBar();
-		}
-
-		foreach (UnitStateController unit in gameUIManager.playerController.unitListForPlayer)
+		foreach (UnitStateController unit in playerUnitsList)
 		{
 			if (unit.entityName == "Scout Vehicle")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitScoutVehStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitScoutVehStats.armour * unitArmourPercentageBonusValue);
-				unit.agentNav.speed = GameManager.Instance.unitScoutVehStats.speed + unitSpeedBonusValue;
+				if (unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitScoutVehStats.health * playerOneUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitScoutVehStats.armour * playerOneUnitHealthPercentageBonus.Value);
+					unit.agentNav.speed = unitScoutVehStats.speed + playerOneUnitSpeedBonus.Value;
+				}
+				else if (!unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitScoutVehStats.health * playerTwoUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitScoutVehStats.armour * playerTwoUnitHealthPercentageBonus.Value);
+					unit.agentNav.speed = unitScoutVehStats.speed + playerTwoUnitSpeedBonus.Value;
+				}
 			}
 			if (unit.entityName == "Radar Vehicle")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitRadarVehStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitRadarVehStats.armour * unitArmourPercentageBonusValue);
-				unit.agentNav.speed = GameManager.Instance.unitRadarVehStats.speed + unitSpeedBonusValue;
+				if (unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitRadarVehStats.health * playerOneUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitRadarVehStats.armour * playerOneUnitHealthPercentageBonus.Value);
+					unit.agentNav.speed = unitRadarVehStats.speed + playerOneUnitSpeedBonus.Value;
+				}
+				else if (!unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitRadarVehStats.health * playerTwoUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitRadarVehStats.armour * playerTwoUnitHealthPercentageBonus.Value);
+					unit.agentNav.speed = unitRadarVehStats.speed + playerTwoUnitSpeedBonus.Value;
+				}
 			}
 			if (unit.entityName == "Light Mech")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitMechLightStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitMechLightStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitMechLightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitMechLightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitMechLightStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitMechLightStats.speed + unitSpeedBonusValue;
+				if (unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitMechLightStats.health * playerOneUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitMechLightStats.armour * playerOneUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitMechLightStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitMechLightStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitMechLightStats.attackRange + playerOneUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitMechLightStats.speed + playerOneUnitSpeedBonus.Value;
+				}
+				else if (!unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitMechLightStats.health * playerTwoUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitMechLightStats.armour * playerTwoUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitMechLightStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitMechLightStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitMechLightStats.attackRange + playerTwoUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitMechLightStats.speed + playerTwoUnitSpeedBonus.Value;
+				}
 			}
 			if (unit.entityName == "Heavy Mech Knight")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitMechHvyKnightStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitMechHvyKnightStats.speed + unitSpeedBonusValue;
+				if (unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitMechHvyKnightStats.health * playerOneUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitMechHvyKnightStats.armour * playerOneUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitMechHvyKnightStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitMechHvyKnightStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitMechHvyKnightStats.attackRange + playerOneUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitMechHvyKnightStats.speed + playerOneUnitSpeedBonus.Value;
+				}
+				else if (!unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitMechHvyKnightStats.health * playerTwoUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitMechHvyKnightStats.armour * playerTwoUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitMechHvyKnightStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitMechHvyKnightStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitMechHvyKnightStats.attackRange + playerTwoUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitMechHvyKnightStats.speed + playerTwoUnitSpeedBonus.Value;
+				}
 			}
 			if (unit.entityName == "Heavy Mech Support")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitMechHvyTankStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitMechHvyTankStats.speed + unitSpeedBonusValue;
+				if (unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitMechHvyTankStats.health * playerOneUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitMechHvyTankStats.armour * playerOneUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitMechHvyTankStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitMechHvyTankStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitMechHvyTankStats.attackRange + playerOneUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitMechHvyTankStats.speed + playerOneUnitSpeedBonus.Value;
+				}
+				else if (!unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitMechHvyTankStats.health * playerTwoUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitMechHvyTankStats.armour * playerTwoUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitMechHvyTankStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitMechHvyTankStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitMechHvyTankStats.attackRange + playerTwoUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitMechHvyTankStats.speed + playerTwoUnitSpeedBonus.Value;
+				}
 			}
 			if (unit.entityName == "VTOL Gunship")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitVtolGunshipStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitVtolGunshipStats.speed + unitSpeedBonusValue;
+				if (unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitVtolGunshipStats.health * playerOneUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitVtolGunshipStats.armour * playerOneUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitVtolGunshipStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitVtolGunshipStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitVtolGunshipStats.attackRange + playerOneUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitVtolGunshipStats.speed + playerOneUnitSpeedBonus.Value;
+				}
+				else if (!unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitVtolGunshipStats.health * playerTwoUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitVtolGunshipStats.armour * playerTwoUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitVtolGunshipStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitVtolGunshipStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitVtolGunshipStats.attackRange + playerTwoUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitVtolGunshipStats.speed + playerTwoUnitSpeedBonus.Value;
+				}
 			}
 			if (unit.entityName == "Turret")
 			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitTurretStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitTurretStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitTurretStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitTurretStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitTurretStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitTurretStats.speed + unitSpeedBonusValue;
+				if (unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitTurretStats.health * playerOneUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitTurretStats.armour * playerOneUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitTurretStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitTurretStats.mainWeaponDamage * playerOneUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitTurretStats.attackRange + playerOneUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitTurretStats.speed + playerOneUnitSpeedBonus.Value;
+				}
+				else if (!unit.isPlayerOneEntity)
+				{
+					unit.maxHealth.Value = 1 + (int)(unitTurretStats.health * playerTwoUnitHealthPercentageBonus.Value);
+					unit.armour.Value = 1 + (int)(unitTurretStats.armour * playerTwoUnitHealthPercentageBonus.Value);
+					unit.weaponSystem.mainWeaponDamage.Value = 1 + (int)(unitTurretStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.weaponSystem.secondaryWeaponDamage.Value = 1 + (int)(unitTurretStats.mainWeaponDamage * playerTwoUnitDamagePercentageBonus.Value);
+					unit.attackRange.Value = unitTurretStats.attackRange + playerTwoUnitAttackRangeBonus.Value;
+					unit.agentNav.speed = unitTurretStats.speed + playerTwoUnitSpeedBonus.Value;
+				}
 			}
 			unit.UpdateHealthBar();
 		}
-		*/
 	}
 
 	[System.Serializable]

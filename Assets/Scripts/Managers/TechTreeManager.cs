@@ -363,18 +363,13 @@ public class TechTreeManager : NetworkBehaviour
 
 		CompleteResearch(techList, index);
 		UnlockNextResearch(techList, index);
-		gameUIManager.gameManager.ApplyTechUpgradesToExistingEntitiesServerRPC();
 	}
 	public void CompleteResearch(List<Technology> techList, int index) //update bonus values provided by research
 	{
 		if (techList == buildingTechList)
-		{
 			gameUIManager.gameManager.UpdateTechBonusesServerRPC(true, index);
-		}
 		else if (techList == unitTechList)
-		{
 			gameUIManager.gameManager.UpdateTechBonusesServerRPC(false, index);
-		}
 	}
 	public void UnlockNextResearch(List<Technology> techList, int index) //unlock next techs in respective trees
 	{
