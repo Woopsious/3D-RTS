@@ -74,12 +74,16 @@ public class UnitStateController : Entities
 		ChangeStateIdleClientRPC();
 		ChangeStateIdleServerRPC(EntityNetworkObjId);
 
-		PlayerController playerCon = FindObjectOfType<PlayerController>();
+		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set refs here
 		if (playerCon.isPlayerOne != !isPlayerOneEntity)
 		{
 			playerController = playerCon;
 			playerController.unitListForPlayer.Add(this);
 		}
+		if (IsServer && playerCon.isPlayerOne)
+			GameManager.Instance.playerUnitsList.Add(GetComponent<UnitStateController>());
+		if (isTurret)
+			GetComponent<TurretController>().AddTurretRefs();
 	}
 	public override void Update()
 	{
@@ -285,7 +289,6 @@ public class UnitStateController : Entities
 		Gizmos.color = Color.red;
 		Gizmos.DrawWireSphere(transform.position, attackRange.Value);
 		Gizmos.DrawWireSphere(transform.position, ViewRange);
-		Gizmos.DrawLine(CenterPoint.transform.position, TestLineCastPos);
 	}
 
 	//STATE CHANGE FUNCTIONS
@@ -337,12 +340,7 @@ public class UnitStateController : Entities
 			Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
 
 			if (hit.point != null && hit.collider.gameObject == entity.gameObject)
-			{
-				TestLineCastPos = hit.point;
-				Debug.LogWarning("Hit: " + hit.collider.gameObject);
-				Debug.LogWarning("Entity: " + entity);
 				return true;
-			}
 			else
 				return false;
 		}

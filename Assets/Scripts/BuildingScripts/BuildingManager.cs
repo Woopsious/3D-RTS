@@ -36,6 +36,7 @@ public class BuildingManager : Entities
 	public override void Start()
 	{
 		base.Start();
+		AddBuildingRefs();
 
 		if (isGeneratorBuilding)
 			gameObject.GetComponent<EnergyGenController>().PowerBuildings();

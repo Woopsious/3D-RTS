@@ -81,6 +81,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 			}
 		}
 	}
+
 	//place building and toggle it on
 	public void PlaceBuildingManager()
 	{
@@ -95,7 +96,6 @@ public class BuildingPlacementManager : NetworkBehaviour
 	{
 		if (NetworkManager.SpawnManager.SpawnedObjects[buildingNetworkedId].GetComponent<BuildingManager>() != null)
 		{
-			Debug.LogWarning("BuildingManager Script Found");
 			BuildingManager building = NetworkManager.SpawnManager.SpawnedObjects[buildingNetworkedId].GetComponent<BuildingManager>();
 
 			if (building.isPlayerOneEntity)
@@ -205,7 +205,6 @@ public class BuildingPlacementManager : NetworkBehaviour
 		if (buildingObj.GetComponent<BuildingManager>() != null)
 		{
 			buildingObj.GetComponent<BuildingManager>().enabled = true;
-			buildingObj.GetComponent<BuildingManager>().AddBuildingRefs();
 
 			if (buildingObj.GetComponent<BuildingManager>().isVTOLProdBuilding)
 				buildingObj.GetComponent<SphereCollider>().isTrigger = true;
@@ -215,8 +214,6 @@ public class BuildingPlacementManager : NetworkBehaviour
 		else if (buildingObj.GetComponent<TurretController>() != null)
 		{
 			buildingObj.GetComponent<TurretController>().enabled = true;
-			buildingObj.GetComponent<TurretController>().AddTurretRefs();
-
 			buildingObj.GetComponent<BoxCollider>().isTrigger = true;
 			buildingObj.transform.GetChild(4).GetComponent<SphereCollider>().enabled = true;
 		}

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Unity.Netcode;
 using UnityEngine;
@@ -108,6 +109,9 @@ public class GameManager : NetworkBehaviour
 	public BaseUnitStats unitTurretStats;
 
 	public UnitStateController testUnit;
+
+	public List<BuildingManager> playerBuildingsList = new List<BuildingManager>();
+	public List<UnitStateController> playerUnitsList = new List<UnitStateController>();
 
 	public void Awake()
 	{
@@ -558,8 +562,10 @@ public class GameManager : NetworkBehaviour
 		}
 	}
 	//using list of all player units, first reset values to base then recalculate values
-	public void ApplyTechUpgradesToExistingEntities()
+	[ServerRpc(RequireOwnership = false)]
+	public void ApplyTechUpgradesToExistingEntitiesServerRPC()
 	{
+
 		/*
 		foreach (BuildingManager building in gameUIManager.playerController.buildingListForPlayer)
 		{

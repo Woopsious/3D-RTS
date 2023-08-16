@@ -5,7 +5,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class CanPlaceBuilding : MonoBehaviour
+public class CanPlaceBuilding : NetworkBehaviour
 {
 	public CapturePointController pointController;
 
@@ -32,8 +32,7 @@ public class CanPlaceBuilding : MonoBehaviour
 			else if (!building.isPlayerOneEntity)
 				building.miniMapRenderObj.layer = 12;
 
-			if (!building.isHQ)
-				AssignPlayerController(building.GetComponent<Entities>());
+			AssignPlayerController(building.GetComponent<Entities>());
 		}
 		else
 		{
@@ -55,17 +54,21 @@ public class CanPlaceBuilding : MonoBehaviour
 	}
 	public void AssignPlayerController(Entities entity)
 	{
-		PlayerController playerCon = FindObjectOfType<PlayerController>();
-
+		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set player refs here
 		if (playerCon.isPlayerOne != !entity.isPlayerOneEntity)
 		{
 			entity.playerController = playerCon;
-			entity.playerController.buildingPlacementManager.currentBuildingPlacement = entity;
-			entity.playerController.buildingPlacementManager.canPlaceBuilding = this;
 
-			entity.playerController.buildingPlacementManager.currentBuildingPlacementNetworkId =
-				entity.GetComponent<NetworkObject>().NetworkObjectId;
+			if (!building.isHQ)
+			{
+				playerCon.buildingPlacementManager.currentBuildingPlacement = entity;
+				playerCon.buildingPlacementManager.canPlaceBuilding = this;
+				playerCon.buildingPlacementManager.currentBuildingPlacementNetworkId =
+					entity.GetComponent<NetworkObject>().NetworkObjectId;
+			}
 		}
+		if (IsServer && playerCon.isPlayerOne)
+			GameManager.Instance.playerBuildingsList.Add(GetComponent<BuildingManager>());
 	}
 
 	public void OnTriggerEnter(Collider other)

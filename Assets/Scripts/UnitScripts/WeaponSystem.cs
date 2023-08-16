@@ -81,10 +81,9 @@ public class WeaponSystem : NetworkBehaviour
 
 	//server/host checks if entity exists + in attack range, if true shoot it, else try get new target and remove null refs from lists
 	[ServerRpc(RequireOwnership = false)]
-	public void ShootMainWeapServerRPC(ulong networkObjId)
+	public void ShootMainWeapServerRPC()
 	{
-		UnitStateController unit = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>();
-		unit.weaponSystem.ShootMainWeaponClientRPC();
+		ShootMainWeaponClientRPC();
 	}
 	[ClientRpc]
 	public void ShootMainWeaponClientRPC()
@@ -132,12 +131,12 @@ public class WeaponSystem : NetworkBehaviour
 			TryFindTargets();
 	}
 	[ServerRpc(RequireOwnership = false)]
-	public void ShootSeconWeapServerRPC(ulong networkObjId)
+	public void ShootSeconWeapServerRPC()
 	{
-		UnitStateController unitNetwork = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>();
-		unitNetwork.weaponSystem.ShootSecondaryWeapon();
+		ShootSecondaryWeaponClientRPC();
 	}
-	public void ShootSecondaryWeapon()
+	[ClientRpc]
+	public void ShootSecondaryWeaponClientRPC()
 	{
 		if (HasPlayerSetTarget())
 		{
@@ -244,7 +243,7 @@ public class WeaponSystem : NetworkBehaviour
 			mainWeaponAttackSpeedTimer -= Time.deltaTime;
 		else if (IsServer)
 		{
-			ShootMainWeapServerRPC(unit.EntityNetworkObjId);
+			ShootMainWeapServerRPC();
 			mainWeaponAttackSpeedTimer = mainWeaponAttackSpeed;
 		}
 	}
@@ -257,7 +256,7 @@ public class WeaponSystem : NetworkBehaviour
 			if (unit.hasShootAnimation)
 				StartCoroutine(DelaySecondaryAttack(1));
 			else
-				ShootSeconWeapServerRPC(unit.EntityNetworkObjId);
+				ShootSeconWeapServerRPC();
 
 			secondaryWeaponAttackSpeedTimer = secondaryWeaponAttackSpeed;
 		}
@@ -267,6 +266,6 @@ public class WeaponSystem : NetworkBehaviour
 		secondaryWeaponAttackSpeedTimer++;
 		secondaryWeaponAttackSpeedTimer %= secondaryWeaponAttackSpeed - 1;
 		yield return new WaitForSeconds(seconds);
-		ShootSeconWeapServerRPC(unit.EntityNetworkObjId);
+		ShootSeconWeapServerRPC();
 	}
 }
