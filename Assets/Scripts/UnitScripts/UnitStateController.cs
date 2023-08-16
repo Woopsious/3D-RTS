@@ -335,15 +335,10 @@ public class UnitStateController : Entities
 	//BOOL FUNCTIONS
 	public bool CheckIfEntityInLineOfSight(Entities entity)
 	{
-		if (entity != null)
-		{
-			Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
+		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
 
-			if (hit.point != null && hit.collider.gameObject == entity.gameObject)
-				return true;
-			else
-				return false;
-		}
+		if (hit.point != null && hit.collider.gameObject == entity.gameObject)
+			return true;
 		else
 			return false;
 	}

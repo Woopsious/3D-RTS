@@ -563,8 +563,105 @@ public class GameManager : NetworkBehaviour
 	}
 	//using list of all player units, first reset values to base then recalculate values
 	[ServerRpc(RequireOwnership = false)]
-	public void ApplyTechUpgradesToExistingEntitiesServerRPC()
+	public void ApplyTechUpgradesToExistingBuildingsServerRPC()
 	{
+		playerBuildingsList = playerBuildingsList.Where(item => item != null).ToList();
+		playerUnitsList = playerUnitsList.Where(item => item != null).ToList();
+
+		foreach (BuildingManager building in playerBuildingsList)
+		{
+			if (building.entityName == "Energy Generator")
+			{
+				if (building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+				}
+				else if (!building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+				}
+			}
+			if (building.entityName == "Refinery Building")
+			{
+				if (building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+				}
+				else if (!building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+				}
+			}
+			if (building.entityName == "Light Vehicle Production Building")
+			{
+				if (building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+				}
+				else if (!building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+				}
+			}
+			if (building.entityName == "Heavy Vehicle Production Building")
+			{
+				if (building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+				}
+				else if (!building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+				}
+			}
+			if (building.entityName == "VTOL Production Pad")
+			{
+				if (building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+				}
+				else if (!building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+				}
+			}
+			if (building.entityName == "Player HQ")
+			{
+				if (building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerOneBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerOneBuildingArmourPercentageBonus.Value);
+				}
+				else if (!building.isPlayerOneEntity)
+				{
+					building.maxHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.currentHealth.Value = 1 + (int)(buildingEnergyGenStats.health * playerTwoBuildingHealthPercentageBonus.Value);
+					building.armour.Value = 1 + (int)(buildingEnergyGenStats.armour * playerTwoBuildingArmourPercentageBonus.Value);
+				}
+			}
+			building.UpdateHealthBar();
+		}
 
 		/*
 		foreach (BuildingManager building in gameUIManager.playerController.buildingListForPlayer)
