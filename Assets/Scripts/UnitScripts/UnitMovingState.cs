@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Animations;
@@ -9,7 +10,7 @@ public class UnitMovingState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		Debug.Log("Entered Moving State");
+		Debug.LogWarning("Entered Moving State");
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[2].Stop();
@@ -28,7 +29,8 @@ public class UnitMovingState : UnitBaseState
 			unit.agentNav.SetPath(unit.navMeshPath);
 		else
 		{
-			unit.ChangeStateIdle();
+			unit.ChangeStateIdleClientRPC();
+			unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
 		}
 	}
@@ -48,14 +50,16 @@ public class UnitMovingState : UnitBaseState
 	{
 		if (unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
 		{
-			unit.ChangeStateIdle();
+			unit.ChangeStateIdleClientRPC();
+			unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
 			unit.agentNav.isStopped = true;
 		}
 		else if (unit.playerSetTarget != null && !unit.hasReachedPlayerSetTarget && unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
-			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
+			if (unit.agentNav.remainingDistance < unit.attackRange.Value - 5)
 			{
-				unit.ChangeStateIdle();
+				unit.ChangeStateIdleClientRPC();
+				unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
 				unit.agentNav.isStopped = true;
 				unit.hasReachedPlayerSetTarget = true;
 			}

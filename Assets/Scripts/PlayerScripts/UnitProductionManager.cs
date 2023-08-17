@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UnitProductionManager : MonoBehaviour
+public class UnitProductionManager : NetworkBehaviour
 {
 	[Header("Game Ui + Refs")]
 	public PlayerController playerController;
@@ -126,15 +127,17 @@ public class UnitProductionManager : MonoBehaviour
 			{
 				//run check to see if a building of the correct type for a unit is built in future
 				build.buildPosDestination = unitBuildHighlighterParent.transform.position;
+				build.isPlayerOne = playerController.isPlayerOne;
 
-				if(build.FindClosestProdBuilding())
+				if (build.FindClosestProdBuilding())
 				{
 					UnitStateController broughtUnit = build.UnitPrefab.GetComponent<UnitStateController>();
-
-					if (CheckIfCanBuy(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost)) //if player can afford them 
+					//if player can afford them
+					if (playerController.CheckIfCanBuyEntity(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost))
 					{
 						//then -unit prices and add to correct queue list and start production on first one if not already started, then update resUI
-						UnitCost(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
+						playerController.EntityCostServerRPC(playerController.isPlayerOne, 
+							broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
 
 						if (build.listNumRef == 1)
 						{
@@ -197,12 +200,13 @@ public class UnitProductionManager : MonoBehaviour
 
 	//BUY UNIT FUNCTIONS (Called from Ui button or Hotkey in PlayerController), spawns ui, Ghost Projections and sets refs/stats
 	//possible to add an if statement to switch prefab to playerTwo unit prefab based on is playerOne bool
-	public void AddScoutVehToBuildQueue()
+	public void AddScoutVehToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, lightVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitScoutVehicle;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 1;
@@ -211,12 +215,13 @@ public class UnitProductionManager : MonoBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddRadarVehToBuildQueue()
+	public void AddRadarVehToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, lightVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitRadarVehicle;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 1;
@@ -225,12 +230,13 @@ public class UnitProductionManager : MonoBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddLightMechToBuildQueue()
+	public void AddLightMechToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, lightVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitLightMech;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 1;
@@ -239,12 +245,13 @@ public class UnitProductionManager : MonoBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddHeavyMechKnightToBuildQueue()
+	public void AddHeavyMechKnightToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, heavyVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitHeavyMechKnight;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 2;
@@ -253,12 +260,13 @@ public class UnitProductionManager : MonoBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddHeavyMechTankToBuildQueue()
+	public void AddHeavyMechTankToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, heavyVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitHeavyMechTank;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 2;
@@ -267,12 +275,13 @@ public class UnitProductionManager : MonoBehaviour
 		currentUnitPlacements.Add(script);
 		playerController.gameUIManager.ShowUnitProdQueuesWhenBuyingUnit();
 	}
-	public void AddVTOLToBuildQueue()
+	public void AddVTOLToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, vtolVehProdQueueObj.transform);
 		BuildTime script = uiObj.GetComponent<BuildTime>();
 
 		script.UnitPrefab = unitVTOL;
+		script.BuildOrderIndex = buildIndex;
 		script.unitProductionManager = this;
 		script.isPlayerOne = playerController.isPlayerOne;
 		script.listNumRef = 3;
@@ -283,19 +292,14 @@ public class UnitProductionManager : MonoBehaviour
 	}
 
 	//SPAWN BUILT UNITS FUNCTIONS
-	public void SpawnUnitsAtProdBuilding(BuildTime buildOrder, VehProdSpawnLocation VehSpawnLocation, Vector3 destination)
+	public void SpawnUnitsAtProdBuilding(int buildOrderIndex, ulong buildingNetworkObjId, Vector3 destination)
 	{
-		StartCoroutine(OpenCloseDoors(VehSpawnLocation));
-		GameObject go = Instantiate(buildOrder.UnitPrefab, VehSpawnLocation.vehProdSpawnPoint.transform.position, Quaternion.identity);
-
-		playerController.gameUIManager.techTreeManager.ApplyTechUpgradesToNewUnits(go);
-		StartCoroutine(ChangeBuiltUnitState(go.GetComponent<UnitStateController>(), destination));
+		SpawnUnitsAtProdBuildingServerRPC(buildOrderIndex, buildingNetworkObjId, destination);
 	}
-	public IEnumerator ChangeBuiltUnitState(UnitStateController newUnit, Vector3 destination)
+	public IEnumerator ChangeBuiltUnitState(ulong NetworkUnitId, Vector3 destination)
 	{
 		yield return new WaitForSeconds(0.1f);
-		newUnit.movePos = destination;
-		newUnit.ChangeStateMoving();
+		playerController.unitSelectionManager.MoveUnitsServerRPC(NetworkUnitId, destination);
 	}
 	public IEnumerator OpenCloseDoors(VehProdSpawnLocation VehSpawnLocation)
 	{
@@ -305,7 +309,7 @@ public class UnitProductionManager : MonoBehaviour
 	}
 
 	//QUEUE UPDATE FUNCTIONS
-	//once first production is done remove it, (hopefully index 1 will now be index 0) and then if condition met start new index 0 production
+	//once first production is done remove it, (index 1 should be index 0 now) and then if condition met start new index 0 production
 	public void RemoveFromQueueAndStartNextBuild(List<BuildTime> list, BuildTime buildNum)
 	{
 		list.Remove(buildNum);
@@ -331,21 +335,80 @@ public class UnitProductionManager : MonoBehaviour
 
 		return baseBuildTime;
 	}
-	public bool CheckIfCanBuy(int MoneyCost, int AlloyCost, int CrystalCost)
-	{
-		if (MoneyCost > GameManager.Instance.playerOneCurrentMoney || AlloyCost > GameManager.Instance.playerOneCurrentAlloys
-			|| CrystalCost > GameManager.Instance.playerOneCurrentCrystals)
-		{
-			return false;
-		}
-		return true;
-	}
-	public void UnitCost(int moneyCost, int alloyCost, int crystalCost)
-	{
-		GameManager.Instance.playerOneCurrentMoney -= moneyCost;
-		GameManager.Instance.playerOneCurrentAlloys -= alloyCost;
-		GameManager.Instance.playerOneCurrentCrystals -= crystalCost;
 
-		playerController.gameUIManager.UpdateCurrentResourcesUI();
+	//server spawns unit in
+	[ServerRpc(RequireOwnership = false)]
+	public void SpawnUnitsAtProdBuildingServerRPC(int buildOrderIndex, ulong buildingNetworkObjId, Vector3 destination,
+		ServerRpcParams serverRpcParams = default)
+	{
+		ulong clientId = serverRpcParams.Receive.SenderClientId;
+		if (!IsServer) return;
+
+		VehProdSpawnLocation spawnLocationScript = NetworkManager.Singleton.SpawnManager.SpawnedObjects[buildingNetworkObjId].
+			GetComponent<VehProdSpawnLocation>();
+		Vector3 vehSpawnPos = spawnLocationScript.vehProdSpawnPoint.transform.position;
+
+		if (clientId == 0)
+		{
+			StartCoroutine(OpenCloseDoors(spawnLocationScript));
+			GameObject obj = Instantiate(GameManager.Instance.PlayerOneUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
+			obj.GetComponent<NetworkObject>().Spawn(true);
+			ApplyTechUpgradesToNewUnitsServerRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
+			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
+		}
+		else if (clientId == 1)
+		{
+			StartCoroutine(OpenCloseDoors(spawnLocationScript));
+			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoUnitsList[buildOrderIndex], vehSpawnPos, Quaternion.identity);
+			obj.GetComponent<NetworkObject>().Spawn(true);
+			ApplyTechUpgradesToNewUnitsServerRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
+			StartCoroutine(ChangeBuiltUnitState(obj.GetComponent<NetworkObject>().NetworkObjectId, destination));
+		}
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void ApplyTechUpgradesToNewUnitsServerRPC(ulong unitNetworkedId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkedId].GetComponent<UnitStateController>();
+
+		if (unit.isPlayerOneEntity) //apply tech upgrades to player one units using player one bonus tech
+		{
+			unit.currentHealth.Value = (int)(unit.currentHealth.Value * 
+				playerController.gameUIManager.gameManager.playerOneUnitHealthPercentageBonus.Value);
+			unit.maxHealth.Value = (int)(unit.maxHealth.Value * 
+				playerController.gameUIManager.gameManager.playerOneUnitHealthPercentageBonus.Value);
+			unit.armour.Value = (int)(unit.armour.Value * 
+				playerController.gameUIManager.gameManager.playerOneUnitArmourPercentageBonus.Value);
+
+			if (unit.isUnitArmed)
+			{
+				unit.weaponSystem.mainWeaponDamage.Value *= 
+					playerController.gameUIManager.gameManager.playerOneUnitDamagePercentageBonus.Value;
+				unit.weaponSystem.secondaryWeaponDamage.Value *= 
+					playerController.gameUIManager.gameManager.playerOneUnitDamagePercentageBonus.Value;
+				unit.attackRange.Value += playerController.gameUIManager.gameManager.playerOneUnitAttackRangeBonus.Value;
+				if (!unit.isTurret)
+					unit.agentNav.speed += playerController.gameUIManager.gameManager.playerOneUnitSpeedBonus.Value;
+			}
+		}
+		if (!unit.isPlayerOneEntity) //apply tech upgrades to player two units using player two bonus tech
+		{
+			unit.currentHealth.Value = (int)(unit.currentHealth.Value * 
+				playerController.gameUIManager.gameManager.playerTwoUnitHealthPercentageBonus.Value);
+			unit.maxHealth.Value = (int)(unit.maxHealth.Value * 
+				playerController.gameUIManager.gameManager.playerTwoUnitHealthPercentageBonus.Value);
+			unit.armour.Value = (int)(unit.armour.Value * 
+				playerController.gameUIManager.gameManager.playerTwoUnitArmourPercentageBonus.Value);
+
+			if (unit.isUnitArmed)
+			{
+				unit.weaponSystem.mainWeaponDamage.Value *= 
+					playerController.gameUIManager.gameManager.playerTwoUnitDamagePercentageBonus.Value;
+				unit.weaponSystem.secondaryWeaponDamage.Value *= 
+					playerController.gameUIManager.gameManager.playerTwoUnitDamagePercentageBonus.Value;
+				unit.attackRange.Value += playerController.gameUIManager.gameManager.playerTwoUnitAttackRangeBonus.Value;
+				if (!unit.isTurret)
+					unit.agentNav.speed += playerController.gameUIManager.gameManager.playerTwoUnitSpeedBonus.Value;
+			}
+		}
 	}
 }

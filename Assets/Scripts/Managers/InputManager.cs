@@ -121,7 +121,7 @@ public class InputManager : MonoBehaviour
 		//if key is escape cancel rebinding
 		if (key == KeyCode.Escape)
 		{
-			MenuUIManager.Instance.CancelKeybindButtonDisplay(buttonNum, InputManager.Instance.keyBindDictionary[Instance.keybindNames[buttonNum]]);
+			MenuUIManager.Instance.CancelKeybindButtonDisplay(buttonNum, Instance.keyBindDictionary[Instance.keybindNames[buttonNum]]);
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("key Rebinding Canceled", 2f);
 		}
 		else if (CheckIfValidKeybind(key))
@@ -131,7 +131,7 @@ public class InputManager : MonoBehaviour
 		}
 		else
 		{
-			MenuUIManager.Instance.CancelKeybindButtonDisplay(buttonNum, InputManager.Instance.keyBindDictionary[Instance.keybindNames[buttonNum]]);
+			MenuUIManager.Instance.CancelKeybindButtonDisplay(buttonNum, Instance.keyBindDictionary[Instance.keybindNames[buttonNum]]);
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("key already bound", 2f);
 		}
 		keyToRebind = "";

@@ -110,6 +110,7 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void MultiplayerBackBackButton()
 	{
+		GameManager.Instance.isPlayerOne = true;
 		mainMenuObj.SetActive(false);
 		SettingsObj.SetActive(false);
 		highScoreObj.SetActive(false);
@@ -181,11 +182,13 @@ public class MenuUIManager : MonoBehaviour
 	//single player button functions
 	public void PlayNewSinglePlayerGame()
 	{
+		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
 		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
 	public void LoadSinglePlayerGame()
 	{
+		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
 		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
@@ -193,6 +196,7 @@ public class MenuUIManager : MonoBehaviour
 	//multi player button functions
 	public void HostNewMultiplayerGame()
 	{
+		GameManager.Instance.isPlayerOne = true;
 		NetworkManager.Singleton.StartHost();
 		multiPlayerScreenObj.SetActive(false);
 		LobbyScreenUiObj.SetActive(true);
@@ -201,6 +205,7 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void JoinMultiplayerGame()
 	{
+		GameManager.Instance.isPlayerOne = false;
 		NetworkManager.Singleton.StartClient();
 		multiPlayerScreenObj.SetActive(false);
 		LobbyScreenUiObj.SetActive(true);

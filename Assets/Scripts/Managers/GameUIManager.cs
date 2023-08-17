@@ -69,19 +69,12 @@ public class GameUIManager : MonoBehaviour
 	public bool isGamePaused;
 	public float gameSpeed;
 
-	//may need to delegate on click functions for buy buttons depending on if PlayerController isPlayerOne or !isPlayerOne
-	public void Awake()
-	{
-		GameManager.Instance.gameUIManager = this;
-		playerController.gameUIManager = this;
-		audioBackButton.onClick.AddListener(delegate { AudioManager.Instance.AdjustAudioVolume(); });
-		//WIP soulution for multiplayer
-		PlayerController[] playerControllers = FindObjectsOfType<PlayerController>();
-	}
 	public void Start()
 	{
 		GameManager.Instance.OnSceneLoad(1);
 		GameManager.Instance.LoadPlayerData();
+
+		audioBackButton.onClick.AddListener(delegate { AudioManager.Instance.AdjustAudioVolume(); });
 	}
 	public void Update()
 	{
@@ -96,7 +89,7 @@ public class GameUIManager : MonoBehaviour
 	{
 		gameSpeed = 1;
 		UpdateGameSpeedUi();
-		UpdateCurrentResourcesUI();
+		StartCoroutine(UpdateCurrentResourcesUI(0f));
 		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
 	}
 	public void PlayButtonSound()
@@ -279,11 +272,11 @@ public class GameUIManager : MonoBehaviour
 			TurretController building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<TurretController>();
 
 			string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
-			string healthInfo = "Stats:\n Health " + building.maxHealth + ", Armour " + building.armour + "\n";
+			string healthInfo = "Stats:\n Health " + building.maxHealth.Value + ", Armour " + building.armour.Value + "\n";
 
 			WeaponSystem weaponSystem = building.GetComponent<WeaponSystem>();
-			float mainWeaponDPS = weaponSystem.mainWeaponDamage / weaponSystem.mainWeaponAttackSpeed;
-			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage / weaponSystem.secondaryWeaponAttackSpeed;
+			float mainWeaponDPS = weaponSystem.mainWeaponDamage.Value / weaponSystem.mainWeaponAttackSpeed;
+			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage.Value / weaponSystem.secondaryWeaponAttackSpeed;
 			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
 
 			string combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + building.attackRange + "\n";
@@ -296,7 +289,7 @@ public class GameUIManager : MonoBehaviour
 			BuildingManager building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<BuildingManager>();
 
 			string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
-			string healthInfo = "Stats:\n Health " + building.maxHealth + ", Armour " + building.armour + "\n";
+			string healthInfo = "Stats:\n Health " + building.maxHealth.Value + ", Armour " + building.armour.Value + "\n";
 			string specialInfo = "";
 
 			if (building.isGeneratorBuilding)
@@ -321,7 +314,8 @@ public class GameUIManager : MonoBehaviour
 		NavMeshAgent unitNavMesh = unit.GetComponent<NavMeshAgent>(); 
 
 		string costInfo = "Cost:\n Money " + unit.moneyCost + ", Alloys " + unit.alloyCost + ", Crystals " + unit.crystalCost + "\n";
-		string healthInfo = "Stats:\n Health " + unit.maxHealth + ", Armour " + unit.armour + ", View Range " + unit.ViewRange + "\n";
+		string healthInfo = "Stats:\n Health " + unit.maxHealth.Value + ", Armour " + unit.armour.Value + 
+			", View Range " + unit.ViewRange + "\n";
 		string specialInfo = "Is Armed: NO, Can Fly: NO, Speed " + unitNavMesh.speed * 5 + "MPH \n";
 		string prodInfo = "Built at Light Vehicle Production Building";
 		if (unit.isFlying)
@@ -334,13 +328,13 @@ public class GameUIManager : MonoBehaviour
 		if (unit.isUnitArmed)
 		{
 			WeaponSystem weaponSystem = unit.GetComponent<WeaponSystem>();
-			float mainWeaponDPS = weaponSystem.mainWeaponDamage / weaponSystem.mainWeaponAttackSpeed;
-			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage / weaponSystem.secondaryWeaponAttackSpeed;
+			float mainWeaponDPS = weaponSystem.mainWeaponDamage.Value / weaponSystem.mainWeaponAttackSpeed;
+			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage.Value / weaponSystem.secondaryWeaponAttackSpeed;
 			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
 
-			combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + unit.attackRange + "\n";
+			combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + unit.attackRange.Value + "\n";
 
-			if (weaponSystem.secondaryWeaponDamage != 0)
+			if (weaponSystem.secondaryWeaponDamage.Value != 0)
 				prodInfo = "Built at Heavy Vehicle Production Building";
 		}
 		textInfo.text = costInfo + healthInfo + specialInfo + combatInfo + prodInfo;
@@ -383,27 +377,27 @@ public class GameUIManager : MonoBehaviour
 			{
 				case 0:
 				buyScoutVehicle = buttonToLink;
-				buyScoutVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddScoutVehToBuildQueue(); });
+				buyScoutVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddScoutVehToBuildQueue(0); });
 				break;
 				case 1:
 				buyRadarVehicle = buttonToLink;
-				buyRadarVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddRadarVehToBuildQueue(); });
+				buyRadarVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddRadarVehToBuildQueue(1); });
 				break;
 				case 2:
 				buyLightMechVehicle = buttonToLink;
-				buyLightMechVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddLightMechToBuildQueue(); });
+				buyLightMechVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddLightMechToBuildQueue(2); });
 				break;
 				case 3:
 				buyHeavyMechKnightVehicle = buttonToLink;
-				buyHeavyMechKnightVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechKnightToBuildQueue(); });
+				buyHeavyMechKnightVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechKnightToBuildQueue(3); });
 				break;
 				case 4:
 				buyHeavyMechTankVehicle = buttonToLink;
-				buyHeavyMechTankVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechTankToBuildQueue(); });
+				buyHeavyMechTankVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechTankToBuildQueue(4); });
 				break;
 				case 5:
 				buyVTOLVehicle = buttonToLink;
-				buyVTOLVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddVTOLToBuildQueue(); });
+				buyVTOLVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddVTOLToBuildQueue(5); });
 				break;
 			}
 		}
@@ -431,13 +425,20 @@ public class GameUIManager : MonoBehaviour
 	{
 		gameSpeedText.text = "x" + gameSpeed.ToString() + " speed";
 	}
-	public void UpdateCurrentResourcesUI()
+	public IEnumerator UpdateCurrentResourcesUI(float secondsToWait)
 	{
-		if (playerController != null)
+		yield return new WaitForSeconds(secondsToWait);
+		if (playerController.isPlayerOne)
 		{
-			CurrentMoneyText.text = GameManager.Instance.playerOneCurrentMoney.ToString();
-			CurrentAlloysText.text = GameManager.Instance.playerOneCurrentAlloys.ToString();
-			CurrentCrystalsText.text = GameManager.Instance.playerOneCurrentCrystals.ToString();
+			CurrentMoneyText.text = GameManager.Instance.playerOneCurrentMoney.Value.ToString();
+			CurrentAlloysText.text = GameManager.Instance.playerOneCurrentAlloys.Value.ToString();
+			CurrentCrystalsText.text = GameManager.Instance.playerOneCurrentCrystals.Value.ToString();
+		}
+		else if (!playerController.isPlayerOne)
+		{
+			CurrentMoneyText.text = GameManager.Instance.playerTwoCurrentMoney.Value.ToString();
+			CurrentAlloysText.text = GameManager.Instance.playerTwoCurrentAlloys.Value.ToString();
+			CurrentCrystalsText.text = GameManager.Instance.playerTwoCurrentCrystals.Value.ToString();
 		}
 	}
 	public void UpdateIncomeResourcesUI(int playerOneMoneyPerSecond, int playerOneAlloysPerSecond, int playerOneCrystalsPerSecond,

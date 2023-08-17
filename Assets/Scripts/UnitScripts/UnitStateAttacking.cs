@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
@@ -10,14 +12,17 @@ using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.CanvasScaler;
 
 public class UnitStateAttacking : UnitBaseState
-{
+{	
 	public override void Enter(UnitStateController unit)
 	{
-		Debug.Log("Entered Attacking State");
+		Debug.LogWarning("Entered Attacking State");
 		if (unit.isTurret)
 			unit.turretController.ActivateTurret();
 		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
-			unit.weaponSystem.TryFindTarget();
+		{
+			unit.weaponSystem.TryFindTargets();
+			//unit.weaponSystem.TryFindTargetsServerRPC(unit.GetComponent<NetworkObject>().NetworkObjectId);
+		}
 	}
 	public override void Exit(UnitStateController unit)
 	{
@@ -27,10 +32,10 @@ public class UnitStateAttacking : UnitBaseState
 	{
 		if (unit.isUnitArmed)
 		{
-			MainGunTimer(unit);
+			unit.weaponSystem.MainGunTimer();
 
 			if (unit.weaponSystem.hasSecondaryWeapon)
-				SecondaryGunTimer(unit);
+				unit.weaponSystem.SecondaryGunTimer();
 		}
 	}
 	public override void UpdatePhysics(UnitStateController unit)
@@ -56,7 +61,7 @@ public class UnitStateAttacking : UnitBaseState
 		else if (!unit.isTurret && unit.playerSetTarget != null && !unit.hasReachedPlayerSetTarget && 
 			unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
-			if (unit.agentNav.remainingDistance < unit.attackRange - 5)
+			if (unit.agentNav.remainingDistance < unit.attackRange.Value - 5)
 			{
 				if (unit.hasMoveAnimation)
 					unit.animatorController.SetBool("isIdle", true);
@@ -79,30 +84,6 @@ public class UnitStateAttacking : UnitBaseState
 		{
 			var lookRotation = Quaternion.LookRotation(entityToLookAt.transform.position - unit.transform.position);
 			unit.transform.rotation = Quaternion.Slerp(unit.transform.rotation, lookRotation, unit.agentNav.angularSpeed / 1000);
-		}
-	}
-	public void MainGunTimer(UnitStateController unit)
-	{
-		if (unit.weaponSystem.mainWeaponAttackSpeedTimer > 0)
-			unit.weaponSystem.mainWeaponAttackSpeedTimer -= Time.deltaTime;
-		else
-		{
-			unit.weaponSystem.ShootMainWeapon();
-			unit.weaponSystem.mainWeaponAttackSpeedTimer = unit.weaponSystem.mainWeaponAttackSpeed;
-		}
-	}
-	public void SecondaryGunTimer(UnitStateController unit)
-	{
-		if (unit.weaponSystem.secondaryWeaponAttackSpeedTimer > 0)
-				unit.weaponSystem.secondaryWeaponAttackSpeedTimer -= Time.deltaTime;
-		else
-		{
-			if (unit.hasShootAnimation)
-				unit.StartCoroutine(unit.DelaySecondaryAttack(unit, 1));
-			else
-				unit.weaponSystem.ShootSecondaryWeapon();
-
-			unit.weaponSystem.secondaryWeaponAttackSpeedTimer = unit.weaponSystem.secondaryWeaponAttackSpeed;
 		}
 	}
 }

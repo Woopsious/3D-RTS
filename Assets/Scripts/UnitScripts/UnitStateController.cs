@@ -2,11 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Unity.Burst.CompilerServices;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
+using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.CanvasScaler;
 
@@ -32,7 +35,7 @@ public class UnitStateController : Entities
 	public GameObject FoVMeshObj;
 
 	[Header("Unit Stats")]
-	public int attackRange;
+	public NetworkVariable<int> attackRange = new NetworkVariable<int>();
 	public int ViewRange;
 
 	[Header("Unit Bools")]
@@ -54,39 +57,45 @@ public class UnitStateController : Entities
 	public UnitStateController currentUnitTarget;
 	public BuildingManager currentBuildingTarget;
 
+	public Entities syncedPlayerSetTarget;
+	public UnitStateController syncedCurrentUnitTarget;
+	public BuildingManager syncedCurrentBuildingTarget;
+
 	public int GroupNum;
 	public Vector3 targetPos;
 	public Vector3 movePos;
 	public NavMeshPath navMeshPath;
 
+	public Vector3 TestLineCastPos;
+
 	public override void Start()
 	{
 		base.Start();
+		ChangeStateIdleClientRPC();
+		ChangeStateIdleServerRPC(EntityNetworkObjId);
 
-		ChangeStateIdle();
-		//assign correct playercontroller to unit on start
-		PlayerController controller = FindObjectOfType<PlayerController>();
-		if (true)
+		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set refs here
+		if (playerCon.isPlayerOne != !isPlayerOneEntity)
 		{
-			playerController = controller;
+			playerController = playerCon;
 			playerController.unitListForPlayer.Add(this);
 		}
+		if (IsServer && playerCon.isPlayerOne)
+			GameManager.Instance.playerUnitsList.Add(GetComponent<UnitStateController>());
+		if (isTurret)
+			GetComponent<TurretController>().AddTurretRefs();
 	}
 	public override void Update()
 	{
 		base.Update();
-
-		currentState.UpdateLogic(this);
+		if (!isCargoShip)
+			currentState.UpdateLogic(this);
 	}
 	public virtual void FixedUpdate()
 	{
-		currentState.UpdatePhysics(this);
-
-		if (targetList.Count != 0 && isUnitArmed && !isCargoShip && currentState != attackState) //switch to attack state if targets found
-			ChangeStateAttacking();
-
-		else if (targetList.Count == 0 && currentState == attackState)
-			ChangeStateIdle();
+		base.Update();
+		if (!isCargoShip)
+			currentState.UpdatePhysics(this);
 	}
 
 	//SPOTTING SYSTEM FUNCTIONS
@@ -123,7 +132,7 @@ public class UnitStateController : Entities
 		for (int i = 0; i < targetList.Count; i++)
 		{
 			Entities entity = targetList[i].GetComponent<Entities>();
-			if (CheckIfEntityInLineOfSight(entity) && entity != null)
+			if (CheckIfEntityInLineOfSight(entity))
 			{
 				if (!entity.wasRecentlySpotted && ShouldDisplaySpottedNotifToPlayer())
 				{
@@ -136,7 +145,14 @@ public class UnitStateController : Entities
 				}
 
 				if (isUnitArmed)
+				{
 					AddSpottedTargetsToListsWhenInAttackRange(entity);
+					if (targetList.Count != 0 && currentState != attackState) //switch to attack state if targets found
+					{
+						ChangeStateAttackingClientRPC();
+						ChangeStateAttackingServerRPC(EntityNetworkObjId);
+					}
+				}
 
 				entity.ShowEntity();
 				entity.ResetEntitySpottedTimer();
@@ -175,18 +191,22 @@ public class UnitStateController : Entities
 	}
 
 	//ATTACK PLAYER SET TARGET FUNCTIONS
-	public virtual void TryAttackPlayerSetTarget(Entities entity)
+	[ServerRpc(RequireOwnership = false)]
+	public virtual void TryAttackPlayerSetTargetServerRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId,
+		ServerRpcParams serverRpcParams = default)
 	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkObjId].GetComponent<UnitStateController>();
+		Entities targetEntity = NetworkManager.SpawnManager.SpawnedObjects[targetEntityNetworkObjId].GetComponent<Entities>();
 		hasReachedPlayerSetTarget = false;
 
-		if (IsPlayerSetTargetSpotted(entity)) //check if already spotted in target lists
+		if (unit.IsPlayerSetTargetSpotted(targetEntity)) //check if already spotted in target lists
 		{
-			playerSetTarget = entity;
+			unit.playerSetTarget = targetEntity;
 		}
 		else //walk in line of sight of enemy then switch to that target
 		{
-			playerSetTarget = entity;
-			MoveToDestination(entity.transform.position);
+			unit.playerSetTarget = targetEntity;
+			MoveToDestination(targetEntity.transform.position);
 		}
 	}
 	public bool IsPlayerSetTargetSpotted(Entities entity)
@@ -219,90 +239,106 @@ public class UnitStateController : Entities
 			else
 				movePos = newMovePos;
 
-			ChangeStateMoving();
+			ChangeStateMovingClientRPC();
+			ChangeStateMovingServerRPC(EntityNetworkObjId);
 		}
 	}
 
 	//UTILITY FUNCTIONS
-	public IEnumerator DelaySecondaryAttack(UnitStateController unit, float seconds)
-	{
-		unit.weaponSystem.secondaryWeaponAttackSpeedTimer++;
-		unit.weaponSystem.secondaryWeaponAttackSpeedTimer %= unit.weaponSystem.secondaryWeaponAttackSpeed - 1;
-		yield return new WaitForSeconds(seconds);
-		unit.weaponSystem.ShootSecondaryWeapon();
-	}
 	public override void RemoveEntityRefs()
 	{
-		playerController.unitListForPlayer.Remove(this);
-		playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
-
-		if (!isTurret)
+		if (playerController != null)
 		{
-			if (GroupNum == 1)
+			playerController.unitListForPlayer.Remove(this);
+			playerController.unitSelectionManager.RemoveDeadUnitFromSelectedUnits(this);
+
+			if (!isTurret)
 			{
-				playerController.unitSelectionManager.unitGroupOne.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupOne, 1);
+				if (GroupNum == 1)
+				{
+					playerController.unitSelectionManager.unitGroupOne.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupOne, 1);
+				}
+				if (GroupNum == 2)
+				{
+					playerController.unitSelectionManager.unitGroupTwo.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupTwo, 2);
+				}
+				if (GroupNum == 3)
+				{
+					playerController.unitSelectionManager.unitGroupThree.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupThree, 3);
+				}
+				if (GroupNum == 4)
+				{
+					playerController.unitSelectionManager.unitGroupFour.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFour, 4);
+				}
+				if (GroupNum == 5)
+				{
+					playerController.unitSelectionManager.unitGroupFive.Remove(this);
+					playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFive, 5);
+				}
 			}
-			if (GroupNum == 2)
-			{
-				playerController.unitSelectionManager.unitGroupTwo.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupTwo, 2);
-			}
-			if (GroupNum == 3)
-			{
-				playerController.unitSelectionManager.unitGroupThree.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupThree, 3);
-			}
-			if (GroupNum == 4)
-			{
-				playerController.unitSelectionManager.unitGroupFour.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFour, 4);
-			}
-			if (GroupNum == 5)
-			{
-				playerController.unitSelectionManager.unitGroupFive.Remove(this);
-				playerController.gameUIManager.UpdateUnitGroupUi(playerController.unitSelectionManager.unitGroupFive, 5);
-			}
+			else if (isTurret)
+				turretController.capturePointController.TurretDefenses.Remove(turretController);
 		}
-		else if (isTurret)
-			turretController.capturePointController.TurretDefenses.Remove(turretController);
 	}
 	public void OnDrawGizmosSelected()
 	{
 		Gizmos.color = Color.red;
-		Gizmos.DrawWireSphere(transform.position, attackRange);
+		Gizmos.DrawWireSphere(transform.position, attackRange.Value);
 		Gizmos.DrawWireSphere(transform.position, ViewRange);
 	}
 
 	//STATE CHANGE FUNCTIONS
-	public void ChangeStateIdle()
+	[ServerRpc(RequireOwnership = false)]
+	public void ChangeStateIdleServerRPC(ulong networkObjId)
 	{
-		currentState = idleState;
-		currentState.Enter(this);
+		NetworkManager.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>().ChangeStateIdleClientRPC();
 	}
-	public void ChangeStateMoving()
+	[ServerRpc(RequireOwnership = false)]
+	public void ChangeStateMovingServerRPC(ulong networkObjId)
+	{
+		NetworkManager.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>().ChangeStateMovingClientRPC();
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void ChangeStateAttackingServerRPC(ulong networkObjId)
+	{
+		NetworkManager.SpawnManager.SpawnedObjects[networkObjId].GetComponent<UnitStateController>().ChangeStateAttackingClientRPC();
+	}
+	[ClientRpc]
+	public void ChangeStateIdleClientRPC()
+	{
+		if (currentState != idleState)
+		{
+			currentState = idleState;
+			currentState.Enter(this);
+		}
+	}
+	[ClientRpc]
+	public void ChangeStateMovingClientRPC()
 	{
 		currentState = movingState;
 		currentState.Enter(this);
 	}
-	public void ChangeStateAttacking()
+	[ClientRpc]
+	public void ChangeStateAttackingClientRPC()
 	{
-		currentState = attackState;
-		currentState.Enter(this);
+		if (currentState != attackState)
+		{
+			currentState = attackState;
+			currentState.Enter(this);
+		}
 	}
 
 	//BOOL FUNCTIONS
 	public bool CheckIfEntityInLineOfSight(Entities entity)
 	{
-		if (entity != null)
-		{
-			Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
+		Physics.Linecast(CenterPoint.transform.position, entity.CenterPoint.transform.position, out RaycastHit hit, ignoreMe);
 
-			if (hit.collider.gameObject == entity.gameObject)
-				return true;
-			else
-				return false;
-		}
+		if (hit.point != null && hit.collider.gameObject == entity.gameObject)
+			return true;
 		else
 			return false;
 	}
@@ -310,7 +346,7 @@ public class UnitStateController : Entities
 	{
 		float Distance = Vector3.Distance(transform.position, targetVector3);
 
-		if (Distance <= attackRange)
+		if (Distance <= attackRange.Value)
 			return true;
 		else
 			return false;

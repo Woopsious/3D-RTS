@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class CanPlaceBuilding : MonoBehaviour
+public class CanPlaceBuilding : NetworkBehaviour
 {
 	public CapturePointController pointController;
 
@@ -29,6 +31,8 @@ public class CanPlaceBuilding : MonoBehaviour
 
 			else if (!building.isPlayerOneEntity)
 				building.miniMapRenderObj.layer = 12;
+
+			AssignPlayerController(building.GetComponent<Entities>());
 		}
 		else
 		{
@@ -40,16 +44,33 @@ public class CanPlaceBuilding : MonoBehaviour
 
 			else if (!turret.isPlayerOneEntity)
 				turret.miniMapRenderObj.layer = 12;
+
+			AssignPlayerController(turret.GetComponent<Entities>());
 		}
 	}
 	public void Update()
 	{
 		TrackPlacementHeight();
 	}
+	public void AssignPlayerController(Entities entity)
+	{
+		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set player refs here
+		if (playerCon.isPlayerOne != !entity.isPlayerOneEntity)
+		{
+			entity.playerController = playerCon;
 
-	//track if colliding with another building or capture point and placement height CAN PLACE HIGHLIGHTER DOESNT ALWAYS WORK
-	//functions are called correctly as a console log is produced and can place bool gets ticked/unticked in inspector
-	//CanPlaceHighliterRed/Green also works as it changes colour when building y axis is too high or low or when not colliding with capture point
+			if (!building.isHQ)
+			{
+				playerCon.buildingPlacementManager.currentBuildingPlacement = entity;
+				playerCon.buildingPlacementManager.canPlaceBuilding = this;
+				playerCon.buildingPlacementManager.currentBuildingPlacementNetworkId =
+					entity.GetComponent<NetworkObject>().NetworkObjectId;
+			}
+		}
+		if (IsServer && playerCon.isPlayerOne)
+			GameManager.Instance.playerBuildingsList.Add(GetComponent<BuildingManager>());
+	}
+
 	public void OnTriggerEnter(Collider other)
 	{
 		if(other.GetComponent<CapturePointController>())
@@ -98,14 +119,14 @@ public class CanPlaceBuilding : MonoBehaviour
 		{
 			if (building != null)
 			{
-				if (building.transform.position.y > 9f && building.transform.position.y < 10.5f)
+				if (building.transform.position.y > 8f && building.transform.position.y < 11f)
 					CanPlaceHighliterGreen();
 				else
 					CanPlaceHighliterRed();
 			}
 			else
 			{
-				if (turret.transform.position.y > 9f && turret.transform.position.y < 10.5f)
+				if (turret.transform.position.y > 8f && turret.transform.position.y < 11f)
 					CanPlaceHighliterGreen();
 				else
 					CanPlaceHighliterRed();
@@ -158,7 +179,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		if (building != null)
 		{
 			if (!pointController.isPlayerOnePoint != building.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
-				building.transform.position.y > 9f && building.transform.position.y < 10.5f)
+				building.transform.position.y > 8f && building.transform.position.y < 11f)
 			{
 				if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)
 				{
@@ -220,7 +241,7 @@ public class CanPlaceBuilding : MonoBehaviour
 		else
 		{
 			if (!pointController.isPlayerOnePoint != turret.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
-				turret.transform.position.y > 9f && turret.transform.position.y < 10.5f)
+				turret.transform.position.y > 8f && turret.transform.position.y < 11f)
 			{
 				if (pointController.TurretDefenses.Count <= 1 && turret.isTurret)
 				{

@@ -1,42 +1,59 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Burst.CompilerServices;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 
-public class WeaponSystem : MonoBehaviour
+public class WeaponSystem : NetworkBehaviour
 {
 	public UnitStateController unit;
 
 	public AudioSource mainWeaponAudio;
 	public ParticleSystem mainWeaponParticles;
 	public ParticleSystem mainWeaponProjectileParticle;
-	public float mainWeaponDamage;
+	public NetworkVariable<float> mainWeaponDamage = new NetworkVariable<float>();
 	public float mainWeaponAttackSpeed;
-	[System.NonSerialized]
 	public float mainWeaponAttackSpeedTimer;
 
 	public AudioSource secondaryWeaponAudio;
 	public ParticleSystem secondaryWeaponParticles;
 	public ParticleSystem secondaryWeaponProjectileParticle;
-	public float secondaryWeaponDamage;
+	public NetworkVariable<float> secondaryWeaponDamage = new NetworkVariable<float>();
 	public float secondaryWeaponAttackSpeed;
-	[System.NonSerialized]
 	public float secondaryWeaponAttackSpeedTimer;
+
 	public bool hasSecondaryWeapon;
 
-	//if found then grab closest one
-	public void TryFindTarget()
+	//try find targets if found then grab closest one
+	public void TryFindTargets()
 	{
-		RemoveNullRefsFromTargetLists();
+		if (IsServer)
+		{
+			RemoveNullRefsFromTargetLists();
+			if (unit.currentUnitTarget == null)
+				unit.currentUnitTarget = GrabClosestUnit();
+			if (unit.currentUnitTarget == null && unit.currentBuildingTarget == null)
+				unit.currentBuildingTarget = GrabClosestBuilding();
 
-		unit.currentUnitTarget = GrabClosestUnit();
-		unit.currentBuildingTarget = GrabClosestBuilding();
+			if (unit.currentUnitTarget != null)
+				SyncCurrentUnitTargetServerRPC(unit.EntityNetworkObjId, unit.currentUnitTarget.EntityNetworkObjId);
+			if (unit.currentBuildingTarget != null)
+				SyncCurrentBuildingTargetServerRPC(unit.EntityNetworkObjId, unit.currentBuildingTarget.EntityNetworkObjId);
+
+			if (unit.targetList.Count == 0)
+			{
+				unit.ChangeStateIdleClientRPC();
+				unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
+			}
+		}
 	}
-	//sort targets from closest to furthest, then check if target is in view + attack range, once a valid target is found, return that target and end loop
+
+	//sort targets from closest to furthest, check if target in view + attack range, once a valid target found, return target then end loop
 	public UnitStateController GrabClosestUnit()
 	{
 		unit.unitTargetList = unit.unitTargetList.OrderBy(newtarget => Vector3.Distance(unit.transform.position, newtarget.transform.position)).ToList();
@@ -62,80 +79,131 @@ public class WeaponSystem : MonoBehaviour
 		return null;
 	}
 
-	//check if entity exists + is in attack range, if true shoot it in order of attack priority, else try get new target and remove null refs from lists
-	public void ShootMainWeapon()
+	//server/host checks if entity exists + in attack range, if true shoot it, else try get new target and remove null refs from lists
+	[ServerRpc(RequireOwnership = false)]
+	public void ShootMainWeapServerRPC()
 	{
-		if (HasPlayerSetTarget() && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position) && 
+		ShootMainWeaponClientRPC();
+	}
+	[ClientRpc]
+	public void ShootMainWeaponClientRPC()
+	{
+		if (HasPlayerSetTarget() && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position) &&
 			unit.CheckIfEntityInLineOfSight(unit.playerSetTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
-			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
-			unit.playerSetTarget.RecieveDamage(mainWeaponDamage);
-			unit.playerSetTarget.ResetIsEntityHitTimer();
-
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
+
+			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
+			if (IsServer)
+				unit.playerSetTarget.RecieveDamageServerRPC(mainWeaponDamage.Value);
 		}
-		else if (HasUnitTarget() && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position) && 
+		else if (HasUnitTarget() && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position) &&
 			unit.CheckIfEntityInLineOfSight(unit.currentUnitTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
-			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
-			unit.currentUnitTarget.RecieveDamage(mainWeaponDamage);
-			unit.currentUnitTarget.ResetIsEntityHitTimer();
-
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
+
+			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
+			if (IsServer)
+				unit.currentUnitTarget.RecieveDamageServerRPC(mainWeaponDamage.Value);
 		}
-		else if (HasBuildingTarget() && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) && 
+		else if (HasBuildingTarget() && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position) &&
 			unit.CheckIfEntityInLineOfSight(unit.currentBuildingTarget))
 		{
 			if (unit.hasShootAnimation)
 				unit.animatorController.SetBool("isAttacking", true);
 
-			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
-			unit.currentBuildingTarget.RecieveDamage(mainWeaponDamage);
-			unit.currentBuildingTarget.ResetIsEntityHitTimer();
-
 			mainWeaponAudio.Play();
 			mainWeaponParticles.Play();
+
+			AimProjectileAtTarget(mainWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
+			if (IsServer)
+				unit.currentBuildingTarget.RecieveDamageServerRPC(mainWeaponDamage.Value);
 		}
 		else
-			TryFindTarget();
+			TryFindTargets();
 	}
-	public void ShootSecondaryWeapon()
+	[ServerRpc(RequireOwnership = false)]
+	public void ShootSeconWeapServerRPC()
+	{
+		ShootSecondaryWeaponClientRPC();
+	}
+	[ClientRpc]
+	public void ShootSecondaryWeaponClientRPC()
 	{
 		if (HasPlayerSetTarget())
 		{
-			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
-			unit.playerSetTarget.RecieveDamage(secondaryWeaponDamage);
-
 			secondaryWeaponAudio.Play();
 			secondaryWeaponParticles.Play();
+
+			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.playerSetTarget.CenterPoint.transform.position);
+			if (!IsServer) return;
+			unit.playerSetTarget.RecieveDamageServerRPC(secondaryWeaponDamage.Value);
 		}
 		else if (HasUnitTarget())
 		{
-			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
-			unit.currentUnitTarget.RecieveDamage(secondaryWeaponDamage);
-
 			secondaryWeaponAudio.Play();
 			secondaryWeaponParticles.Play();
+
+			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentUnitTarget.CenterPoint.transform.position);
+			if (!IsServer) return;
+			unit.currentUnitTarget.RecieveDamageServerRPC(secondaryWeaponDamage.Value);
 		}
 		else if (HasBuildingTarget())
 		{
-			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
-			unit.currentBuildingTarget.RecieveDamage(secondaryWeaponDamage);
-
 			secondaryWeaponAudio.Play();
 			secondaryWeaponParticles.Play();
+
+			AimProjectileAtTarget(secondaryWeaponParticles.gameObject, unit.currentBuildingTarget.CenterPoint.transform.position);
+			if (!IsServer) return;
+			unit.currentBuildingTarget.RecieveDamageServerRPC(secondaryWeaponDamage.Value);
 		}
 	}
 
 	//UTILITY FUNCTIONS
+	[ServerRpc(RequireOwnership = false)]
+	public void SyncPlayerSetTargetServerRPC(ulong unitId, ulong PlayerSetTargetId)
+	{
+		SyncPlayerSetTargetClientRPC(unitId, PlayerSetTargetId);
+	}
+	[ClientRpc]
+	public void SyncPlayerSetTargetClientRPC(ulong unitId, ulong PlayerSetTargetId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
+		Entities entity = NetworkManager.SpawnManager.SpawnedObjects[PlayerSetTargetId].GetComponent<UnitStateController>();
+		unit.playerSetTarget = entity;
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void SyncCurrentUnitTargetServerRPC(ulong unitId, ulong UnitTargetId)
+	{
+		SyncCurrentUnitTargetClientRPC(unitId, UnitTargetId);
+	}
+	[ClientRpc]
+	public void SyncCurrentUnitTargetClientRPC(ulong unitId, ulong UnitTargetId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
+		UnitStateController unitTarget = NetworkManager.SpawnManager.SpawnedObjects[UnitTargetId].GetComponent<UnitStateController>();
+		unit.currentUnitTarget = unitTarget;
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void SyncCurrentBuildingTargetServerRPC(ulong unitId, ulong BuildingTargetId)
+	{
+		SyncCurrentBuildingTargetClientRPC(unitId, BuildingTargetId);
+	}
+	[ClientRpc]
+	public void SyncCurrentBuildingTargetClientRPC(ulong unitId, ulong BuildingTargetId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
+		BuildingManager BuildingTarget = NetworkManager.SpawnManager.SpawnedObjects[BuildingTargetId].GetComponent<BuildingManager>();
+		unit.currentBuildingTarget = BuildingTarget;
+	}
 	public void AimProjectileAtTarget(GameObject particleObject, Vector3 targetPos) //function to shoot projectile at target center
 	{
 		var lookRotation = Quaternion.LookRotation(targetPos - particleObject.transform.position);
@@ -166,5 +234,38 @@ public class WeaponSystem : MonoBehaviour
 		if (unit.currentBuildingTarget != null)
 			return true;
 		return false;
+	}
+
+	//ATTACK FUNCTIONS
+	public void MainGunTimer()
+	{
+		if (mainWeaponAttackSpeedTimer > 0)
+			mainWeaponAttackSpeedTimer -= Time.deltaTime;
+		else if (IsServer)
+		{
+			ShootMainWeapServerRPC();
+			mainWeaponAttackSpeedTimer = mainWeaponAttackSpeed;
+		}
+	}
+	public void SecondaryGunTimer()
+	{
+		if (secondaryWeaponAttackSpeedTimer > 0)
+			secondaryWeaponAttackSpeedTimer -= Time.deltaTime;
+		else if (IsServer)
+		{
+			if (unit.hasShootAnimation)
+				StartCoroutine(DelaySecondaryAttack(1));
+			else
+				ShootSeconWeapServerRPC();
+
+			secondaryWeaponAttackSpeedTimer = secondaryWeaponAttackSpeed;
+		}
+	}
+	public IEnumerator DelaySecondaryAttack(float seconds)
+	{
+		secondaryWeaponAttackSpeedTimer++;
+		secondaryWeaponAttackSpeedTimer %= secondaryWeaponAttackSpeed - 1;
+		yield return new WaitForSeconds(seconds);
+		ShootSeconWeapServerRPC();
 	}
 }

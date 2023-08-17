@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,6 +16,7 @@ public class BuildTime : MonoBehaviour
 	public Text buildTimeText;
 
 	public GameObject UnitPrefab;
+	public int BuildOrderIndex;
 	public int listNumRef;
 	public float buildTime;
 	public float buildTimer;
@@ -112,7 +114,8 @@ public class BuildTime : MonoBehaviour
 
 		if (unitSpawnLocation != null)
 		{
-			unitProductionManager.SpawnUnitsAtProdBuilding(this, unitSpawnLocation, buildPosDestination);
+			unitProductionManager.SpawnUnitsAtProdBuilding(BuildOrderIndex, 
+				unitSpawnLocation.gameObject.GetComponent<NetworkObject>().NetworkObjectId, buildPosDestination);
 			RemoveUi();
 		}
 		else
@@ -121,8 +124,8 @@ public class BuildTime : MonoBehaviour
 	public void CancelProduction()
 	{
 		UnitStateController unit = UnitPrefab.GetComponent<UnitStateController>();
-		UnitCost(unit.moneyCost, unit.alloyCost, unit.crystalCost);
-		GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI();
+		UnitRefundCostServerRPC(isPlayerOne, unit.moneyCost, unit.alloyCost, unit.crystalCost);
+		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(1f));
 
 		if (isSpawnPointStillValid)
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("unit production canceled", 1f);
@@ -144,14 +147,20 @@ public class BuildTime : MonoBehaviour
 		unitProductionManager.currentUnitPlacements.Remove(this);
 		Destroy(gameObject);
 	}
-	public void UnitCost(int moneyCost, int alloyCost, int crystalCost)
+	[ServerRpc(RequireOwnership = false)]
+	public void UnitRefundCostServerRPC(bool wasPlayerOneEntity, int moneyCost, int alloyCost, int crystalCost)
 	{
-		GameManager.Instance.playerOneCurrentMoney += moneyCost;
-		GameManager.Instance.playerOneCurrentAlloys += alloyCost;
-		GameManager.Instance.playerOneCurrentCrystals += crystalCost;
-	}
-	public void TestDebugLog()
-	{
-		Debug.Log("Test Log");
+		if (wasPlayerOneEntity)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += moneyCost;
+			GameManager.Instance.playerOneCurrentAlloys.Value += alloyCost;
+			GameManager.Instance.playerOneCurrentCrystals.Value += crystalCost;
+		}
+		else if (!wasPlayerOneEntity)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += moneyCost;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += alloyCost;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalCost;
+		}
 	}
 }

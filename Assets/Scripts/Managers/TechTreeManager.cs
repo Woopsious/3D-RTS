@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.UI.CanvasScaler;
 
-public class TechTreeManager : MonoBehaviour
+public class TechTreeManager : NetworkBehaviour
 {
 	public GameUIManager gameUIManager;
 
@@ -227,20 +230,6 @@ public class TechTreeManager : MonoBehaviour
 	[Header("STATS")]
 	public bool isCurrentlyReseaching;
 
-	[Header("Buildings")]
-	public float buildingHealthPercentageBonusValue;
-	public float buildingArmourPercentageBonusValue;
-	public float buildingBonusToResourceIncome;
-	public bool buildingHasUnlockedHeavyMechs;
-	public bool buildingHasUnlockedVtols;
-
-	[Header("Units")]
-	public float unitHealthPercentageBonusValue;
-	public float unitArmourPercentageBonusValue;
-	public float unitDamagePercentageBonusValue;
-	public int unitAttackRangeBonusValue;
-	public int unitSpeedBonusValue;
-
 	//SET UP TECH TREE AND THE UI
 	public void SetUpTechTrees()
 	{
@@ -359,18 +348,8 @@ public class TechTreeManager : MonoBehaviour
 				StartCoroutine(ResearchCountdownTimer(techList, index, unitTechList[index].TimeToResearchSec, UiElement));
 			}
 		}
-		if (gameUIManager.playerController.isPlayerOne)
-		{
-			GameManager.Instance.playerOneCurrentMoney -= techList[index].techCostMoney;
-			GameManager.Instance.playerOneCurrentAlloys -= techList[index].techCostAlloys;
-			GameManager.Instance.playerOneCurrentCrystals -= techList[index].techCostCrystals;
-		}
-		else if (!gameUIManager.playerController.isPlayerOne)
-		{
-			GameManager.Instance.aiCurrentMoney -= techList[index].techCostMoney;
-			GameManager.Instance.aiCurrentAlloys -= techList[index].techCostAlloys;
-			GameManager.Instance.aiCurrentCrystals -= techList[index].techCostCrystals;
-		}
+		gameUIManager.playerController.EntityCostServerRPC(gameUIManager.playerController.isPlayerOne,
+			techList[index].techCostMoney, techList[index].techCostAlloys, techList[index].techCostCrystals);
 	}
 	public IEnumerator ResearchCountdownTimer(List<Technology> techList, int index, float researchTime, GameObject UiElement)
 	{
@@ -384,76 +363,13 @@ public class TechTreeManager : MonoBehaviour
 
 		CompleteResearch(techList, index);
 		UnlockNextResearch(techList, index);
-		ApplyTechUpgradesToExistingEntities();
 	}
 	public void CompleteResearch(List<Technology> techList, int index) //update bonus values provided by research
 	{
 		if (techList == buildingTechList)
-		{
-			if (index == 0)
-			{
-				buildingHealthPercentageBonusValue += 0.1f;
-			}
-			if (index == 1)
-			{
-				buildingArmourPercentageBonusValue += 0.1f;
-			}
-			if (index == 2)
-			{
-				buildingBonusToResourceIncome += 0.1f;
-			}
-			if (index == 3)
-			{
-				buildingHasUnlockedHeavyMechs = true;
-			}
-			if (index == 4)
-			{
-				buildingHasUnlockedVtols = true;
-			}
-			if (index == 5)
-			{
-				buildingHealthPercentageBonusValue += 0.15f;
-			}
-			if (index == 6)
-			{
-				buildingArmourPercentageBonusValue += 0.15f;
-			}
-		}
+			gameUIManager.gameManager.UpdateTechBonusesServerRPC(true, index);
 		else if (techList == unitTechList)
-		{
-			if (index == 0)
-			{
-				unitHealthPercentageBonusValue += 0.05f;
-			}
-			if (index == 1)
-			{
-				unitArmourPercentageBonusValue += 0.1f;
-			}
-			if (index == 2)
-			{
-				unitSpeedBonusValue = 1;
-			}
-			if (index == 3)
-			{
-				unitHealthPercentageBonusValue += 0.1f;
-			}
-			if (index == 4)
-			{
-				unitAttackRangeBonusValue += 1;
-			}
-			if (index == 6)
-			{
-				unitAttackRangeBonusValue += 1;
-			}
-			if (index == 5)
-			{
-				unitDamagePercentageBonusValue += 0.05f;
-			}
-			if (index == 7)
-			{
-				unitDamagePercentageBonusValue += 0.1f;
-			}
-		}
+			gameUIManager.gameManager.UpdateTechBonusesServerRPC(false, index);
 	}
 	public void UnlockNextResearch(List<Technology> techList, int index) //unlock next techs in respective trees
 	{
@@ -530,9 +446,9 @@ public class TechTreeManager : MonoBehaviour
 			{
 				if (gameUIManager.playerController.isPlayerOne) //check if can afford cost depending on if is player one or two/ai
 				{
-					int moneyCost = gameUIManager.gameManager.playerOneCurrentMoney;
-					int alloyCost = gameUIManager.gameManager.playerOneCurrentAlloys;
-					int crystalCost = gameUIManager.gameManager.playerOneCurrentCrystals;
+					int moneyCost = gameUIManager.gameManager.playerOneCurrentMoney.Value;
+					int alloyCost = gameUIManager.gameManager.playerOneCurrentAlloys.Value;
+					int crystalCost = gameUIManager.gameManager.playerOneCurrentCrystals.Value;
 
 					if (techList[index].techCostMoney <= moneyCost && techList[index].techCostAlloys <= alloyCost && 
 						techList[index].techCostCrystals <= crystalCost)
@@ -548,9 +464,9 @@ public class TechTreeManager : MonoBehaviour
 				}
 				else
 				{
-					int moneyCost = gameUIManager.gameManager.aiCurrentMoney;
-					int alloyCost = gameUIManager.gameManager.aiCurrentAlloys;
-					int crystalCost = gameUIManager.gameManager.aiCurrentCrystals;
+					int moneyCost = gameUIManager.gameManager.playerTwoCurrentMoney.Value;
+					int alloyCost = gameUIManager.gameManager.playerTwoCurrentAlloys.Value;
+					int crystalCost = gameUIManager.gameManager.playerTwoCurrentCrystals.Value;
 
 					if (techList[index].techCostMoney <= moneyCost && techList[index].techCostAlloys <= alloyCost && 
 						techList[index].techCostCrystals <= crystalCost)
@@ -590,133 +506,6 @@ public class TechTreeManager : MonoBehaviour
 
 			uiObj.transform.GetChild(0).GetComponent<Text>().color = new Color(0.8f, 0.8f, 0, 1);
 			uiObj.transform.GetChild(1).GetComponent<Text>().color = new Color(0.8f, 0.8f, 0, 1);
-		}
-	}
-
-	//APPLY TECH UPGRADES TO ENTITIES
-	public void ApplyTechUpgradesToNewUnits(GameObject unitObj)
-	{
-		UnitStateController unit = unitObj.GetComponent<UnitStateController>();
-
-		unit.currentHealth = (int)(unit.currentHealth * unitHealthPercentageBonusValue);
-		unit.maxHealth = (int)(unit.maxHealth * unitHealthPercentageBonusValue);
-		unit.armour = (int)(unit.armour * unitArmourPercentageBonusValue);
-		if (unit.isUnitArmed)
-		{
-			unit.weaponSystem.mainWeaponDamage *= unitDamagePercentageBonusValue;
-			unit.weaponSystem.secondaryWeaponDamage *= unitDamagePercentageBonusValue;
-			unit.attackRange += unitAttackRangeBonusValue;
-			if (!unit.isTurret)
-				unit.agentNav.speed += unitSpeedBonusValue;
-		}
-	}
-	public void ApplyTechUpgradesToNewBuildings(GameObject buildingObj)
-	{
-		BuildingManager building = buildingObj.GetComponent<BuildingManager>();
-
-		building.currentHealth = (int)(building.currentHealth * buildingHealthPercentageBonusValue);
-		building.maxHealth = (int)(building.maxHealth * buildingHealthPercentageBonusValue);
-		building.armour = (int)(building.armour * buildingArmourPercentageBonusValue);
-	}
-	//using list of all player units, first reset values to base then recalculate values
-	public void ApplyTechUpgradesToExistingEntities()
-	{
-		foreach (BuildingManager building in gameUIManager.playerController.buildingListForPlayer)
-		{
-			if (building.entityName == "Energy Generator")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingEnergyGenStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "Refinery Building")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingRefineryStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingRefineryStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "Light Vehicle Production Building")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingLightVehProdStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "Heavy Vehicle Production Building")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingHeavyVehProdStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "VTOL Production Pad")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingVtolVehProdStats.armour * buildingArmourPercentageBonusValue);
-			}
-			if (building.entityName == "Player HQ")
-			{
-				building.maxHealth = 1 + (int)(GameManager.Instance.buildingHQStats.health * buildingHealthPercentageBonusValue);
-				building.armour = 1 + (int)(GameManager.Instance.buildingHQStats.armour * buildingArmourPercentageBonusValue);
-			}
-
-			building.UpdateHealthBar();
-		}
-
-		foreach (UnitStateController unit in gameUIManager.playerController.unitListForPlayer)
-		{
-			if (unit.entityName == "Scout Vehicle")
-			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitScoutVehStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitScoutVehStats.armour * unitArmourPercentageBonusValue);
-				unit.agentNav.speed = GameManager.Instance.unitScoutVehStats.speed + unitSpeedBonusValue;
-			}
-			if (unit.entityName == "Radar Vehicle")
-			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitRadarVehStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitRadarVehStats.armour * unitArmourPercentageBonusValue);
-				unit.agentNav.speed = GameManager.Instance.unitRadarVehStats.speed + unitSpeedBonusValue;
-			}
-			if (unit.entityName == "Light Mech")
-			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitMechLightStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitMechLightStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitMechLightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitMechLightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitMechLightStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitMechLightStats.speed + unitSpeedBonusValue;
-			}
-			if (unit.entityName == "Heavy Mech Knight")
-			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyKnightStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitMechHvyKnightStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitMechHvyKnightStats.speed + unitSpeedBonusValue;
-			}
-			if (unit.entityName == "Heavy Mech Support")
-			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitMechHvyTankStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitMechHvyTankStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitMechHvyTankStats.speed + unitSpeedBonusValue;
-			}
-			if (unit.entityName == "VTOL Gunship")
-			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitVtolGunshipStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitVtolGunshipStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitVtolGunshipStats.speed + unitSpeedBonusValue;
-			}
-			if (unit.entityName == "Turret")
-			{
-				unit.maxHealth = 1 + (int)(GameManager.Instance.unitTurretStats.health * unitHealthPercentageBonusValue);
-				unit.armour = 1 + (int)(GameManager.Instance.unitTurretStats.armour * unitArmourPercentageBonusValue);
-				unit.weaponSystem.mainWeaponDamage = 1 + (int)(GameManager.Instance.unitTurretStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.weaponSystem.secondaryWeaponDamage = 1 + (int)(GameManager.Instance.unitTurretStats.mainWeaponDamage * unitDamagePercentageBonusValue);
-				unit.attackRange = GameManager.Instance.unitTurretStats.attackRange + unitAttackRangeBonusValue;
-				unit.agentNav.speed = GameManager.Instance.unitTurretStats.speed + unitSpeedBonusValue;
-			}
-			unit.UpdateHealthBar();
 		}
 	}
 

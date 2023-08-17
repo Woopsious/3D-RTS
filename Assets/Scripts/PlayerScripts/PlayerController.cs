@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
 	public LayerMask ignoreMe;
 
@@ -31,6 +32,7 @@ public class PlayerController : MonoBehaviour
 
 	public void Start()
 	{
+		isPlayerOne = GameManager.Instance.isPlayerOne;
 		if (isPlayerOne)
 		{
 			int playerOneMiniMapLayer = LayerMask.NameToLayer("PlayerOneMiniMapRender");
@@ -120,30 +122,30 @@ public class PlayerController : MonoBehaviour
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddScoutVehToBuildQueue();
+				unitProductionManager.AddScoutVehToBuildQueue(0);
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha2) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddRadarVehToBuildQueue();
+				unitProductionManager.AddRadarVehToBuildQueue(1);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha3) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddLightMechToBuildQueue();
+				unitProductionManager.AddLightMechToBuildQueue(2);
 			}
 		}
 		else if (!Input.GetKey(KeyCode.LeftShift) && gameUIManager.unitsHeavyUiShopTwoObj.activeInHierarchy)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddHeavyMechKnightToBuildQueue();
+				unitProductionManager.AddHeavyMechKnightToBuildQueue(3);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha2) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddHeavyMechTankToBuildQueue();
+				unitProductionManager.AddHeavyMechTankToBuildQueue(4);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha3) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
-				unitProductionManager.AddVTOLToBuildQueue();
+				unitProductionManager.AddVTOLToBuildQueue(5);
 			}
 			if (Input.GetKeyDown(KeyCode.Alpha4) && unitProductionManager.currentUnitPlacements.Count < 5)
 			{
@@ -179,14 +181,16 @@ public class PlayerController : MonoBehaviour
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				if (gameUIManager.techTreeManager.buildingHasUnlockedHeavyMechs)
+				if (isPlayerOne && gameUIManager.gameManager.playerOneBuildingHasUnlockedHeavyMechs.Value ||
+					!isPlayerOne && gameUIManager.gameManager.playerTwoBuildingHasUnlockedHeavyMechs.Value)
 					buildingPlacementManager.PlaceHeavyVehProdBuilding();
 				else
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Heavy Mechs Tech Not Researched", 2f);
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				if (gameUIManager.techTreeManager.buildingHasUnlockedVtols)
+				if (isPlayerOne && gameUIManager.gameManager.playerOneBuildingHasUnlockedVtols.Value ||
+					!isPlayerOne && gameUIManager.gameManager.playerTwoBuildingHasUnlockedVtols.Value)
 					buildingPlacementManager.PlaceVTOLProdBuilding();
 				else
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("VTOLS Tech Not Researched", 2f);
@@ -202,5 +206,54 @@ public class PlayerController : MonoBehaviour
 	public bool IsMouseOverUI()
 	{
 		return EventSystem.current.IsPointerOverGameObject();
+	}
+
+	public bool CheckIfCanBuyEntity(int MoneyCost, int AlloyCost, int CrystalCost)
+	{
+		if (isPlayerOne)
+		{
+			if (MoneyCost > GameManager.Instance.playerOneCurrentMoney.Value || AlloyCost > GameManager.Instance.playerOneCurrentAlloys.Value
+				|| CrystalCost > GameManager.Instance.playerOneCurrentCrystals.Value)
+			{
+				return false;
+			}
+			return true;
+		}
+		else if (!isPlayerOne)
+		{
+			if (MoneyCost > GameManager.Instance.playerTwoCurrentMoney.Value || AlloyCost > GameManager.Instance.playerTwoCurrentAlloys.Value
+				|| CrystalCost > GameManager.Instance.playerTwoCurrentCrystals.Value)
+			{
+				return false;
+			}
+			return true;
+		}
+		else
+		{
+			Debug.LogError("This error shouldnt happen");
+			return false;
+		}
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void EntityCostServerRPC(bool isPlayerOneCall, int moneyCost, int alloyCost, int crystalCost)
+	{
+		if (isPlayerOneCall)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value -= moneyCost;
+			GameManager.Instance.playerOneCurrentAlloys.Value -= alloyCost;
+			GameManager.Instance.playerOneCurrentCrystals.Value -= crystalCost;
+		}
+		else if (!isPlayerOneCall)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value -= moneyCost;
+			GameManager.Instance.playerTwoCurrentAlloys.Value -= alloyCost;
+			GameManager.Instance.playerTwoCurrentCrystals.Value -= crystalCost;
+		}
+		UpdateClientUiClientRPC();
+	}
+	[ClientRpc]
+	public void UpdateClientUiClientRPC()
+	{
+		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(1f));
 	}
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,6 +36,7 @@ public class BuildingManager : Entities
 	public override void Start()
 	{
 		base.Start();
+		AddBuildingRefs();
 
 		if (isGeneratorBuilding)
 			gameObject.GetComponent<EnergyGenController>().PowerBuildings();
@@ -101,35 +103,38 @@ public class BuildingManager : Entities
 	}
 	public void AddBuildingRefs()
 	{
-		playerController.buildingListForPlayer.Add(this);
+		if (playerController != null)
+			playerController.buildingListForPlayer.Add(this);
 
 		if (isGeneratorBuilding)
-		{
 			capturePointController.energyGeneratorBuilding = this;
-		}
+
 		else if (isRefineryBuilding)
-		{
-				capturePointController.RefinaryBuildings.Add(this);
-		}
+			capturePointController.RefinaryBuildings.Add(this);
+
 		else if (isLightVehProdBuilding)
 		{
-			playerController.lightVehProdBuildingsList.Add(this);
-				capturePointController.lightVehProdBuildings.Add(this);
+			capturePointController.lightVehProdBuildings.Add(this);
+			if (playerController != null)
+				playerController.lightVehProdBuildingsList.Add(this);
 		}
 		else if (isHeavyVehProdBuilding)
 		{
-			playerController.heavyVehProdBuildingsList.Add(this);
-				capturePointController.heavyVehProdBuildings.Add(this);
+			capturePointController.heavyVehProdBuildings.Add(this);
+			if (playerController != null)
+				playerController.heavyVehProdBuildingsList.Add(this);
 		}
 		else if (isVTOLProdBuilding)
 		{
-			playerController.vtolVehProdBuildingsList.Add(this);
-				capturePointController.vtolProdBuildings.Add(this);
+			capturePointController.vtolProdBuildings.Add(this);
+			if (playerController != null)
+				playerController.vtolVehProdBuildingsList.Add(this);
 		}
 	}
 	public override void RemoveEntityRefs()
 	{
-		playerController.buildingListForPlayer.Remove(this);
+		if (playerController != null)
+			playerController.buildingListForPlayer.Remove(this);
 
 		if (isGeneratorBuilding)
 		{
@@ -143,22 +148,25 @@ public class BuildingManager : Entities
 			if (GetComponent<RefineryController>().CargoShipList.Count == 1)
 				GetComponent<RefineryController>().CargoShipList[0].DeleteSelf();
 
-			capturePointController.RefinaryBuildings.Remove(this);			
+			capturePointController.RefinaryBuildings.Remove(this);
 		}
 		else if (isLightVehProdBuilding)
 		{
-			playerController.lightVehProdBuildingsList.Remove(this);
 			capturePointController.lightVehProdBuildings.Remove(this);
+			if (playerController != null)
+				playerController.lightVehProdBuildingsList.Remove(this);
 		}
 		else if (isHeavyVehProdBuilding)
 		{
-			playerController.heavyVehProdBuildingsList.Remove(this);
 			capturePointController.heavyVehProdBuildings.Remove(this);
+			if (playerController != null)
+				playerController.heavyVehProdBuildingsList.Remove(this);
 		}
 		else if (isVTOLProdBuilding)
 		{
-			playerController.heavyVehProdBuildingsList.Remove(this);
 			capturePointController.heavyVehProdBuildings.Remove(this);
+			if (playerController != null)
+				playerController.heavyVehProdBuildingsList.Remove(this);
 		}
 	}
 }

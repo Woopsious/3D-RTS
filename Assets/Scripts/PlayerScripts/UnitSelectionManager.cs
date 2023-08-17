@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using Unity.AI.Navigation;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -13,7 +14,7 @@ using static UnityEngine.EventSystems.EventTrigger;
 using static UnityEngine.GraphicsBuffer;
 using static UnityEngine.UI.CanvasScaler;
 
-public class UnitSelectionManager : MonoBehaviour
+public class UnitSelectionManager : NetworkBehaviour
 {
 	NavMeshQueryFilter filter = new NavMeshQueryFilter();
 
@@ -196,7 +197,7 @@ public class UnitSelectionManager : MonoBehaviour
 			{
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
 				if (entity.GetComponent<UnitStateController>() != null && entity.isPlayerOneEntity != playerController.isPlayerOne)
-					TryAttackEnemyEntity(entity);
+					TryAttackEnemyEntity(entity.NetworkObjectId);
 
 				else if (entity.GetComponent<CargoShipController>() != null)
 					TrySelectCargoShip(entity.GetComponent<CargoShipController>());
@@ -264,7 +265,8 @@ public class UnitSelectionManager : MonoBehaviour
 				DeselectUnits();
 				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
-				unit.attackRangeMeshObj.SetActive(true);
+				if (unit.isUnitArmed)
+					unit.attackRangeMeshObj.SetActive(true);
 				unit.isSelected = true;
 				selectedUnitList.Add(unit);
 				if (unit.isTurret)
@@ -310,16 +312,17 @@ public class UnitSelectionManager : MonoBehaviour
 		{
 			ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
 
-			if (resourceNode.isBeingMined)
+			if (resourceNode.isBeingMined.Value)
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
 
-			else if (resourceNode.isEmpty)
+			else if (resourceNode.isEmpty.Value)
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
 
 			else //else mine selected node
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
-				SelectedCargoShip.SetResourceNodeFromPlayerInput(resourceNode);
+				SelectedCargoShip.SetResourceNodeFromPlayerInputServerRPC(SelectedCargoShip.GetComponent<NetworkObject>().NetworkObjectId, 
+					resourceNode.GetComponent<NetworkObject>().NetworkObjectId);
 			}
 		}
 		//move selected units to mouse pos
@@ -329,19 +332,18 @@ public class UnitSelectionManager : MonoBehaviour
 
 			for (int i = 0; i < selectedUnitList.Count; i++)
 			{
-				UnitStateController unit = selectedUnitList[i];
-				Vector3 movePos = movePosHighlighterObj[i].transform.position;
-				unit.MoveToDestination(movePos);
+				Vector3 movePos = movePosHighlighterObj[i].transform.position;	//ask server to move units fo clients
+				MoveUnitsServerRPC(selectedUnitList[i].EntityNetworkObjId, movePos);
 			}
 		}
 	}
-	public void TryAttackEnemyEntity(Entities entity)
+	public void TryAttackEnemyEntity(ulong targetEntityNetworkObjId)
 	{
 		//move selected units closer to target and attack it
 		for (int i = 0; i < selectedUnitList.Count; i++)
 		{
 			UnitStateController unit = selectedUnitList[i];
-			unit.TryAttackPlayerSetTarget(entity);
+			unit.TryAttackPlayerSetTargetServerRPC(unit.EntityNetworkObjId, targetEntityNetworkObjId);
 		}
 	}
 
@@ -658,5 +660,20 @@ public class UnitSelectionManager : MonoBehaviour
 	{
 		return position.x > bounds.min.x && position.x < bounds.max.x
 			&& position.y > bounds.min.y && position.y < bounds.max.y;
+	}
+
+	//NETWORKING FUNCTIONS
+	[ServerRpc(RequireOwnership = false)]
+	public void MoveUnitsServerRPC(ulong NetworkObjId, Vector3 destination)
+	{
+		Debug.Log("server call");
+		if (!IsServer) return;
+		MoveUnitsClientRPC(NetworkObjId, destination);
+	}
+	[ClientRpc]
+	public void MoveUnitsClientRPC(ulong NetworkObjId, Vector3 destination)
+	{
+		Debug.Log("client call");
+		NetworkManager.SpawnManager.SpawnedObjects[NetworkObjId].GetComponent<UnitStateController>().MoveToDestination(destination);
 	}
 }

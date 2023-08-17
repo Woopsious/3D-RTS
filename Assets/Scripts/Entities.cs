@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
+using static UnityEngine.EventSystems.EventTrigger;
 
-public class Entities : MonoBehaviour
+public class Entities : NetworkBehaviour
 {
 	[Header("Entity Refs")]
 	public PlayerController playerController;
@@ -23,14 +25,16 @@ public class Entities : MonoBehaviour
 	public int moneyCost;
 	public int alloyCost;
 	public int crystalCost;
-	public int maxHealth;
-	public int currentHealth;
-	public int armour;
+	public NetworkVariable<int> maxHealth = new NetworkVariable<int>();
+	public NetworkVariable<int> currentHealth = new NetworkVariable<int>();
+	public NetworkVariable<int> armour = new NetworkVariable<int>();
 
 	public float spottedCooldown;
 	public float spottedTimer;
 	public float hitCooldown;
 	public float hitTimer;
+
+	public ulong EntityNetworkObjId;
 
 	[Header("Entity Bools")]
 	public bool isPlayerOneEntity;
@@ -41,25 +45,23 @@ public class Entities : MonoBehaviour
 
 	public virtual void Start()
 	{
+		EntityNetworkObjId = GetComponent<NetworkObject>().NetworkObjectId;
 		spottedTimer = 0;
 		hitTimer = 0;
 		UpdateEntityAudioVolume();
-
 		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
-		HideUIHealthBar();
-		UpdateHealthBar();
 		UiObj.transform.rotation = Quaternion.identity;
+		HideUIHealthBar();
 
-		if (isPlayerOneEntity)
+		if (playerController != null) //set layer of minimap (in future the colour too)
 			miniMapRenderObj.layer = 11;
-		else if (!isPlayerOneEntity)
+		else
 			miniMapRenderObj.layer = 12;
-
 		//FoVMeshObj.SetActive(true);
 	}
 	public virtual void Update()
 	{
-		if (UiObj.activeInHierarchy)
+		if (UiObj != null && UiObj.activeInHierarchy)
 			UiObj.transform.position = Camera.main.WorldToScreenPoint(gameObject.transform.position + new Vector3(0, 5, 0));
 
 		IsEntityHitTimer();
@@ -99,7 +101,7 @@ public class Entities : MonoBehaviour
 		spottedTimer = spottedCooldown;
 	}
 
-	//HEALTH/HIT AND UI FUNCTIONS
+	//HEALTH + DEATH/HIT AND UI FUNCTIONS
 	//hit and ui
 	public void IsEntityHitTimer()
 	{
@@ -127,71 +129,70 @@ public class Entities : MonoBehaviour
 	public void ShowUIHealthBar()
 	{
 		UiObj.SetActive(true);
+		UpdateHealthBar();
 	}
 	public void HideUIHealthBar()
 	{
 		UiObj.SetActive(false);
 	}
-	//health and ui
+
+	//health and death functions
+	[ServerRpc(RequireOwnership = false)]
+	public void RecieveDamageServerRPC(float dmg, ServerRpcParams serverRpcParams = default)
+	{
+		RecieveDamage(dmg);
+		RecieveDamageClientRPC(GetComponent<NetworkObject>().NetworkObjectId, serverRpcParams.Receive.SenderClientId);
+	}
+	[ClientRpc]
+	public void RecieveDamageClientRPC(ulong networkObjId, ulong clientId)
+	{
+		ResetIsEntityHitTimer();
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<Entities>().UpdateHealthBar();
+
+		if (currentHealth.Value <= 0)
+			OnEntityDeath();
+	}
 	public void RecieveDamage(float dmg)
 	{
-		dmg -= armour;
+		dmg -= armour.Value;
 		if (dmg < 0)
 			dmg = 0;
-		currentHealth -= (int)dmg;
-		UpdateHealthBar();
-		if (currentHealth <= 0)
-			OnEntityDeath();
+		currentHealth.Value -= (int)dmg;
 	}
 	public void UpdateHealthBar()
 	{
-		float healthPercentage = (float)currentHealth / (float)maxHealth * 100;
+		float health = currentHealth.Value;
+		float healthPercentage = health / maxHealth.Value * 100;
 		HealthSlider.value = healthPercentage;
-		HealthText.text = currentHealth.ToString() + " / " + maxHealth.ToString();
-	}
-	public virtual void OnEntityDeath()
-	{
-		RemoveEntityRefs();
-		Instantiate(DeathObj, transform.position, Quaternion.identity);
-		Destroy(UiObj);
-		Destroy(gameObject);
-	}
-
-	//UTILITY FUNCTIONS
-	public bool ShouldDisplaySpottedNotifToPlayer()
-	{
-		if (playerController.isPlayerOne != isPlayerOneEntity)
-			return false;
-		else
-			return true;
+		HealthText.text = health.ToString() + " / " + maxHealth.ToString();
 	}
 	public virtual void RemoveEntityRefs()
 	{
 
 	}
+	public virtual void OnEntityDeath()
+	{
+		RemoveEntityRefs();
+		Instantiate(DeathObj, transform.position, Quaternion.identity);
+		if (playerController != null)
+		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+	}
+
+	//UTILITY FUNCTIONS
+	public bool ShouldDisplaySpottedNotifToPlayer()
+	{
+		if (playerController != null)
+			return false;
+		else
+			return true;
+	}
 	public void RefundEntity()
 	{
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Refunded 75% of resources", 1f);
-		int refundMoney = (int)(moneyCost / 1.5);
-		int refundAlloy = (int)(alloyCost / 1.5);
-		int refundCrystal = (int)(crystalCost / 1.5);
-
-		if (isPlayerOneEntity)
-		{
-			GameManager.Instance.playerOneCurrentMoney += refundMoney;
-			GameManager.Instance.playerOneCurrentAlloys += refundAlloy;
-			GameManager.Instance.playerOneCurrentCrystals += refundCrystal;
-		}
-		else if (!isPlayerOneEntity)
-		{
-			GameManager.Instance.aiCurrentMoney += refundMoney;
-			GameManager.Instance.aiCurrentAlloys += refundAlloy;
-			GameManager.Instance.aiCurrentCrystals += refundCrystal;
-		}
-		playerController.gameUIManager.UpdateCurrentResourcesUI();
 		RemoveEntityRefs();
-		Destroy(UiObj);
-		Destroy(gameObject);
+		playerController.gameUIManager.gameManager.RefundEntityCostServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		StartCoroutine(playerController.gameUIManager.UpdateCurrentResourcesUI(0f));
 	}
 	public void UpdateEntityAudioVolume()
 	{

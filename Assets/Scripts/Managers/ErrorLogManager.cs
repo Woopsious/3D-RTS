@@ -173,7 +173,7 @@ public class ErrorLogManager : MonoBehaviour
 	{
 		string playerLogPath = Application.persistentDataPath + "/playerError.log";
 
-		File.AppendAllText(playerLogPath, "\n\n[BEGINING OF LOG] | LogType: " + logType + " | Times Repeated: " + counter + "\n" + logString);
+		//File.AppendAllText(playerLogPath, "\n\n[BEGINING OF LOG] | LogType: " + logType + " | Times Repeated: " + counter + "\n" + logString);
 	}
 
 	//UTILITY FUNCTIONS
