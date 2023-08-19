@@ -168,19 +168,17 @@ public class Entities : NetworkBehaviour
 	}
 	public virtual void OnEntityDeath()
 	{
-		RemoveEntityRefs();
-		Instantiate(DeathObj, transform.position, Quaternion.identity);
-		if (playerController != null)
-		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		if (IsServer)
+			GameManager.Instance.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 
 	//UTILITY FUNCTIONS
 	public bool ShouldDisplaySpottedNotifToPlayer()
 	{
 		if (playerController != null)
-			return false;
-		else
 			return true;
+		else
+			return false;
 	}
 	public void RefundEntity()
 	{

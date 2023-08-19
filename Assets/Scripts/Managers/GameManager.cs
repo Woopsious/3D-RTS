@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Unity.Netcode;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -421,7 +422,10 @@ public class GameManager : NetworkBehaviour
 	[ClientRpc]
 	public void RemoveEntityUiClientRPC(ulong networkObjId)
 	{
-		Destroy(NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<Entities>().UiObj);
+		GameObject entityObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].gameObject;
+		entityObj.GetComponent<Entities>().RemoveEntityRefs();
+		Instantiate(entityObj.GetComponent<Entities>().DeathObj, entityObj.transform.position, Quaternion.identity);
+		Destroy(entityObj.GetComponent<Entities>().UiObj);
 	}
 
 	//FUNCTIONS FOR TECH

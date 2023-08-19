@@ -196,7 +196,6 @@ public class BuildingPlacementManager : NetworkBehaviour
 		ApplyTechUpgradesToNewBuildingsServerRPC(networkObjId);
 		BuildingPlacedClientRPC(networkObjId);
 	}
-
 	[ClientRpc]
 	public void BuildingPlacedClientRPC(ulong networkObjId)
 	{
