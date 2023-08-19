@@ -32,6 +32,7 @@ public class GameUIManager : MonoBehaviour
 	public Text gameTimerText;
 
 	public GameObject isPlayerReadyObj;
+	public Text isOtherPlayerReadyText;
 
 	[Header("User Resource Refs")]
 	public Text CurrentMoneyText;
@@ -67,6 +68,9 @@ public class GameUIManager : MonoBehaviour
 	public Text groupFiveInfoUI;
 
 	[Header("Game Speed Refs")]
+	public GameObject gameSpeedIncreaseObj;
+	public GameObject gameSpeedDecreaseObj;
+	public GameObject gameSpeedPauseObj;
 	public Text gameSpeedText;
 	public bool isGamePaused;
 	public float gameSpeed;
@@ -91,6 +95,12 @@ public class GameUIManager : MonoBehaviour
 	public void SetPlayerReady()
 	{
 		gameManager.SetPlayerToReadyServerRPC(playerController.isPlayerOne);
+	}
+	public void HideGameSpeedButtonsForMP()
+	{
+		gameSpeedIncreaseObj.SetActive(false);
+		gameSpeedDecreaseObj.SetActive(false);
+		gameSpeedPauseObj.SetActive(false);
 	}
 	public void ResetUi()
 	{
@@ -430,7 +440,10 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void UpdateGameSpeedUi()
 	{
-		gameSpeedText.text = "x" + gameSpeed.ToString() + " speed";
+		if (!isGamePaused)
+			gameSpeedText.text = "Game Paused";
+		else
+			gameSpeedText.text = "x" + gameSpeed.ToString() + " speed";
 	}
 	public IEnumerator UpdateCurrentResourcesUI(float secondsToWait)
 	{

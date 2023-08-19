@@ -421,25 +421,36 @@ public class GameManager : NetworkBehaviour
 		{
 			Time.timeScale = 0;
 			gameUIManager.isPlayerReadyObj.SetActive(true);
+			gameUIManager.HideGameSpeedButtonsForMP();
 		}
 	}
 
 	//SERVER FUNCTIONS AT RUNTIME
 	[ServerRpc(RequireOwnership = false)]
-	public void SetPlayerToReadyServerRPC(bool isPlayerOne)
+	public void SetPlayerToReadyServerRPC(bool isPlayerOne, ServerRpcParams serverRpcParams = default)
 	{
 		if (isPlayerOne)
 			playerOneReadyToStart.Value = true;
 		else if (!isPlayerOne)
 			playerTwoReadyToStart.Value = true;
+		NotifyOtherPlayerIsReadyClientRPC(serverRpcParams.Receive.SenderClientId);
 
 		if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
 			StartGameClientRPC();
 	}
 	[ClientRpc]
+	public void NotifyOtherPlayerIsReadyClientRPC(ulong clientId)
+	{
+		if (clientId != NetworkManager.Singleton.LocalClientId)
+			gameUIManager.isOtherPlayerReadyText.text = "Other Player Ready";
+	}
+	[ClientRpc]
 	public void StartGameClientRPC()
 	{
-		Time.timeScale = 1;
+		gameUIManager.isGamePaused = true;
+		gameUIManager.PauseGame();
+		gameUIManager.isPlayerReadyObj.SetActive(false);
+		playerNotifsManager.DisplayNotifisMessage("GAME STARTING", 3f);
 	}
 
 	//FUNCTIONS ON ENTITY DEATH

@@ -59,18 +59,12 @@ public class PlayerController : NetworkBehaviour
 	}
 	public void GameSpeedHotkeys()
 	{
-		if (Input.GetKeyDown(KeyCode.Equals))
-		{
+		if (Input.GetKeyDown(KeyCode.Equals) && !gameUIManager.gameManager.isMultiplayerGame)
 			gameUIManager.IncreaseGameSpeed();
-		}
-		if (Input.GetKeyDown(KeyCode.Minus))
-		{
+		if (Input.GetKeyDown(KeyCode.Minus) && !gameUIManager.gameManager.isMultiplayerGame)
 			gameUIManager.DecreaseGameSpeed();
-		}
 		if (Input.GetKeyDown(KeyCode.Space))
-		{
 			gameUIManager.PauseGame();
-		}
 	}
 	//hotkeys for game menu functions
 	public void MenuHotkeys()
@@ -203,11 +197,11 @@ public class PlayerController : NetworkBehaviour
 			}
 		}
 	}
+
 	public bool IsMouseOverUI()
 	{
 		return EventSystem.current.IsPointerOverGameObject();
 	}
-
 	public bool CheckIfCanBuyEntity(int MoneyCost, int AlloyCost, int CrystalCost)
 	{
 		if (isPlayerOne)
