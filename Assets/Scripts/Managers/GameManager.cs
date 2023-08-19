@@ -111,8 +111,13 @@ public class GameManager : NetworkBehaviour
 
 	public UnitStateController testUnit;
 
+	[Header("MP Refs")]
 	public List<BuildingManager> playerBuildingsList = new List<BuildingManager>();
 	public List<UnitStateController> playerUnitsList = new List<UnitStateController>();
+
+	public NetworkVariable<bool> playerOneReadyToStart = new NetworkVariable<bool>();
+	public NetworkVariable<bool> playerTwoReadyToStart = new NetworkVariable<bool>();
+	public bool isMultiplayerGame;
 
 	public void Awake()
 	{
@@ -411,8 +416,33 @@ public class GameManager : NetworkBehaviour
 		}
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
 		AudioManager.Instance.LoadSoundSettings();
+
+		if(isMultiplayerGame)
+		{
+			Time.timeScale = 0;
+			gameUIManager.isPlayerReadyObj.SetActive(true);
+		}
 	}
 
+	//SERVER FUNCTIONS AT RUNTIME
+	[ServerRpc(RequireOwnership = false)]
+	public void SetPlayerToReadyServerRPC(bool isPlayerOne)
+	{
+		if (isPlayerOne)
+			playerOneReadyToStart.Value = true;
+		else if (!isPlayerOne)
+			playerTwoReadyToStart.Value = true;
+
+		if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+			StartGameClientRPC();
+	}
+	[ClientRpc]
+	public void StartGameClientRPC()
+	{
+		Time.timeScale = 1;
+	}
+
+	//FUNCTIONS ON ENTITY DEATH
 	[ServerRpc(RequireOwnership = false)]
 	public void RemoveEntityServerRPC(ulong networkObjId)
 	{
@@ -428,7 +458,7 @@ public class GameManager : NetworkBehaviour
 		Destroy(entityObj.GetComponent<Entities>().UiObj);
 	}
 
-	//FUNCTIONS FOR TECH
+	//functions for tech
 	[ServerRpc(RequireOwnership = false)]
 	public void UpdateTechBonusesServerRPC(bool isBuildingTech, int index, ServerRpcParams serverRpcParams = default)
 	{
@@ -570,7 +600,7 @@ public class GameManager : NetworkBehaviour
 		else if (!isBuildingTech)
 			ApplyTechUpgradesToExistingUnitsServerRPC();
 	}
-	//using list of all player units, first reset values to base then recalculate values
+	//using list of all units/buildings, reset values to base then recalculate values to correct player entities
 	[ServerRpc(RequireOwnership = false)]
 	public void ApplyTechUpgradesToExistingBuildingsServerRPC()
 	{

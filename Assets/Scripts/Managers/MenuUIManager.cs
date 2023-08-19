@@ -183,12 +183,14 @@ public class MenuUIManager : MonoBehaviour
 	public void PlayNewSinglePlayerGame()
 	{
 		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = false;
 		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
 		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
 	public void LoadSinglePlayerGame()
 	{
 		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = false;
 		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
 		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
@@ -197,6 +199,7 @@ public class MenuUIManager : MonoBehaviour
 	public void HostNewMultiplayerGame()
 	{
 		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = true;
 		NetworkManager.Singleton.StartHost();
 		multiPlayerScreenObj.SetActive(false);
 		LobbyScreenUiObj.SetActive(true);
@@ -206,6 +209,7 @@ public class MenuUIManager : MonoBehaviour
 	public void JoinMultiplayerGame()
 	{
 		GameManager.Instance.isPlayerOne = false;
+		GameManager.Instance.isMultiplayerGame = true;
 		NetworkManager.Singleton.StartClient();
 		multiPlayerScreenObj.SetActive(false);
 		LobbyScreenUiObj.SetActive(true);

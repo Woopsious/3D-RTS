@@ -31,6 +31,8 @@ public class GameUIManager : MonoBehaviour
 	public GameObject entityInfoTemplatePrefab;
 	public Text gameTimerText;
 
+	public GameObject isPlayerReadyObj;
+
 	[Header("User Resource Refs")]
 	public Text CurrentMoneyText;
 	public Text IncomeMoneyText;
@@ -84,6 +86,11 @@ public class GameUIManager : MonoBehaviour
 
 		if(techTreeManager.isCurrentlyReseaching)
 			UpdateTechUi();
+	}
+	//function called when player clicks ready on button for MP only
+	public void SetPlayerReady()
+	{
+		gameManager.SetPlayerToReadyServerRPC(playerController.isPlayerOne);
 	}
 	public void ResetUi()
 	{
