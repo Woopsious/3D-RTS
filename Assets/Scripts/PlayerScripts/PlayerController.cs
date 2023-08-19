@@ -63,7 +63,7 @@ public class PlayerController : NetworkBehaviour
 			gameUIManager.IncreaseGameSpeed();
 		if (Input.GetKeyDown(KeyCode.Minus) && !gameUIManager.gameManager.isMultiplayerGame)
 			gameUIManager.DecreaseGameSpeed();
-		if (Input.GetKeyDown(KeyCode.Space))
+		if (Input.GetKeyDown(KeyCode.Space) && !gameUIManager.gameManager.isMultiplayerGame)
 			gameUIManager.PauseGame();
 	}
 	//hotkeys for game menu functions
