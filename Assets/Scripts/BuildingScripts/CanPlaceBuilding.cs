@@ -20,41 +20,38 @@ public class CanPlaceBuilding : NetworkBehaviour
 
 	public void Start()
 	{
-		if (building != null)
-		{
-			if (!building.isHQ)
-				highlighterObj.SetActive(true);
-			CanPlaceHighliterRed();
-
-			if (building.isPlayerOneEntity)
-				building.miniMapRenderObj.layer = 11;
-
-			else if (!building.isPlayerOneEntity)
-				building.miniMapRenderObj.layer = 12;
-
-			AssignPlayerController(building.GetComponent<Entities>());
-		}
+		if (building != null && !building.isHQ)
+			SetUpBuildingOnStartUp(building.GetComponent<Entities>());
+		else if (building.isHQ)
+			Invoke(nameof(SetUpHQ), 1);
 		else
-		{
-			highlighterObj.SetActive(true);
-			CanPlaceHighliterRed();
-
-			if (turret.isPlayerOneEntity)
-				turret.miniMapRenderObj.layer = 11;
-
-			else if (!turret.isPlayerOneEntity)
-				turret.miniMapRenderObj.layer = 12;
-
-			AssignPlayerController(turret.GetComponent<Entities>());
-		}
+			SetUpBuildingOnStartUp(turret.GetComponent<Entities>());
 	}
 	public void Update()
 	{
 		TrackPlacementHeight();
 	}
-	public void AssignPlayerController(Entities entity)
+	public void SetUpHQ()
 	{
+		SetUpBuildingOnStartUp(building.GetComponent<Entities>());
+	}
+	public void SetUpBuildingOnStartUp(Entities entity)
+	{
+		if (!building.isHQ)
+			highlighterObj.SetActive(true);
+		CanPlaceHighliterRed();
+
+		Debug.LogWarning("building set up running");
 		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set player refs here
+		if (building.isPlayerOneEntity)
+		{
+			Debug.LogWarning("Player One HQ: " + playerCon.isPlayerOne);
+		}
+		else if (!building.isPlayerOneEntity)
+		{
+			Debug.LogWarning("Player Two HQ: " + playerCon.isPlayerOne);
+		}
+
 		if (playerCon.isPlayerOne != !entity.isPlayerOneEntity)
 		{
 			entity.playerController = playerCon;
@@ -67,6 +64,17 @@ public class CanPlaceBuilding : NetworkBehaviour
 					entity.GetComponent<NetworkObject>().NetworkObjectId;
 			}
 		}
+		//set entity Minimap layer and colour
+		if (building.isPlayerOneEntity)
+			building.miniMapRenderObj.layer = 11;
+		else
+			building.miniMapRenderObj.layer = 12;
+
+		if (building.playerController != null)
+			building.miniMapRenderObj.GetComponent<SpriteRenderer>().color = Color.green;
+		else
+			building.miniMapRenderObj.GetComponent<SpriteRenderer>().color = Color.red;
+
 		if (IsServer && playerCon.isPlayerOne)
 			GameManager.Instance.playerBuildingsList.Add(GetComponent<BuildingManager>());
 	}

@@ -53,10 +53,6 @@ public class Entities : NetworkBehaviour
 		UiObj.transform.rotation = Quaternion.identity;
 		HideUIHealthBar();
 
-		if (playerController != null) //set layer of minimap (in future the colour too)
-			miniMapRenderObj.layer = 11;
-		else
-			miniMapRenderObj.layer = 12;
 		//FoVMeshObj.SetActive(true);
 	}
 	public virtual void Update()
@@ -164,7 +160,7 @@ public class Entities : NetworkBehaviour
 		float health = currentHealth.Value;
 		float healthPercentage = health / maxHealth.Value * 100;
 		HealthSlider.value = healthPercentage;
-		HealthText.text = health.ToString() + " / " + maxHealth.ToString();
+		HealthText.text = health.ToString() + " / " + maxHealth.Value.ToString();
 	}
 	public virtual void RemoveEntityRefs()
 	{

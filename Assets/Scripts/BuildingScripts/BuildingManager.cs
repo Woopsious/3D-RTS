@@ -36,24 +36,20 @@ public class BuildingManager : Entities
 	public override void Start()
 	{
 		base.Start();
+		OnBuildingStartUp();
+	}
+	public override void Update()
+	{
+		base.Update();
+	}
+	public void OnBuildingStartUp()
+	{
 		AddBuildingRefs();
 
 		if (isGeneratorBuilding)
 			gameObject.GetComponent<EnergyGenController>().PowerBuildings();
 		else if (!isGeneratorBuilding && capturePointController.energyGeneratorBuilding != null)
 			capturePointController.energyGeneratorBuilding.GetComponent<EnergyGenController>().PowerBuildings();
-	}
-	public override void Update()
-	{
-		base.Update();
-	}
-	public void ShowRefundButton()
-	{
-		refundBuildingBackgroundObj.SetActive(true);
-	}
-	public void HideRefundButton()
-	{
-		refundBuildingBackgroundObj.SetActive(false);
 	}
 
 	//HEALTH/HIT FUNCTIONS OVERRIDES
@@ -168,5 +164,13 @@ public class BuildingManager : Entities
 			if (playerController != null)
 				playerController.heavyVehProdBuildingsList.Remove(this);
 		}
+	}
+	public void ShowRefundButton()
+	{
+		refundBuildingBackgroundObj.SetActive(true);
+	}
+	public void HideRefundButton()
+	{
+		refundBuildingBackgroundObj.SetActive(false);
 	}
 }

@@ -71,19 +71,7 @@ public class UnitStateController : Entities
 	public override void Start()
 	{
 		base.Start();
-		ChangeStateIdleClientRPC();
-		ChangeStateIdleServerRPC(EntityNetworkObjId);
-
-		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set refs here
-		if (playerCon.isPlayerOne != !isPlayerOneEntity)
-		{
-			playerController = playerCon;
-			playerController.unitListForPlayer.Add(this);
-		}
-		if (IsServer && playerCon.isPlayerOne)
-			GameManager.Instance.playerUnitsList.Add(GetComponent<UnitStateController>());
-		if (isTurret)
-			GetComponent<TurretController>().AddTurretRefs();
+		OnUnitStartUp();
 	}
 	public override void Update()
 	{
@@ -96,6 +84,33 @@ public class UnitStateController : Entities
 		base.Update();
 		if (!isCargoShip)
 			currentState.UpdatePhysics(this);
+	}
+	public void OnUnitStartUp()
+	{
+		ChangeStateIdleClientRPC();
+		ChangeStateIdleServerRPC(EntityNetworkObjId);
+
+		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set refs here
+		if (playerCon.isPlayerOne != !isPlayerOneEntity)
+		{
+			playerController = playerCon;
+			playerController.unitListForPlayer.Add(this);
+		}
+		//set entity Minimap layer and colour
+		if (isPlayerOneEntity)
+			miniMapRenderObj.layer = 11;
+		else
+			miniMapRenderObj.layer = 12;
+
+		if (playerController != null)
+			miniMapRenderObj.GetComponent<SpriteRenderer>().color = Color.green;
+		else
+			miniMapRenderObj.GetComponent<SpriteRenderer>().color = Color.red;
+
+		if (IsServer && playerCon.isPlayerOne)
+			GameManager.Instance.playerUnitsList.Add(GetComponent<UnitStateController>());
+		if (isTurret)
+			GetComponent<TurretController>().AddTurretRefs();
 	}
 
 	//SPOTTING SYSTEM FUNCTIONS
