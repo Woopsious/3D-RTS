@@ -137,13 +137,14 @@ public class Entities : NetworkBehaviour
 	public void RecieveDamageServerRPC(float dmg, ServerRpcParams serverRpcParams = default)
 	{
 		RecieveDamage(dmg);
-		RecieveDamageClientRPC(GetComponent<NetworkObject>().NetworkObjectId, serverRpcParams.Receive.SenderClientId);
+		UpdateHealthBar();
+		RecieveDamageClientRPC(HealthText.text);
 	}
 	[ClientRpc]
-	public void RecieveDamageClientRPC(ulong networkObjId, ulong clientId)
+	public void RecieveDamageClientRPC(string healthBarUi)
 	{
 		ResetIsEntityHitTimer();
-		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<Entities>().UpdateHealthBar();
+		HealthText.text = healthBarUi;
 
 		if (currentHealth.Value <= 0)
 			OnEntityDeath();
