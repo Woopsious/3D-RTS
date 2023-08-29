@@ -203,6 +203,7 @@ public class MenuUIManager : MonoBehaviour
 		NetworkManager.Singleton.StartHost();
 		multiPlayerScreenObj.SetActive(false);
 		LobbyScreenUiObj.SetActive(true);
+		MultiplayerManager.Instance.StartHost();
 
 		LobbyInfoText.text = "hosting";
 	}
@@ -213,13 +214,13 @@ public class MenuUIManager : MonoBehaviour
 		NetworkManager.Singleton.StartClient();
 		multiPlayerScreenObj.SetActive(false);
 		LobbyScreenUiObj.SetActive(true);
+		MultiplayerManager.Instance.StartClient();
 
 		LobbyInfoText.text = "joining";
 	}
 	public void StartMultiplayerGame()
 	{
 		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
-		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
 	//UNUSED
 	public void PlayNewMultiPlayerGame()
