@@ -31,17 +31,17 @@ public class MultiplayerManager : MonoBehaviour
 
 	public void StartHost()
 	{
-		AuthenticatePlayer();
+		//AuthenticatePlayer();
 
 		CreateRelay();
 	}
 	public void StartClient()
 	{
-		AuthenticatePlayer();
+		//AuthenticatePlayer();
 
 		JoinRelay();
 	}
-	public async void AuthenticatePlayer()
+	public async Task AuthenticatePlayer()
 	{
 		await UnityServices.InitializeAsync();
 
@@ -51,6 +51,8 @@ public class MultiplayerManager : MonoBehaviour
 
 	public async void CreateRelay()
 	{
+		await AuthenticatePlayer();
+
 		Allocation allocation;
 		try
 		{
@@ -69,6 +71,8 @@ public class MultiplayerManager : MonoBehaviour
 	}
 	public async void JoinRelay()
 	{
+		await AuthenticatePlayer();
+
 		JoinAllocation joinAllocation;
 		try
 		{
