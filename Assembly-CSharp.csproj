@@ -73,6 +73,7 @@
     <Compile Include="Assets\Scripts\ResourceNodes.cs" />
     <Compile Include="Assets\Scripts\Managers\NotifsEventManager.cs" />
     <Compile Include="Assets\Scripts\Managers\AudioManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\MultiplayerManager.cs" />
     <Compile Include="Assets\Scripts\Managers\CameraController.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitSelectionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\PlayerNotifsManager.cs" />
@@ -97,7 +98,8 @@
     <Compile Include="Assets\Scripts\UnitScripts\ParticleEffects.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitProductionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\CapturePointController.cs" />
-    <Compile Include="Assets\Scripts\Managers\MultiplayerManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\LobbyItemManager.cs" />
+    <Compile Include="Assets\Scripts\Managers\PlayerItemManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Effects\UI\FogOfWar\TestUnlit 1.shader" />

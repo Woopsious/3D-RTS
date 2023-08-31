@@ -6,6 +6,8 @@ using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Authentication;
 using Unity.Services.Core;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEditor;
@@ -15,8 +17,14 @@ public class MultiplayerManager : MonoBehaviour
 {
 	public static MultiplayerManager Instance;
 
+	private string lobbyName = "[LobbyName]";
 	private int maxConnections = 2;
 	private string joinCode;
+
+	public Lobby hostLobby;
+	float lobbyTimer = 0;
+
+	public string playerName;
 
 	public void Awake()
 	{
@@ -27,32 +35,148 @@ public class MultiplayerManager : MonoBehaviour
 		}
 		else
 			Destroy(gameObject);
+
+		playerName = $"Player{Random.Range(1000, 9999)}";
+	}
+	public void Update()
+	{
+		HandleLobbyPollForUpdates();
 	}
 
-	public void StartHost()
+	public async void StartHost()
 	{
-		//AuthenticatePlayer();
+		await AuthenticatePlayer();
 
-		CreateRelay();
+		CreateLobby();
+
+		//CreateRelay();
 	}
-	public void StartClient()
+	public async void StartClient()
 	{
-		//AuthenticatePlayer();
+		await AuthenticatePlayer();
 
-		JoinRelay();
+		ListLobbies();
+
+		//JoinRelay();
 	}
 	public async Task AuthenticatePlayer()
 	{
 		await UnityServices.InitializeAsync();
 
+		AuthenticationService.Instance.SignedIn += () => { Debug.LogWarning($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
+		Debug.LogWarning($"player Name: {playerName}");
 		await AuthenticationService.Instance.SignInAnonymouslyAsync();
-		AuthenticationService.Instance.SignedIn += () => { Debug.Log($"Player Id{AuthenticationService.Instance.PlayerId}"); };
+	}
+
+	public async void CreateLobby()
+	{
+		try
+		{
+			CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions
+			{
+				IsPrivate = false,
+				Player = GetPlayer()
+			};
+
+			Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxConnections, createLobbyOptions);
+			hostLobby = lobby;
+
+			StartCoroutine(LobbyHeartBeat(5f));
+
+			Debug.LogWarning($"Created lobby with name: {lobby.Name} and Id: {lobby.Id}");
+		}
+		catch (LobbyServiceException e)
+		{
+			Debug.LogError(e.Message);
+		}
+	}
+	private IEnumerator LobbyHeartBeat(float waitTime)
+	{
+		while (true)
+		{
+			LobbyService.Instance.SendHeartbeatPingAsync(hostLobby.Id);
+			yield return new WaitForSeconds(waitTime);
+		}
+	}
+
+	private async void HandleLobbyPollForUpdates()
+	{
+		if (hostLobby != null)
+		{
+			lobbyTimer -= Time.deltaTime;
+			if (lobbyTimer < 0)
+			{
+				lobbyTimer = 1.5f;
+				Lobby lobby = await LobbyService.Instance.GetLobbyAsync(hostLobby.Id);
+				hostLobby = lobby;
+				MenuUIManager.Instance.SyncPlayerListforLobbyUi(hostLobby);
+			}
+		}
+	}
+	private Player GetPlayer()
+	{
+		return new Player
+		{
+			Data = new Dictionary<string, PlayerDataObject>
+				{
+					{ "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, playerName) }
+				}
+		};
+	}
+
+	public async void ListLobbies()
+	{
+		try
+		{
+			QueryLobbiesOptions queryLobbiesOptions = new QueryLobbiesOptions
+			{ 
+				Count = 25,
+				Filters= new List<QueryFilter> {
+					new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "1", QueryFilter.OpOptions.EQ)
+				}
+			};
+
+			QueryResponse queryResponse = await Lobbies.Instance.QueryLobbiesAsync(queryLobbiesOptions);
+			Debug.LogWarning($"lobbies found: {queryResponse.Results.Count}");
+
+			int index = 1;
+			foreach (Lobby lobby in queryResponse.Results)
+			{
+				Debug.LogWarning($"lobby # {index} lobby Id; {lobby.Id}");
+				index++;
+			}
+
+			MenuUIManager.Instance.SetUpLobbyListUi(queryResponse);
+		}
+		catch (LobbyServiceException e)
+		{
+			Debug.LogError(e.Message);
+		}
+	}
+	public async void JoinLobby(Lobby lobby)
+	{
+		try
+		{
+			JoinLobbyByIdOptions joinLobbyByIdOptions = new JoinLobbyByIdOptions
+			{
+				Player = GetPlayer()
+			};
+
+			await Lobbies.Instance.JoinLobbyByIdAsync(lobby.Id, joinLobbyByIdOptions);
+			hostLobby = lobby;
+
+			Debug.LogWarning($"joined lobby with Id:{lobby.Id}");
+		}
+		catch (LobbyServiceException e)
+		{
+			Debug.LogError(e.Message);
+		}
+
+		MenuUIManager.Instance.JoinPlayerLobby();
 	}
 
 	public async void CreateRelay()
 	{
-		await AuthenticatePlayer();
-
 		Allocation allocation;
 		try
 		{
@@ -71,8 +195,6 @@ public class MultiplayerManager : MonoBehaviour
 	}
 	public async void JoinRelay()
 	{
-		await AuthenticatePlayer();
-
 		JoinAllocation joinAllocation;
 		try
 		{

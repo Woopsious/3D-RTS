@@ -1,7 +1,10 @@
 using Newtonsoft.Json.Converters;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Unity.Netcode;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEditor;
 using UnityEngine;
@@ -21,7 +24,12 @@ public class MenuUIManager : MonoBehaviour
 	public GameObject SettingsKeybindsObj;
 
 	[Header("Multiplayer Ui Refs")]
+	public GameObject LobbyItemPrefab;
+	public GameObject LobbyListUiObj;
+	public Transform LobbyListParent;
+	public GameObject PlayerItemPrefab;
 	public GameObject LobbyScreenUiObj;
+	public Transform LobbyScreenParent;
 	public Button hostNewGameButton;
 	public Button startGameButton;
 	public Button joinNewGameButton;
@@ -108,17 +116,6 @@ public class MenuUIManager : MonoBehaviour
 		SettingsKeybindsObj.SetActive(false);
 		GameManager.Instance.SavePlayerData();
 	}
-	public void MultiplayerBackBackButton()
-	{
-		GameManager.Instance.isPlayerOne = true;
-		mainMenuObj.SetActive(false);
-		SettingsObj.SetActive(false);
-		highScoreObj.SetActive(false);
-		singlePlayerScreenObj.SetActive(false);
-		multiPlayerScreenObj.SetActive(true);
-		LobbyScreenUiObj.SetActive(false);
-		GameManager.Instance.SavePlayerData();
-	}
 	public void QuitGame()
 	{
 		GameManager.Instance.SavePlayerData();
@@ -200,7 +197,6 @@ public class MenuUIManager : MonoBehaviour
 	{
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = true;
-		NetworkManager.Singleton.StartHost();
 		multiPlayerScreenObj.SetActive(false);
 		LobbyScreenUiObj.SetActive(true);
 		MultiplayerManager.Instance.StartHost();
@@ -211,16 +207,82 @@ public class MenuUIManager : MonoBehaviour
 	{
 		GameManager.Instance.isPlayerOne = false;
 		GameManager.Instance.isMultiplayerGame = true;
-		NetworkManager.Singleton.StartClient();
 		multiPlayerScreenObj.SetActive(false);
-		LobbyScreenUiObj.SetActive(true);
+		LobbyListUiObj.SetActive(true);
 		MultiplayerManager.Instance.StartClient();
 
 		LobbyInfoText.text = "joining";
 	}
+	public void JoinPlayerLobby()
+	{
+		LobbyListUiObj.SetActive(false);
+		LobbyScreenUiObj.SetActive(true);
+	}
 	public void StartMultiplayerGame()
 	{
 		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+	}
+	public void MultiplayerBackBackButton()
+	{
+		GameManager.Instance.isPlayerOne = true;
+		mainMenuObj.SetActive(false);
+		SettingsObj.SetActive(false);
+		highScoreObj.SetActive(false);
+		singlePlayerScreenObj.SetActive(false);
+		multiPlayerScreenObj.SetActive(true);
+		LobbyScreenUiObj.SetActive(false);
+		LobbyListUiObj.SetActive(false);
+		GameManager.Instance.SavePlayerData();
+	}
+	//Set up lobby list and Player list
+	public void SetUpLobbyListUi(QueryResponse queryResponse)
+	{
+		foreach (Lobby lobby in queryResponse.Results)
+		{
+			GameObject obj = Instantiate(LobbyItemPrefab, LobbyListParent);
+			obj.GetComponent<LobbyItemManager>().Initialize(lobby);
+		}
+	}
+	public void SyncPlayerListforLobbyUi(Lobby lobby)
+	{
+		Debug.LogWarning("syncing playerItems");
+		if (lobby.Players.Count < LobbyScreenParent.childCount)
+		{
+			Transform childTransform = LobbyScreenParent.GetChild(LobbyScreenParent.childCount - 1);
+			Destroy(childTransform.gameObject);
+		}
+		else if (lobby.Players.Count > LobbyScreenParent.childCount)
+		{
+			Instantiate(PlayerItemPrefab, LobbyScreenParent);
+			UpdatePlayerList(lobby);
+		}
+		else
+		{
+			UpdatePlayerList(lobby);
+		}
+	}
+	public void UpdatePlayerList(Lobby lobby)
+	{
+		int index = 0;
+		foreach (Transform child in LobbyScreenParent.transform)
+		{
+			PlayerItemManager playerItem = child.GetComponent<PlayerItemManager>();
+			playerItem.Initialize(lobby.Players[index].Id, lobby.Players[index].Data["PlayerName"].Value);
+
+			Debug.LogWarning(lobby.Players[index].Data["PlayerName"].Value);
+		}
+	}
+	public void ShowPlayersInLobby()
+	{
+		if (MultiplayerManager.Instance.hostLobby != null)
+		{
+			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
+			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
+			{
+				Debug.LogWarning($"player Id: {player.Id}");
+				Debug.LogWarning($"player Id: {player.Id}, player name: {player.Data["PlayerName"].Value}");
+			}
+		}
 	}
 	//UNUSED
 	public void PlayNewMultiPlayerGame()
