@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -10,7 +11,6 @@ using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
-using UnityEditor;
 using UnityEngine;
 
 public class MultiplayerManager : MonoBehaviour
@@ -24,7 +24,8 @@ public class MultiplayerManager : MonoBehaviour
 	public Lobby hostLobby;
 	float lobbyTimer = 0;
 
-	public string playerName;
+	public string localPlayerId;
+	public string localPlayerName;
 
 	public void Awake()
 	{
@@ -36,36 +37,38 @@ public class MultiplayerManager : MonoBehaviour
 		else
 			Destroy(gameObject);
 
-		playerName = $"Player{Random.Range(1000, 9999)}";
+		localPlayerName = $"Player{UnityEngine.Random.Range(1000, 9999)}";
+	}
+	public async void Start()
+	{
+		await AuthenticatePlayer();
 	}
 	public void Update()
 	{
 		HandleLobbyPollForUpdates();
 	}
 
-	public async void StartHost()
-	{
-		await AuthenticatePlayer();
-
-		CreateLobby();
-
-		//CreateRelay();
-	}
-	public async void StartClient()
-	{
-		await AuthenticatePlayer();
-
-		ListLobbies();
-
-		//JoinRelay();
-	}
 	public async Task AuthenticatePlayer()
 	{
 		await UnityServices.InitializeAsync();
 
 		AuthenticationService.Instance.SignedIn += () => { Debug.LogWarning($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
-		Debug.LogWarning($"player Name: {playerName}");
 		await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+		localPlayerId = AuthenticationService.Instance.PlayerId;
+		Debug.LogWarning($"player Name: {localPlayerName}");
+	}
+	public void StartHost()
+	{
+		CreateLobby();
+
+		//CreateRelay();
+	}
+	public void StartClient()
+	{
+		ListLobbies();
+
+		//JoinRelay();
 	}
 
 	public async void CreateLobby()
@@ -94,7 +97,8 @@ public class MultiplayerManager : MonoBehaviour
 	{
 		while (true)
 		{
-			LobbyService.Instance.SendHeartbeatPingAsync(hostLobby.Id);
+			if (hostLobby != null)
+				LobbyService.Instance.SendHeartbeatPingAsync(hostLobby.Id);
 			yield return new WaitForSeconds(waitTime);
 		}
 	}
@@ -119,7 +123,7 @@ public class MultiplayerManager : MonoBehaviour
 		{
 			Data = new Dictionary<string, PlayerDataObject>
 				{
-					{ "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, playerName) }
+					{ "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerName) }
 				}
 		};
 	}
@@ -175,6 +179,55 @@ public class MultiplayerManager : MonoBehaviour
 		MenuUIManager.Instance.JoinPlayerLobby();
 	}
 
+	public async void LeaveLobby()
+	{
+		try
+		{
+			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, localPlayerId);
+			Debug.LogWarning($"player with Id: {localPlayerId} left lobby");
+		}
+		catch (LobbyServiceException e)
+		{
+			Debug.LogError(e.Message);
+		}
+		hostLobby = null;
+	}
+	public async void kickPlayerFromLobby(string playerId)
+	{
+		try
+		{
+			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
+			Debug.LogWarning($"player with Id: {playerId} kicked from lobby");
+		}
+		catch (LobbyServiceException e)
+		{
+			Debug.LogError(e.Message);
+		}
+		hostLobby = null;
+	}
+	public async void DeleteLobby()
+	{
+		try
+		{
+			await LobbyService.Instance.DeleteLobbyAsync(hostLobby.Id);
+			Debug.LogWarning($"closed lobby with Id: {localPlayerId} and kicked all players");
+		}
+		catch (LobbyServiceException e)
+		{
+			Debug.LogError(e.Message);
+		}
+		hostLobby = null;
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void PlayerKickedFromLobbyServerRPC()
+	{
+		PlayerKickedFromLobbyClientRPC();
+	}
+	[ClientRpc]
+	public void PlayerKickedFromLobbyClientRPC()
+	{
+
+	}
 	public async void CreateRelay()
 	{
 		Allocation allocation;

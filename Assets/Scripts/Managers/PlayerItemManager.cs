@@ -21,6 +21,6 @@ public class PlayerItemManager : MonoBehaviour
 
 	public void KickPlayerFromLobby()
 	{
-
+		MultiplayerManager.Instance.kickPlayerFromLobby(playerId);
 	}
 }

@@ -78,6 +78,7 @@
     <Compile Include="Assets\Scripts\PlayerScripts\UnitSelectionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\PlayerNotifsManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\ParticleCollisions.cs" />
+    <Compile Include="Assets\Scripts\Managers\LobbyItemManager.cs" />
     <Compile Include="Assets\Scripts\Managers\MenuUIManager.cs" />
     <Compile Include="Assets\Scripts\Entities.cs" />
     <Compile Include="Assets\Scripts\Managers\GameUIManager.cs" />
@@ -92,14 +93,13 @@
     <Compile Include="Assets\Scripts\BuildingScripts\CanPlaceBuilding.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\TurretController.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\Managers\PlayerItemManager.cs" />
     <Compile Include="Assets\Scripts\Managers\ErrorLogManager.cs" />
     <Compile Include="Assets\Scripts\Managers\TechTreeManager.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\BuildingManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\ParticleEffects.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitProductionManager.cs" />
     <Compile Include="Assets\Scripts\Managers\CapturePointController.cs" />
-    <Compile Include="Assets\Scripts\Managers\LobbyItemManager.cs" />
-    <Compile Include="Assets\Scripts\Managers\PlayerItemManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Effects\UI\FogOfWar\TestUnlit 1.shader" />

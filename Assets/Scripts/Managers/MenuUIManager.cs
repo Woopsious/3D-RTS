@@ -34,6 +34,8 @@ public class MenuUIManager : MonoBehaviour
 	public Button startGameButton;
 	public Button joinNewGameButton;
 	public Text LobbyInfoText;
+	public GameObject leaveLobbyButton;
+	public GameObject deleteLobbyButton;
 
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
@@ -199,6 +201,8 @@ public class MenuUIManager : MonoBehaviour
 		GameManager.Instance.isMultiplayerGame = true;
 		multiPlayerScreenObj.SetActive(false);
 		LobbyScreenUiObj.SetActive(true);
+		leaveLobbyButton.SetActive(false);
+		deleteLobbyButton.SetActive(true);
 		MultiplayerManager.Instance.StartHost();
 
 		LobbyInfoText.text = "hosting";
@@ -209,6 +213,8 @@ public class MenuUIManager : MonoBehaviour
 		GameManager.Instance.isMultiplayerGame = true;
 		multiPlayerScreenObj.SetActive(false);
 		LobbyListUiObj.SetActive(true);
+		leaveLobbyButton.SetActive(true);
+		deleteLobbyButton.SetActive(false);
 		MultiplayerManager.Instance.StartClient();
 
 		LobbyInfoText.text = "joining";
@@ -233,6 +239,23 @@ public class MenuUIManager : MonoBehaviour
 		LobbyScreenUiObj.SetActive(false);
 		LobbyListUiObj.SetActive(false);
 		GameManager.Instance.SavePlayerData();
+	}
+	public void RefreshLobbiesList()
+	{
+		ClearLobbiesList();
+		MultiplayerManager.Instance.ListLobbies();
+	}
+	public void LeaveLobbyButton()
+	{
+		MultiplayerManager.Instance.LeaveLobby();
+		MultiplayerBackBackButton();
+		ClearPlayersList();
+	}
+	public void DeleteLobbyButton()
+	{
+		MultiplayerManager.Instance.DeleteLobby();
+		MultiplayerBackBackButton();
+		ClearPlayersList();
 	}
 	//Set up lobby list and Player list
 	public void SetUpLobbyListUi(QueryResponse queryResponse)
@@ -270,6 +293,7 @@ public class MenuUIManager : MonoBehaviour
 			playerItem.Initialize(lobby.Players[index].Id, lobby.Players[index].Data["PlayerName"].Value);
 
 			Debug.LogWarning(lobby.Players[index].Data["PlayerName"].Value);
+			index++;
 		}
 	}
 	public void ShowPlayersInLobby()
@@ -279,11 +303,20 @@ public class MenuUIManager : MonoBehaviour
 			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
 			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
 			{
-				Debug.LogWarning($"player Id: {player.Id}");
 				Debug.LogWarning($"player Id: {player.Id}, player name: {player.Data["PlayerName"].Value}");
 			}
 		}
 	}
+	public void ClearLobbiesList()
+	{
+		foreach (Transform child in LobbyListParent)
+			Destroy(child.gameObject);
+	}
+	public void ClearPlayersList()
+	{
+		foreach (Transform child in LobbyScreenParent)
+			Destroy(child.gameObject);
+	}	
 	//UNUSED
 	public void PlayNewMultiPlayerGame()
 	{
