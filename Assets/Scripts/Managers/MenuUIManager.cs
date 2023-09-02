@@ -6,11 +6,10 @@ using Unity.Netcode;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MenuUIManager : MonoBehaviour
+public class MenuUIManager : NetworkBehaviour
 {
 	public static MenuUIManager Instance;
 	//references
@@ -105,7 +104,7 @@ public class MenuUIManager : MonoBehaviour
 		SettingsObj.SetActive(false);
 		SettingsKeybindsObj.SetActive(true);
 		UpdateKeybindButtonDisplay();
-	}	
+	}
 	public void ShowSettingsVolumeButton()
 	{
 		SettingsObj.SetActive(false);
@@ -133,7 +132,7 @@ public class MenuUIManager : MonoBehaviour
 			GameObject keybindPanelObj = Instantiate(keybindPanelPrefab, KeybindParentObj.transform);
 			keybindPanelObj.transform.GetChild(0).GetComponent<Text>().text = "Keybind for: " + InputManager.Instance.keybindNames[closureIndex];
 
-			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate 
+			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate
 				{ KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
 			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
 			keybindPanelObj.transform.GetChild(1).GetComponentInChildren<Text>().text =
@@ -239,27 +238,27 @@ public class MenuUIManager : MonoBehaviour
 		LobbyScreenUiObj.SetActive(false);
 		LobbyListUiObj.SetActive(false);
 		GameManager.Instance.SavePlayerData();
+		ClearPlayersList();
 	}
 	public void RefreshLobbiesList()
 	{
-		ClearLobbiesList();
-		MultiplayerManager.Instance.ListLobbies();
+		MultiplayerManager.Instance.GetLobbiesList();
 	}
 	public void LeaveLobbyButton()
 	{
 		MultiplayerManager.Instance.LeaveLobby();
 		MultiplayerBackBackButton();
-		ClearPlayersList();
 	}
 	public void DeleteLobbyButton()
 	{
 		MultiplayerManager.Instance.DeleteLobby();
 		MultiplayerBackBackButton();
-		ClearPlayersList();
 	}
 	//Set up lobby list and Player list
 	public void SetUpLobbyListUi(QueryResponse queryResponse)
 	{
+		ClearLobbiesList();
+
 		foreach (Lobby lobby in queryResponse.Results)
 		{
 			GameObject obj = Instantiate(LobbyItemPrefab, LobbyListParent);
@@ -268,7 +267,6 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void SyncPlayerListforLobbyUi(Lobby lobby)
 	{
-		Debug.LogWarning("syncing playerItems");
 		if (lobby.Players.Count < LobbyScreenParent.childCount)
 		{
 			Transform childTransform = LobbyScreenParent.GetChild(LobbyScreenParent.childCount - 1);
@@ -290,9 +288,9 @@ public class MenuUIManager : MonoBehaviour
 		foreach (Transform child in LobbyScreenParent.transform)
 		{
 			PlayerItemManager playerItem = child.GetComponent<PlayerItemManager>();
-			playerItem.Initialize(lobby.Players[index].Id, lobby.Players[index].Data["PlayerName"].Value);
+			playerItem.Initialize(lobby.Players[index].Id, 
+				lobby.Players[index].Data["PlayerName"].Value, lobby.Players[index].Data["NetworkedId"].Value);
 
-			Debug.LogWarning($"player Id: {lobby.Players[index].Data["PlayerName"].Value}");
 			index++;
 		}
 	}
@@ -303,7 +301,8 @@ public class MenuUIManager : MonoBehaviour
 			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
 			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
 			{
-				Debug.LogWarning($"player Id: {player.Id}, player name: {player.Data["PlayerName"].Value}");
+				Debug.LogWarning($"player Id: {player.Id} " +
+					$"player name: {player.Data["PlayerName"].Value}, networked Id {player.Data["NetworkedId"].Value}");
 			}
 		}
 	}

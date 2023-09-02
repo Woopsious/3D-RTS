@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
@@ -13,7 +14,7 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 
-public class MultiplayerManager : MonoBehaviour
+public class MultiplayerManager : NetworkBehaviour
 {
 	public static MultiplayerManager Instance;
 
@@ -22,10 +23,14 @@ public class MultiplayerManager : MonoBehaviour
 	private string joinCode;
 
 	public Lobby hostLobby;
+	public ILobbyEvents lobbyEvents;
 	float lobbyTimer = 0;
 
 	public string localPlayerId;
 	public string localPlayerName;
+	public string localPlayerNetworkedId;
+
+	public bool wasKickedFromLobby;
 
 	public void Awake()
 	{
@@ -58,6 +63,8 @@ public class MultiplayerManager : MonoBehaviour
 		localPlayerId = AuthenticationService.Instance.PlayerId;
 		Debug.LogWarning($"player Name: {localPlayerName}");
 	}
+
+	/*
 	public async void SubToLobbyEvents(Lobby lobbyToSubTo)
 	{
 		var callbacks = new LobbyEventCallbacks();
@@ -67,7 +74,7 @@ public class MultiplayerManager : MonoBehaviour
 
 		try
 		{
-			await Lobbies.Instance.SubscribeToLobbyEventsAsync(lobbyToSubTo.Id, callbacks);
+			lobbyEvents = await Lobbies.Instance.SubscribeToLobbyEventsAsync(lobbyToSubTo.Id, callbacks);
 		}
 		catch (LobbyServiceException ex)
 		{
@@ -89,7 +96,7 @@ public class MultiplayerManager : MonoBehaviour
 
 		try
 		{
-			await Lobbies.Instance.SubscribeToLobbyEventsAsync(lobbyToSubTo.Id, callbacks);
+			lobbyEvents = await Lobbies.Instance.SubscribeToLobbyEventsAsync(lobbyToSubTo.Id, callbacks);
 		}
 		catch (LobbyServiceException e)
 		{
@@ -100,28 +107,40 @@ public class MultiplayerManager : MonoBehaviour
 	{
 		Debug.LogWarning("player joined");
 
+		return null;
 	}
 	public Action<List<int>> PlayerLeftEvent()
 	{
 		Debug.LogWarning("player kicked");
 		UnSubToLobbyEvents(hostLobby);
+
 		return null;
 	}
-	public Action PlayerKickedEvent()
+	public void PlayerKickedEvent()
 	{
 		Debug.LogWarning("player kicked");
 		UnSubToLobbyEvents(hostLobby);
-		return null;
+
+		this.lobbyEvents = null;
 	}
+	*/
 	public void StartHost()
 	{
+		NetworkManager.Singleton.StartHost();
+		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
+
 		CreateLobby();
 
 		//CreateRelay();
 	}
 	public void StartClient()
 	{
-		ListLobbies();
+		NetworkManager.Singleton.StartClient();
+		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
+
+		GetLobbiesList();
 
 		//JoinRelay();
 	}
@@ -137,6 +156,7 @@ public class MultiplayerManager : MonoBehaviour
 			};
 
 			Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxConnections, createLobbyOptions);
+			//SubToLobbyEvents(hostLobby);
 
 			hostLobby = lobby;
 			StartCoroutine(LobbyHeartBeat(5f));
@@ -147,7 +167,6 @@ public class MultiplayerManager : MonoBehaviour
 		{
 			Debug.LogError(e.Message);
 		}
-		SubToLobbyEvents(hostLobby);
 	}
 	private IEnumerator LobbyHeartBeat(float waitTime)
 	{
@@ -179,12 +198,13 @@ public class MultiplayerManager : MonoBehaviour
 		{
 			Data = new Dictionary<string, PlayerDataObject>
 				{
-					{ "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerName) }
+					{ "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerName) },
+					{ "NetworkedId", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerNetworkedId.ToString())}
 				}
 		};
 	}
 
-	public async void ListLobbies()
+	public async void GetLobbiesList()
 	{
 		try
 		{
@@ -223,7 +243,7 @@ public class MultiplayerManager : MonoBehaviour
 			};
 
 			await Lobbies.Instance.JoinLobbyByIdAsync(lobby.Id, joinLobbyByIdOptions);
-			SubToLobbyEvents(lobby);
+			//SubToLobbyEvents(lobby);
 
 			hostLobby = lobby;
 			Debug.LogWarning($"joined lobby with Id:{lobby.Id}");
@@ -236,10 +256,12 @@ public class MultiplayerManager : MonoBehaviour
 		MenuUIManager.Instance.JoinPlayerLobby();
 	}
 
-	public async void kickPlayerFromLobby(string playerId)
+	public async void kickPlayerFromLobby(string playerId, string networkedId)
 	{
 		try
 		{
+			PlayerKickedFromLobbyServerRPC(networkedId);
+
 			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
 			Debug.LogWarning($"player with Id: {playerId} kicked from lobby");
 		}
@@ -260,7 +282,7 @@ public class MultiplayerManager : MonoBehaviour
 			Debug.LogError(e.Message);
 		}
 
-		UnSubToLobbyEvents(hostLobby);
+		//UnSubToLobbyEvents(hostLobby);
 		hostLobby = null;
 	}
 	public async void DeleteLobby()
@@ -268,25 +290,26 @@ public class MultiplayerManager : MonoBehaviour
 		try
 		{
 			await LobbyService.Instance.DeleteLobbyAsync(hostLobby.Id);
-			Debug.LogWarning($"closed lobby with Id: {localPlayerId} and kicked all players");
+			Debug.LogWarning($"closed lobby with Id: {hostLobby.Id} and kicked all players");
 		}
 		catch (LobbyServiceException e)
 		{
 			Debug.LogError(e.Message);
 		}
 
-		UnSubToLobbyEvents(hostLobby);
+		//UnSubToLobbyEvents(hostLobby);
 		hostLobby = null;
 	}
 	[ServerRpc(RequireOwnership = false)]
-	public void PlayerKickedFromLobbyServerRPC()
+	public void PlayerKickedFromLobbyServerRPC(string clientNetworkedId)
 	{
-		PlayerKickedFromLobbyClientRPC();
+		PlayerKickedFromLobbyClientRPC(clientNetworkedId);
 	}
 	[ClientRpc]
-	public void PlayerKickedFromLobbyClientRPC()
+	public void PlayerKickedFromLobbyClientRPC(string clientNetworkedId)
 	{
-
+		if (localPlayerNetworkedId == clientNetworkedId)
+			MenuUIManager.Instance.MultiplayerBackBackButton();
 	}
 	public async void CreateRelay()
 	{
@@ -298,8 +321,6 @@ public class MultiplayerManager : MonoBehaviour
 
 			RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
 			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-
-			NetworkManager.Singleton.StartHost();
 		}
 		catch (RelayServiceException e)
 		{
@@ -316,8 +337,6 @@ public class MultiplayerManager : MonoBehaviour
 
 			RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
 			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-
-			NetworkManager.Singleton.StartClient();
 		}
 		catch (RelayServiceException e)
 		{
