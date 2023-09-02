@@ -99,7 +99,7 @@ public class MultiplayerManager : MonoBehaviour
 	public Action<List<LobbyPlayerJoined>> PlayerJoinedEvent()
 	{
 		Debug.LogWarning("player joined");
-		return null;
+
 	}
 	public Action<List<int>> PlayerLeftEvent()
 	{
