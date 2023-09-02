@@ -292,7 +292,7 @@ public class MenuUIManager : MonoBehaviour
 			PlayerItemManager playerItem = child.GetComponent<PlayerItemManager>();
 			playerItem.Initialize(lobby.Players[index].Id, lobby.Players[index].Data["PlayerName"].Value);
 
-			Debug.LogWarning(lobby.Players[index].Data["PlayerName"].Value);
+			Debug.LogWarning($"player Id: {lobby.Players[index].Data["PlayerName"].Value}");
 			index++;
 		}
 	}

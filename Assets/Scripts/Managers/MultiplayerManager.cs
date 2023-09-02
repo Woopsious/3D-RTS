@@ -58,6 +58,61 @@ public class MultiplayerManager : MonoBehaviour
 		localPlayerId = AuthenticationService.Instance.PlayerId;
 		Debug.LogWarning($"player Name: {localPlayerName}");
 	}
+	public async void SubToLobbyEvents(Lobby lobbyToSubTo)
+	{
+		var callbacks = new LobbyEventCallbacks();
+		callbacks.PlayerJoined += PlayerJoinedEvent();
+		callbacks.PlayerLeft += PlayerLeftEvent();
+		callbacks.KickedFromLobby += PlayerKickedEvent();
+
+		try
+		{
+			await Lobbies.Instance.SubscribeToLobbyEventsAsync(lobbyToSubTo.Id, callbacks);
+		}
+		catch (LobbyServiceException ex)
+		{
+			switch (ex.Reason)
+			{
+				case LobbyExceptionReason.AlreadySubscribedToLobby: Debug.LogWarning($"Already subscribed to lobby[{lobbyToSubTo.Id}]. We did not need to try and subscribe again. Exception Message: {ex.Message}"); break;
+				case LobbyExceptionReason.SubscriptionToLobbyLostWhileBusy: Debug.LogError($"Subscription to lobby events was lost while it was busy trying to subscribe. Exception Message: {ex.Message}"); throw;
+				case LobbyExceptionReason.LobbyEventServiceConnectionError: Debug.LogError($"Failed to connect to lobby events. Exception Message: {ex.Message}"); throw;
+				default: throw;
+			}
+		}
+	}
+	public async void UnSubToLobbyEvents(Lobby lobbyToSubTo)
+	{
+		var callbacks = new LobbyEventCallbacks();
+		callbacks.PlayerJoined -= PlayerJoinedEvent();
+		callbacks.PlayerLeft -= PlayerLeftEvent();
+		callbacks.KickedFromLobby -= PlayerKickedEvent();
+
+		try
+		{
+			await Lobbies.Instance.SubscribeToLobbyEventsAsync(lobbyToSubTo.Id, callbacks);
+		}
+		catch (LobbyServiceException e)
+		{
+			Debug.LogError($"failed to unsub from lobby events{e}");
+		}
+	}
+	public Action<List<LobbyPlayerJoined>> PlayerJoinedEvent()
+	{
+		Debug.LogWarning("player joined");
+		return null;
+	}
+	public Action<List<int>> PlayerLeftEvent()
+	{
+		Debug.LogWarning("player kicked");
+		UnSubToLobbyEvents(hostLobby);
+		return null;
+	}
+	public Action PlayerKickedEvent()
+	{
+		Debug.LogWarning("player kicked");
+		UnSubToLobbyEvents(hostLobby);
+		return null;
+	}
 	public void StartHost()
 	{
 		CreateLobby();
@@ -82,8 +137,8 @@ public class MultiplayerManager : MonoBehaviour
 			};
 
 			Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxConnections, createLobbyOptions);
-			hostLobby = lobby;
 
+			hostLobby = lobby;
 			StartCoroutine(LobbyHeartBeat(5f));
 
 			Debug.LogWarning($"Created lobby with name: {lobby.Name} and Id: {lobby.Id}");
@@ -92,6 +147,7 @@ public class MultiplayerManager : MonoBehaviour
 		{
 			Debug.LogError(e.Message);
 		}
+		SubToLobbyEvents(hostLobby);
 	}
 	private IEnumerator LobbyHeartBeat(float waitTime)
 	{
@@ -167,8 +223,9 @@ public class MultiplayerManager : MonoBehaviour
 			};
 
 			await Lobbies.Instance.JoinLobbyByIdAsync(lobby.Id, joinLobbyByIdOptions);
-			hostLobby = lobby;
+			SubToLobbyEvents(lobby);
 
+			hostLobby = lobby;
 			Debug.LogWarning($"joined lobby with Id:{lobby.Id}");
 		}
 		catch (LobbyServiceException e)
@@ -179,19 +236,6 @@ public class MultiplayerManager : MonoBehaviour
 		MenuUIManager.Instance.JoinPlayerLobby();
 	}
 
-	public async void LeaveLobby()
-	{
-		try
-		{
-			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, localPlayerId);
-			Debug.LogWarning($"player with Id: {localPlayerId} left lobby");
-		}
-		catch (LobbyServiceException e)
-		{
-			Debug.LogError(e.Message);
-		}
-		hostLobby = null;
-	}
 	public async void kickPlayerFromLobby(string playerId)
 	{
 		try
@@ -203,6 +247,20 @@ public class MultiplayerManager : MonoBehaviour
 		{
 			Debug.LogError(e.Message);
 		}
+	}
+	public async void LeaveLobby()
+	{
+		try
+		{
+			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, localPlayerId);
+			Debug.LogWarning($"player with Id: {localPlayerId} left lobby");
+		}
+		catch (LobbyServiceException e)
+		{
+			Debug.LogError(e.Message);
+		}
+
+		UnSubToLobbyEvents(hostLobby);
 		hostLobby = null;
 	}
 	public async void DeleteLobby()
@@ -216,6 +274,8 @@ public class MultiplayerManager : MonoBehaviour
 		{
 			Debug.LogError(e.Message);
 		}
+
+		UnSubToLobbyEvents(hostLobby);
 		hostLobby = null;
 	}
 	[ServerRpc(RequireOwnership = false)]
