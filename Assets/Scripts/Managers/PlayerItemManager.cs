@@ -10,7 +10,10 @@ public class PlayerItemManager : MonoBehaviour
 	public string playerName;
 	public string localPlayerNetworkedId;
 
+	public bool isThisPlayerHost;
+
 	public Text playerNameUi;
+	public Text playerHostUi;
 
 	public GameObject kickPlayerButton;
 

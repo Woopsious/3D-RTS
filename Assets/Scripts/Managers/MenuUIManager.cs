@@ -158,7 +158,11 @@ public class MenuUIManager : NetworkBehaviour
 	}
 	public void StartMultiplayerGameButton()
 	{
-		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+		if (MultiplayerManager.Instance.hostLobby.Players.Count == MultiplayerManager.Instance.hostLobby.MaxPlayers)
+			GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+
+		else
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Two player are needed to start the game", 3f);
 	}
 
 	//MP UI UPDATES
@@ -208,9 +212,7 @@ public class MenuUIManager : NetworkBehaviour
 			UpdatePlayerList(lobby);
 		}
 		else
-		{
 			UpdatePlayerList(lobby);
-		}
 	}
 	public void UpdatePlayerList(Lobby lobby)
 	{
@@ -221,12 +223,17 @@ public class MenuUIManager : NetworkBehaviour
 			playerItem.Initialize(lobby.Players[index].Id, 
 				lobby.Players[index].Data["PlayerName"].Value, lobby.Players[index].Data["NetworkedId"].Value);
 
-			if (GameManager.Instance.isPlayerOne && !playerItem.kickPlayerButton.activeInHierarchy)
-				playerItem.kickPlayerButton.SetActive(true);
-
-			else if (!GameManager.Instance.isPlayerOne)
+			if (!GameManager.Instance.isPlayerOne && playerItem.kickPlayerButton.activeInHierarchy)
 				playerItem.kickPlayerButton.SetActive(false);
 
+			else if (GameManager.Instance.isPlayerOne && !playerItem.kickPlayerButton.activeInHierarchy)
+			{
+				if (playerItem.playerId == lobby.HostId)
+					playerItem.kickPlayerButton.SetActive(false);
+
+				else
+					playerItem.kickPlayerButton.SetActive(true);
+			}
 			index++;
 		}
 	}
