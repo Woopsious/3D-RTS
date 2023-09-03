@@ -6,6 +6,7 @@ using Unity.Netcode;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,27 +15,26 @@ public class MenuUIManager : NetworkBehaviour
 	public static MenuUIManager Instance;
 	//references
 	[Header("MenuObj UI Refs")]
-	public GameObject mainMenuObj;
+	public GameObject mainMenuPanelObj;
 	public GameObject singlePlayerScreenObj;
-	public GameObject multiPlayerScreenObj;
-	public GameObject highScoreObj;
-	public GameObject SettingsObj;
-	public GameObject SettingsVolumeObj;
-	public GameObject SettingsKeybindsObj;
+	public GameObject highScorePanelObj;
+	public GameObject settingsPanelObj;
+	public GameObject settingsVolumePanelObj;
+	public GameObject settingsKeybindsPanelObj;
 
 	[Header("Multiplayer Ui Refs")]
+	public GameObject MpLobbiesListPanel;
+	public GameObject MpLobbyPanel;
+	public GameObject leaveLobbyButtonObj;
+	public GameObject closeLobbyButtonObj;
+	public GameObject startGameButtonObj;
+
 	public GameObject LobbyItemPrefab;
-	public GameObject LobbyListUiObj;
-	public Transform LobbyListParent;
+	public GameObject LobbyListPanelObj;
+	public Transform LobbyListParentTransform;
 	public GameObject PlayerItemPrefab;
-	public GameObject LobbyScreenUiObj;
-	public Transform LobbyScreenParent;
-	public Button hostNewGameButton;
-	public Button startGameButton;
-	public Button joinNewGameButton;
-	public Text LobbyInfoText;
-	public GameObject leaveLobbyButton;
-	public GameObject deleteLobbyButton;
+	public GameObject LobbyScreenPanelObj;
+	public Transform LobbyScreenParentTransform;
 
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
@@ -68,59 +68,189 @@ public class MenuUIManager : NetworkBehaviour
 	{
 		AudioManager.Instance.menuSFX.Play();
 	}
-
-	//FUNCTIONS FOR MAIN MENU BUTTONS
+	//MAIN MENU BUTTON FUNCTIONS
+	public void BackToMainMenuButton()
+	{
+		ShowMainMenuUi();
+	}
 	public void ShowHighScoreButton()
 	{
-		mainMenuObj.SetActive(false);
-		highScoreObj.SetActive(true);
-	}
-	public void ShowSinglePlayerScreen()
-	{
-		mainMenuObj.SetActive(false);
-		singlePlayerScreenObj.SetActive(true);
-	}
-	public void ShowMultiPlayerScreen()
-	{
-		mainMenuObj.SetActive(false);
-		multiPlayerScreenObj.SetActive(true);
-	}
-	public void BackButton()
-	{
-		mainMenuObj.SetActive(true);
-		SettingsObj.SetActive(false);
-		highScoreObj.SetActive(false);
-		singlePlayerScreenObj.SetActive(false);
-		multiPlayerScreenObj.SetActive(false);
-		GameManager.Instance.SavePlayerData();
+		ShowHighScoreUi();
 	}
 	public void ShowSettingsButton()
 	{
-		mainMenuObj.SetActive(false);
-		SettingsObj.SetActive(true);
+		ShowSettingsUi();
 	}
 	public void ShowSettingsKeybindsButton()
 	{
-		SettingsObj.SetActive(false);
-		SettingsKeybindsObj.SetActive(true);
+		settingsPanelObj.SetActive(false);
+		settingsKeybindsPanelObj.SetActive(true);
 		UpdateKeybindButtonDisplay();
 	}
 	public void ShowSettingsVolumeButton()
 	{
-		SettingsObj.SetActive(false);
-		SettingsVolumeObj.SetActive(true);
+		settingsPanelObj.SetActive(false);
+		settingsVolumePanelObj.SetActive(true);
 	}
-	public void SettingsBackButton()
+	public void BackToSettingsButton()
 	{
-		SettingsObj.SetActive(true);
-		SettingsVolumeObj.SetActive(false);
-		SettingsKeybindsObj.SetActive(false);
+		ShowSettingsUi();
 		GameManager.Instance.SavePlayerData();
+	}
+
+	//MAIN MENU UI UPDATES
+	public void ShowMainMenuUi()
+	{
+		GameManager.Instance.isPlayerOne = true;
+		mainMenuPanelObj.SetActive(true);
+		settingsPanelObj.SetActive(false);
+		highScorePanelObj.SetActive(false);
+		singlePlayerScreenObj.SetActive(false);
+		MpLobbiesListPanel.SetActive(false);
+		GameManager.Instance.SavePlayerData();
+	}
+	public void ShowHighScoreUi()
+	{
+		mainMenuPanelObj.SetActive(false);
+		highScorePanelObj.SetActive(true);
+	}
+	public void ShowSettingsUi()
+	{
+		mainMenuPanelObj.SetActive(false);
+		settingsPanelObj.SetActive(true);
+		settingsKeybindsPanelObj.SetActive(false);
+		settingsVolumePanelObj.SetActive(false);
 	}
 	public void QuitGame()
 	{
 		GameManager.Instance.SavePlayerData();
 		Application.Quit();
+	}
+
+	//MP BUTTON FUNCTIONS
+	public void PlayMultiplayerButton()
+	{
+		GameManager.Instance.isPlayerOne = false;
+		GameManager.Instance.isMultiplayerGame = true;
+		ShowLobbiesListUi();
+	}
+	public void RefreshLobbiesListButton()
+	{
+		MultiplayerManager.Instance.GetLobbiesList();
+	}
+	public void CreateLobbyButton()
+	{
+		GameManager.Instance.isPlayerOne = true;
+		MultiplayerManager.Instance.StartHost();
+		ShowLobbyUi();
+	}
+	public void LeaveLobbyButton()
+	{
+		MultiplayerManager.Instance.LeaveLobby();
+		ShowLobbiesListUi();
+		ClearPlayersList();
+	}
+	public void CloseLobbyButton()
+	{
+		MultiplayerManager.Instance.CloseLobby();
+		ShowLobbiesListUi();
+		ClearPlayersList();
+	}
+	public void StartMultiplayerGameButton()
+	{
+		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+	}
+
+	//MP UI UPDATES
+	public void ShowLobbiesListUi()
+	{
+		mainMenuPanelObj.SetActive(false);
+		MpLobbiesListPanel.SetActive(true);
+		MpLobbyPanel.SetActive(false);
+		closeLobbyButtonObj.SetActive(false);
+		leaveLobbyButtonObj.SetActive(false);
+		startGameButtonObj.SetActive(false);
+		MultiplayerManager.Instance.GetLobbiesList();
+	}
+	public void ShowLobbyUi()
+	{
+		MpLobbiesListPanel.SetActive(false);
+		MpLobbyPanel.SetActive(true);
+		if (GameManager.Instance.isPlayerOne)
+		{
+			closeLobbyButtonObj.SetActive(true);
+			startGameButtonObj.SetActive(true);
+		}
+		else
+			leaveLobbyButtonObj.SetActive(true);
+	}
+	//Set up lobby list and Player list
+	public void SetUpLobbyListUi(QueryResponse queryResponse)
+	{
+		ClearLobbiesList();
+
+		foreach (Lobby lobby in queryResponse.Results)
+		{
+			GameObject obj = Instantiate(LobbyItemPrefab, LobbyListParentTransform);
+			obj.GetComponent<LobbyItemManager>().Initialize(lobby);
+		}
+	}
+	public void SyncPlayerListforLobbyUi(Lobby lobby)
+	{
+		if (lobby.Players.Count < LobbyScreenParentTransform.childCount)
+		{
+			Transform childTransform = LobbyScreenParentTransform.GetChild(LobbyScreenParentTransform.childCount - 1);
+			Destroy(childTransform.gameObject);
+		}
+		else if (lobby.Players.Count > LobbyScreenParentTransform.childCount)
+		{
+			Instantiate(PlayerItemPrefab, LobbyScreenParentTransform);
+			UpdatePlayerList(lobby);
+		}
+		else
+		{
+			UpdatePlayerList(lobby);
+		}
+	}
+	public void UpdatePlayerList(Lobby lobby)
+	{
+		int index = 0;
+		foreach (Transform child in LobbyScreenParentTransform.transform)
+		{
+			PlayerItemManager playerItem = child.GetComponent<PlayerItemManager>();
+			playerItem.Initialize(lobby.Players[index].Id, 
+				lobby.Players[index].Data["PlayerName"].Value, lobby.Players[index].Data["NetworkedId"].Value);
+
+			if (GameManager.Instance.isPlayerOne && !playerItem.kickPlayerButton.activeInHierarchy)
+				playerItem.kickPlayerButton.SetActive(true);
+
+			else if (!GameManager.Instance.isPlayerOne)
+				playerItem.kickPlayerButton.SetActive(false);
+
+			index++;
+		}
+	}
+	public void ShowPlayersInLobby()
+	{
+		if (MultiplayerManager.Instance.hostLobby != null)
+		{
+			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
+			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
+			{
+				Debug.LogWarning($"player Id: {player.Id} " +
+					$"player name: {player.Data["PlayerName"].Value}, networked Id {player.Data["NetworkedId"].Value}");
+			}
+		}
+	}
+	public void ClearLobbiesList()
+	{
+		foreach (Transform child in LobbyListParentTransform)
+			Destroy(child.gameObject);
+	}
+	public void ClearPlayersList()
+	{
+		foreach (Transform child in LobbyScreenParentTransform)
+			Destroy(child.gameObject);
 	}
 
 	//FUNCTIONS TO CHANGE KEYBINDS
@@ -133,7 +263,7 @@ public class MenuUIManager : NetworkBehaviour
 			keybindPanelObj.transform.GetChild(0).GetComponent<Text>().text = "Keybind for: " + InputManager.Instance.keybindNames[closureIndex];
 
 			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate
-				{ KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
+			{ KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
 			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
 			keybindPanelObj.transform.GetChild(1).GetComponentInChildren<Text>().text =
 				InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
@@ -177,145 +307,6 @@ public class MenuUIManager : NetworkBehaviour
 		UpdateKeybindButtonDisplay();
 	}
 
-	//single player button functions
-	public void PlayNewSinglePlayerGame()
-	{
-		GameManager.Instance.isPlayerOne = true;
-		GameManager.Instance.isMultiplayerGame = false;
-		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
-		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
-	}
-	public void LoadSinglePlayerGame()
-	{
-		GameManager.Instance.isPlayerOne = true;
-		GameManager.Instance.isMultiplayerGame = false;
-		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
-		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
-	}
-
-	//multi player button functions
-	public void HostNewMultiplayerGame()
-	{
-		GameManager.Instance.isPlayerOne = true;
-		GameManager.Instance.isMultiplayerGame = true;
-		multiPlayerScreenObj.SetActive(false);
-		LobbyScreenUiObj.SetActive(true);
-		leaveLobbyButton.SetActive(false);
-		deleteLobbyButton.SetActive(true);
-		MultiplayerManager.Instance.StartHost();
-
-		LobbyInfoText.text = "hosting";
-	}
-	public void JoinMultiplayerGame()
-	{
-		GameManager.Instance.isPlayerOne = false;
-		GameManager.Instance.isMultiplayerGame = true;
-		multiPlayerScreenObj.SetActive(false);
-		LobbyListUiObj.SetActive(true);
-		leaveLobbyButton.SetActive(true);
-		deleteLobbyButton.SetActive(false);
-		MultiplayerManager.Instance.StartClient();
-
-		LobbyInfoText.text = "joining";
-	}
-	public void JoinPlayerLobby()
-	{
-		LobbyListUiObj.SetActive(false);
-		LobbyScreenUiObj.SetActive(true);
-	}
-	public void StartMultiplayerGame()
-	{
-		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
-	}
-	public void MultiplayerBackBackButton()
-	{
-		GameManager.Instance.isPlayerOne = true;
-		mainMenuObj.SetActive(false);
-		SettingsObj.SetActive(false);
-		highScoreObj.SetActive(false);
-		singlePlayerScreenObj.SetActive(false);
-		multiPlayerScreenObj.SetActive(true);
-		LobbyScreenUiObj.SetActive(false);
-		LobbyListUiObj.SetActive(false);
-		GameManager.Instance.SavePlayerData();
-		ClearPlayersList();
-	}
-	public void RefreshLobbiesList()
-	{
-		MultiplayerManager.Instance.GetLobbiesList();
-	}
-	public void LeaveLobbyButton()
-	{
-		MultiplayerManager.Instance.LeaveLobby();
-		MultiplayerBackBackButton();
-	}
-	public void DeleteLobbyButton()
-	{
-		MultiplayerManager.Instance.DeleteLobby();
-		MultiplayerBackBackButton();
-	}
-	//Set up lobby list and Player list
-	public void SetUpLobbyListUi(QueryResponse queryResponse)
-	{
-		ClearLobbiesList();
-
-		foreach (Lobby lobby in queryResponse.Results)
-		{
-			GameObject obj = Instantiate(LobbyItemPrefab, LobbyListParent);
-			obj.GetComponent<LobbyItemManager>().Initialize(lobby);
-		}
-	}
-	public void SyncPlayerListforLobbyUi(Lobby lobby)
-	{
-		if (lobby.Players.Count < LobbyScreenParent.childCount)
-		{
-			Transform childTransform = LobbyScreenParent.GetChild(LobbyScreenParent.childCount - 1);
-			Destroy(childTransform.gameObject);
-		}
-		else if (lobby.Players.Count > LobbyScreenParent.childCount)
-		{
-			Instantiate(PlayerItemPrefab, LobbyScreenParent);
-			UpdatePlayerList(lobby);
-		}
-		else
-		{
-			UpdatePlayerList(lobby);
-		}
-	}
-	public void UpdatePlayerList(Lobby lobby)
-	{
-		int index = 0;
-		foreach (Transform child in LobbyScreenParent.transform)
-		{
-			PlayerItemManager playerItem = child.GetComponent<PlayerItemManager>();
-			playerItem.Initialize(lobby.Players[index].Id, 
-				lobby.Players[index].Data["PlayerName"].Value, lobby.Players[index].Data["NetworkedId"].Value);
-
-			index++;
-		}
-	}
-	public void ShowPlayersInLobby()
-	{
-		if (MultiplayerManager.Instance.hostLobby != null)
-		{
-			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
-			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
-			{
-				Debug.LogWarning($"player Id: {player.Id} " +
-					$"player name: {player.Data["PlayerName"].Value}, networked Id {player.Data["NetworkedId"].Value}");
-			}
-		}
-	}
-	public void ClearLobbiesList()
-	{
-		foreach (Transform child in LobbyListParent)
-			Destroy(child.gameObject);
-	}
-	public void ClearPlayersList()
-	{
-		foreach (Transform child in LobbyScreenParent)
-			Destroy(child.gameObject);
-	}	
 	//UNUSED
 	public void PlayNewMultiPlayerGame()
 	{

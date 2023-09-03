@@ -406,13 +406,13 @@ public class GameManager : NetworkBehaviour
 			gameUIManager = FindObjectOfType<GameUIManager>();
 			gameUIManager.gameManager = this;
 
-			GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 			gameUIManager.ResetUi();
 			gameUIManager.ResetUnitGroupUI();
 			gameUIManager.SetUpUnitShopUi();
 			gameUIManager.SetUpBuildingsShopUi();
 			gameUIManager.techTreeManager.SetUpTechTrees();
 		}
+		GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
 		AudioManager.Instance.LoadSoundSettings();
 
