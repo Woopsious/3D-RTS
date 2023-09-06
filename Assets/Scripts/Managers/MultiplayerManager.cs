@@ -158,6 +158,11 @@ public class MultiplayerManager : NetworkBehaviour
 	//called on creating a lobby from MainMenu
 	public async void StartHost()
 	{
+		NetworkManager.Singleton.StartHost();
+		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
+		Debug.LogWarning($"lobby Join Code: {lobbyJoinCode}");
+
 		await CreateRelay();
 
 		CreateLobby();
@@ -177,11 +182,6 @@ public class MultiplayerManager : NetworkBehaviour
 		{
 			Debug.LogError("Failed to allocate relay" + e);
 		}
-
-		NetworkManager.Singleton.StartHost();
-		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
-		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
-		Debug.LogWarning($"lobby Join Code: {lobbyJoinCode}");
 	}
 	public async void CreateLobby()
 	{
@@ -391,5 +391,56 @@ public class MultiplayerManager : NetworkBehaviour
 					{ "NetworkedId", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerNetworkedId.ToString())}
 				}
 		};
+	}
+
+	public void StartHostTest()
+	{
+		NetworkManager.Singleton.StartHost();
+		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
+
+		CreateRelayTest();
+	}
+	public async void CreateRelayTest()
+	{
+		Allocation allocation;
+		try
+		{
+			allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
+			lobbyJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+
+			RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
+			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+		}
+		catch (RelayServiceException e)
+		{
+			Debug.LogError("Failed to allocate relay" + e);
+		}
+		Debug.LogWarning($"lobby Join Code: {lobbyJoinCode}");
+	}
+
+	public void StartClientTest()
+	{
+		NetworkManager.Singleton.StartClient();
+		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
+
+		JoinRelayTest();
+	}
+	public async void JoinRelayTest()
+	{
+		JoinAllocation joinAllocation;
+		try
+		{
+			Debug.LogWarning($"Joining relay with code: {TestJoinCode}");
+			joinAllocation = await RelayService.Instance.JoinAllocationAsync(TestJoinCode);
+
+			RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
+			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+		}
+		catch (RelayServiceException e)
+		{
+			Debug.LogError($"Failed to join relay with code: {e}");
+		}
 	}
 }
