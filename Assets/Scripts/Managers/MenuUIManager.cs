@@ -241,6 +241,7 @@ public class MenuUIManager : NetworkBehaviour
 	{
 		if (MultiplayerManager.Instance.hostLobby != null)
 		{
+			Debug.LogWarning($"lobby join code: {MultiplayerManager.Instance.hostLobby.Data["joinCode"].Value}");
 			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
 			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
 			{

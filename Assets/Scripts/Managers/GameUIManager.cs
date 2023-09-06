@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -142,6 +143,18 @@ public class GameUIManager : MonoBehaviour
 		GameManager.Instance.SavePlayerData();
 		Time.timeScale = 1;
 		settingsObj.SetActive(false);
+	}
+	public void ShowPlayersInLobby()
+	{
+		if (MultiplayerManager.Instance.hostLobby != null)
+		{
+			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
+			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
+			{
+				Debug.LogWarning($"player Id: {player.Id} " +
+					$"player name: {player.Data["PlayerName"].Value}, networked Id {player.Data["NetworkedId"].Value}");
+			}
+		}
 	}
 
 	//SHOW UI ELEMENTS

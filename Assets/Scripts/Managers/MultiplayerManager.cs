@@ -13,6 +13,7 @@ using Unity.Services.Lobbies.Models;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MultiplayerManager : NetworkBehaviour
 {
@@ -20,11 +21,13 @@ public class MultiplayerManager : NetworkBehaviour
 
 	private string lobbyName = "[LobbyName]";
 	private int maxConnections = 2;
-	private string joinCode;
 
 	public Lobby hostLobby;
+	private string lobbyJoinCode;
 	public ILobbyEvents lobbyEvents;
 	float lobbyTimer = 0;
+
+	public string TestJoinCode;
 
 	public string localPlayerId;
 	public string localPlayerName;
@@ -153,15 +156,32 @@ public class MultiplayerManager : NetworkBehaviour
 
 	//FUNCTIONS FOR HOSTING LOBBY
 	//called on creating a lobby from MainMenu
-	public void StartHost()
+	public async void StartHost()
 	{
+		await CreateRelay();
+
+		CreateLobby();
+	}
+	public async Task CreateRelay()
+	{
+		Allocation allocation;
+		try
+		{
+			allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
+			lobbyJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+
+			RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
+			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+		}
+		catch (RelayServiceException e)
+		{
+			Debug.LogError("Failed to allocate relay" + e);
+		}
+
 		NetworkManager.Singleton.StartHost();
 		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
 		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
-
-		CreateLobby();
-
-		//CreateRelay();
+		Debug.LogWarning($"lobby Join Code: {lobbyJoinCode}");
 	}
 	public async void CreateLobby()
 	{
@@ -170,7 +190,16 @@ public class MultiplayerManager : NetworkBehaviour
 			CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions
 			{
 				IsPrivate = false,
-				Player = GetPlayer()
+				Player = GetPlayer(),
+			};
+			createLobbyOptions.Data = new Dictionary<string, DataObject>()
+			{
+				{
+					"joinCode", new DataObject(
+						visibility: DataObject.VisibilityOptions.Member,
+						value: lobbyJoinCode,
+						index: DataObject.IndexOptions.S1)
+				},
 			};
 
 			Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxConnections, createLobbyOptions);
@@ -179,6 +208,7 @@ public class MultiplayerManager : NetworkBehaviour
 			hostLobby = lobby;
 			StartCoroutine(LobbyHeartBeat(5f));
 
+			Debug.LogWarning($"lobby code: {lobby.Data["joinCode"].Value}");
 			Debug.LogWarning($"Created lobby with name: {lobby.Name} and Id: {lobby.Id}");
 		}
 		catch (LobbyServiceException e)
@@ -249,18 +279,27 @@ public class MultiplayerManager : NetworkBehaviour
 
 	//FUNCTIONS FOR JOINING LOBBY
 	//called when joininglobby from lobbylist
-	public void StartClient()
+	public void StartClient(Lobby lobby)
 	{
 		NetworkManager.Singleton.StartClient();
 		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
 		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
 
-		//JoinRelay();
+		ConnectToLobbyAndRelay(lobby);
 	}
-	public async void JoinLobby(Lobby lobby)
+	public async void ConnectToLobbyAndRelay(Lobby lobby)
 	{
-		StartClient();
-
+		await JoinLobby(lobby);
+		//await JoinRelay(hostLobby.Data["joinLobby"].Value);
+		StartCoroutine(DelayRelayJoin());
+	}
+	public IEnumerator DelayRelayJoin()
+	{
+		yield return new WaitForSeconds(2f);
+		JoinRelay();
+	}
+	public async Task JoinLobby(Lobby lobby)
+	{
 		try
 		{
 			JoinLobbyByIdOptions joinLobbyByIdOptions = new JoinLobbyByIdOptions
@@ -273,10 +312,27 @@ public class MultiplayerManager : NetworkBehaviour
 
 			hostLobby = lobby;
 			Debug.LogWarning($"joined lobby with Id:{lobby.Id}");
+			//Debug.LogWarning($"lobby join code: {lobby.Data["joinCode"].Value}");
 		}
 		catch (LobbyServiceException e)
 		{
 			Debug.LogError(e.Message);
+		}
+	}
+	public async void JoinRelay()
+	{
+		JoinAllocation joinAllocation;
+		try
+		{
+			Debug.LogWarning($"Joining relay with code: {TestJoinCode}");
+			joinAllocation = await RelayService.Instance.JoinAllocationAsync(TestJoinCode);
+
+			RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
+			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+		}
+		catch (RelayServiceException e)
+		{
+			Debug.LogError($"Failed to join relay with code: {e}");
 		}
 	}
 	public async void LeaveLobby()
@@ -303,6 +359,11 @@ public class MultiplayerManager : NetworkBehaviour
 			if (hostLobby != null)
 				LobbyService.Instance.SendHeartbeatPingAsync(hostLobby.Id);
 			yield return new WaitForSeconds(waitTime);
+
+			if (IsHost)
+			{
+				Debug.LogWarning($"lobby join code: {hostLobby.Data["joinCode"].Value}");
+			}
 		}
 	}
 	private async void HandleLobbyPollForUpdates()
@@ -330,39 +391,5 @@ public class MultiplayerManager : NetworkBehaviour
 					{ "NetworkedId", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerNetworkedId.ToString())}
 				}
 		};
-	}
-
-	//Unused Relay Functions
-	public async void CreateRelay()
-	{
-		Allocation allocation;
-		try
-		{
-			allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
-			joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-
-			RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
-			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-		}
-		catch (RelayServiceException e)
-		{
-			Debug.LogError("Failed to allocate relay" + e);
-		}
-	}
-	public async void JoinRelay()
-	{
-		JoinAllocation joinAllocation;
-		try
-		{
-			Debug.LogWarning($"Joining relay with code: {joinCode}");
-			joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
-
-			RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
-			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-		}
-		catch (RelayServiceException e)
-		{
-			Debug.LogError($"Failed to join relay with code: {e}");
-		}
 	}
 }
