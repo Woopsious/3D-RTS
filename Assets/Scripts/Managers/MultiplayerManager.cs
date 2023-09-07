@@ -57,6 +57,10 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		HandleLobbyPollForUpdates();
 	}
+	public void StartGameTest()
+	{
+		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+	}
 	public void StartHostTest()
 	{
 		CreateRelayTest();
@@ -71,7 +75,7 @@ public class MultiplayerManager : NetworkBehaviour
 		{
 			HostAllocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
 
-			RelayServerData relayServerData = new RelayServerData(HostAllocation, "dtls");
+			RelayServerData relayServerData = new RelayServerData(HostAllocation, "udp");
 			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 		}
 		catch (RelayServiceException e)
@@ -91,6 +95,8 @@ public class MultiplayerManager : NetworkBehaviour
 		NetworkManager.Singleton.StartHost();
 		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
 		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
+
+		StartCoroutine(CountPlayers());
 	}
 	public void GetRelayCodeAgain()
 	{
@@ -101,20 +107,31 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		try
 		{
-			Debug.LogWarning($"Joining relay with code: {lobbyJoinCode}");
 			JoinAllocation = await RelayService.Instance.JoinAllocationAsync(lobbyJoinCode);
-
-			RelayServerData relayServerData = new RelayServerData(JoinAllocation, "dtls");
-			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
 		}
 		catch (RelayServiceException e)
 		{
-			Debug.LogError($"Failed to join relay with code: {e.Message}");
+			Debug.LogError($"Failed to join relay: {e.Message}\n join code: {lobbyJoinCode}");
+		}
+		try
+		{
+			RelayServerData relayServerData = new RelayServerData(JoinAllocation, "udp");
+			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+		}
+		catch
+		{
+			Debug.LogError($"Failed to set relay server data");
 		}
 
 		NetworkManager.Singleton.StartClient();
 		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
 		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
+	}
+	public IEnumerator CountPlayers()
+	{
+		Debug.LogWarning($"Networked players count {NetworkManager.Singleton.ConnectedClientsList.Count}");
+		yield return new WaitForSeconds(1f);
+		StartCoroutine(CountPlayers());
 	}
 
 	/*
