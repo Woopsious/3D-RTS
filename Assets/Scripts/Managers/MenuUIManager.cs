@@ -21,20 +21,18 @@ public class MenuUIManager : NetworkBehaviour
 	public GameObject settingsPanelObj;
 	public GameObject settingsVolumePanelObj;
 	public GameObject settingsKeybindsPanelObj;
+	public Text joinCodeText;
 
 	[Header("Multiplayer Ui Refs")]
+	public GameObject LobbyItemPrefab;
+	public GameObject PlayerItemPrefab;
 	public GameObject MpLobbiesListPanel;
+	public Transform LobbyListParentTransform;
 	public GameObject MpLobbyPanel;
+	public Transform LobbyScreenParentTransform;
 	public GameObject leaveLobbyButtonObj;
 	public GameObject closeLobbyButtonObj;
 	public GameObject startGameButtonObj;
-
-	public GameObject LobbyItemPrefab;
-	public GameObject LobbyListPanelObj;
-	public Transform LobbyListParentTransform;
-	public GameObject PlayerItemPrefab;
-	public GameObject LobbyScreenPanelObj;
-	public Transform LobbyScreenParentTransform;
 
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
@@ -162,7 +160,7 @@ public class MenuUIManager : NetworkBehaviour
 			GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
 
 		else
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Two player are needed to start the game", 3f);
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Two players are needed to start the game", 3f);
 	}
 
 	//MP UI UPDATES
