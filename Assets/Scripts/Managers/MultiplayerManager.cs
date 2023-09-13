@@ -124,8 +124,6 @@ public class MultiplayerManager : NetworkBehaviour
 	public void StartHost()
 	{
 		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
-
-		CreateLobby();
 	}
 	IEnumerator RelayConfigureTransportAsHostingPlayer()
 	{
@@ -149,6 +147,8 @@ public class MultiplayerManager : NetworkBehaviour
 		Instance.localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
 		Debug.LogWarning($"player networked Id: {Instance.localPlayerNetworkedId}");
 		Debug.LogWarning($"lobby Join Code: {Instance.lobbyHostCode}");
+
+		CreateLobby();
 	}
 	public static async Task<RelayServerData> AllocateRelayServerAndGetJoinCode(int maxConnections, string region = null)
 	{
@@ -183,6 +183,7 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		try
 		{
+			Debug.LogWarning($"code to set as lobby data: {lobbyHostCode}");
 			CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions
 			{
 				IsPrivate = false,
@@ -272,14 +273,15 @@ public class MultiplayerManager : NetworkBehaviour
 	//called when joininglobby from lobbylist
 	public void StartClient(Lobby lobby)
 	{
-		ConnectToLobbyAndRelay(lobby);
+		JoinLobby(lobby);
+		//ConnectToLobbyAndRelay(lobby);
 	}
 	public async void ConnectToLobbyAndRelay(Lobby lobby)
 	{
-		await JoinLobby(lobby);
-		StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
+		//await JoinLobby(lobby);
+		//StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
 	}
-	public async Task JoinLobby(Lobby lobby)
+	public async void JoinLobby(Lobby lobby)
 	{
 		try
 		{
@@ -300,6 +302,8 @@ public class MultiplayerManager : NetworkBehaviour
 		{
 			Debug.LogError(e.Message);
 		}
+
+		StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
 	}
 	IEnumerator RelayConfigureTransportAsConnectingPlayer()
 	{
