@@ -77,18 +77,6 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
 	}
-	public void GetRelayCodeAgain()
-	{
-		Debug.LogWarning($"lobby Join Code: {lobbyJoinCode}");
-		MenuUIManager.Instance.joinCodeText.text = $"Join Code: {lobbyJoinCode}";
-	}
-	public IEnumerator CountPlayers()
-	{
-		Debug.LogWarning($"Networked players count {NetworkManager.Singleton.ConnectedClientsList.Count}");
-		Debug.LogWarning($"local players count {connectedPlayers}");
-		yield return new WaitForSeconds(1f);
-		StartCoroutine(CountPlayers());
-	}
 
 	//authed on start up
 	public async Task AuthenticatePlayer()
@@ -201,17 +189,8 @@ public class MultiplayerManager : NetworkBehaviour
 				Player = GetPlayer(),
 				Data = new Dictionary<string, DataObject>
 				{
-
+					{"joinCode", new DataObject(visibility: DataObject.VisibilityOptions.Public, lobbyHostCode)}
 				}
-			};
-			createLobbyOptions.Data = new Dictionary<string, DataObject>()
-			{
-				{
-					"joinCode", new DataObject(
-						visibility: DataObject.VisibilityOptions.Member,
-						value: lobbyJoinCode,
-						index: DataObject.IndexOptions.S1)
-				},
 			};
 
 			Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxConnections, createLobbyOptions);
@@ -220,8 +199,8 @@ public class MultiplayerManager : NetworkBehaviour
 			hostLobby = lobby;
 			StartCoroutine(LobbyHeartBeat(5f));
 
-			Debug.LogWarning($"lobby code: {lobby.Data["joinCode"].Value}");
 			Debug.LogWarning($"Created lobby with name: {lobby.Name} and Id: {lobby.Id}");
+			Debug.LogWarning($"lobby code: {lobby.Data["joinCode"].Value}");
 		}
 		catch (LobbyServiceException e)
 		{
@@ -313,8 +292,9 @@ public class MultiplayerManager : NetworkBehaviour
 			//SubToLobbyEvents(lobby);
 
 			hostLobby = lobby;
+			lobbyJoinCode = hostLobby.Data["joinCode"].Value;
 			Debug.LogWarning($"joined lobby with Id:{lobby.Id}");
-			//Debug.LogWarning($"lobby join code: {lobby.Data["joinCode"].Value}");
+			Debug.LogWarning($"lobby join code: {lobby.Data["joinCode"].Value}");
 		}
 		catch (LobbyServiceException e)
 		{
@@ -389,11 +369,6 @@ public class MultiplayerManager : NetworkBehaviour
 			if (hostLobby != null)
 				LobbyService.Instance.SendHeartbeatPingAsync(hostLobby.Id);
 			yield return new WaitForSeconds(waitTime);
-
-			if (IsHost)
-			{
-				Debug.LogWarning($"lobby join code: {hostLobby.Data["joinCode"].Value}");
-			}
 		}
 	}
 	private async void HandleLobbyPollForUpdates()
@@ -407,6 +382,8 @@ public class MultiplayerManager : NetworkBehaviour
 				Lobby lobby = await LobbyService.Instance.GetLobbyAsync(hostLobby.Id);
 				hostLobby = lobby;
 				MenuUIManager.Instance.SyncPlayerListforLobbyUi(hostLobby);
+
+				Debug.LogWarning($"lobby join code: {hostLobby.Data["joinCode"].Value}");
 			}
 		}
 	}
