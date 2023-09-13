@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Netcode;
@@ -26,6 +28,7 @@ public class MultiplayerManager : NetworkBehaviour
 	private int maxConnections = 2;
 
 	public Lobby hostLobby;
+	public string lobbyHostCode;
 	public string lobbyJoinCode;
 	public ILobbyEvents lobbyEvents;
 	float lobbyTimer = 0;
@@ -36,6 +39,8 @@ public class MultiplayerManager : NetworkBehaviour
 
 	private Allocation HostAllocation;
 	private JoinAllocation JoinAllocation;
+
+	public int connectedPlayers;
 
 	public void Awake()
 	{
@@ -56,6 +61,9 @@ public class MultiplayerManager : NetworkBehaviour
 	public void Update()
 	{
 		HandleLobbyPollForUpdates();
+
+		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+
 	}
 	public void StartGameTest()
 	{
@@ -63,137 +71,25 @@ public class MultiplayerManager : NetworkBehaviour
 	}
 	public void StartHostTest()
 	{
-		CreateRelayTest();
+		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
 	}
 	public void StartClientTest()
 	{
-		JoinRelayTest();
-	}
-	public async void CreateRelayTest()
-	{
-		try
-		{
-			HostAllocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
-
-			RelayServerData relayServerData = new RelayServerData(HostAllocation, "udp");
-			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-		}
-		catch (RelayServiceException e)
-		{
-			Debug.LogError("Failed to allocate relay" + e);
-		}
-		try
-		{
-			lobbyJoinCode = await RelayService.Instance.GetJoinCodeAsync(HostAllocation.AllocationId);
-		}
-		catch (RelayServiceException e)
-		{
-			Debug.LogError($"Failed to get relay join code {e.Message}");
-		}
-		GetRelayCodeAgain();
-
-		NetworkManager.Singleton.StartHost();
-		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
-		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
-
-		StartCoroutine(CountPlayers());
+		StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
 	}
 	public void GetRelayCodeAgain()
 	{
 		Debug.LogWarning($"lobby Join Code: {lobbyJoinCode}");
 		MenuUIManager.Instance.joinCodeText.text = $"Join Code: {lobbyJoinCode}";
 	}
-	public async void JoinRelayTest()
-	{
-		try
-		{
-			JoinAllocation = await RelayService.Instance.JoinAllocationAsync(lobbyJoinCode);
-		}
-		catch (RelayServiceException e)
-		{
-			Debug.LogError($"Failed to join relay: {e.Message}\n join code: {lobbyJoinCode}");
-		}
-		try
-		{
-			RelayServerData relayServerData = new RelayServerData(JoinAllocation, "udp");
-			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-		}
-		catch
-		{
-			Debug.LogError($"Failed to set relay server data");
-		}
-
-		NetworkManager.Singleton.StartClient();
-		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
-		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
-	}
 	public IEnumerator CountPlayers()
 	{
 		Debug.LogWarning($"Networked players count {NetworkManager.Singleton.ConnectedClientsList.Count}");
+		Debug.LogWarning($"local players count {connectedPlayers}");
 		yield return new WaitForSeconds(1f);
 		StartCoroutine(CountPlayers());
 	}
 
-	/*
-	public async void SubToLobbyEvents(Lobby lobbyToSubTo)
-	{
-		var callbacks = new LobbyEventCallbacks();
-		callbacks.PlayerJoined += PlayerJoinedEvent();
-		callbacks.PlayerLeft += PlayerLeftEvent();
-		callbacks.KickedFromLobby += PlayerKickedEvent();
-
-		try
-		{
-			lobbyEvents = await Lobbies.Instance.SubscribeToLobbyEventsAsync(lobbyToSubTo.Id, callbacks);
-		}
-		catch (LobbyServiceException ex)
-		{
-			switch (ex.Reason)
-			{
-				case LobbyExceptionReason.AlreadySubscribedToLobby: Debug.LogWarning($"Already subscribed to lobby[{lobbyToSubTo.Id}]. We did not need to try and subscribe again. Exception Message: {ex.Message}"); break;
-				case LobbyExceptionReason.SubscriptionToLobbyLostWhileBusy: Debug.LogError($"Subscription to lobby events was lost while it was busy trying to subscribe. Exception Message: {ex.Message}"); throw;
-				case LobbyExceptionReason.LobbyEventServiceConnectionError: Debug.LogError($"Failed to connect to lobby events. Exception Message: {ex.Message}"); throw;
-				default: throw;
-			}
-		}
-	}
-	public async void UnSubToLobbyEvents(Lobby lobbyToSubTo)
-	{
-		var callbacks = new LobbyEventCallbacks();
-		callbacks.PlayerJoined -= PlayerJoinedEvent();
-		callbacks.PlayerLeft -= PlayerLeftEvent();
-		callbacks.KickedFromLobby -= PlayerKickedEvent();
-
-		try
-		{
-			lobbyEvents = await Lobbies.Instance.SubscribeToLobbyEventsAsync(lobbyToSubTo.Id, callbacks);
-		}
-		catch (LobbyServiceException e)
-		{
-			Debug.LogError($"failed to unsub from lobby events{e}");
-		}
-	}
-	public Action<List<LobbyPlayerJoined>> PlayerJoinedEvent()
-	{
-		Debug.LogWarning("player joined");
-
-		return null;
-	}
-	public Action<List<int>> PlayerLeftEvent()
-	{
-		Debug.LogWarning("player kicked");
-		UnSubToLobbyEvents(hostLobby);
-
-		return null;
-	}
-	public void PlayerKickedEvent()
-	{
-		Debug.LogWarning("player kicked");
-		UnSubToLobbyEvents(hostLobby);
-
-		this.lobbyEvents = null;
-	}
-	*/
 	//authed on start up
 	public async Task AuthenticatePlayer()
 	{
@@ -203,7 +99,7 @@ public class MultiplayerManager : NetworkBehaviour
 		await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
 		localPlayerId = AuthenticationService.Instance.PlayerId;
-		Debug.LogWarning($"player Name: {localPlayerName}");
+		Debug.LogWarning($"player Name: {Instance.localPlayerName}");
 	}
 	public async void GetLobbiesList()
 	{
@@ -237,32 +133,63 @@ public class MultiplayerManager : NetworkBehaviour
 
 	//FUNCTIONS FOR HOSTING LOBBY
 	//called on creating a lobby from MainMenu
-	public async void StartHost()
+	public void StartHost()
 	{
-		NetworkManager.Singleton.StartHost();
-		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
-		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
-		Debug.LogWarning($"lobby Join Code: {lobbyJoinCode}");
-
-		await CreateRelay();
+		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
 
 		CreateLobby();
 	}
-	public async Task CreateRelay()
+	IEnumerator RelayConfigureTransportAsHostingPlayer()
+	{
+		var serverRelayUtilityTask = AllocateRelayServerAndGetJoinCode(2);
+		while (!serverRelayUtilityTask.IsCompleted)
+		{
+			yield return null;
+		}
+		if (serverRelayUtilityTask.IsFaulted)
+		{
+			Debug.LogError("Exception thrown when attempting to start Relay Server. Server not started. Exception: " + serverRelayUtilityTask.Exception.Message);
+			yield break;
+		}
+
+		var relayServerData = serverRelayUtilityTask.Result;
+
+		NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+		yield return null;
+
+		NetworkManager.Singleton.StartHost();
+		Instance.localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+		Debug.LogWarning($"player networked Id: {Instance.localPlayerNetworkedId}");
+		Debug.LogWarning($"lobby Join Code: {Instance.lobbyHostCode}");
+	}
+	public static async Task<RelayServerData> AllocateRelayServerAndGetJoinCode(int maxConnections, string region = null)
 	{
 		Allocation allocation;
 		try
 		{
-			allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections);
-			lobbyJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-
-			RelayServerData relayServerData = new RelayServerData(allocation, "dtls");
-			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+			allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections, region);
 		}
-		catch (RelayServiceException e)
+		catch (Exception e)
 		{
-			Debug.LogError("Failed to allocate relay" + e);
+			Debug.LogError($"Relay create allocation request failed {e.Message}");
+			throw;
 		}
+
+		Debug.Log($"server: {allocation.ConnectionData[0]} {allocation.ConnectionData[1]}");
+		Debug.Log($"server: {allocation.AllocationId}");
+
+		try
+		{
+			Instance.lobbyHostCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+			MenuUIManager.Instance.joinCodeText.text = $"JoinCode: {Instance.lobbyHostCode}";
+		}
+		catch
+		{
+			Debug.LogError("Relay create join code request failed");
+			throw;
+		}
+
+		return new RelayServerData(allocation, "dtls");
 	}
 	public async void CreateLobby()
 	{
@@ -366,22 +293,12 @@ public class MultiplayerManager : NetworkBehaviour
 	//called when joininglobby from lobbylist
 	public void StartClient(Lobby lobby)
 	{
-		NetworkManager.Singleton.StartClient();
-		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
-		Debug.LogWarning($"player networked Id: {localPlayerNetworkedId}");
-
 		ConnectToLobbyAndRelay(lobby);
 	}
 	public async void ConnectToLobbyAndRelay(Lobby lobby)
 	{
 		await JoinLobby(lobby);
-		//await JoinRelay(hostLobby.Data["joinLobby"].Value);
-		StartCoroutine(DelayRelayJoin());
-	}
-	public IEnumerator DelayRelayJoin()
-	{
-		yield return new WaitForSeconds(2f);
-		JoinRelay();
+		StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
 	}
 	public async Task JoinLobby(Lobby lobby)
 	{
@@ -404,21 +321,49 @@ public class MultiplayerManager : NetworkBehaviour
 			Debug.LogError(e.Message);
 		}
 	}
-	public async void JoinRelay()
+	IEnumerator RelayConfigureTransportAsConnectingPlayer()
 	{
-		JoinAllocation joinAllocation;
+		// Populate RelayJoinCode beforehand through the UI
+		var clientRelayUtilityTask = JoinRelayServerFromJoinCode(lobbyJoinCode);
+
+		while (!clientRelayUtilityTask.IsCompleted)
+		{
+			yield return null;
+		}
+
+		if (clientRelayUtilityTask.IsFaulted)
+		{
+			Debug.LogError("Exception thrown when attempting to connect to Relay Server. Exception: " + clientRelayUtilityTask.Exception.Message);
+			yield break;
+		}
+
+		var relayServerData = clientRelayUtilityTask.Result;
+
+		NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+		yield return null;
+
+		NetworkManager.Singleton.StartClient();
+		Instance.localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+		Debug.LogWarning($"player networked Id: {Instance.localPlayerNetworkedId}");
+	}
+	public static async Task<RelayServerData> JoinRelayServerFromJoinCode(string joinCode)
+	{
+		JoinAllocation allocation;
 		try
 		{
-			Debug.LogWarning($"Joining relay with code: {lobbyJoinCode}");
-			joinAllocation = await RelayService.Instance.JoinAllocationAsync(lobbyJoinCode);
-
-			RelayServerData relayServerData = new RelayServerData(joinAllocation, "dtls");
-			NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+			allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 		}
-		catch (RelayServiceException e)
+		catch
 		{
-			Debug.LogError($"Failed to join relay with code: {e}");
+			Debug.LogError("Relay create join code request failed");
+			throw;
 		}
+
+		Debug.Log($"client: {allocation.ConnectionData[0]} {allocation.ConnectionData[1]}");
+		Debug.Log($"host: {allocation.HostConnectionData[0]} {allocation.HostConnectionData[1]}");
+		Debug.Log($"client: {allocation.AllocationId}");
+
+		return new RelayServerData(allocation, "dtls");
 	}
 	public async void LeaveLobby()
 	{

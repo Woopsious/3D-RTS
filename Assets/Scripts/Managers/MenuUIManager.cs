@@ -21,7 +21,6 @@ public class MenuUIManager : NetworkBehaviour
 	public GameObject settingsPanelObj;
 	public GameObject settingsVolumePanelObj;
 	public GameObject settingsKeybindsPanelObj;
-	public Text joinCodeText;
 
 	[Header("Multiplayer Ui Refs")]
 	public GameObject LobbyItemPrefab;
@@ -33,6 +32,13 @@ public class MenuUIManager : NetworkBehaviour
 	public GameObject leaveLobbyButtonObj;
 	public GameObject closeLobbyButtonObj;
 	public GameObject startGameButtonObj;
+
+	public Text joinCodeText;
+	public Text joinCodeInputField;
+	public Text localPlayerNameText;
+	public Text localPlayerIdText;
+	public Text localPlayerHostText;
+	public Text localNetworkedIdText;
 
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
@@ -61,6 +67,16 @@ public class MenuUIManager : NetworkBehaviour
 	public void Start()
 	{
 		GameManager.Instance.OnSceneLoad(0);
+	}
+	public void Update()
+	{
+		if (!IsHost && joinCodeInputField.text != MultiplayerManager.Instance.lobbyJoinCode)
+			MultiplayerManager.Instance.lobbyJoinCode = joinCodeInputField.text;
+
+		localPlayerNameText.text = $"Player Name: {MultiplayerManager.Instance.localPlayerName}";
+		localPlayerIdText.text = $"Player ID: {MultiplayerManager.Instance.localPlayerId}";
+		localPlayerHostText.text = "UNSET";
+		localNetworkedIdText.text = $"Player Networked ID: {MultiplayerManager.Instance.localPlayerNetworkedId}";
 	}
 	public void PlayButtonSound()
 	{
@@ -311,15 +327,5 @@ public class MenuUIManager : NetworkBehaviour
 	{
 		InputManager.Instance.ResetKeybindsToDefault();
 		UpdateKeybindButtonDisplay();
-	}
-
-	//UNUSED
-	public void PlayNewMultiPlayerGame()
-	{
-		StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
-	}
-	public void LoadMultiPlayerGame()
-	{
-		StartCoroutine(GameManager.Instance.WaitForSceneLoad(1));
 	}
 }

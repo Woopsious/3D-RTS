@@ -389,22 +389,6 @@ public class GameManager : NetworkBehaviour
 	{
 		NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
 	}
-	[ServerRpc(RequireOwnership = false)]
-	public void LoadSceneServerRPC(string sceneName)
-	{
-		LoadSceneClientRPC(sceneName);
-	}
-	[ClientRpc]
-	public void LoadSceneClientRPC(string sceneName)
-	{
-		NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
-	}
-	public IEnumerator WaitForSceneLoad(int sceneIndex)
-	{
-		var asyncLoadLevel = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Single);
-		while (!asyncLoadLevel.isDone)
-			yield return null;
-	}
 	public void OnSceneLoad(int sceneIndex)
 	{
 		if (sceneIndex == 0)
