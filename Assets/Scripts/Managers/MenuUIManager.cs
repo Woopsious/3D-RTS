@@ -215,12 +215,12 @@ public class MenuUIManager : NetworkBehaviour
 	}
 	public void SyncPlayerListforLobbyUi(Lobby lobby)
 	{
-		if (lobby.Players.Count < LobbyScreenParentTransform.childCount)
+		if (NetworkManager.Singleton.ConnectedClientsList.Count < LobbyScreenParentTransform.childCount)
 		{
 			Transform childTransform = LobbyScreenParentTransform.GetChild(LobbyScreenParentTransform.childCount - 1);
 			Destroy(childTransform.gameObject);
 		}
-		else if (lobby.Players.Count > LobbyScreenParentTransform.childCount)
+		else if (NetworkManager.Singleton.ConnectedClientsList.Count > LobbyScreenParentTransform.childCount)
 		{
 			Instantiate(PlayerItemPrefab, LobbyScreenParentTransform);
 			UpdatePlayerList(lobby);
@@ -234,8 +234,11 @@ public class MenuUIManager : NetworkBehaviour
 		foreach (Transform child in LobbyScreenParentTransform.transform)
 		{
 			PlayerItemManager playerItem = child.GetComponent<PlayerItemManager>();
-			playerItem.Initialize(lobby.Players[index].Id, 
-				lobby.Players[index].Data["PlayerName"].Value, lobby.Players[index].Data["NetworkedId"].Value);
+			playerItem.Initialize(
+				MultiplayerManager.Instance.connectedClientsList[index].clientName.ToString(),
+				MultiplayerManager.Instance.connectedClientsList[index].clientId.ToString(),
+				MultiplayerManager.Instance.connectedClientsList[index].clientNetworkedId.ToString()
+				);
 
 			if (!GameManager.Instance.isPlayerOne && playerItem.kickPlayerButton.activeInHierarchy)
 				playerItem.kickPlayerButton.SetActive(false);

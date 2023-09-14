@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class PlayerItemManager : MonoBehaviour
 {
-	public string playerId;
 	public string playerName;
+	public string playerId;
 	public string localPlayerNetworkedId;
 
 	public bool isThisPlayerHost;
@@ -16,12 +16,23 @@ public class PlayerItemManager : MonoBehaviour
 
 	public GameObject kickPlayerButton;
 
-	public void Initialize(string playerId, string playerName, string localPlayerNetworkedId)
+	public void Initialize(string playerName, string playerId, string localPlayerNetworkedId)
 	{
-		this.playerId = playerId;
 		this.playerName = playerName;
+		this.playerId = playerId;
 		this.localPlayerNetworkedId = localPlayerNetworkedId;
 		playerNameUi.text = playerName;
+	}
+	public void UpdateInfo(string playerId, string playerName, string localPlayerNetworkedId)
+	{
+		if (this.playerName != playerName)
+			this.playerName = playerName;
+
+		if (this.playerId != playerId)
+			this.playerId = playerId;
+
+		if (this.localPlayerNetworkedId != localPlayerNetworkedId)
+			this.localPlayerNetworkedId = localPlayerNetworkedId;
 	}
 
 	public void KickPlayerFromLobby()

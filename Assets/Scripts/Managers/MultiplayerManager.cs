@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Netcode;
@@ -33,8 +34,10 @@ public class MultiplayerManager : NetworkBehaviour
 	public ILobbyEvents lobbyEvents;
 	float lobbyTimer = 0;
 
-	public string localPlayerId;
+	public NetworkList<ClientData> connectedClientsList;
+
 	public string localPlayerName;
+	public string localPlayerId;
 	public string localPlayerNetworkedId;
 
 	private Allocation HostAllocation;
@@ -57,25 +60,59 @@ public class MultiplayerManager : NetworkBehaviour
 	public async void Start()
 	{
 		await AuthenticatePlayer();
+		connectedClientsList = new NetworkList<ClientData>();
 	}
 	public void Update()
 	{
 		HandleLobbyPollForUpdates();
 
 		localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+	}
+	public void SubToEvents()
+	{
+		NetworkManager.Singleton.OnClientConnectedCallback += PlayerConnectedCallback;
+		NetworkManager.Singleton.OnClientDisconnectCallback += PlayerDisconnectedCallback;
+	}
+	public void UnsubToEvents()
+	{
+		NetworkManager.Singleton.OnClientConnectedCallback -= PlayerConnectedCallback;
+		NetworkManager.Singleton.OnClientDisconnectCallback -= PlayerDisconnectedCallback;
+	}
+	public void PlayerConnectedCallback(ulong id)
+	{
+		Debug.LogWarning("Player Connected");
+		Debug.LogWarning($"Player network ID: {id}");
 
+		if (IsHost)
+		{
+			connectedClientsList.Add(new ClientData(localPlayerName, localPlayerId, id.ToString()));
+		}
+		if (!IsHost)
+		{
+			connectedClientsList.Add(new ClientData(hostLobby.Players[(int)id].Data["PlayerName"].Value,
+				hostLobby.Players[(int)id].Data["PlayerID"].Value, id.ToString()));
+		}
+
+		MenuUIManager.Instance.SyncPlayerListforLobbyUi(hostLobby);
 	}
-	public void StartGameTest()
+
+	public void PlayerDisconnectedCallback(ulong id)
 	{
-		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
-	}
-	public void StartHostTest()
-	{
-		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
-	}
-	public void StartClientTest()
-	{
-		StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
+		Debug.LogWarning("Player Disconnected");
+
+		if (IsHost)
+		{
+			foreach (ClientData clientData in connectedClientsList)
+			{
+				if (clientData.clientNetworkedId == id.ToString())
+				{
+					connectedClientsList.Remove(clientData);
+					break;
+				}
+			}
+		}
+
+		MenuUIManager.Instance.SyncPlayerListforLobbyUi(hostLobby);
 	}
 
 	//authed on start up
@@ -124,6 +161,7 @@ public class MultiplayerManager : NetworkBehaviour
 	public void StartHost()
 	{
 		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
+		SubToEvents();
 	}
 	IEnumerator RelayConfigureTransportAsHostingPlayer()
 	{
@@ -242,7 +280,12 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		try
 		{
+			ulong networkedIdulong = Convert.ToUInt64(networkedId);
+			Debug.LogWarning($"Networked string ID: {networkedId}");
+			Debug.LogWarning($"Networked ulong ID: {networkedIdulong}");
+
 			PlayerKickedFromLobbyServerRPC(networkedId);
+			NetworkManager.Singleton.DisconnectClient(networkedIdulong);
 
 			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
 			Debug.LogWarning($"player with Id: {playerId} kicked from lobby");
@@ -274,12 +317,7 @@ public class MultiplayerManager : NetworkBehaviour
 	public void StartClient(Lobby lobby)
 	{
 		JoinLobby(lobby);
-		//ConnectToLobbyAndRelay(lobby);
-	}
-	public async void ConnectToLobbyAndRelay(Lobby lobby)
-	{
-		//await JoinLobby(lobby);
-		//StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
+		SubToEvents();
 	}
 	public async void JoinLobby(Lobby lobby)
 	{
@@ -289,14 +327,10 @@ public class MultiplayerManager : NetworkBehaviour
 			{
 				Player = GetPlayer()
 			};
-
 			await Lobbies.Instance.JoinLobbyByIdAsync(lobby.Id, joinLobbyByIdOptions);
-			//SubToLobbyEvents(lobby);
 
 			hostLobby = lobby;
 			lobbyJoinCode = hostLobby.Data["joinCode"].Value;
-			Debug.LogWarning($"joined lobby with Id:{lobby.Id}");
-			Debug.LogWarning($"lobby join code: {lobby.Data["joinCode"].Value}");
 		}
 		catch (LobbyServiceException e)
 		{
@@ -379,15 +413,15 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		if (hostLobby != null)
 		{
+			Debug.LogWarning($"connected clients count: {connectedClientsList.Count}");
+			Debug.LogWarning($"Networked ID: {localPlayerNetworkedId}");
+
 			lobbyTimer -= Time.deltaTime;
 			if (lobbyTimer < 0)
 			{
 				lobbyTimer = 1.5f;
 				Lobby lobby = await LobbyService.Instance.GetLobbyAsync(hostLobby.Id);
 				hostLobby = lobby;
-				MenuUIManager.Instance.SyncPlayerListforLobbyUi(hostLobby);
-
-				Debug.LogWarning($"lobby join code: {hostLobby.Data["joinCode"].Value}");
 			}
 		}
 	}
@@ -399,8 +433,34 @@ public class MultiplayerManager : NetworkBehaviour
 			Data = new Dictionary<string, PlayerDataObject>
 				{
 					{ "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerName) },
-					{ "NetworkedId", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerNetworkedId.ToString())}
+					{ "PlayerID", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerId.ToString())}
 				}
 		};
+	}
+}
+
+//Custom datatype so it can be used as networked variable
+public struct ClientData : INetworkSerializable, IEquatable<ClientData>
+{
+	public FixedString64Bytes clientName;
+	public FixedString64Bytes clientId;
+	public FixedString64Bytes clientNetworkedId;
+
+	public ClientData(string playerName = "not set", string clientId = "0", string clientNetworkedId = "not set")
+	{
+		this.clientName = playerName;
+		this.clientId = clientId;
+		this.clientNetworkedId = clientNetworkedId;
+	}
+
+	public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+	{
+		serializer.SerializeValue(ref clientName);
+		serializer.SerializeValue(ref clientId);
+		serializer.SerializeValue(ref clientNetworkedId);
+	}
+	public bool Equals(ClientData other)
+	{
+		return clientName == other.clientName && clientId == other.clientId && clientNetworkedId == other.clientNetworkedId;
 	}
 }
