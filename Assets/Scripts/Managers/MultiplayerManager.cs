@@ -81,6 +81,7 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		Debug.LogError($"Player Connected, ID: {id}");
 		Instance.localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
+		int i = connectedClientsList.Count;
 
 		if (IsHost)
 		{
@@ -92,8 +93,8 @@ public class MultiplayerManager : NetworkBehaviour
 			//for connecting clients grab data through lobby before it joins host relay
 			else
 			{
-				connectedClientsList.Add(new ClientData(hostLobby.Players[(int)id].Data["PlayerName"].Value,
-					hostLobby.Players[(int)id].Data["PlayerID"].Value, id.ToString()));
+				connectedClientsList.Add(new ClientData(hostLobby.Players[i].Data["PlayerName"].Value,
+					hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
 			}
 		}
 	}
