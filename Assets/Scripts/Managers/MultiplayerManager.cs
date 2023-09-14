@@ -118,7 +118,7 @@ public class MultiplayerManager : NetworkBehaviour
 	}
 	public void HandlePlayerDisconnectTypes(ulong id)
 	{
-		if (localPlayerNetworkedId != id.ToString())
+		if (localPlayerNetworkedId != "0")
 		{
 			Debug.LogError($"active scene build index: {SceneManager.GetActiveScene().buildIndex}");
 
@@ -425,7 +425,11 @@ public class MultiplayerManager : NetworkBehaviour
 				hostLobby = lobby;
 				MenuUIManager.Instance.SyncPlayerListforLobbyUi(hostLobby);
 
+				if (IsHost)
+					Debug.LogWarning($"connected Networked clients: {NetworkManager.Singleton.ConnectedClientsList.Count}");
+
 				Debug.LogWarning($"connected clients count: {connectedClientsList.Count}");
+				Debug.LogWarning($"client in lobby: {hostLobby.Players.Count}");
 				Debug.LogWarning($"Networked ID: {localPlayerNetworkedId}");
 			}
 		}
