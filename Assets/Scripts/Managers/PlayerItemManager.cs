@@ -37,6 +37,6 @@ public class PlayerItemManager : MonoBehaviour
 
 	public void KickPlayerFromLobby()
 	{
-		MultiplayerManager.Instance.kickPlayerFromLobby(playerId, localPlayerNetworkedId);
+		MultiplayerManager.Instance.kickPlayerFromGame(playerId, localPlayerNetworkedId);
 	}
 }

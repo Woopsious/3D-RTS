@@ -215,12 +215,12 @@ public class MenuUIManager : NetworkBehaviour
 	}
 	public void SyncPlayerListforLobbyUi(Lobby lobby)
 	{
-		if (NetworkManager.Singleton.ConnectedClientsList.Count < LobbyScreenParentTransform.childCount)
+		if (MultiplayerManager.Instance.connectedClientsList.Count < LobbyScreenParentTransform.childCount)
 		{
 			Transform childTransform = LobbyScreenParentTransform.GetChild(LobbyScreenParentTransform.childCount - 1);
 			Destroy(childTransform.gameObject);
 		}
-		else if (NetworkManager.Singleton.ConnectedClientsList.Count > LobbyScreenParentTransform.childCount)
+		else if (MultiplayerManager.Instance.connectedClientsList.Count > LobbyScreenParentTransform.childCount)
 		{
 			Instantiate(PlayerItemPrefab, LobbyScreenParentTransform);
 			UpdatePlayerList(lobby);
