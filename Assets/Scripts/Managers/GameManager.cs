@@ -413,6 +413,7 @@ public class GameManager : NetworkBehaviour
 		if(isMultiplayerGame)
 		{
 			Time.timeScale = 0;
+			gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
 			gameUIManager.isPlayerReadyObj.SetActive(true);
 			gameUIManager.HideGameSpeedButtonsForMP();
 		}

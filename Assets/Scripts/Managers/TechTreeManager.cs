@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static UnityEngine.UI.CanvasScaler;
 
-public class TechTreeManager : NetworkBehaviour
+public class TechTreeManager : MonoBehaviour
 {
 	public GameUIManager gameUIManager;
 

@@ -10,7 +10,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MenuUIManager : NetworkBehaviour
+public class MenuUIManager : MonoBehaviour
 {
 	public static MenuUIManager Instance;
 	//references
@@ -70,7 +70,7 @@ public class MenuUIManager : NetworkBehaviour
 	}
 	public void Update()
 	{
-		if (!IsHost && joinCodeInputField.text != MultiplayerManager.Instance.lobbyJoinCode)
+		if (!MultiplayerManager.Instance.CheckIfHost() && joinCodeInputField.text != MultiplayerManager.Instance.lobbyJoinCode)
 			MultiplayerManager.Instance.lobbyJoinCode = joinCodeInputField.text;
 
 		localPlayerNameText.text = $"Player Name: {MultiplayerManager.Instance.localPlayerName}";
@@ -160,7 +160,7 @@ public class MenuUIManager : NetworkBehaviour
 	}
 	public void LeaveLobbyButton()
 	{
-		MultiplayerManager.Instance.LeaveLobby();
+		MultiplayerManager.Instance.LeaveGame();
 		ShowLobbiesListUi();
 		ClearPlayersList();
 	}

@@ -83,7 +83,7 @@ public class MultiplayerManager : NetworkBehaviour
 		Instance.localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
 		int i = connectedClientsList.Count;
 
-		if (IsHost)
+		if (CheckIfHost())
 		{
 			//lobby created after host creates relay, for host grab data locally
 			if (id == 0)
@@ -102,7 +102,7 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		Debug.LogError($"Player Disconnected, ID: {id}");
 
-		if (IsHost)
+		if (CheckIfHost())
 		{
 			for (int i = 0; i < connectedClientsList.Count; i++)
 			{
@@ -130,6 +130,11 @@ public class MultiplayerManager : NetworkBehaviour
 					MenuUIManager.Instance.ShowLobbiesListUi();
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Removed From Lobby", 3f);
 				}
+			}
+			else if (SceneManager.GetActiveScene().buildIndex == 1) //check if in game scene
+			{
+				GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+				GameManager.Instance.gameUIManager.PauseGame();
 			}
 
 			hostLobby = null;
@@ -263,6 +268,17 @@ public class MultiplayerManager : NetworkBehaviour
 			Debug.LogError(e.Message);
 		}
 	}
+	public void CloseGame()
+	{
+		if (CheckIfHost())
+		{
+			CloseLobby();
+		}
+		else
+		{
+			LeaveGame();
+		}
+	}
 	public async void CloseLobby()
 	{
 		//delete lobby and kick playes from lobby
@@ -277,29 +293,12 @@ public class MultiplayerManager : NetworkBehaviour
 
 		for (int i = connectedClientsList.Count - 1; i > 0; i++)
 		{
-			kickPlayerFromGame(connectedClientsList[i].clientId.ToString(), connectedClientsList[i].clientNetworkedId.ToString());
+			RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
+			RemoveClientFromRelay(connectedClientsList[i].clientNetworkedId.ToString());
 		}
 		hostLobby = null;
 	}
-	[ServerRpc(RequireOwnership = false)]
-	public void HostClosedLobbyServerRPC()
-	{
-		HostClosedLobbyClientRPC();
-	}
-	[ClientRpc]
-	public void HostClosedLobbyClientRPC()
-	{
-		MenuUIManager.Instance.ShowLobbiesListUi();
-		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Lobby Closed By Host", 2f);
-
-		hostLobby = null;
-	}
-	public async void kickPlayerFromGame(string playerId, string networkedId)
-	{
-		await RemoveClientFromLobby(playerId);
-		RemoveClientFromRelay(networkedId);
-	}
-	public async Task RemoveClientFromLobby(string playerId)
+	public async void RemoveClientFromLobby(string playerId)
 	{
 		try
 		{
@@ -389,7 +388,7 @@ public class MultiplayerManager : NetworkBehaviour
 
 		return new RelayServerData(allocation, "dtls");
 	}
-	public async void LeaveLobby()
+	public async void LeaveGame()
 	{
 		try
 		{
@@ -401,6 +400,8 @@ public class MultiplayerManager : NetworkBehaviour
 			Debug.LogError(e.Message);
 		}
 
+		RemoveClientFromRelay(localPlayerNetworkedId);
+		NetworkManager.Singleton.Shutdown();
 		hostLobby = null;
 	}
 
@@ -426,7 +427,7 @@ public class MultiplayerManager : NetworkBehaviour
 				hostLobby = lobby;
 				MenuUIManager.Instance.SyncPlayerListforLobbyUi(hostLobby);
 
-				if (IsHost)
+				if (CheckIfHost())
 					Debug.LogWarning($"connected Networked clients: {NetworkManager.Singleton.ConnectedClientsList.Count}");
 
 				Debug.LogWarning($"connected clients count: {connectedClientsList.Count}");
@@ -446,6 +447,13 @@ public class MultiplayerManager : NetworkBehaviour
 					{ "PlayerID", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerId.ToString())}
 				}
 		};
+	}
+	//check if host from anywhere
+	public bool CheckIfHost()
+	{
+		if (NetworkManager.Singleton.IsHost)
+			return true;
+		else return false;
 	}
 }
 

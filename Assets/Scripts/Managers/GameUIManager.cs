@@ -35,6 +35,10 @@ public class GameUIManager : MonoBehaviour
 	public GameObject isPlayerReadyObj;
 	public Text isOtherPlayerReadyText;
 
+	public GameObject exitAndSaveGameButtonObj;
+	public GameObject exitGameButtonObj;
+	public GameObject playerDisconnectedUiPanel;
+
 	[Header("User Resource Refs")]
 	public Text CurrentMoneyText;
 	public Text IncomeMoneyText;
@@ -97,19 +101,6 @@ public class GameUIManager : MonoBehaviour
 	{
 		gameManager.SetPlayerToReadyServerRPC(playerController.isPlayerOne);
 	}
-	public void HideGameSpeedButtonsForMP()
-	{
-		gameSpeedIncreaseObj.SetActive(false);
-		gameSpeedDecreaseObj.SetActive(false);
-		gameSpeedPauseObj.SetActive(false);
-	}
-	public void ResetUi()
-	{
-		gameSpeed = 1;
-		UpdateGameSpeedUi();
-		StartCoroutine(UpdateCurrentResourcesUI(0f));
-		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
-	}
 	public void PlayButtonSound()
 	{
 		AudioManager.Instance.menuSFX.Play();
@@ -118,18 +109,29 @@ public class GameUIManager : MonoBehaviour
 	//MAIN GAME MENU FUNCTIONS
 	public void ExitGame()
 	{
-		AudioManager.Instance.menuSFX.Play();
+		if (gameManager.isMultiplayerGame)
+		{
+			if (MultiplayerManager.Instance.CheckIfHost())
+			{
+				MultiplayerManager.Instance.CloseGame();
+			}
+			else
+			{
+				MultiplayerManager.Instance.LeaveGame();
+			}
+		}
+		else
+		{
+			GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
+		}
+
 		GameManager.Instance.SavePlayerData();
-		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
-		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(0));
 	}
 	public void SaveAndExitGame()
 	{
-		AudioManager.Instance.menuSFX.Play();
 		GameManager.Instance.SavePlayerData();
 		//save game data function
 		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
-		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(0));
 	}
 	public void OpenSettings()
 	{
@@ -144,6 +146,7 @@ public class GameUIManager : MonoBehaviour
 		Time.timeScale = 1;
 		settingsObj.SetActive(false);
 	}
+	//function below needs to be removed at somepoint
 	public void ShowPlayersInLobby()
 	{
 		if (MultiplayerManager.Instance.hostLobby != null)
@@ -155,6 +158,23 @@ public class GameUIManager : MonoBehaviour
 					$"player name: {player.Data["PlayerName"].Value}, networked Id {player.Data["NetworkedId"].Value}");
 			}
 		}
+	}
+	public void ShowPlayerDisconnectedPanel()
+	{
+		playerDisconnectedUiPanel.SetActive(true);
+	}
+	public void HideGameSpeedButtonsForMP()
+	{
+		gameSpeedIncreaseObj.SetActive(false);
+		gameSpeedDecreaseObj.SetActive(false);
+		gameSpeedPauseObj.SetActive(false);
+	}
+	public void ResetUi()
+	{
+		gameSpeed = 1;
+		UpdateGameSpeedUi();
+		StartCoroutine(UpdateCurrentResourcesUI(0f));
+		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
 	}
 
 	//SHOW UI ELEMENTS
