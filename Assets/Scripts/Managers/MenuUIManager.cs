@@ -160,19 +160,19 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void LeaveLobbyButton()
 	{
-		MultiplayerManager.Instance.LeaveGame();
+		MultiplayerManager.Instance.CloseOrLeaveGameSession();
 		ShowLobbiesListUi();
 		ClearPlayersList();
 	}
 	public void CloseLobbyButton()
 	{
-		MultiplayerManager.Instance.CloseLobby();
+		MultiplayerManager.Instance.CloseOrLeaveGameSession();
 		ShowLobbiesListUi();
 		ClearPlayersList();
 	}
 	public void StartMultiplayerGameButton()
 	{
-		if (MultiplayerManager.Instance.hostLobby.Players.Count == MultiplayerManager.Instance.hostLobby.MaxPlayers)
+		if (MultiplayerManager.Instance.connectedClientsList.Count == MultiplayerManager.Instance.hostLobby.MaxPlayers)
 			GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
 
 		else

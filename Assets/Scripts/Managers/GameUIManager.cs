@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -111,20 +112,12 @@ public class GameUIManager : MonoBehaviour
 	{
 		if (gameManager.isMultiplayerGame)
 		{
-			if (MultiplayerManager.Instance.CheckIfHost())
-			{
-				MultiplayerManager.Instance.CloseGame();
-			}
-			else
-			{
-				MultiplayerManager.Instance.LeaveGame();
-			}
+			MultiplayerManager.Instance.CloseOrLeaveGameSession();
 		}
 		else
-		{
-			GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
-		}
+			//exit via SceneManager for Singleplayer
 
+		NetworkManager.Singleton.Shutdown();
 		GameManager.Instance.SavePlayerData();
 	}
 	public void SaveAndExitGame()

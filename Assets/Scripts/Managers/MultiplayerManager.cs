@@ -45,6 +45,7 @@ public class MultiplayerManager : NetworkBehaviour
 	private JoinAllocation JoinAllocation;
 
 	public int connectedPlayers;
+	public string idOfKickedPlayer;
 
 	public void Awake()
 	{
@@ -102,44 +103,68 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		Debug.LogError($"Player Disconnected, ID: {id}");
 
-		if (CheckIfHost())
+		if (CheckIfHost()) // if host remove client from lobby and relay
 		{
 			for (int i = 0; i < connectedClientsList.Count; i++)
 			{
 				if (connectedClientsList[i].clientNetworkedId == id.ToString())
 				{
+					if (idOfKickedPlayer != id.ToString()) //dont run if player was kicked already
+					{
+						RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
+						RemoveClientFromRelay(connectedClientsList[i].clientNetworkedId.ToString());
+					}
 					connectedClientsList.RemoveAt(i);
 					break;
 				}
 			}
 		}
 
-		//by checking if in a lobby and what player left work out if "instanced" client was disconnected or not
 		HandlePlayerDisconnectTypes(id);
 	}
 	public void HandlePlayerDisconnectTypes(ulong id)
 	{
-		if (localPlayerNetworkedId != "0")
+		if (SceneManager.GetActiveScene().buildIndex == 0) //check if in main menu scene
 		{
-			Debug.LogError($"active scene build index: {SceneManager.GetActiveScene().buildIndex}");
-
-			if (SceneManager.GetActiveScene().buildIndex == 0) //check if in main menu scene
+			if (localPlayerNetworkedId != "0" && localPlayerNetworkedId != id.ToString())
 			{
-				if (MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy)
-				{
-					MenuUIManager.Instance.ShowLobbiesListUi();
-					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Removed From Lobby", 3f);
-				}
+				HandleMainMenuScenePlayerDisconnects();
 			}
-			else if (SceneManager.GetActiveScene().buildIndex == 1) //check if in game scene
-			{
-				GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
-				GameManager.Instance.gameUIManager.PauseGame();
-			}
-
-			hostLobby = null;
-			NetworkManager.Singleton.Shutdown();
 		}
+		else //else for game scene
+		{
+			if (localPlayerNetworkedId != id.ToString())
+			{
+				HandleGameScenePlayerDisconnects();
+			}
+		}
+
+		/*
+		if (localPlayerNetworkedId != "0" && SceneManager.GetActiveScene().buildIndex == 0) //check if in main menu scene
+		{
+			HandleMainMenuScenePlayerDisconnects();
+		}
+		else //else for game scene
+		{
+			HandleGameScenePlayerDisconnects();
+		}
+		*/
+	}
+	public void HandleMainMenuScenePlayerDisconnects()
+	{
+		if (MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy)
+		{
+			MenuUIManager.Instance.ShowLobbiesListUi();
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Removed From Lobby", 3f);
+
+			ShutDownNetworkManagerIfActive();
+		}
+	}
+	public void HandleGameScenePlayerDisconnects()
+	{
+		GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+		GameManager.Instance.gameUIManager.PauseGame();
+		hostLobby = null;
 	}
 
 	//authed on start up
@@ -268,36 +293,6 @@ public class MultiplayerManager : NetworkBehaviour
 			Debug.LogError(e.Message);
 		}
 	}
-	public void CloseGame()
-	{
-		if (CheckIfHost())
-		{
-			CloseLobby();
-		}
-		else
-		{
-			LeaveGame();
-		}
-	}
-	public async void CloseLobby()
-	{
-		//delete lobby and kick playes from lobby
-		try
-		{
-			await LobbyService.Instance.DeleteLobbyAsync(hostLobby.Id);
-		}
-		catch (LobbyServiceException e)
-		{
-			Debug.LogError(e.Message);
-		}
-
-		for (int i = connectedClientsList.Count - 1; i > 0; i++)
-		{
-			RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
-			RemoveClientFromRelay(connectedClientsList[i].clientNetworkedId.ToString());
-		}
-		hostLobby = null;
-	}
 	public async void RemoveClientFromLobby(string playerId)
 	{
 		try
@@ -316,7 +311,13 @@ public class MultiplayerManager : NetworkBehaviour
 		Debug.LogWarning($"Networked string ID: {networkedId}");
 		Debug.LogWarning($"Networked ulong ID: {networkedIdulong}");
 
-		NetworkManager.Singleton.DisconnectClient(networkedIdulong);
+		if (CheckIfHost())
+			NetworkManager.Singleton.DisconnectClient(networkedIdulong);
+	}
+	public void ShutDownNetworkManagerIfActive()
+	{
+		if (NetworkManager.Singleton.isActiveAndEnabled)
+			NetworkManager.Singleton.Shutdown();
 	}
 
 	//FUNCTIONS FOR JOINING LOBBY
@@ -388,24 +389,54 @@ public class MultiplayerManager : NetworkBehaviour
 
 		return new RelayServerData(allocation, "dtls");
 	}
-	public async void LeaveGame()
+
+	//SHARED FUNCTIONS
+	public void CloseOrLeaveGameSession()
 	{
-		try
+		if (CheckIfHost())
 		{
-			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, localPlayerId);
-			Debug.LogWarning($"player with Id: {localPlayerId} left lobby");
+			CloseGameSession();
+		}
+		else
+		{
+			LeaveGameSession();
+		}
+	}
+	public async void CloseGameSession()
+	{
+		try //kick all clients from lobby and relay then delete lobby
+		{
+			for (int i = 0; i < connectedClientsList.Count; i++)
+			{
+				RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
+
+				if (connectedClientsList[i].clientNetworkedId != "0")
+					RemoveClientFromRelay(connectedClientsList[i].clientNetworkedId.ToString());
+
+				connectedClientsList.RemoveAt(i);
+			}
+
+			await LobbyService.Instance.DeleteLobbyAsync(hostLobby.Id);
 		}
 		catch (LobbyServiceException e)
 		{
 			Debug.LogError(e.Message);
 		}
 
-		RemoveClientFromRelay(localPlayerNetworkedId);
-		NetworkManager.Singleton.Shutdown();
+		UnsubToEvents();
 		hostLobby = null;
-	}
 
-	//SHARED FUNCTIONS
+		if (SceneManager.GetActiveScene().buildIndex == 0)
+			ShutDownNetworkManagerIfActive();
+	}
+	public void LeaveGameSession()
+	{
+		UnsubToEvents();
+		hostLobby = null;
+
+		if (SceneManager.GetActiveScene().buildIndex == 0)
+			ShutDownNetworkManagerIfActive();
+	}
 	private IEnumerator LobbyHeartBeat(float waitTime)
 	{
 		while (true)
@@ -417,7 +448,7 @@ public class MultiplayerManager : NetworkBehaviour
 	}
 	private async void HandleLobbyPollForUpdates()
 	{
-		if (hostLobby != null)
+		if (hostLobby != null && SceneManager.GetActiveScene().buildIndex == 0)
 		{
 			lobbyTimer -= Time.deltaTime;
 			if (lobbyTimer < 0)
