@@ -70,7 +70,7 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void Update()
 	{
-		if (!MultiplayerManager.Instance.CheckIfHost() && joinCodeInputField.text != MultiplayerManager.Instance.lobbyJoinCode)
+		//if (!MultiplayerManager.Instance.CheckIfHost() && joinCodeInputField.text != MultiplayerManager.Instance.lobbyJoinCode)
 			MultiplayerManager.Instance.lobbyJoinCode = joinCodeInputField.text;
 
 		localPlayerNameText.text = $"Player Name: {MultiplayerManager.Instance.localPlayerName}";

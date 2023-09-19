@@ -39,6 +39,6 @@ public class PlayerItemManager : MonoBehaviour
 	{
 		MultiplayerManager.Instance.idOfKickedPlayer = localPlayerNetworkedId;
 		MultiplayerManager.Instance.RemoveClientFromLobby(playerId);
-		MultiplayerManager.Instance.RemoveClientFromRelay(localPlayerNetworkedId);
+		MultiplayerManager.Instance.RemoveClientFromRelayServerRPC(localPlayerNetworkedId);
 	}
 }

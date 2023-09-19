@@ -117,7 +117,7 @@ public class GameUIManager : MonoBehaviour
 		else
 			//exit via SceneManager for Singleplayer
 
-		NetworkManager.Singleton.Shutdown();
+		//NetworkManager.Singleton.Shutdown();
 		GameManager.Instance.SavePlayerData();
 	}
 	public void SaveAndExitGame()
@@ -130,14 +130,16 @@ public class GameUIManager : MonoBehaviour
 	{
 		AudioManager.Instance.menuSFX.Play();
 		settingsObj.SetActive(true);
-		Time.timeScale = 0;
+		if (!gameManager.isMultiplayerGame)
+			Time.timeScale = 0;
 	}
 	public void CloseSettings()
 	{
 		AudioManager.Instance.menuSFX.Play();
 		GameManager.Instance.SavePlayerData();
-		Time.timeScale = 1;
 		settingsObj.SetActive(false);
+		if (!gameManager.isMultiplayerGame)
+			Time.timeScale = 1;
 	}
 	//function below needs to be removed at somepoint
 	public void ShowPlayersInLobby()
