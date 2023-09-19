@@ -8,6 +8,7 @@ using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MenuUIManager : MonoBehaviour
@@ -256,16 +257,20 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void ShowPlayersInLobby()
 	{
-		if (MultiplayerManager.Instance.hostLobby != null)
-		{
-			Debug.LogWarning($"lobby join code: {MultiplayerManager.Instance.hostLobby.Data["joinCode"].Value}");
-			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
-			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
-			{
-				Debug.LogWarning($"player Id: {player.Id} " +
-					$"player name: {player.Data["PlayerName"].Value}, networked Id {player.Data["NetworkedId"].Value}");
-			}
-		}
+		if (MultiplayerManager.Instance.hostLobby.HostId == MultiplayerManager.Instance.localPlayerId)
+			Debug.LogWarning($"is lobby host");
+		else
+			Debug.LogWarning($"is not lobby host");
+
+		if (SceneManager.GetActiveScene().buildIndex == 0)
+			MenuUIManager.Instance.SyncPlayerListforLobbyUi(MultiplayerManager.Instance.hostLobby);
+
+		if (MultiplayerManager.Instance.CheckIfHost())
+			Debug.LogWarning($"connected Networked clients: {NetworkManager.Singleton.ConnectedClientsList.Count}");
+
+		Debug.LogWarning($"connected clients count: {MultiplayerManager.Instance.connectedClientsList.Count}");
+		Debug.LogWarning($"client in lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
+		Debug.LogWarning($"Networked ID: {MultiplayerManager.Instance.localPlayerNetworkedId}");
 	}
 	public void ClearLobbiesList()
 	{

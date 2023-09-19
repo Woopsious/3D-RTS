@@ -46,6 +46,7 @@ public class MultiplayerManager : NetworkBehaviour
 
 	public int connectedPlayers;
 	public string idOfKickedPlayer;
+	public string idOfLeavingPlayer;
 
 	public void Awake()
 	{
@@ -78,6 +79,7 @@ public class MultiplayerManager : NetworkBehaviour
 		NetworkManager.Singleton.OnClientConnectedCallback -= PlayerConnectedCallback;
 		NetworkManager.Singleton.OnClientDisconnectCallback -= PlayerDisconnectedCallback;
 	}
+	//Client data added to networked list of client data when ever client connects to a relay
 	public void PlayerConnectedCallback(ulong id)
 	{
 		Debug.LogError($"Player Connected, ID: {id}");
@@ -99,81 +101,41 @@ public class MultiplayerManager : NetworkBehaviour
 			}
 		}
 	}
+	//StopClient will always be called to handle intentional leaving or unintentional disconnects
 	public void PlayerDisconnectedCallback(ulong id)
 	{
 		Debug.LogError($"Player Disconnected, ID: {id}");
 
 		if (CheckIfHost()) // if host remove client from lobby and relay
-		{
-			for (int i = 0; i < connectedClientsList.Count; i++)
-			{
-				if (connectedClientsList[i].clientNetworkedId == id.ToString())
-				{
-					if (idOfKickedPlayer != id.ToString()) //dont run if player was kicked already
-					{
-						RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
-						RemoveClientFromRelayServerRPC(connectedClientsList[i].clientNetworkedId.ToString());
-					}
-					connectedClientsList.RemoveAt(i);
-					break;
-				}
-			}
-		}
+			HandleClientDisconnectsWhenHost(id);
 
-		HandlePlayerDisconnectTypes(id);
+		HandleClientDisconnects(id);
 	}
-	public void HandlePlayerDisconnectTypes(ulong id)
+	public void HandleClientDisconnectsWhenHost(ulong id)
 	{
-		if (SceneManager.GetActiveScene().buildIndex == 0) //check if in main menu scene
+		for (int i = 0; i < connectedClientsList.Count; i++)
 		{
-			if (localPlayerNetworkedId != "0" && localPlayerNetworkedId != id.ToString())
+			if (id != 0 && connectedClientsList[i].clientNetworkedId == id.ToString())
 			{
-				HandleMainMenuScenePlayerDisconnects();
-			}
-		}
-		else //else for game scene
-		{
-			if (localPlayerNetworkedId != id.ToString())
-			{
-				HandleGameScenePlayerDisconnects();
-			}
-		}
-	}
-	public void HandlePlayerDisconnects(ulong id)
-	{
-		if (SceneManager.GetActiveScene().buildIndex == 0) //check if in main menu scene
-		{
-			if (localPlayerNetworkedId != "0" && localPlayerNetworkedId != id.ToString())
-			{
-				HandleMainMenuScenePlayerDisconnects();
-			}
-		}
-		else //else for game scene
-		{
-			if (localPlayerNetworkedId != id.ToString())
-			{
-				HandleGameScenePlayerDisconnects();
-			}
-		}
-	}
-	public void HandlePlayersLeaving()
-	{
+				RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
 
-	}
-	public void HandleMainMenuScenePlayerDisconnects()
-	{
-		if (MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy)
-		{
-			MenuUIManager.Instance.ShowLobbiesListUi();
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Removed From Lobby", 3f);
+				if (idOfKickedPlayer != id.ToString() && idOfLeavingPlayer != id.ToString()) //if player left/kicked dont run
+					RemoveClientFromRelayServerRPC(connectedClientsList[i].clientNetworkedId.ToString());
 
-			ShutDownNetworkManagerIfActive();
+				connectedClientsList.RemoveAt(i);
+				break;
+			}
+		}
+		//only stop host when not in main scene as host can still wait in lobby for new player
+		if (SceneManager.GetActiveScene().buildIndex == 1)
+		{
+			StopHost();
 		}
 	}
-	public void HandleGameScenePlayerDisconnects()
+	public void HandleClientDisconnects(ulong id)
 	{
-		GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
-		GameManager.Instance.gameUIManager.PauseGame();
+		if (localPlayerNetworkedId != "0" && localPlayerNetworkedId != id.ToString())
+			StopClient();
 	}
 
 	//authed on start up
@@ -302,32 +264,6 @@ public class MultiplayerManager : NetworkBehaviour
 			Debug.LogError(e.Message);
 		}
 	}
-	public async void RemoveClientFromLobby(string playerId)
-	{
-		try
-		{
-			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
-			Debug.LogWarning($"player with Id: {playerId} kicked from lobby");
-		}
-		catch (LobbyServiceException e)
-		{
-			Debug.LogError(e.Message);
-		}
-	}
-	[ServerRpc(RequireOwnership = false)]
-	public void RemoveClientFromRelayServerRPC(string networkedId)
-	{
-		ulong networkedIdulong = Convert.ToUInt64(networkedId);
-		Debug.LogWarning($"Networked string ID: {networkedId}");
-		Debug.LogWarning($"Networked ulong ID: {networkedIdulong}");
-
-		NetworkManager.Singleton.DisconnectClient(networkedIdulong);
-	}
-	public void ShutDownNetworkManagerIfActive()
-	{
-		if (NetworkManager.Singleton.isActiveAndEnabled)
-			NetworkManager.Singleton.Shutdown();
-	}
 
 	//FUNCTIONS FOR JOINING LOBBY
 	//called when joininglobby from lobbylist
@@ -403,50 +339,64 @@ public class MultiplayerManager : NetworkBehaviour
 	public void CloseOrLeaveGameSession()
 	{
 		if (CheckIfHost())
-		{
-			CloseGameSession();
-		}
+			StopHost();
+
 		else
-		{
-			LeaveGameSession();
-		}
+			StopClient();
 	}
-	public async void CloseGameSession()
+	public void StopHost()
 	{
-		try //kick all clients from lobby and relay then delete lobby
+		connectedClientsList.Clear();
+
+		UnsubToEvents();
+		NetworkManager.Singleton.Shutdown();
+		hostLobby = null;
+
+		if (SceneManager.GetActiveScene().buildIndex == 0)
+			MenuUIManager.Instance.ShowLobbiesListUi();
+
+		else
+			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+	}
+	public void StopClient()
+	{
+		UnsubToEvents();
+		NetworkManager.Singleton.Shutdown();
+		hostLobby = null;
+
+		if (SceneManager.GetActiveScene().buildIndex == 0)
+			MenuUIManager.Instance.ShowLobbiesListUi();
+
+		else
+			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+	}
+
+	public async void RemoveClientFromLobby(string playerId)
+	{
+		try
 		{
-			for (int i = 0; i < connectedClientsList.Count; i++)
-			{
-				RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
-
-				if (connectedClientsList[i].clientNetworkedId != "0")
-					RemoveClientFromRelayServerRPC(connectedClientsList[i].clientNetworkedId.ToString());
-
-				connectedClientsList.RemoveAt(i);
-			}
-
-			await LobbyService.Instance.DeleteLobbyAsync(hostLobby.Id);
+			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
+			Debug.LogWarning($"player with Id: {playerId} kicked from lobby");
 		}
 		catch (LobbyServiceException e)
 		{
 			Debug.LogError(e.Message);
 		}
-
-		UnsubToEvents();
-		hostLobby = null;
-
-		if (SceneManager.GetActiveScene().buildIndex == 0)
-			ShutDownNetworkManagerIfActive();
 	}
-	public void LeaveGameSession()
+	[ServerRpc(RequireOwnership = false)]
+	public void RemoveClientFromRelayServerRPC(string networkedId)
 	{
-		RemoveClientFromRelayServerRPC(localPlayerNetworkedId.ToString());
+		idOfLeavingPlayer = networkedId;
+		ulong networkedIdulong = Convert.ToUInt64(networkedId);
+		Debug.LogWarning($"Networked string ID: {networkedId}");
+		Debug.LogWarning($"Networked ulong ID: {networkedIdulong}");
 
-		UnsubToEvents();
-		hostLobby = null;
-
-		if (SceneManager.GetActiveScene().buildIndex == 0)
-			ShutDownNetworkManagerIfActive();
+		NetworkManager.Singleton.DisconnectClient(networkedIdulong);
+	}
+	public void ShutDownNetworkManagerIfActive()
+	{
+		if (NetworkManager.Singleton.isActiveAndEnabled)
+			NetworkManager.Singleton.Shutdown();
 	}
 	private IEnumerator LobbyHeartBeat(float waitTime)
 	{

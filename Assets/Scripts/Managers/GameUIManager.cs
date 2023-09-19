@@ -5,6 +5,7 @@ using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static UnityEngine.ParticleSystem;
 using static UnityEngine.UI.CanvasScaler;
@@ -157,6 +158,12 @@ public class GameUIManager : MonoBehaviour
 	public void ShowPlayerDisconnectedPanel()
 	{
 		playerDisconnectedUiPanel.SetActive(true);
+		PauseGame();
+	}
+	public void ReturnToMainMenuAfterPlayerDisconnect()
+	{
+		GameManager.Instance.isMultiplayerGame = false;
+		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
 	}
 	public void HideGameSpeedButtonsForMP()
 	{

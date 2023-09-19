@@ -234,6 +234,8 @@ public class GameManager : NetworkBehaviour
 
 		testUnit = PlayerOneUnitsList[4].GetComponent<UnitStateController>();
 
+		isMultiplayerGame = false;
+
 		//Debug.Log(testUnit.maxHealth);
 		//Debug.Log(testUnit.armour);
 		//Debug.Log(testUnit.weaponSystem.mainWeaponDamage);
@@ -387,7 +389,11 @@ public class GameManager : NetworkBehaviour
 	//scene changes functions
 	public void LoadScene(string sceneName)
 	{
-		NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+		if (isMultiplayerGame)
+			NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+
+		else if (!isMultiplayerGame)
+			SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
 	}
 	public void OnSceneLoad(int sceneIndex)
 	{
