@@ -162,6 +162,7 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void ReturnToMainMenuAfterPlayerDisconnect()
 	{
+		PauseGame();
 		GameManager.Instance.isMultiplayerGame = false;
 		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
 	}

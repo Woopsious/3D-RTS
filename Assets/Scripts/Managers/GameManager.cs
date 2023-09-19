@@ -234,8 +234,6 @@ public class GameManager : NetworkBehaviour
 
 		testUnit = PlayerOneUnitsList[4].GetComponent<UnitStateController>();
 
-		isMultiplayerGame = false;
-
 		//Debug.Log(testUnit.maxHealth);
 		//Debug.Log(testUnit.armour);
 		//Debug.Log(testUnit.weaponSystem.mainWeaponDamage);

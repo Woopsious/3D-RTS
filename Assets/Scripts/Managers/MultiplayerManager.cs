@@ -358,6 +358,10 @@ public class MultiplayerManager : NetworkBehaviour
 		else
 			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 	}
+	public void ReturnHostToMainMenu()
+	{
+		GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+	}
 	public void StopClient()
 	{
 		UnsubToEvents();
