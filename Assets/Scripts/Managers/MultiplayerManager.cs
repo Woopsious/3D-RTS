@@ -37,9 +37,9 @@ public class MultiplayerManager : NetworkBehaviour
 
 	public NetworkList<ClientData> connectedClientsList;
 
-	public string localPlayerName;
-	public string localPlayerId;
-	public string localPlayerNetworkedId;
+	public string localClientName;
+	public string localClientId;
+	public string localClientNetworkedId;
 
 	private Allocation HostAllocation;
 	private JoinAllocation JoinAllocation;
@@ -58,7 +58,7 @@ public class MultiplayerManager : NetworkBehaviour
 		else
 			Destroy(gameObject);
 
-		localPlayerName = $"Player{UnityEngine.Random.Range(1000, 9999)}";
+		localClientName = $"Player{UnityEngine.Random.Range(1000, 9999)}";
 	}
 	public async void Start()
 	{
@@ -83,7 +83,7 @@ public class MultiplayerManager : NetworkBehaviour
 	public void PlayerConnectedCallback(ulong id)
 	{
 		Debug.LogError($"Player Connected, ID: {id}");
-		Instance.localPlayerNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
+		Instance.localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
 		int i = connectedClientsList.Count;
 
 		if (CheckIfHost())
@@ -91,7 +91,7 @@ public class MultiplayerManager : NetworkBehaviour
 			//lobby created after host creates relay, for host grab data locally
 			if (id == 0)
 			{
-				connectedClientsList.Add(new ClientData(localPlayerName, localPlayerId, id.ToString()));
+				connectedClientsList.Add(new ClientData(localClientName, localClientId, id.ToString()));
 			}
 			//for connecting clients grab data through lobby before it joins host relay
 			else
@@ -100,6 +100,8 @@ public class MultiplayerManager : NetworkBehaviour
 					hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
 			}
 		}
+		if (!MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy)
+			MenuUIManager.Instance.ShowLobbyUi();
 	}
 	//StopClient will always be called to handle intentional leaving or unintentional disconnects
 	public void PlayerDisconnectedCallback(ulong id)
@@ -134,7 +136,7 @@ public class MultiplayerManager : NetworkBehaviour
 	}
 	public void HandleClientDisconnects(ulong id)
 	{
-		if (localPlayerNetworkedId != "0" && localPlayerNetworkedId != id.ToString())
+		if (localClientNetworkedId != "0" && localClientNetworkedId != id.ToString())
 			StopClient();
 	}
 
@@ -146,8 +148,8 @@ public class MultiplayerManager : NetworkBehaviour
 		AuthenticationService.Instance.SignedIn += () => { Debug.LogWarning($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
 		await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
-		localPlayerId = AuthenticationService.Instance.PlayerId;
-		Debug.LogWarning($"player Name: {Instance.localPlayerName}");
+		localClientId = AuthenticationService.Instance.PlayerId;
+		Debug.LogWarning($"player Name: {Instance.localClientName}");
 	}
 	public async void GetLobbiesList()
 	{
@@ -183,6 +185,8 @@ public class MultiplayerManager : NetworkBehaviour
 	//called on creating a lobby from MainMenu
 	public void StartHost()
 	{
+		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = true;
 		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
 		SubToEvents();
 	}
@@ -269,6 +273,8 @@ public class MultiplayerManager : NetworkBehaviour
 	//called when joininglobby from lobbylist
 	public void StartClient(Lobby lobby)
 	{
+		GameManager.Instance.isPlayerOne = false;
+		GameManager.Instance.isMultiplayerGame = true;
 		JoinLobby(lobby);
 		SubToEvents();
 	}
@@ -346,6 +352,8 @@ public class MultiplayerManager : NetworkBehaviour
 	}
 	public void StopHost()
 	{
+		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = false;
 		connectedClientsList.Clear();
 
 		UnsubToEvents();
@@ -358,12 +366,10 @@ public class MultiplayerManager : NetworkBehaviour
 		else
 			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 	}
-	public void ReturnHostToMainMenu()
-	{
-		GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
-	}
 	public void StopClient()
 	{
+		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = false;
 		UnsubToEvents();
 		NetworkManager.Singleton.Shutdown();
 		hostLobby = null;
@@ -424,7 +430,7 @@ public class MultiplayerManager : NetworkBehaviour
 					Lobby lobby = await LobbyService.Instance.GetLobbyAsync(hostLobby.Id);
 					hostLobby = lobby;
 
-					if (hostLobby.HostId == localPlayerId)
+					if (hostLobby.HostId == localClientId)
 						Debug.LogWarning($"is lobby host");
 					else
 						Debug.LogWarning($"is not lobby host");
@@ -437,7 +443,7 @@ public class MultiplayerManager : NetworkBehaviour
 
 					Debug.LogWarning($"connected clients count: {connectedClientsList.Count}");
 					Debug.LogWarning($"client in lobby: {hostLobby.Players.Count}");
-					Debug.LogWarning($"Networked ID: {localPlayerNetworkedId}");
+					Debug.LogWarning($"Networked ID: {localClientNetworkedId}");
 				}
 				catch
 				{
@@ -454,8 +460,8 @@ public class MultiplayerManager : NetworkBehaviour
 		{
 			Data = new Dictionary<string, PlayerDataObject>
 				{
-					{ "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerName) },
-					{ "PlayerID", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localPlayerId.ToString())}
+					{ "PlayerName", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localClientName) },
+					{ "PlayerID", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Member, localClientId.ToString())}
 				}
 		};
 	}

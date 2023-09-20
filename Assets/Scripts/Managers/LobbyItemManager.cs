@@ -24,7 +24,7 @@ public class LobbyItemManager : MonoBehaviour
 
 	public void JoinLobby()
 	{
-		MenuUIManager.Instance.ShowLobbyUi();
 		MultiplayerManager.Instance.StartClient(lobby);
+		MenuUIManager.Instance.ShowConnectingToLobbyUi();
 	}
 }

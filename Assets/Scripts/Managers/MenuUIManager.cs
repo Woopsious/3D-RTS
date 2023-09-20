@@ -36,10 +36,13 @@ public class MenuUIManager : MonoBehaviour
 
 	public Text joinCodeText;
 	public Text joinCodeInputField;
-	public Text localPlayerNameText;
-	public Text localPlayerIdText;
-	public Text localPlayerHostText;
-	public Text localNetworkedIdText;
+	public Text localClientNameText;
+	public Text localClientIdText;
+	public Text localClientHostText;
+	public Text localClientNetworkedIdText;
+
+	public GameObject ConnectingToLobbyPanelObj;
+	public Text ConnectingOrCreatingLobbyText;
 
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
@@ -71,13 +74,10 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void Update()
 	{
-		//if (!MultiplayerManager.Instance.CheckIfHost() && joinCodeInputField.text != MultiplayerManager.Instance.lobbyJoinCode)
-			MultiplayerManager.Instance.lobbyJoinCode = joinCodeInputField.text;
-
-		localPlayerNameText.text = $"Player Name: {MultiplayerManager.Instance.localPlayerName}";
-		localPlayerIdText.text = $"Player ID: {MultiplayerManager.Instance.localPlayerId}";
-		localPlayerHostText.text = "UNSET";
-		localNetworkedIdText.text = $"Player Networked ID: {MultiplayerManager.Instance.localPlayerNetworkedId}";
+		localClientNameText.text = $"Client Name: {MultiplayerManager.Instance.localClientName}";
+		localClientIdText.text = $"Client ID: {MultiplayerManager.Instance.localClientId}";
+		localClientHostText.text = $"Is Client Host?: {MultiplayerManager.Instance.CheckIfHost()}";
+		localClientNetworkedIdText.text = $"Client Networked ID: {MultiplayerManager.Instance.localClientNetworkedId}";
 	}
 	public void PlayButtonSound()
 	{
@@ -86,6 +86,8 @@ public class MenuUIManager : MonoBehaviour
 	//MAIN MENU BUTTON FUNCTIONS
 	public void BackToMainMenuButton()
 	{
+		GameManager.Instance.isMultiplayerGame = false;
+		GameManager.Instance.isPlayerOne = true;
 		ShowMainMenuUi();
 	}
 	public void ShowHighScoreButton()
@@ -116,6 +118,7 @@ public class MenuUIManager : MonoBehaviour
 	//MAIN MENU UI UPDATES
 	public void ShowMainMenuUi()
 	{
+		ConnectingToLobbyPanelObj.SetActive(false);
 		GameManager.Instance.isPlayerOne = true;
 		mainMenuPanelObj.SetActive(true);
 		settingsPanelObj.SetActive(false);
@@ -145,8 +148,6 @@ public class MenuUIManager : MonoBehaviour
 	//MP BUTTON FUNCTIONS
 	public void PlayMultiplayerButton()
 	{
-		GameManager.Instance.isPlayerOne = false;
-		GameManager.Instance.isMultiplayerGame = true;
 		ShowLobbiesListUi();
 	}
 	public void RefreshLobbiesListButton()
@@ -155,9 +156,8 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void CreateLobbyButton()
 	{
-		GameManager.Instance.isPlayerOne = true;
 		MultiplayerManager.Instance.StartHost();
-		ShowLobbyUi();
+		MenuUIManager.Instance.ShowConnectingToLobbyUi();
 	}
 	public void LeaveLobbyButton()
 	{
@@ -174,8 +174,11 @@ public class MenuUIManager : MonoBehaviour
 	public void StartMultiplayerGameButton()
 	{
 		if (MultiplayerManager.Instance.connectedClientsList.Count == MultiplayerManager.Instance.hostLobby.MaxPlayers)
+		{
+			GameManager.Instance.playerOneReadyToStart.Value = false;
+			GameManager.Instance.playerTwoReadyToStart.Value = false;
 			GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
-
+		}
 		else
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Two players are needed to start the game", 3f);
 	}
@@ -183,6 +186,7 @@ public class MenuUIManager : MonoBehaviour
 	//MP UI UPDATES
 	public void ShowLobbiesListUi()
 	{
+		ConnectingToLobbyPanelObj.SetActive(false);
 		mainMenuPanelObj.SetActive(false);
 		MpLobbiesListPanel.SetActive(true);
 		MpLobbyPanel.SetActive(false);
@@ -191,8 +195,18 @@ public class MenuUIManager : MonoBehaviour
 		startGameButtonObj.SetActive(false);
 		MultiplayerManager.Instance.GetLobbiesList();
 	}
+	public void ShowConnectingToLobbyUi()
+	{
+		MpLobbiesListPanel.SetActive(false);
+		ConnectingToLobbyPanelObj.SetActive(true);
+		if (GameManager.Instance.isPlayerOne)
+			ConnectingOrCreatingLobbyText.text = "Creating Lobby...";
+		else
+			ConnectingOrCreatingLobbyText.text = "Connecting To Lobby...";
+	}
 	public void ShowLobbyUi()
 	{
+		ConnectingToLobbyPanelObj.SetActive(false);
 		MpLobbiesListPanel.SetActive(false);
 		MpLobbyPanel.SetActive(true);
 		if (GameManager.Instance.isPlayerOne)
@@ -255,9 +269,10 @@ public class MenuUIManager : MonoBehaviour
 			index++;
 		}
 	}
+	//remove function below after testing
 	public void ShowPlayersInLobby()
 	{
-		if (MultiplayerManager.Instance.hostLobby.HostId == MultiplayerManager.Instance.localPlayerId)
+		if (MultiplayerManager.Instance.hostLobby.HostId == MultiplayerManager.Instance.localClientId)
 			Debug.LogWarning($"is lobby host");
 		else
 			Debug.LogWarning($"is not lobby host");
@@ -270,7 +285,7 @@ public class MenuUIManager : MonoBehaviour
 
 		Debug.LogWarning($"connected clients count: {MultiplayerManager.Instance.connectedClientsList.Count}");
 		Debug.LogWarning($"client in lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
-		Debug.LogWarning($"Networked ID: {MultiplayerManager.Instance.localPlayerNetworkedId}");
+		Debug.LogWarning($"Networked ID: {MultiplayerManager.Instance.localClientNetworkedId}");
 	}
 	public void ClearLobbiesList()
 	{
