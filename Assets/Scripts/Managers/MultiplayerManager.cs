@@ -47,6 +47,7 @@ public class MultiplayerManager : NetworkBehaviour
 	public int connectedPlayers;
 	public string idOfKickedPlayer;
 	public string idOfLeavingPlayer;
+	public NetworkVariable<bool> isHostClosingLobby;
 
 	public void Awake()
 	{
@@ -137,7 +138,10 @@ public class MultiplayerManager : NetworkBehaviour
 	public void HandleClientDisconnects(ulong id)
 	{
 		if (localClientNetworkedId != "0" && localClientNetworkedId != id.ToString())
+		{
 			StopClient();
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Connection to Host Lost", 3f);
+		}
 	}
 
 	//authed on start up
@@ -185,10 +189,12 @@ public class MultiplayerManager : NetworkBehaviour
 	//called on creating a lobby from MainMenu
 	public void StartHost()
 	{
-		GameManager.Instance.isPlayerOne = true;
-		GameManager.Instance.isMultiplayerGame = true;
 		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
 		SubToEvents();
+
+		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = true;
+		isHostClosingLobby.Value = false;
 	}
 	IEnumerator RelayConfigureTransportAsHostingPlayer()
 	{
@@ -273,10 +279,11 @@ public class MultiplayerManager : NetworkBehaviour
 	//called when joininglobby from lobbylist
 	public void StartClient(Lobby lobby)
 	{
-		GameManager.Instance.isPlayerOne = false;
-		GameManager.Instance.isMultiplayerGame = true;
 		JoinLobby(lobby);
 		SubToEvents();
+
+		GameManager.Instance.isPlayerOne = false;
+		GameManager.Instance.isMultiplayerGame = true;
 	}
 	public async void JoinLobby(Lobby lobby)
 	{
@@ -352,12 +359,13 @@ public class MultiplayerManager : NetworkBehaviour
 	}
 	public void StopHost()
 	{
+		isHostClosingLobby.Value = true;
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = false;
 		connectedClientsList.Clear();
 
 		UnsubToEvents();
-		NetworkManager.Singleton.Shutdown();
+		ShutDownNetworkManagerIfActive();
 		hostLobby = null;
 
 		if (SceneManager.GetActiveScene().buildIndex == 0)
@@ -371,7 +379,7 @@ public class MultiplayerManager : NetworkBehaviour
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = false;
 		UnsubToEvents();
-		NetworkManager.Singleton.Shutdown();
+		ShutDownNetworkManagerIfActive();
 		hostLobby = null;
 
 		if (SceneManager.GetActiveScene().buildIndex == 0)
