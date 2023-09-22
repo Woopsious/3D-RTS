@@ -17,7 +17,7 @@ public class MenuUIManager : MonoBehaviour
 	//references
 	[Header("MenuObj UI Refs")]
 	public GameObject mainMenuPanelObj;
-	public GameObject singlePlayerScreenObj;
+	public GameObject singlePlayerPanelObj;
 	public GameObject highScorePanelObj;
 	public GameObject settingsPanelObj;
 	public GameObject settingsVolumePanelObj;
@@ -114,7 +114,18 @@ public class MenuUIManager : MonoBehaviour
 		ShowSettingsUi();
 		GameManager.Instance.SavePlayerData();
 	}
-
+	public void PlaySinglePayerButton()
+	{
+		ShowSinglePlayerUi();
+	}
+	public void StartSinglePlayerGameButton()
+	{
+		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+	}
+	public void LoadSinglePlayerGameButton()
+	{
+		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+	}
 	//MAIN MENU UI UPDATES
 	public void ShowMainMenuUi()
 	{
@@ -123,7 +134,7 @@ public class MenuUIManager : MonoBehaviour
 		mainMenuPanelObj.SetActive(true);
 		settingsPanelObj.SetActive(false);
 		highScorePanelObj.SetActive(false);
-		singlePlayerScreenObj.SetActive(false);
+		singlePlayerPanelObj.SetActive(false);
 		MpLobbiesListPanel.SetActive(false);
 		GameManager.Instance.SavePlayerData();
 	}
@@ -138,6 +149,11 @@ public class MenuUIManager : MonoBehaviour
 		settingsPanelObj.SetActive(true);
 		settingsKeybindsPanelObj.SetActive(false);
 		settingsVolumePanelObj.SetActive(false);
+	}
+	public void ShowSinglePlayerUi()
+	{
+		mainMenuPanelObj.SetActive(false);
+		singlePlayerPanelObj.SetActive(true);
 	}
 	public void QuitGame()
 	{

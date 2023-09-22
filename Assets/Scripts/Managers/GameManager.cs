@@ -17,6 +17,8 @@ public class GameManager : NetworkBehaviour
 	public ErrorLogManager errorManager;
 	public PlayerNotifsManager playerNotifsManager;
 
+	public bool IsDevBuild;
+
 	//references
 	public float timer;
 	public float secondsCount;
