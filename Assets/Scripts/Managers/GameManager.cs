@@ -17,8 +17,6 @@ public class GameManager : NetworkBehaviour
 	public ErrorLogManager errorManager;
 	public PlayerNotifsManager playerNotifsManager;
 
-	public bool IsDevBuild;
-
 	//references
 	public float timer;
 	public float secondsCount;
@@ -142,6 +140,7 @@ public class GameManager : NetworkBehaviour
 		InputManager.Instance.SetUpKeybindDictionary();
 
 		GameManager.Instance.LoadPlayerData();
+		MenuUIManager.Instance.GetPlayerNameUi();
 
 		//assign base building stats
 		buildingHQStats = new BaseBuildingStats
@@ -333,6 +332,7 @@ public class GameManager : NetworkBehaviour
 		else
 		{
 			//audio is saved when slider value is changed
+			Instance.LocalCopyOfPlayerData.PlayerName = MultiplayerManager.Instance.localClientName;
 			InputManager.Instance.SavePlayerKeybinds();
 
 			BinaryFormatter formatter = new BinaryFormatter();
@@ -355,6 +355,7 @@ public class GameManager : NetworkBehaviour
 			LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
 			playerData.Close();
 
+			MultiplayerManager.Instance.localClientName = Instance.LocalCopyOfPlayerData.PlayerName;
 			AudioManager.Instance.LoadSoundSettings();
 			InputManager.Instance.LoadPlayerKeybinds();
 		}
@@ -400,6 +401,7 @@ public class GameManager : NetworkBehaviour
 		if (sceneIndex == 0)
 		{
 			MenuUIManager.Instance.SetUpKeybindButtonNames();
+			MenuUIManager.Instance.GetPlayerNameUi();
 		}
 		else if (sceneIndex == 1)
 		{

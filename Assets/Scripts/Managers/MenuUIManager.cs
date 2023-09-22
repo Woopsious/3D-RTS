@@ -34,15 +34,18 @@ public class MenuUIManager : MonoBehaviour
 	public GameObject closeLobbyButtonObj;
 	public GameObject startGameButtonObj;
 
-	public Text joinCodeText;
-	public Text joinCodeInputField;
+	public GameObject ConnectingToLobbyPanelObj;
+	public Text ConnectingOrCreatingLobbyText;
+
+	public Text playerNameText;
+	public Text playerNameInputField;
+	public Text lobbyNameText;
+	public Text lobbyNameInputField;
+
 	public Text localClientNameText;
 	public Text localClientIdText;
 	public Text localClientHostText;
 	public Text localClientNetworkedIdText;
-
-	public GameObject ConnectingToLobbyPanelObj;
-	public Text ConnectingOrCreatingLobbyText;
 
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
@@ -155,6 +158,10 @@ public class MenuUIManager : MonoBehaviour
 		mainMenuPanelObj.SetActive(false);
 		singlePlayerPanelObj.SetActive(true);
 	}
+	public void GetPlayerNameUi()
+	{
+		Instance.playerNameText.text = $"Player Name: {MultiplayerManager.Instance.localClientName}";
+	}
 	public void QuitGame()
 	{
 		GameManager.Instance.SavePlayerData();
@@ -164,6 +171,11 @@ public class MenuUIManager : MonoBehaviour
 	//MP BUTTON FUNCTIONS
 	public void PlayMultiplayerButton()
 	{
+		if (MultiplayerManager.Instance.localClientName == "PlayerName")
+		{
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Set a Name For Yourself", 3f);
+			return;
+		}
 		ShowLobbiesListUi();
 	}
 	public void RefreshLobbiesListButton()
@@ -172,6 +184,11 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void CreateLobbyButton()
 	{
+		if (MultiplayerManager.Instance.lobbyName == "LobbyName")
+		{
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Set a Name For Your Lobby", 3f);
+			return;
+		}
 		MultiplayerManager.Instance.StartHost();
 		MenuUIManager.Instance.ShowConnectingToLobbyUi();
 	}
@@ -197,6 +214,20 @@ public class MenuUIManager : MonoBehaviour
 		}
 		else
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Two players are needed to start the game", 3f);
+	}
+	public void SetPlayerNameButton()
+	{
+		MultiplayerManager.Instance.localClientName = Instance.playerNameInputField.text;
+		Instance.playerNameText.text = $"Player Name: {MultiplayerManager.Instance.localClientName}";
+		Instance.playerNameInputField.text = "";
+
+		GameManager.Instance.SavePlayerData();
+	}
+	public void SetLobbyNameButton()
+	{
+		MultiplayerManager.Instance.lobbyName = Instance.lobbyNameInputField.text;
+		Instance.lobbyNameText.text = $"Lobby Name: {MultiplayerManager.Instance.lobbyName}";
+		Instance.lobbyNameInputField.text = "";
 	}
 
 	//MP UI UPDATES

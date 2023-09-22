@@ -26,7 +26,7 @@ public class MultiplayerManager : NetworkBehaviour
 {
 	public static MultiplayerManager Instance;
 
-	private string lobbyName = "[LobbyName]";
+	public string lobbyName = "LobbyName";
 	private int maxConnections = 2;
 
 	public Lobby hostLobby;
@@ -37,7 +37,7 @@ public class MultiplayerManager : NetworkBehaviour
 
 	public NetworkList<ClientData> connectedClientsList;
 
-	public string localClientName;
+	public string localClientName = "PlayerName";
 	public string localClientId;
 	public string localClientNetworkedId;
 
@@ -58,8 +58,6 @@ public class MultiplayerManager : NetworkBehaviour
 		}
 		else
 			Destroy(gameObject);
-
-		localClientName = $"Player{UnityEngine.Random.Range(1000, 9999)}";
 	}
 	public async void Start()
 	{
@@ -235,7 +233,6 @@ public class MultiplayerManager : NetworkBehaviour
 		try
 		{
 			Instance.lobbyHostCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-			MenuUIManager.Instance.joinCodeText.text = $"JoinCode: {Instance.lobbyHostCode}";
 		}
 		catch
 		{
