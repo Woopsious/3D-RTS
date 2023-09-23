@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 public class CameraController : MonoBehaviour
 {
 	public static CameraController instance;
-	public TerrainCollider terrainCollider;
+	private TerrainCollider terrainCollider;
 
 	private readonly float moveSpeed = 50f;
 	private readonly float turnSpeed = 100f;
@@ -18,7 +18,6 @@ public class CameraController : MonoBehaviour
 	private readonly float maxHeightBounds = 50;
 
 	private float prevTerrainHeight;
-
 	public void Start()
 	{
 		CameraController.instance = this;
@@ -34,6 +33,8 @@ public class CameraController : MonoBehaviour
 		if (terrainCollider != null)
 			AdjustHeight();
 	}
+
+	//camera movement functions
 	public void ClampPosition()
 	{
 		gameObject.transform.position = new Vector3(Mathf.Clamp(transform.position.x, minBounds, maxBounds), 

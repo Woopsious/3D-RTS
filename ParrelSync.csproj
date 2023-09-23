@@ -59,14 +59,23 @@
     <Analyzer Include="E:\Unity\2022.3.9f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\Project.cs">
+      <Link>Editor\Project.cs</Link>
+    </Compile>
+    <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\AssetModBlock\EditorQuit.cs">
+      <Link>Editor\AssetModBlock\EditorQuit.cs</Link>
+    </Compile>
+    <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\Preferences.cs">
+      <Link>Editor\Preferences.cs</Link>
+    </Compile>
+    <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\NonCore\OtherMenuItem.cs">
+      <Link>Editor\NonCore\OtherMenuItem.cs</Link>
+    </Compile>
     <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\FileUtilities.cs">
       <Link>Editor\FileUtilities.cs</Link>
     </Compile>
     <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\AssetModBlock\ParrelSyncAssetModificationProcessor.cs">
       <Link>Editor\AssetModBlock\ParrelSyncAssetModificationProcessor.cs</Link>
-    </Compile>
-    <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\Project.cs">
-      <Link>Editor\Project.cs</Link>
     </Compile>
     <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\ValidateCopiedFoldersIntegrity.cs">
       <Link>Editor\ValidateCopiedFoldersIntegrity.cs</Link>
@@ -80,17 +89,8 @@
     <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\NonCore\AskFeedbackDialog.cs">
       <Link>Editor\NonCore\AskFeedbackDialog.cs</Link>
     </Compile>
-    <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\AssetModBlock\EditorQuit.cs">
-      <Link>Editor\AssetModBlock\EditorQuit.cs</Link>
-    </Compile>
     <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\ClonesManagerWindow.cs">
       <Link>Editor\ClonesManagerWindow.cs</Link>
-    </Compile>
-    <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\Preferences.cs">
-      <Link>Editor\Preferences.cs</Link>
-    </Compile>
-    <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\NonCore\OtherMenuItem.cs">
-      <Link>Editor\NonCore\OtherMenuItem.cs</Link>
     </Compile>
     <Compile Include="E:\Unity\Unity Packages\ParrelSync-1.5.1\ParrelSync\Editor\ExternalLinks.cs">
       <Link>Editor\ExternalLinks.cs</Link>
