@@ -9,6 +9,9 @@ public class CanPlaceBuilding : NetworkBehaviour
 {
 	public CapturePointController pointController;
 
+	public readonly float placementHeightMax = 11f;
+	public readonly float placementHeightMin = 8f;
+
 	public TurretController turret;
 	public BuildingManager building;
 	public GameObject highlighterObj;
@@ -18,18 +21,54 @@ public class CanPlaceBuilding : NetworkBehaviour
 	public bool canPlace;
 	public bool isPlaced;
 
+	public float timer;
+
 	public void Start()
 	{
 		if (building != null && !building.isHQ)
 			SetUpBuildingOnStartUp(building.GetComponent<Entities>());
-		else if (building.isHQ)
+		else if (building != null && building.isHQ)
 			Invoke(nameof(SetUpHQ), 1);
 		else
-			SetUpBuildingOnStartUp(turret.GetComponent<Entities>());
+			SetUpTurretOnStartUp(turret.GetComponent<Entities>());
 	}
 	public void Update()
 	{
-		TrackPlacementHeight();
+		if (pointController != null)
+		{
+			timer -= Time.deltaTime;
+
+			if (timer < 0)
+			{
+				timer = 0.25f;
+				UpdateHighlighterColour();
+			}
+		}
+		//if capturepoint ref == null:
+		//highlighter == red, canPlace == false
+
+		//if capturepoint ref != null:
+		//if capturepoint == neutral || capturepoint is not owned by player:
+		//highlighter == red, canPlace == false
+
+		//if capturepoint ref != null:
+		//if capturepoint != neutral && capturepoint is owned by player:
+		//if y coords smaller then 8 || y coords bigger then 11:
+		//highlighter == red, canPlace == false
+
+		//if capturepoint ref != null:
+		//if capturepoint != neutral && capturepoint is owned by player:
+		//if y coords bigger then 8 && y coords smaller then 11:
+		//if entity colliding with another entity
+		//highlighter == red, canPlace == false
+
+		//if capturepoint ref != null:
+		//if capturepoint != neutral && capturepoint is owned by player:
+		//if y coords bigger then 8 && y coords smaller then 11:
+		//if entity Not colliding with another entity
+		//highlighter == green, canPlace == true
+
+		//TrackPlacementHeight();
 	}
 	public void SetUpHQ()
 	{
@@ -41,7 +80,6 @@ public class CanPlaceBuilding : NetworkBehaviour
 			highlighterObj.SetActive(true);
 		CanPlaceHighliterRed();
 
-		Debug.LogWarning("building set up running");
 		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set player refs here
 		if (building.isPlayerOneEntity)
 		{
@@ -78,90 +116,149 @@ public class CanPlaceBuilding : NetworkBehaviour
 		if (IsServer && playerCon.isPlayerOne)
 			GameManager.Instance.playerBuildingsList.Add(GetComponent<BuildingManager>());
 	}
+	public void SetUpTurretOnStartUp(Entities entity)
+	{
+		highlighterObj.SetActive(true);
+		CanPlaceHighliterRed();
 
+		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set player refs here
+
+		if (playerCon.isPlayerOne != !entity.isPlayerOneEntity)
+		{
+			entity.playerController = playerCon;
+
+			playerCon.buildingPlacementManager.currentBuildingPlacement = entity;
+			playerCon.buildingPlacementManager.canPlaceBuilding = this;
+			playerCon.buildingPlacementManager.currentBuildingPlacementNetworkId = entity.GetComponent<NetworkObject>().NetworkObjectId;
+		}
+		//set entity Minimap layer and colour
+		if (turret.isPlayerOneEntity)
+			turret.miniMapRenderObj.layer = 11;
+		else
+			turret.miniMapRenderObj.layer = 12;
+
+		if (turret.playerController != null)
+			turret.miniMapRenderObj.GetComponent<SpriteRenderer>().color = Color.green;
+		else
+			turret.miniMapRenderObj.GetComponent<SpriteRenderer>().color = Color.red;
+
+		if (IsServer && playerCon.isPlayerOne)
+			GameManager.Instance.playerBuildingsList.Add(GetComponent<BuildingManager>());
+	}
+
+	//update highlighter colour depending on bools, final bool checks on building placement
+	public void UpdateHighlighterColour()
+	{
+		if (CheckCapturePointOwnership())
+		{
+			if (CheckPlacementHeight())
+			{
+				if (!isCollidingWithAnotherBuilding)
+				{
+					CanPlaceHighliterGreen();
+				}
+				else
+					CanPlaceHighliterRed();
+			}
+			else
+				CanPlaceHighliterRed();
+		}
+		else
+			CanPlaceHighliterRed();
+	}
+	public bool CheckIfCanPlaceBuilding()
+	{
+		if (pointController != null)
+		{
+			if (CheckCapturePointOwnership())
+			{
+				if (CheckPlacementHeight())
+				{
+					if (!isCollidingWithAnotherBuilding)
+					{
+						return canPlace = true;
+					}
+					else
+					{
+						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Colliding with another Entity", 2f);
+						return canPlace = false;
+					}
+				}
+				else
+				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Incorrect Placement Height", 2f);
+					return canPlace = false;
+				}
+			}
+			else
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("You Dont Own This Capturepoint", 2f);
+				return canPlace = false;
+			}
+		}
+		else
+		{
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Not In Buildable Area", 2f);
+			return canPlace = false;
+		}
+	}
+
+	//bool checks and updates
 	public void OnTriggerEnter(Collider other)
 	{
 		if(other.GetComponent<CapturePointController>())
 		{
-			//Debug.Log("capturepoint trigger enter");
 			pointController = other.GetComponent<CapturePointController>();
-			if (!CheckIfCapturePointIsNeutral())
-				CanPlaceHighliterGreen();
-			if (pointController.isNeutralPoint)
-				CanPlaceHighliterRed();
-			else
-				CanPlaceHighliterRed();
 
-			if (turret != null)
-				turret.capturePointController = pointController;
-			else if (building != null)
+			if (building != null)
 				building.capturePointController = pointController;
+			else if (turret != null)
+				turret.capturePointController = pointController;
 		}
 
 		if (other.GetComponent<CanPlaceBuilding>() != null)
-		{
-			//Debug.Log("building trigger enter");
-			CanPlaceHighliterRed();
 			isCollidingWithAnotherBuilding = true;
-		}
 	}
 	public void OnTriggerExit(Collider other)
 	{
 		if (other.GetComponent<CapturePointController>())
-		{
-			//Debug.Log("capturepoint trigger exit");
-			CanPlaceHighliterRed();
 			pointController = null;
-		}
 
 		if (other.GetComponent<CanPlaceBuilding>() != null)
-		{
-			//Debug.Log("building trigger exit");
-			CanPlaceHighliterGreen();
 			isCollidingWithAnotherBuilding = false;
-		}
 	}
-	public void TrackPlacementHeight()
-	{
-		if (pointController != null && !CheckIfCapturePointIsNeutral() && !isCollidingWithAnotherBuilding)
-		{
-			if (building != null)
-			{
-				if (building.transform.position.y > 8f && building.transform.position.y < 11f)
-					CanPlaceHighliterGreen();
-				else
-					CanPlaceHighliterRed();
-			}
-			else
-			{
-				if (turret.transform.position.y > 8f && turret.transform.position.y < 11f)
-					CanPlaceHighliterGreen();
-				else
-					CanPlaceHighliterRed();
-			}
-		}
-	}
-	public bool CheckIfCapturePointIsNeutral()
+	public bool CheckCapturePointOwnership()
 	{
 		if (building != null)
 		{
-			if (pointController.isPlayerOnePoint == building.isPlayerOneEntity && !pointController.isNeutralPoint ||
-				pointController.isPlayerTwoPoint == !building.isPlayerOneEntity && !pointController.isNeutralPoint)
-			{
-				return false;
-			}
-			else
+			if (!pointController.isNeutralPoint && !pointController.isPlayerOnePoint != building.isPlayerOneEntity)
 				return true;
+			else
+				return false;
 		}
 		else
 		{
-			if (pointController.isPlayerOnePoint == turret.isPlayerOneEntity && !pointController.isNeutralPoint ||
-				pointController.isPlayerTwoPoint == !turret.isPlayerOneEntity && !pointController.isNeutralPoint)
-			{
-				return false;
-			}
-			else
+			if (!pointController.isNeutralPoint && !pointController.isPlayerOnePoint != turret.isPlayerOneEntity)
 				return true;
+			else
+				return false;
+		}
+	}
+	public bool CheckPlacementHeight()
+	{
+		if (building != null)
+		{
+			if (building.transform.position.y > placementHeightMin && building.transform.position.y < placementHeightMax)
+				return true;
+			else
+				return false;
+		}
+		else
+		{
+			if (turret.transform.position.y > placementHeightMin && turret.transform.position.y < placementHeightMax)
+				return true;
+			else
+				return false;
 		}
 	}
 
@@ -186,8 +283,8 @@ public class CanPlaceBuilding : NetworkBehaviour
 
 		if (building != null)
 		{
-			if (!pointController.isPlayerOnePoint != building.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
-				building.transform.position.y > 8f && building.transform.position.y < 11f)
+			if (!pointController.isNeutralPoint && !pointController.isPlayerOnePoint != building.isPlayerOneEntity && pointController != null &&
+				building.transform.position.y > 8f && building.transform.position.y < 11f && !isCollidingWithAnotherBuilding)
 			{
 				if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)
 				{
@@ -198,38 +295,38 @@ public class CanPlaceBuilding : NetworkBehaviour
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Energy Generator Already Exists", 1f);
 					return canPlace = false;
 				}
-				else if (pointController.RefinaryBuildings.Count <= 1 && building.isRefineryBuilding)
+				else if (pointController.RefinaryBuildings.Count < pointController.RefinaryBuildingsPlacementLimit && building.isRefineryBuilding)
 				{
 					return canPlace = true;
 				}
-				else if (pointController.RefinaryBuildings.Count >= 1 && building.isRefineryBuilding)
+				else if (pointController.RefinaryBuildings.Count >= pointController.RefinaryBuildingsPlacementLimit && building.isRefineryBuilding)
 				{
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Refinery Buildings Reached in Control Point", 2f);
 					return canPlace = false;
 				}
-				else if (pointController.lightVehProdBuildings.Count <= 1 && building.isLightVehProdBuilding)
+				else if (pointController.lightVehProdBuildings.Count < pointController.lightVehProdBuildingsPlacementLimit && building.isLightVehProdBuilding)
 				{
 					return canPlace = true;
 				}
-				else if (pointController.lightVehProdBuildings.Count >= 1 && building.isLightVehProdBuilding)
+				else if (pointController.lightVehProdBuildings.Count >= pointController.lightVehProdBuildingsPlacementLimit && building.isLightVehProdBuilding)
 				{
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Light Vehicle Buildings Reached in Control Point", 2f);
 					return canPlace = false;
 				}
-				else if (pointController.heavyVehProdBuildings.Count <= 1 && building.isHeavyVehProdBuilding)
+				else if (pointController.heavyVehProdBuildings.Count < pointController.heavyVehProdBuildingsPlacementLimit && building.isHeavyVehProdBuilding)
 				{
 					return canPlace = true;
 				}
-				else if (pointController.heavyVehProdBuildings.Count >= 1 && building.isHeavyVehProdBuilding)
+				else if (pointController.heavyVehProdBuildings.Count >= pointController.heavyVehProdBuildingsPlacementLimit && building.isHeavyVehProdBuilding)
 				{
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Heavy Vehicle Buildings Reached in Control Point", 2f);
 					return canPlace = false;
 				}
-				else if (pointController.vtolProdBuildings.Count <= 1 && building.isVTOLProdBuilding)
+				else if (pointController.vtolProdBuildings.Count < pointController.vtolProdBuildingsPlacementLimit && building.isVTOLProdBuilding)
 				{
 					return canPlace = true;
 				}
-				else if (pointController.vtolProdBuildings.Count >= 1 && building.isVTOLProdBuilding)
+				else if (pointController.vtolProdBuildings.Count >= pointController.vtolProdBuildingsPlacementLimit && building.isVTOLProdBuilding)
 				{
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max VTOL Vehicle Buildings Reached in Control Point", 2f);
 					return canPlace = false;
@@ -246,31 +343,51 @@ public class CanPlaceBuilding : NetworkBehaviour
 				return false;
 			}
 		}
-		else
+		else if (turret != null)
 		{
-			if (!pointController.isPlayerOnePoint != turret.isPlayerOneEntity && pointController != null && !isCollidingWithAnotherBuilding &&
-				turret.transform.position.y > 8f && turret.transform.position.y < 11f)
+			if (!pointController.isNeutralPoint && !pointController.isPlayerOnePoint != turret.isPlayerOneEntity && pointController != null)
 			{
-				if (pointController.TurretDefenses.Count <= 1 && turret.isTurret)
+				if (turret.transform.position.y > 8f && turret.transform.position.y < 11f && !isCollidingWithAnotherBuilding)
 				{
-					return canPlace = true;
-				}
-				else if (pointController.TurretDefenses.Count >= 1 && turret.isTurret)
-				{
-					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Turret Defense Buildings Reached in Control Point", 2f);
-					return canPlace = false;
+					if (!isCollidingWithAnotherBuilding)
+					{
+						if (pointController.TurretDefenses.Count < pointController.TurretDefensesPlacementLimit && turret.isTurret)
+						{
+							return canPlace = true;
+						}
+						else if (pointController.TurretDefenses.Count >= pointController.TurretDefensesPlacementLimit && turret.isTurret)
+						{
+							GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Turret Defense Buildings Reached in Control Point", 2f);
+							return canPlace = false;
+						}
+						else
+						{
+							GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building for some reason", 2f);
+							return canPlace = false;
+						}
+					}
+					else
+					{
+						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Turret touching another entity", 2f);
+						return canPlace = false;
+					}
 				}
 				else
 				{
-					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 1f);
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Turret Placement Too High or Low", 2f);
 					return canPlace = false;
 				}
 			}
 			else
 			{
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Couldnt place building", 1f);
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Player doesnt own capturepoint", 2f);
 				return false;
 			}
+		}
+		else
+		{
+			Debug.LogError("building/turret Reference not assigned");
+			return false;
 		}
 	}
 }

@@ -9,6 +9,14 @@ public class CapturePointController : MonoBehaviour
 	public bool isPlayerOnePoint;
 	public bool isPlayerTwoPoint;
 
+	[Header("Max Building Type Limit")]
+	public readonly int energyGeneratorPlacementLimit = 1;
+	public readonly int RefinaryBuildingsPlacementLimit = 2;
+	public readonly int lightVehProdBuildingsPlacementLimit = 2;
+	public readonly int heavyVehProdBuildingsPlacementLimit = 2;
+	public readonly int vtolProdBuildingsPlacementLimit = 2;
+	public readonly int TurretDefensesPlacementLimit = 3;
+
 	[Header("Optional Refs")]
 	public BuildingManager HQRef;
 
