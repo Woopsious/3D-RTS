@@ -385,7 +385,6 @@ public class MultiplayerManager : NetworkBehaviour
 		else
 			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 	}
-
 	public async void RemoveClientFromLobby(string playerId)
 	{
 		try

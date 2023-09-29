@@ -188,7 +188,7 @@ public class UnitSelectionManager : NetworkBehaviour
 	{
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-		if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe) && !playerController.IsMouseOverUI() && 
+		if (Physics.Raycast(ray, out RaycastHit hitInfo, 500f, playerController.ignoreMe) && !playerController.IsMouseOverUI() && 
 		playerController.buildingPlacementManager.currentBuildingPlacement == null && 
 		playerController.unitProductionManager.currentUnitPlacements.Count == 0)
 		{	
@@ -205,6 +205,9 @@ public class UnitSelectionManager : NetworkBehaviour
 				else if (entity.GetComponent<BuildingManager>() != null)
 					TrySelectBuilding(entity.GetComponent<BuildingManager>());
 
+				else if (entity.GetComponent<TurretController>() != null)
+					TrySelectTurrets(entity.GetComponent<TurretController>());
+
 				else if (entity.GetComponent<UnitStateController>() != null)
 					TrySelectUnits(entity.GetComponent<UnitStateController>());
 			}
@@ -219,9 +222,10 @@ public class UnitSelectionManager : NetworkBehaviour
 
 				else
 				{
-					DeselectUnits();
-					DeselectBuilding();
 					DeselectCargoShip();
+					DeselectBuilding();
+					DeselectTurrets();
+					DeselectUnits();
 				}
 			}
 		}
@@ -230,9 +234,11 @@ public class UnitSelectionManager : NetworkBehaviour
 	{
 		if (CheckForCargoShip(cargoShip) && cargoShip.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
-			DeselectBuilding();
-			DeselectUnits();
 			DeselectCargoShip();
+			DeselectBuilding();
+			DeselectTurrets();
+			DeselectUnits();
+
 			SelectedCargoShip = cargoShip;
 			SelectedCargoShip.selectedHighlighter.SetActive(true);
 			SelectedCargoShip.isSelected = true;
@@ -242,9 +248,11 @@ public class UnitSelectionManager : NetworkBehaviour
 	{
 		if (BuildingExists(building) && building.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
-			DeselectBuilding();
-			DeselectUnits();
 			DeselectCargoShip();
+			DeselectBuilding();
+			DeselectTurrets();
+			DeselectUnits();
+
 			selectedBuilding = building;
 			selectedBuilding.ShowUIHealthBar();
 			selectedBuilding.ShowRefundButton();
@@ -254,8 +262,9 @@ public class UnitSelectionManager : NetworkBehaviour
 	}
 	public void TrySelectUnits(UnitStateController unit)
 	{
-		DeselectBuilding();
 		DeselectCargoShip();
+		DeselectBuilding();
+		DeselectTurrets();
 
 		if (unit.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
@@ -305,6 +314,57 @@ public class UnitSelectionManager : NetworkBehaviour
 			SetUnitRefundButtonActiveUnactive();
 		}
 	}
+	public void TrySelectTurrets(TurretController turret)
+	{
+		DeselectCargoShip();
+		DeselectBuilding();
+		DeselectUnits();
+
+		if (turret.isPlayerOneEntity != !playerController.isPlayerOne)
+		{
+			//reselect new turret
+			if (!Input.GetKey(KeyCode.LeftShift))
+			{
+				DeselectTurrets();
+				turret.ShowUIHealthBar();
+				turret.selectedHighlighter.SetActive(true);
+				if (turret.isUnitArmed)
+					turret.attackRangeMeshObj.SetActive(true);
+				turret.isSelected = true;
+				selectedUnitList.Add(turret);
+				turret.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(true);
+			}
+			//check if turret is already in selectedUnitList, if it was remove it, else add it
+			if (Input.GetKey(KeyCode.LeftShift))
+			{
+				foreach (UnitStateController selectedUnit in selectedUnitList)
+				{
+					if (UnitAlreadyInList(selectedUnit, turret))
+					{
+						selectedUnit.HideUIHealthBar();
+						selectedUnit.selectedHighlighter.SetActive(false);
+						turret.attackRangeMeshObj.SetActive(false);
+						selectedUnit.isSelected = false;
+						selectedUnitList.Remove(selectedUnit);
+
+						if (selectedUnit.isTurret)
+							selectedUnit.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(false);
+					}
+					foreach (GameObject obj in movePosHighlighterObj)
+					{
+						if (obj.activeInHierarchy)
+							obj.SetActive(false);
+					}
+				}
+				turret.ShowUIHealthBar();
+				turret.selectedHighlighter.SetActive(true);
+				turret.attackRangeMeshObj.SetActive(true);
+				turret.isSelected = true;
+				selectedUnitList.Add(turret);
+				turret.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(true);
+			}
+		}
+	}
 	public void TryMoveSelectedEntities(GameObject Obj)
 	{
 		//move selected cargoShip
@@ -328,17 +388,22 @@ public class UnitSelectionManager : NetworkBehaviour
 		//move selected units to mouse pos
 		else if (selectedUnitList.Count != 0)
 		{
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Moving!", 1f);
-
-			for (int i = 0; i < selectedUnitList.Count; i++)
+			if (!selectedUnitList[0].isTurret)
 			{
-				Vector3 movePos = movePosHighlighterObj[i].transform.position;	//ask server to move units fo clients
-				MoveUnitsServerRPC(selectedUnitList[i].EntityNetworkObjId, movePos);
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Moving!", 1f);
+
+				for (int i = 0; i < selectedUnitList.Count; i++)
+				{
+					Vector3 movePos = movePosHighlighterObj[i].transform.position;  //ask server to move units fo clients
+					MoveUnitsServerRPC(selectedUnitList[i].EntityNetworkObjId, movePos);
+				}
 			}
 		}
 	}
 	public void TryAttackEnemyEntity(ulong targetEntityNetworkObjId)
 	{
+		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target!", 1f);
+
 		//move selected units closer to target and attack it
 		for (int i = 0; i < selectedUnitList.Count; i++)
 		{
@@ -416,6 +481,27 @@ public class UnitSelectionManager : NetworkBehaviour
 	}
 
 	//DESELECT ENTITY FUNCTIONS
+	public void DeselectCargoShip()
+	{
+		if (SelectedCargoShip != null)
+		{
+			SelectedCargoShip.selectedHighlighter.SetActive(false);
+			SelectedCargoShip.isSelected = false;
+			SelectedCargoShip = null;
+		}
+	}
+	public void DeselectBuilding()
+	{
+		if (selectedBuilding != null)
+		{
+			if (!selectedBuilding.wasRecentlyHit)
+				selectedBuilding.HideUIHealthBar();
+			selectedBuilding.HideRefundButton();
+			selectedBuilding.selectedHighlighter.SetActive(false);
+			selectedBuilding.isSelected = false;
+			selectedBuilding = null;
+		}
+	}
 	public void DeselectUnits()
 	{
 		if (selectedUnitList.Count != 0)
@@ -423,13 +509,11 @@ public class UnitSelectionManager : NetworkBehaviour
 			SetUnitRefundButtonActiveUnactive();
 			foreach (UnitStateController selectedUnit in selectedUnitList)
 			{
+				if (selectedUnit )
 				selectedUnit.HideUIHealthBar();
 				selectedUnit.selectedHighlighter.SetActive(false);
 				selectedUnit.attackRangeMeshObj.SetActive(false);
 				selectedUnit.isSelected = false;
-
-				if (selectedUnit.isTurret)
-					selectedUnit.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(false);
 			}
 
 			foreach (GameObject obj in movePosHighlighterObj)
@@ -440,25 +524,26 @@ public class UnitSelectionManager : NetworkBehaviour
 			selectedUnitList.Clear();
 		}
 	}
-	public void DeselectBuilding()
+	public void DeselectTurrets()
 	{
-		if (selectedBuilding != null)
+		if (selectedUnitList.Count != 0)
 		{
-			if(!selectedBuilding.wasRecentlyHit)
-				selectedBuilding.HideUIHealthBar();
-			selectedBuilding.HideRefundButton();
-			selectedBuilding.selectedHighlighter.SetActive(false);
-			selectedBuilding.isSelected = false;
-			selectedBuilding = null;
-		}
-	}
-	public void DeselectCargoShip()
-	{
-		if (SelectedCargoShip != null)
-		{
-			SelectedCargoShip.selectedHighlighter.SetActive(false);
-			SelectedCargoShip.isSelected = false;
-			SelectedCargoShip = null;
+			SetUnitRefundButtonActiveUnactive();
+			foreach (TurretController selectedTurret in selectedUnitList)
+			{
+				selectedTurret.HideUIHealthBar();
+				selectedTurret.selectedHighlighter.SetActive(false);
+				selectedTurret.attackRangeMeshObj.SetActive(false);
+				selectedTurret.isSelected = false;
+				selectedTurret.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(false);
+			}
+
+			foreach (GameObject obj in movePosHighlighterObj)
+			{
+				if (obj.activeInHierarchy)
+					obj.SetActive(false);
+			}
+			selectedUnitList.Clear();
 		}
 	}
 
