@@ -18,7 +18,6 @@ public class TurretController : UnitStateController
 		audioSFXs[0].Play();
 
 		weaponSystem.TryFindTargets();
-		//weaponSystem.TryFindTargetsServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
 	public void DeactivateTurret()
 	{
