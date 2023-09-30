@@ -84,10 +84,14 @@ public class UnitSelectionManager : NetworkBehaviour
 			mouseDownTime = 0;
 		}
 		//clear selected list
-		if (Input.GetMouseButtonDown(1) && selectedUnitList.Count != 0)
+		if (Input.GetMouseButtonDown(1) && selectedUnitList.Count != 0 && !selectedUnitList[0].isTurret)
 		{
 			DeselectUnits();
 			SetUnitRefundButtonActiveUnactive();
+		}
+		else if (Input.GetMouseButtonDown(1) && selectedUnitList.Count != 0 && selectedUnitList[0].isTurret)
+		{
+			DeselectTurrets();
 		}
 		if (Input.GetMouseButtonDown(1) && selectedBuilding != null)
 		{
@@ -464,9 +468,10 @@ public class UnitSelectionManager : NetworkBehaviour
 	{
 		if (dragSelectedUnitList.Count != 0)
 		{
-			DeselectUnits();
-			DeselectBuilding();
 			DeselectCargoShip();
+			DeselectBuilding();
+			DeselectTurrets();
+			DeselectUnits();
 		}
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{
@@ -550,7 +555,7 @@ public class UnitSelectionManager : NetworkBehaviour
 	//UNIT GROUP SAVING AND SELECTING FUNCTIONS
 	public void ManageSelectedUnitsAndGroups()
 	{
-		if (selectedUnitList.Count != 0)
+		if (selectedUnitList.Count != 0 && !selectedUnitList[0].isTurret)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
@@ -573,7 +578,7 @@ public class UnitSelectionManager : NetworkBehaviour
 				AssignUnitsToGroupFive();
 			}
 		}
-		else if (selectedUnitList.Count == 0)
+		else if (selectedUnitList.Count == 0 && !selectedUnitList[0].isTurret)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
@@ -707,6 +712,11 @@ public class UnitSelectionManager : NetworkBehaviour
 	//if no units selected then select all units in group
 	public void SelectUnitsFromGroup(List<UnitStateController> unitGroup)
 	{
+		DeselectCargoShip();
+		DeselectBuilding();
+		DeselectTurrets();
+		DeselectUnits();
+
 		foreach (UnitStateController unit in unitGroup)
 		{
 			unit.selectedHighlighter.SetActive(true);
