@@ -23,6 +23,17 @@ public class CameraController : MonoBehaviour
 		CameraController.instance = this;
 		if (terrainCollider != null)
 			prevTerrainHeight = Terrain.activeTerrain.SampleHeight(transform.position);
+
+		if (GameManager.Instance.isPlayerOne)
+		{
+			gameObject.transform.position = new Vector3(55, 35, 55);
+			gameObject.transform.eulerAngles = new Vector3(0, 225, 0);
+		}
+		else if (!GameManager.Instance.isPlayerOne)
+		{
+			gameObject.transform.position = new Vector3(200, 35, 200);
+			gameObject.transform.eulerAngles = new Vector3(0, 45, 0);
+		}
 	}
 	public void Update()
 	{
