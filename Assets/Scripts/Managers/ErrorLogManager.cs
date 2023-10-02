@@ -74,10 +74,9 @@ public class ErrorLogManager : MonoBehaviour
 	{
 		string log = stackTrace + "\n" + logString;
 
-		if (stackTrace.Contains("[NetCode] [DestinationState To Transition Info] Layer (0) does not exist!"))
-		{
-			Debug.LogError("ERROR MATCHES");
-		}
+		//get rid of the error thrown by networkanimator when entities are moving
+		if (log.Contains("/Library/PackageCache/com.unity.netcode.gameobjects@1.5.2/Components/NetworkAnimator.cs:1181)"))
+			return;
 
 		if (type == LogType.Error || type == LogType.Warning)
 		{
