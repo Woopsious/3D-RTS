@@ -56,6 +56,48 @@ public class TurretController : UnitStateController
 		var lookRotation = Quaternion.LookRotation(lookDirection - turretGuns.transform.position);
 		turretGuns.transform.rotation = Quaternion.Slerp(turretGuns.transform.rotation, lookRotation, 0.1f);
 	}
+
+	[ServerRpc(RequireOwnership = false)]
+	public void LookAtTargetServerRPC()
+	{
+		LookAtTargetClientRPC();
+	}
+	[ClientRpc]
+	public void LookAtTargetClientRPC()
+	{
+		FaceTargetTest();
+		ChangeGunElevationTest();
+	}
+	public void FaceTargetTest()
+	{
+		if (playerSetTarget != null)
+		{
+			Vector3 lookDirection = new Vector3(playerSetTarget.transform.position.x, turretTower.transform.position.y, playerSetTarget.transform.position.z);
+			var lookRotation = Quaternion.LookRotation(lookDirection - turretTower.transform.position);
+			turretTower.transform.rotation = Quaternion.Slerp(turretTower.transform.rotation, lookRotation, 0.1f);
+		}
+		else
+		{
+			Vector3 lookDirection = new Vector3(currentUnitTarget.transform.position.x, turretTower.transform.position.y, currentUnitTarget.transform.position.z);
+			var lookRotation = Quaternion.LookRotation(lookDirection - turretTower.transform.position);
+			turretTower.transform.rotation = Quaternion.Slerp(turretTower.transform.rotation, lookRotation, 0.1f);
+		}
+	}
+	public void ChangeGunElevationTest()
+	{
+		if (playerSetTarget != null)
+		{
+			Vector3 lookDirection = new Vector3(playerSetTarget.transform.position.x, playerSetTarget.transform.position.y, playerSetTarget.transform.position.z);
+			var lookRotation = Quaternion.LookRotation(lookDirection - turretGuns.transform.position);
+			turretGuns.transform.rotation = Quaternion.Slerp(turretGuns.transform.rotation, lookRotation, 0.1f);
+		}
+		else
+		{
+			Vector3 lookDirection = new Vector3(currentUnitTarget.transform.position.x, currentUnitTarget.transform.position.y, currentUnitTarget.transform.position.z);
+			var lookRotation = Quaternion.LookRotation(lookDirection - turretGuns.transform.position);
+			turretGuns.transform.rotation = Quaternion.Slerp(turretGuns.transform.rotation, lookRotation, 0.1f);
+		}
+	}
 	public void AddTurretRefs()
 	{
 		capturePointController.TurretDefenses.Add(this);

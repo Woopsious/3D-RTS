@@ -42,11 +42,17 @@ public class UnitStateAttacking : UnitBaseState
 	{
 		//only look at target when its within attack range
 		if (unit.playerSetTarget != null && unit.CheckIfInAttackRange(unit.playerSetTarget.transform.position))
+		{
 			StopAndLookAtTarget(unit, unit.playerSetTarget);
+		}
 		else if (unit.currentUnitTarget != null && unit.CheckIfInAttackRange(unit.currentUnitTarget.transform.position))
+		{
 			StopAndLookAtTarget(unit, unit.currentUnitTarget);
+		}
 		else if (unit.currentBuildingTarget != null && unit.CheckIfInAttackRange(unit.currentBuildingTarget.transform.position))
+		{
 			StopAndLookAtTarget(unit, unit.currentBuildingTarget);
+		}
 
 		//continue to last movement destination
 		if (!unit.isTurret && unit.agentNav.remainingDistance < unit.agentNav.stoppingDistance)
