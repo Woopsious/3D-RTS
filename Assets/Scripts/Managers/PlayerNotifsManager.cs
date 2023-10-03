@@ -40,6 +40,9 @@ public class PlayerNotifsManager : MonoBehaviour
 	//FUNCTIONS FOR PLAYER NOTIFICATIONS
 	public void DisplayNotifisMessage(string message, float displayTimeInSeconds)
 	{
+		if (playerMessageNotifsWindowObj.activeInHierarchy)
+			playerMessageNotifsWindowObj.SetActive(false);
+
 		playerMessageNotifsText.text = message;
 		playerMessageNotifsWindowObj.SetActive(true);
 		StartCoroutine(HidePopUpMessage(displayTimeInSeconds));
