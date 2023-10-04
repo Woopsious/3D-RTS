@@ -85,7 +85,8 @@ public class MultiplayerManager : NetworkBehaviour
 	//Client data added to networked list of client data when ever client connects to a relay
 	public void PlayerConnectedCallback(ulong id)
 	{
-		Debug.LogError($"Player Connected, ID: {id}");
+		//Debug.LogError($"Player Connected, ID: {id}");
+
 		Instance.localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
 		int i = connectedClientsList.Count;
 
@@ -109,7 +110,7 @@ public class MultiplayerManager : NetworkBehaviour
 	//StopClient will always be called to handle intentional leaving or unintentional disconnects
 	public void PlayerDisconnectedCallback(ulong id)
 	{
-		Debug.LogError($"Player Disconnected, ID: {id}");
+		//Debug.LogError($"Player Disconnected, ID: {id}");
 
 		if (CheckIfHost()) // if host remove client from lobby and relay
 			HandleClientDisconnectsWhenHost(id);

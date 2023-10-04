@@ -10,8 +10,15 @@ public class WeatherSystem : MonoBehaviour
 	public readonly int maxSnowEmissionRate = 1000;
 	public readonly int minSnowEmissionRate = 250;
 
+	public int newSnowEmissionRate;
+
 	public readonly int maxVelocity = 10;
 	public readonly int minVelocity = -10;
+
+	public readonly float maxFogDensity = 0.035f;
+	public readonly float minFogDensity = 0.01f;
+
+	public float newFogDensity;
 
 	//weather changes every 90s to 180s (set lower for now)
 	public readonly float minWeatherTimer = 10;
@@ -41,16 +48,49 @@ public class WeatherSystem : MonoBehaviour
 			ChangeEmissionRate();
 			ChangeXDirectionVelocity();
 			ChangeZDirectionVelocity();
+			ChangeFogDensity();
 
 			changeWeatherTimer = Random.Range(minWeatherTimer, maxWeatherTimer);
 		}
 	}
 
+	//functions to change fog density
+	public void ChangeFogDensity()
+	{
+		newFogDensity = (float)newSnowEmissionRate / 25000;
+
+		if (RenderSettings.fogDensity < newFogDensity)
+			StartCoroutine(IncreaseFogDensityOvertime());
+		else if (RenderSettings.fogDensity > newFogDensity)
+			StartCoroutine(DecreaseFogDensityOvertime());
+	}
+	public IEnumerator IncreaseFogDensityOvertime()
+	{
+		yield return new WaitForSeconds(0.1f);
+
+		if (RenderSettings.fogDensity < newFogDensity)
+		{
+			RenderSettings.fogDensity += 0.0001f;
+			StartCoroutine(IncreaseFogDensityOvertime());
+		}
+	}
+	public IEnumerator DecreaseFogDensityOvertime()
+	{
+		yield return new WaitForSeconds(0.1f);
+
+		if (RenderSettings.fogDensity > newFogDensity)
+		{
+			RenderSettings.fogDensity -= 0.0001f;
+			StartCoroutine(DecreaseFogDensityOvertime());
+		}
+	}
+
+	//functions to change snow particle effects
 	public void ChangeEmissionRate()
 	{
-		int newEmissionRate = Random.Range(minSnowEmissionRate, maxSnowEmissionRate);
+		newSnowEmissionRate = Random.Range(minSnowEmissionRate, maxSnowEmissionRate);
 		var emission = snowParticleSystem.emission;
-		emission.rateOverTime = newEmissionRate;
+		emission.rateOverTime = newSnowEmissionRate;
 	}
 	public void ChangeXDirectionVelocity()
 	{

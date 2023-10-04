@@ -366,6 +366,8 @@ public class TechTreeManager : MonoBehaviour
 	}
 	public void CompleteResearch(List<Technology> techList, int index) //update bonus values provided by research
 	{
+		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Research Complete", 2f);
+
 		if (techList == buildingTechList)
 			gameUIManager.gameManager.UpdateTechBonusesServerRPC(true, index);
 		else if (techList == unitTechList)
@@ -375,7 +377,6 @@ public class TechTreeManager : MonoBehaviour
 	{
 		if (techList == buildingTechList)
 		{
-			Debug.Log("building tech list");
 			if (index == 0 || index == 1)
 			{
 				techList[2].canBeReseached = true;
@@ -402,7 +403,6 @@ public class TechTreeManager : MonoBehaviour
 		}
 		else if (techList == unitTechList)
 		{
-			Debug.Log("unit tech list");
 			if (index == 0 || index == 1)
 			{
 				techList[2].canBeReseached = true;

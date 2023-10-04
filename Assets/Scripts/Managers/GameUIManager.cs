@@ -88,6 +88,7 @@ public class GameUIManager : MonoBehaviour
 		GameManager.Instance.LoadPlayerData();
 
 		audioBackButton.onClick.AddListener(delegate { AudioManager.Instance.AdjustAudioVolume(); });
+		techTreeManager.currentResearchInfoText.text = "No Tech Currently Researching";
 	}
 	public void Update()
 	{
@@ -96,7 +97,7 @@ public class GameUIManager : MonoBehaviour
 		GameManager.Instance.GameClock();
 
 		if(techTreeManager.isCurrentlyReseaching)
-			UpdateTechUi();
+			UpdateTechUiComplete();
 	}
 	//function called when player clicks ready on button for MP only
 	public void SetPlayerReady()
@@ -457,7 +458,16 @@ public class GameUIManager : MonoBehaviour
 	}
 
 	//UI UPDATES
-	public void UpdateTechUi()
+	public IEnumerator ResetTechUi(float timeToWaitSeconds)
+	{
+		yield return new WaitForSeconds(timeToWaitSeconds);
+		if (!techTreeManager.isCurrentlyReseaching)
+		{
+			techTreeManager.currentResearchInfoText.text = "No Tech Currently Researching";
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("SELECT A NEW RESEARCH", 2f);
+		}
+	}
+	public void UpdateTechUiComplete()
 	{
 		if (techTreeManager.currentReseachingTech.TimeToResearchSec > 0)
 		{
@@ -466,7 +476,10 @@ public class GameUIManager : MonoBehaviour
 				"\n Complete In: " + techTreeManager.currentReseachingTech.TimeToResearchSec + "s";
 		}
 		else
+		{
 			techTreeManager.currentResearchInfoText.text = techTreeManager.currentReseachingTech.TechName + "\n COMPLETE";
+			StartCoroutine(ResetTechUi(10f));
+		}
 	}
 	public void UpdateInGameTimerUI()
 	{
