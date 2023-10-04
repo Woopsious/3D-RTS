@@ -13,17 +13,37 @@ public class WeatherSystem : MonoBehaviour
 	public readonly int maxVelocity = 10;
 	public readonly int minVelocity = -10;
 
+	//weather changes every 90s to 180s (set lower for now)
+	public readonly float minWeatherTimer = 15;
+	public readonly float maxWeatherTimer = 30;
+
+	public float changeWeatherTimer;
+
 	public void Start()
 	{
 		ChangeEmissionRate();
 		ChangeFallVelocity();
 		ChangeXDirectionVelocity();
 		ChangeZDirectionVelocity();
+
+		changeWeatherTimer = Random.Range(minWeatherTimer, maxWeatherTimer);
 	}
 
 	public void Update()
 	{
-		
+		ChangeWeather();
+	}
+	public void ChangeWeather()
+	{
+		changeWeatherTimer -= Time.deltaTime;
+		if (changeWeatherTimer < 0)
+		{
+			ChangeEmissionRate();
+			ChangeXDirectionVelocity();
+			ChangeZDirectionVelocity();
+
+			changeWeatherTimer = Random.Range(minWeatherTimer, maxWeatherTimer);
+		}
 	}
 
 	public void ChangeEmissionRate()
