@@ -56,7 +56,7 @@ public class PlayerController : NetworkBehaviour
 	{
 		if (Input.GetKeyDown(KeyCode.Alpha0))
 		{
-			weatherSystem.ChangeEmissionRate();
+			weatherSystem.ChangeEmissionRate();	
 			weatherSystem.ChangeFallVelocity();
 			weatherSystem.ChangeXDirectionVelocity();
 			weatherSystem.ChangeZDirectionVelocity();

@@ -34,6 +34,7 @@ public class MultiplayerManager : NetworkBehaviour
 	public string lobbyJoinCode;
 	public ILobbyEvents lobbyEvents;
 	float lobbyTimer = 0;
+	public float kickPlayerFromLobbyOnFailedToConnectTimer = 10f;
 
 	public NetworkList<ClientData> connectedClientsList;
 
@@ -67,6 +68,9 @@ public class MultiplayerManager : NetworkBehaviour
 	public void Update()
 	{
 		HandleLobbyPollForUpdates();
+
+		if (hostLobby != null && Instance.hostLobby.Players.Count == 2)
+			KickPlayerFromLobbyIfFailedToConnectToRelay();
 	}
 	public void SubToEvents()
 	{
@@ -269,6 +273,17 @@ public class MultiplayerManager : NetworkBehaviour
 		catch (LobbyServiceException e)
 		{
 			Debug.LogError(e.Message);
+		}
+	}
+	public void KickPlayerFromLobbyIfFailedToConnectToRelay()
+	{
+		kickPlayerFromLobbyOnFailedToConnectTimer -= Time.deltaTime;
+		if (kickPlayerFromLobbyOnFailedToConnectTimer < 0)
+		{
+			if (Instance.hostLobby.Players.Count != connectedClientsList.Count)
+				RemoveClientFromLobby(Instance.hostLobby.Players[1].Id);
+
+			kickPlayerFromLobbyOnFailedToConnectTimer = 11f;
 		}
 	}
 

@@ -21,6 +21,11 @@ public class WeatherSystem : MonoBehaviour
 		ChangeZDirectionVelocity();
 	}
 
+	public void Update()
+	{
+		
+	}
+
 	public void ChangeEmissionRate()
 	{
 		int newEmissionRate = Random.Range(minSnowEmissionRate, maxSnowEmissionRate);
