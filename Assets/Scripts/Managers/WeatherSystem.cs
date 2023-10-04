@@ -14,8 +14,8 @@ public class WeatherSystem : MonoBehaviour
 	public readonly int minVelocity = -10;
 
 	//weather changes every 90s to 180s (set lower for now)
-	public readonly float minWeatherTimer = 15;
-	public readonly float maxWeatherTimer = 30;
+	public readonly float minWeatherTimer = 10;
+	public readonly float maxWeatherTimer = 15;
 
 	public float changeWeatherTimer;
 
