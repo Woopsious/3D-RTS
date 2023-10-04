@@ -88,6 +88,7 @@
     <Compile Include="Assets\Scripts\UnitScripts\ParticleEffects.cs" />
     <Compile Include="Assets\Scripts\Managers\GameUIManager.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\WeaponSystem.cs" />
+    <Compile Include="Assets\Scripts\Managers\WeatherSystem.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\UnitStateAttacking.cs" />
     <Compile Include="Assets\Scripts\BuildingScripts\RefineryController.cs" />
     <Compile Include="Assets\Scripts\UnitScripts\ParticleCollisions.cs" />
@@ -861,11 +862,11 @@
     <Reference Include="Unity.Burst">
       <HintPath>Library\ScriptAssemblies\Unity.Burst.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Services.Authentication.Editor.Shared">
-      <HintPath>Library\ScriptAssemblies\Unity.Services.Authentication.Editor.Shared.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.ProBuilder">
       <HintPath>Library\ScriptAssemblies\Unity.ProBuilder.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Authentication.Editor.Shared">
+      <HintPath>Library\ScriptAssemblies\Unity.Services.Authentication.Editor.Shared.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Timeline.Editor.dll</HintPath>
@@ -942,14 +943,14 @@
     <Reference Include="Unity.Services.Authentication">
       <HintPath>Library\ScriptAssemblies\Unity.Services.Authentication.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.Services.Lobbies">
-      <HintPath>Library\ScriptAssemblies\Unity.Services.Lobbies.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.Mathematics">
       <HintPath>Library\ScriptAssemblies\Unity.Mathematics.dll</HintPath>
     </Reference>
     <Reference Include="Unity.2D.Common.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.2D.Common.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Services.Lobbies">
+      <HintPath>Library\ScriptAssemblies\Unity.Services.Lobbies.dll</HintPath>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Universal.Shaders">
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Universal.Shaders.dll</HintPath>

@@ -112,16 +112,6 @@ public class CapturePointController : MonoBehaviour
 		else
 			yield return new WaitForSeconds(1);
 	}
-
-	public void OnTriggerEnter(Collider other)
-	{
-		GrabUnitRefs(other);
-	}
-	public void OnTriggerExit(Collider other)
-	{
-		RemoveUnitRefs(other);
-	}
-
 	public void UpdateFlagColour(int newFlagOwnership)
 	{
 		if (newFlagOwnership == 0 && trackLastCapturePointOwnership != 0)
@@ -216,6 +206,14 @@ public class CapturePointController : MonoBehaviour
 	}
 
 	//track units in area
+	public void OnTriggerEnter(Collider other)
+	{
+		GrabUnitRefs(other);
+	}
+	public void OnTriggerExit(Collider other)
+	{
+		RemoveUnitRefs(other);
+	}
 	public void GrabUnitRefs(Collider other)
 	{
 		if (other.gameObject.GetComponent<UnitStateController>())
