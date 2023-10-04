@@ -10,6 +10,7 @@ using UnityEngine.UI;
 public class PlayerController : NetworkBehaviour
 {
 	public LayerMask ignoreMe;
+	public WeatherSystem weatherSystem;
 
 	[Header("Game Ui Refs")]
 	public Camera miniMapCameraRenderer;
@@ -53,6 +54,13 @@ public class PlayerController : NetworkBehaviour
 	}
 	public void PlayerInputs()
 	{
+		if (Input.GetKeyDown(KeyCode.Alpha0))
+		{
+			weatherSystem.ChangeEmissionRate();	
+			weatherSystem.ChangeFallVelocity();
+			weatherSystem.ChangeXDirectionVelocity();
+			weatherSystem.ChangeZDirectionVelocity();
+		}
 		MenuHotkeys();
 		BuyShopItemHotkeys();
 		GameSpeedHotkeys();
@@ -164,7 +172,7 @@ public class PlayerController : NetworkBehaviour
 				|| Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement != null
 				|| Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement != null )
 			{
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing A Building", 2);
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing A Building", 2f);
 			}
 		}
 		else if (!Input.GetKey(KeyCode.LeftShift) && gameUIManager.buildingsVehicleProdUiShopObj.activeInHierarchy)
@@ -175,29 +183,20 @@ public class PlayerController : NetworkBehaviour
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				if (isPlayerOne && gameUIManager.gameManager.playerOneBuildingHasUnlockedHeavyMechs.Value ||
-					!isPlayerOne && gameUIManager.gameManager.playerTwoBuildingHasUnlockedHeavyMechs.Value)
-					buildingPlacementManager.PlaceHeavyVehProdBuilding();
-				else
-					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Heavy Mechs Tech Not Researched", 2f);
+				buildingPlacementManager.PlaceHeavyVehProdBuilding();
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement == null)
 			{
-				if (isPlayerOne && gameUIManager.gameManager.playerOneBuildingHasUnlockedVtols.Value ||
-					!isPlayerOne && gameUIManager.gameManager.playerTwoBuildingHasUnlockedVtols.Value)
-					buildingPlacementManager.PlaceVTOLProdBuilding();
-				else
-					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("VTOLS Tech Not Researched", 2f);
+				buildingPlacementManager.PlaceVTOLProdBuilding();
 			}
 			else if (Input.GetKeyDown(KeyCode.Alpha1) && buildingPlacementManager.currentBuildingPlacement != null
 				|| Input.GetKeyDown(KeyCode.Alpha2) && buildingPlacementManager.currentBuildingPlacement != null
 				|| Input.GetKeyDown(KeyCode.Alpha3) && buildingPlacementManager.currentBuildingPlacement != null)
 			{
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing A Building", 2);
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Already Placing A Building", 2f);
 			}
 		}
 	}
-
 	public bool IsMouseOverUI()
 	{
 		return EventSystem.current.IsPointerOverGameObject();

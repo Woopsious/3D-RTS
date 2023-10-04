@@ -85,7 +85,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 	//place building and toggle it on
 	public void PlaceBuildingManager()
 	{
-		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlace())
+		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlaceBuilding())
 			TryPlaceCurrentBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
 
 		if (Input.GetMouseButtonDown(1))
@@ -140,11 +140,45 @@ public class BuildingPlacementManager : NetworkBehaviour
 	}
 	public void PlaceHeavyVehProdBuilding()
 	{
-		BuyBuilding(4);
+		if (CheckIfBuildingTechIsUnlocked(GameManager.Instance.isPlayerOne, 4))
+			BuyBuilding(4);
+		else
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Heavy Mechs Tech Not Researched", 3f);
 	}
 	public void PlaceVTOLProdBuilding()
 	{
-		BuyBuilding(5);
+		if (CheckIfBuildingTechIsUnlocked(GameManager.Instance.isPlayerOne, 5))
+				BuyBuilding(5);
+		else
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("VTOLS Tech Not Researched", 3f);
+	}
+	public bool CheckIfBuildingTechIsUnlocked(bool isPlayerOne, int buildingIndex)
+	{
+		if (isPlayerOne && buildingIndex == 4)
+		{
+			if (GameManager.Instance.gameUIManager.gameManager.playerOneBuildingHasUnlockedHeavyMechs.Value)
+				return true;
+			else return false;
+		}
+		else if (isPlayerOne && buildingIndex == 5)
+		{
+			if (GameManager.Instance.gameUIManager.gameManager.playerOneBuildingHasUnlockedVtols.Value)
+				return true;
+			else return false;
+		}
+		else if (!isPlayerOne && buildingIndex == 4)
+		{
+			if (GameManager.Instance.gameUIManager.gameManager.playerTwoBuildingHasUnlockedHeavyMechs.Value)
+				return true;
+			else return false;
+		}
+		else if (!isPlayerOne && buildingIndex == 5)
+		{
+			if (GameManager.Instance.gameUIManager.gameManager.playerTwoBuildingHasUnlockedVtols.Value)
+				return true;
+			else return false;
+		}
+		else return false;
 	}
 
 	//buy functions

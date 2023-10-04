@@ -14,7 +14,6 @@ public class BuildingManager : Entities
 	public GameObject refundBuildingBackgroundObj;
 	public GameObject unpoweredBuildingIndicatorObj;
 
-
 	[Header("Building Production Stats")]
 	public int moneyProduction;
 	public int alloyProduction;

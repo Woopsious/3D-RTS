@@ -8,6 +8,7 @@ public class PlayerData
 {
 	public static PlayerData Instance;
 
+	public string PlayerName;
 	public float backgroundMusicVolumeData;
 	public float menuSFXVolumeData;
 	public float gameSFXVolumeData;

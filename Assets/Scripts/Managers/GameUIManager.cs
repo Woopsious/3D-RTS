@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.Services.Lobbies.Models;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using static UnityEngine.ParticleSystem;
 using static UnityEngine.UI.CanvasScaler;
@@ -33,6 +36,10 @@ public class GameUIManager : MonoBehaviour
 
 	public GameObject isPlayerReadyObj;
 	public Text isOtherPlayerReadyText;
+
+	public GameObject exitAndSaveGameButtonObj;
+	public GameObject exitGameButtonObj;
+	public GameObject playerDisconnectedUiPanel;
 
 	[Header("User Resource Refs")]
 	public Text CurrentMoneyText;
@@ -96,6 +103,69 @@ public class GameUIManager : MonoBehaviour
 	{
 		gameManager.SetPlayerToReadyServerRPC(playerController.isPlayerOne);
 	}
+	public void PlayButtonSound()
+	{
+		AudioManager.Instance.menuSFX.Play();
+	}
+
+	//MAIN GAME MENU FUNCTIONS
+	public void ExitGame()
+	{
+		if (gameManager.isMultiplayerGame)
+		{
+			MultiplayerManager.Instance.CloseOrLeaveGameSession();
+		}
+		else
+			//exit via SceneManager for Singleplayer
+
+		//NetworkManager.Singleton.Shutdown();
+		GameManager.Instance.SavePlayerData();
+	}
+	public void SaveAndExitGame()
+	{
+		GameManager.Instance.SavePlayerData();
+		//save game data function
+		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
+	}
+	public void OpenSettings()
+	{
+		AudioManager.Instance.menuSFX.Play();
+		settingsObj.SetActive(true);
+		if (!gameManager.isMultiplayerGame)
+			Time.timeScale = 0;
+	}
+	public void CloseSettings()
+	{
+		AudioManager.Instance.menuSFX.Play();
+		GameManager.Instance.SavePlayerData();
+		settingsObj.SetActive(false);
+		if (!gameManager.isMultiplayerGame)
+			Time.timeScale = 1;
+	}
+	//function below needs to be removed at somepoint
+	public void ShowPlayersInLobby()
+	{
+		if (MultiplayerManager.Instance.hostLobby != null)
+		{
+			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
+			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
+			{
+				Debug.LogWarning($"player Id: {player.Id} " +
+					$"player name: {player.Data["PlayerName"].Value}, networked Id {player.Data["NetworkedId"].Value}");
+			}
+		}
+	}
+	public void ShowPlayerDisconnectedPanel()
+	{
+		playerDisconnectedUiPanel.SetActive(true);
+		PauseGame();
+	}
+	public void ReturnToMainMenuAfterPlayerDisconnect()
+	{
+		PauseGame();
+		GameManager.Instance.isMultiplayerGame = false;
+		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
+	}
 	public void HideGameSpeedButtonsForMP()
 	{
 		gameSpeedIncreaseObj.SetActive(false);
@@ -108,40 +178,6 @@ public class GameUIManager : MonoBehaviour
 		UpdateGameSpeedUi();
 		StartCoroutine(UpdateCurrentResourcesUI(0f));
 		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
-	}
-	public void PlayButtonSound()
-	{
-		AudioManager.Instance.menuSFX.Play();
-	}
-
-	//MAIN GAME MENU FUNCTIONS
-	public void ExitGame()
-	{
-		AudioManager.Instance.menuSFX.Play();
-		GameManager.Instance.SavePlayerData();
-		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
-		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(0));
-	}
-	public void SaveAndExitGame()
-	{
-		AudioManager.Instance.menuSFX.Play();
-		GameManager.Instance.SavePlayerData();
-		//save game data function
-		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
-		//StartCoroutine(GameManager.Instance.WaitForSceneLoad(0));
-	}
-	public void OpenSettings()
-	{
-		AudioManager.Instance.menuSFX.Play();
-		settingsObj.SetActive(true);
-		Time.timeScale = 0;
-	}
-	public void CloseSettings()
-	{
-		AudioManager.Instance.menuSFX.Play();
-		GameManager.Instance.SavePlayerData();
-		Time.timeScale = 1;
-		settingsObj.SetActive(false);
 	}
 
 	//SHOW UI ELEMENTS

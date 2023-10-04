@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Unity.Netcode;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -141,6 +140,7 @@ public class GameManager : NetworkBehaviour
 		InputManager.Instance.SetUpKeybindDictionary();
 
 		GameManager.Instance.LoadPlayerData();
+		MenuUIManager.Instance.GetPlayerNameUi();
 
 		//assign base building stats
 		buildingHQStats = new BaseBuildingStats
@@ -332,6 +332,7 @@ public class GameManager : NetworkBehaviour
 		else
 		{
 			//audio is saved when slider value is changed
+			Instance.LocalCopyOfPlayerData.PlayerName = MultiplayerManager.Instance.localClientName;
 			InputManager.Instance.SavePlayerKeybinds();
 
 			BinaryFormatter formatter = new BinaryFormatter();
@@ -354,6 +355,7 @@ public class GameManager : NetworkBehaviour
 			LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
 			playerData.Close();
 
+			MultiplayerManager.Instance.localClientName = Instance.LocalCopyOfPlayerData.PlayerName;
 			AudioManager.Instance.LoadSoundSettings();
 			InputManager.Instance.LoadPlayerKeybinds();
 		}
@@ -388,38 +390,38 @@ public class GameManager : NetworkBehaviour
 	//scene changes functions
 	public void LoadScene(string sceneName)
 	{
-		NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
-	}
-	public IEnumerator WaitForSceneLoad(int sceneIndex)
-	{
-		var asyncLoadLevel = SceneManager.LoadSceneAsync(sceneIndex, LoadSceneMode.Single);
-		while (!asyncLoadLevel.isDone)
-			yield return null;
+		if (isMultiplayerGame)
+			NetworkManager.Singleton.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
+
+		else if (!isMultiplayerGame)
+			SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
 	}
 	public void OnSceneLoad(int sceneIndex)
 	{
 		if (sceneIndex == 0)
 		{
 			MenuUIManager.Instance.SetUpKeybindButtonNames();
+			MenuUIManager.Instance.GetPlayerNameUi();
 		}
 		else if (sceneIndex == 1)
 		{
 			gameUIManager = FindObjectOfType<GameUIManager>();
 			gameUIManager.gameManager = this;
 
-			GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 			gameUIManager.ResetUi();
 			gameUIManager.ResetUnitGroupUI();
 			gameUIManager.SetUpUnitShopUi();
 			gameUIManager.SetUpBuildingsShopUi();
 			gameUIManager.techTreeManager.SetUpTechTrees();
 		}
+		GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
 		AudioManager.Instance.LoadSoundSettings();
 
 		if(isMultiplayerGame)
 		{
 			Time.timeScale = 0;
+			gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
 			gameUIManager.isPlayerReadyObj.SetActive(true);
 			gameUIManager.HideGameSpeedButtonsForMP();
 		}

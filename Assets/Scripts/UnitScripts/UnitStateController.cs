@@ -140,6 +140,16 @@ public class UnitStateController : Entities
 
 		if (buildingTargetList.Contains(triggerObj.GetComponent<BuildingManager>()))
 			buildingTargetList.Remove(triggerObj.GetComponent<BuildingManager>());
+
+		if (playerSetTarget == triggerObj.GetComponent<UnitStateController>())
+			playerSetTarget = null;
+		else if (playerSetTarget == triggerObj.GetComponent<BuildingManager>())
+			playerSetTarget = null;
+
+		if (currentUnitTarget == triggerObj.GetComponent<UnitStateController>())
+			currentUnitTarget = null;
+		if (currentBuildingTarget == triggerObj.GetComponent<BuildingManager>())
+			currentBuildingTarget = null;
 	}
 	public IEnumerator TrySpotTargetsNotSpotted()
 	{

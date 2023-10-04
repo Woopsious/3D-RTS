@@ -74,6 +74,10 @@ public class ErrorLogManager : MonoBehaviour
 	{
 		string log = stackTrace + "\n" + logString;
 
+		//get rid of the error thrown by networkanimator when entities are moving
+		if (log.Contains("/Library/PackageCache/com.unity.netcode.gameobjects@1.5.2/Components/NetworkAnimator.cs:1181)"))
+			return;
+
 		if (type == LogType.Error || type == LogType.Warning)
 		{
 			if (CheckForRepeatingLogMessages(log))
@@ -187,7 +191,8 @@ public class ErrorLogManager : MonoBehaviour
 	}
 	void UpdateRepeatedLogMessage(string num)
 	{
-		lastLogCounterText.text = num;
+		if (lastLogCounterText != null)
+			lastLogCounterText.text = num;
 	}
 	void SaveLastMessage(Text counter, string message)
 	{
@@ -198,8 +203,8 @@ public class ErrorLogManager : MonoBehaviour
 	//button functions
 	void ClearErrorLog()
 	{
-		for (int i = errorLogWindowObj.transform.childCount - 1; i >= 0; i--)
-			Destroy(errorLogWindowObj.transform.GetChild(i).gameObject);
+		for (int i = errorLogWindowObj.transform.GetChild(0).childCount - 1; i >= 0; i--)
+			Destroy(errorLogWindowObj.transform.GetChild(0).GetChild(i).gameObject);
 	}
 	public void ShowErrorLog()
 	{
