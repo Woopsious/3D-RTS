@@ -256,6 +256,7 @@ public class MultiplayerManager : NetworkBehaviour
 			{
 				IsPrivate = false,
 				Player = GetPlayer(),
+				IsLocked = false,
 				Data = new Dictionary<string, DataObject>
 				{
 					{"joinCode", new DataObject(visibility: DataObject.VisibilityOptions.Public, lobbyHostCode)}
@@ -266,7 +267,7 @@ public class MultiplayerManager : NetworkBehaviour
 			//SubToLobbyEvents(hostLobby);
 
 			hostLobby = lobby;
-			StartCoroutine(LobbyHeartBeat(5f));
+			StartCoroutine(LobbyHeartBeat(20f));
 
 			Debug.LogWarning($"Created lobby with name: {lobby.Name} and Id: {lobby.Id}");
 			Debug.LogWarning($"lobby code: {lobby.Data["joinCode"].Value}");
@@ -286,6 +287,14 @@ public class MultiplayerManager : NetworkBehaviour
 
 			kickPlayerFromLobbyOnFailedToConnectTimer = 11f;
 		}
+	}
+	public Task LockLobby()
+	{
+		UpdateLobbyOptions updateLobbyOptions = new UpdateLobbyOptions();
+		updateLobbyOptions.IsLocked = true;
+
+		LobbyService.Instance.UpdateLobbyAsync(hostLobby.Id, updateLobbyOptions);
+		return Task.CompletedTask;
 	}
 
 	//FUNCTIONS FOR JOINING LOBBY
@@ -379,6 +388,7 @@ public class MultiplayerManager : NetworkBehaviour
 
 		UnsubToEvents();
 		ShutDownNetworkManagerIfActive();
+		DeleteLobby();
 		hostLobby = null;
 
 		if (SceneManager.GetActiveScene().buildIndex == 0)
@@ -386,6 +396,10 @@ public class MultiplayerManager : NetworkBehaviour
 
 		else
 			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+	}
+	public async void DeleteLobby()
+	{
+		await LobbyService.Instance.DeleteLobbyAsync(hostLobby.Id);
 	}
 	public void StopClient()
 	{
