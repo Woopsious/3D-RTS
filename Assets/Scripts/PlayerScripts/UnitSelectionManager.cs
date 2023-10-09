@@ -35,6 +35,7 @@ public class UnitSelectionManager : NetworkBehaviour
 	private float mouseDownTime;
 
 	public List<UnitStateController> selectedUnitList;
+	public List<TurretController> selectedTurretList;
 	public List<UnitStateController> dragSelectedUnitList;
 	int unitCount = 0;
 
@@ -335,24 +336,23 @@ public class UnitSelectionManager : NetworkBehaviour
 				if (turret.isUnitArmed)
 					turret.attackRangeMeshObj.SetActive(true);
 				turret.isSelected = true;
-				selectedUnitList.Add(turret);
+				selectedTurretList.Add(turret);
 				turret.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(true);
 			}
 			//check if turret is already in selectedUnitList, if it was remove it, else add it
 			if (Input.GetKey(KeyCode.LeftShift))
 			{
-				foreach (UnitStateController selectedUnit in selectedUnitList)
+				foreach (TurretController selectedTurret in selectedUnitList)
 				{
-					if (UnitAlreadyInList(selectedUnit, turret))
+					if (UnitAlreadyInList(selectedTurret, turret))
 					{
-						selectedUnit.HideUIHealthBar();
-						selectedUnit.selectedHighlighter.SetActive(false);
+						selectedTurret.HideUIHealthBar();
+						selectedTurret.selectedHighlighter.SetActive(false);
 						turret.attackRangeMeshObj.SetActive(false);
-						selectedUnit.isSelected = false;
-						selectedUnitList.Remove(selectedUnit);
+						selectedTurret.isSelected = false;
+						selectedTurretList.Remove(selectedTurret);
 
-						if (selectedUnit.isTurret)
-							selectedUnit.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(false);
+						selectedTurret.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(false);
 					}
 					foreach (GameObject obj in movePosHighlighterObj)
 					{
@@ -364,7 +364,7 @@ public class UnitSelectionManager : NetworkBehaviour
 				turret.selectedHighlighter.SetActive(true);
 				turret.attackRangeMeshObj.SetActive(true);
 				turret.isSelected = true;
-				selectedUnitList.Add(turret);
+				selectedTurretList.Add(turret);
 				turret.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(true);
 			}
 		}
@@ -514,7 +514,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			SetUnitRefundButtonActiveUnactive();
 			foreach (UnitStateController selectedUnit in selectedUnitList)
 			{
-				if (selectedUnit )
+				if (selectedUnit)
 				selectedUnit.HideUIHealthBar();
 				selectedUnit.selectedHighlighter.SetActive(false);
 				selectedUnit.attackRangeMeshObj.SetActive(false);
@@ -531,10 +531,10 @@ public class UnitSelectionManager : NetworkBehaviour
 	}
 	public void DeselectTurrets()
 	{
-		if (selectedUnitList.Count != 0)
+		if (selectedTurretList.Count != 0)
 		{
 			SetUnitRefundButtonActiveUnactive();
-			foreach (TurretController selectedTurret in selectedUnitList)
+			foreach (TurretController selectedTurret in selectedTurretList)
 			{
 				selectedTurret.HideUIHealthBar();
 				selectedTurret.selectedHighlighter.SetActive(false);
