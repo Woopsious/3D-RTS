@@ -473,6 +473,7 @@ public class MultiplayerManager : NetworkBehaviour
 			}
 		}
 	}
+
 	//set up player data when joining/creating lobby
 	private Player GetPlayer()
 	{
@@ -498,6 +499,18 @@ public class MultiplayerManager : NetworkBehaviour
 			//Debug.LogError("CLIENT IS NOT HOST");
 			return false;
 		}
+	}
+
+	//SYNC WEATHER FOR PLAYERS
+	[ServerRpc(RequireOwnership = false)]
+	public void SyncWeatherServerRPC()
+	{
+		SyncWeatherClientRPC();
+	}
+	[ClientRpc]
+	public void SyncWeatherClientRPC()
+	{
+		GameManager.Instance.gameUIManager.weatherSystem.ChangeWeather();
 	}
 }
 

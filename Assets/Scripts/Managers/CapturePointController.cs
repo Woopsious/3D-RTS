@@ -219,6 +219,7 @@ public class CapturePointController : MonoBehaviour
 		if (other.gameObject.GetComponent<UnitStateController>())
 		{
 			UnitStateController unit = other.GetComponent<UnitStateController>();
+			unit.capturePoint = this;
 
 			if (!unit.isTurret && !unit.isCargoShip && unit.isPlayerOneEntity)
 				playerOneUnitList.Add(unit);
@@ -231,11 +232,19 @@ public class CapturePointController : MonoBehaviour
 		if (other.gameObject.GetComponent<UnitStateController>())
 		{
 			UnitStateController unit = other.GetComponent<UnitStateController>();
+			unit.capturePoint = null;
 
 			if (!unit.isTurret && !unit.isCargoShip && unit.isPlayerOneEntity)
 				playerOneUnitList.Remove(unit);
 			else if (!unit.isTurret && !unit.isCargoShip && !unit.isPlayerOneEntity)
 				playerTwoUnitList.Remove(unit);
 		}
+	}
+	public void RemoveUnitRefsOnUnitDeath(UnitStateController unit)
+	{
+		if (playerOneUnitList.Contains(unit))
+			playerOneUnitList.Remove(unit);
+		else if (playerTwoUnitList.Contains(unit))
+			playerTwoUnitList.Remove(unit);
 	}
 }

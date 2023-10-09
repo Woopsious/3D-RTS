@@ -15,6 +15,7 @@ public class GameUIManager : MonoBehaviour
 	public GameManager gameManager;
 	public PlayerController playerController;
 	public TechTreeManager techTreeManager;
+	public WeatherSystem weatherSystem;
 
 	public MiniMapManager miniMap;
 

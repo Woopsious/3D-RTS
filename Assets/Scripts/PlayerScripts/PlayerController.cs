@@ -10,7 +10,6 @@ using UnityEngine.UI;
 public class PlayerController : NetworkBehaviour
 {
 	public LayerMask ignoreMe;
-	public WeatherSystem weatherSystem;
 
 	[Header("Game Ui Refs")]
 	public Camera miniMapCameraRenderer;
@@ -54,13 +53,6 @@ public class PlayerController : NetworkBehaviour
 	}
 	public void PlayerInputs()
 	{
-		if (Input.GetKeyDown(KeyCode.Alpha0))
-		{
-			weatherSystem.ChangeEmissionRate();	
-			weatherSystem.ChangeFallVelocity();
-			weatherSystem.ChangeXDirectionVelocity();
-			weatherSystem.ChangeZDirectionVelocity();
-		}
 		MenuHotkeys();
 		BuyShopItemHotkeys();
 		GameSpeedHotkeys();

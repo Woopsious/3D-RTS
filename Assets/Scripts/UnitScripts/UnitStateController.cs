@@ -49,6 +49,7 @@ public class UnitStateController : Entities
 	public bool hasReachedPlayerSetTarget;
 
 	[Header("Unit Dynamic Refs")]
+	public CapturePointController capturePoint;
 	public List<GameObject> targetList;
 	public List<UnitStateController> unitTargetList;
 	public List<BuildingManager> buildingTargetList;
@@ -272,6 +273,9 @@ public class UnitStateController : Entities
 	//UTILITY FUNCTIONS
 	public override void RemoveEntityRefs()
 	{
+		if (capturePoint != null)
+			capturePoint.RemoveUnitRefsOnUnitDeath(this);
+
 		if (playerController != null)
 		{
 			playerController.unitListForPlayer.Remove(this);
