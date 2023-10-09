@@ -1,6 +1,9 @@
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -98,6 +101,8 @@ public class BuildingManager : Entities
 	}
 	public void AddBuildingRefs()
 	{
+		EnsureCapturePointRefIsNotNull();
+
 		if (playerController != null)
 			playerController.buildingListForPlayer.Add(this);
 
@@ -171,5 +176,17 @@ public class BuildingManager : Entities
 	public void HideRefundButton()
 	{
 		refundBuildingBackgroundObj.SetActive(false);
+	}
+	public void EnsureCapturePointRefIsNotNull()
+	{
+		if (capturePointController == null)
+		{
+			CapturePointController[] capturePointsArray = FindObjectsOfType<CapturePointController>();
+			List<CapturePointController> capturePoints = new List<CapturePointController>();
+
+			capturePoints.AddRange(capturePointsArray);
+			capturePoints = capturePoints.OrderBy(capPoint => Vector3.Distance(gameObject.transform.position, capPoint.transform.position)).ToList();
+			capturePointController = capturePoints[0];
+		}
 	}
 }

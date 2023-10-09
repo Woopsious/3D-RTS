@@ -157,7 +157,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		{
 			Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-			if (Physics.Raycast(ray, out RaycastHit hitInfo, 250f, playerController.ignoreMe))
+			if (Physics.Raycast(ray, out RaycastHit hitInfo, 500f, playerController.ignoreMe))
 			{
 				movePosHighlighterParentObj.transform.position = hitInfo.point;
 				//not working properly
@@ -185,6 +185,14 @@ public class UnitSelectionManager : NetworkBehaviour
 					}
 				}
 			}
+		}
+	}
+	public void HideAllGhostProjections()
+	{
+		if (selectedUnitList.Count == 0 && selectedTurretList.Count == 0)
+		{
+			for (int i = 7; i >= 0; i--)
+				movePosHighlighterObj[i].SetActive(false);
 		}
 	}
 
@@ -231,6 +239,7 @@ public class UnitSelectionManager : NetworkBehaviour
 					DeselectBuilding();
 					DeselectTurrets();
 					DeselectUnits();
+					HideAllGhostProjections();
 				}
 			}
 		}
@@ -243,6 +252,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			DeselectBuilding();
 			DeselectTurrets();
 			DeselectUnits();
+			HideAllGhostProjections();
 
 			SelectedCargoShip = cargoShip;
 			SelectedCargoShip.selectedHighlighter.SetActive(true);
@@ -257,6 +267,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			DeselectBuilding();
 			DeselectTurrets();
 			DeselectUnits();
+			HideAllGhostProjections();
 
 			selectedBuilding = building;
 			selectedBuilding.ShowUIHealthBar();
@@ -270,6 +281,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		DeselectCargoShip();
 		DeselectBuilding();
 		DeselectTurrets();
+		HideAllGhostProjections();
 
 		if (unit.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
@@ -324,6 +336,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		DeselectCargoShip();
 		DeselectBuilding();
 		DeselectUnits();
+		HideAllGhostProjections();
 
 		if (turret.isPlayerOneEntity != !playerController.isPlayerOne)
 		{
@@ -472,6 +485,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			DeselectBuilding();
 			DeselectTurrets();
 			DeselectUnits();
+			HideAllGhostProjections();
 		}
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{

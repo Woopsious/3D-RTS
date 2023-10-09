@@ -34,7 +34,7 @@ public class CanPlaceBuilding : NetworkBehaviour
 	}
 	public void Update()
 	{
-		if (pointController != null)
+		if (pointController != null && !isPlaced)
 		{
 			timer -= Time.deltaTime;
 
