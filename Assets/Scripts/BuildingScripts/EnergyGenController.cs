@@ -14,8 +14,11 @@ public class EnergyGenController : MonoBehaviour
 	}
 	public void PowerBuildings()
 	{
-		if (!buildingRef.capturePointController.HQRef.isPowered)
-			buildingRef.capturePointController.HQRef.PowerBuilding();
+		if (buildingRef.capturePointController.HQRef != null)
+		{
+			if (!buildingRef.capturePointController.HQRef.isPowered)
+				buildingRef.capturePointController.HQRef.PowerBuilding();
+		}
 
 		foreach (BuildingManager building in buildingRef.capturePointController.RefinaryBuildings)
 		{
