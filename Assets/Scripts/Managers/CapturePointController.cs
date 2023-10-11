@@ -76,13 +76,11 @@ public class CapturePointController : MonoBehaviour
 		if (timer < 0)
 		{
 			timer = 2.5f;
-			TrackPointOwnerShip();
+			TrackPointOwnership();
 		}
 	}
-
-
 	//check if buildings exist, check list of player units to fip point ownership 
-	public void TrackPointOwnerShip()
+	public void TrackPointOwnership()
 	{
 		// check for buildings
 		if (HQRef == null && energyGeneratorBuilding == null && RefinaryBuildings.Count == 0 && lightVehProdBuildings.Count == 0 && 
@@ -123,7 +121,6 @@ public class CapturePointController : MonoBehaviour
 				trackLastCapturePointOwnership = 2;
 			}
 			ChangeOwnershipOfResourceNodes();
-
 		}
 	}
 	public void UpdateFlagColour(int newFlagOwnership)
