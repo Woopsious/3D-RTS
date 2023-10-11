@@ -53,7 +53,7 @@ public class CargoShipController : UnitStateController
 
 		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);
 
-		if(targetResourceNode != null)
+		if(targetResourceNode != null && CheckIfCanMineResourceNode(targetResourceNode))
 			StartCoroutine(MoveToResourceNode());
 	}
 	public IEnumerator MoveToResourceNode()
@@ -77,7 +77,7 @@ public class CargoShipController : UnitStateController
 		yield return new WaitForSeconds(15);                                                                            //mine resources for 15s
 		MineResourcesFromNodeServerRPC();
 
-		if (CheckIfNodeIsEmpty() && IsServer) //check to make sure resources are still avalable, if not find new closest one
+		if (CheckIfNodeIsEmpty() && CheckIfCanMineResourceNode(targetResourceNode) && IsServer) //check to make sure resource node is still valid
 			FindClosestTargetResourcesNodeServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 
 		SetDestination(new Vector3(gameObject.transform.position.x, 22, gameObject.transform.position.z));
@@ -148,7 +148,7 @@ public class CargoShipController : UnitStateController
 
 		foreach (ResourceNodes resourceNode in cargoShip.refineryControllerParent.resourceNodesList)
 		{
-			if (!resourceNode.isBeingMined.Value && !resourceNode.isEmpty.Value)
+			if (CheckIfCanMineResourceNode(resourceNode))
 				PossibleNodes.Add(resourceNode);
 		}
 
@@ -266,6 +266,26 @@ public class CargoShipController : UnitStateController
 		if (targetResourceNode.isEmpty.Value)
 			return true;
 		else return false;
+	}
+	public bool CheckIfCanMineResourceNode(ResourceNodes resourceNode)
+	{
+		if (!resourceNode.isBeingMined.Value && !resourceNode.isEmpty.Value)
+		{
+			if (resourceNode.canPOneMine && isPlayerOneEntity)
+				return true;
+			else if (resourceNode.canPTwoMine && !isPlayerOneEntity)
+				return true;
+			else
+			{
+				Debug.LogError("no resource nodes owned by player found");
+				return false;
+			}
+		}
+		else
+		{
+			Debug.LogError("all resource nodes empty or already being mined");
+			return false; 
+		}
 	}
 	public bool CheckIfInPosition(Vector3 moveDestination)
 	{

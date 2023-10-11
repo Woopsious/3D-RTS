@@ -273,18 +273,18 @@ public class CapturePointController : MonoBehaviour
 		{
 			if (isNeutralPoint)
 			{
-				resourceNode.canPlayerOneMineThis = false;
-				resourceNode.canPlayerTwoMineThis = false;
+				resourceNode.canPOneMine = false;
+				resourceNode.canPTwoMine = false;
 			}
 			else if (isPlayerOnePoint)
 			{
-				resourceNode.canPlayerOneMineThis = true;
-				resourceNode.canPlayerTwoMineThis = false;
+				resourceNode.canPOneMine = true;
+				resourceNode.canPTwoMine = false;
 			}
 			else if (isPlayerTwoPoint)
 			{
-				resourceNode.canPlayerOneMineThis = false;
-				resourceNode.canPlayerTwoMineThis = true;
+				resourceNode.canPOneMine = false;
+				resourceNode.canPTwoMine = true;
 			}
 		}
 	}

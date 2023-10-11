@@ -11,8 +11,8 @@ public class ResourceNodes : NetworkBehaviour
 	public NetworkVariable<bool> isBeingMined = new NetworkVariable<bool>();
 	public NetworkVariable<bool> isEmpty = new NetworkVariable<bool>();
 
-	public bool canPlayerOneMineThis;
-	public bool canPlayerTwoMineThis;
+	public bool canPOneMine;
+	public bool canPTwoMine;
 
 	[ServerRpc(RequireOwnership = false)]
 	public void CheckResourceCountServerRpc()

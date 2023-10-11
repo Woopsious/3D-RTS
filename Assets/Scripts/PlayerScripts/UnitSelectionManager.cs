@@ -389,7 +389,10 @@ public class UnitSelectionManager : NetworkBehaviour
 		{
 			ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
 
-			if (resourceNode.isBeingMined.Value)
+			if (!resourceNode.canPOneMine && playerController.isPlayerOne || !resourceNode.canPTwoMine && !playerController.isPlayerOne)
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("You need to own the Capturepoint to mine this resource node", 4f);
+
+			else if (resourceNode.isBeingMined.Value)
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
 
 			else if (resourceNode.isEmpty.Value)
