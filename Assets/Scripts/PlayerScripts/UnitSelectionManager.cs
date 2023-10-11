@@ -461,7 +461,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		foreach (UnitStateController unit in playerController.unitListForPlayer)
 		{
 			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf && 
-				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne && !unit.isTurret)
+				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne && !unit.isTurret && !unit.isCargoShip)
 			{
 				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
@@ -492,7 +492,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		}
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{
-			if(unit.isPlayerOneEntity != !playerController.isPlayerOne && !unit.isTurret)
+			if(unit.isPlayerOneEntity != !playerController.isPlayerOne && !unit.isTurret && !unit.isCargoShip)
 				selectedUnitList.Add(unit);
 		}
 		dragSelectedUnitList.Clear();

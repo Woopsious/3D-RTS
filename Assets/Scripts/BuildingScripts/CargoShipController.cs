@@ -41,13 +41,17 @@ public class CargoShipController : UnitStateController
 	public override void FixedUpdate()
 	{
 		if (targetResourceNode != null)
+		{
 			transform.position = Vector3.MoveTowards(transform.position, movePos, moveSpeed * Time.deltaTime);
+			Debug.Log("cargoship moving towards res node");
+		}
 	}
 
 	//FUNCTIONS FOR LOOPING RESOURCE GATHERING
 	//can chnage mine orders here
 	public IEnumerator IncreaseHeightFromRefinery()
 	{
+		Debug.LogError("increasing height");
 		canChangeOrders = true;
 		SetDestination(new Vector3(refineryControllerParent.transform.position.x, 22, refineryControllerParent.transform.position.z));
 
@@ -55,9 +59,10 @@ public class CargoShipController : UnitStateController
 
 		if(targetResourceNode != null && CheckIfCanMineResourceNode(targetResourceNode))
 			StartCoroutine(MoveToResourceNode());
-	}
+	}	
 	public IEnumerator MoveToResourceNode()
 	{
+		Debug.LogError("Moving to res node");
 		canChangeOrders = true;
 		SetDestination(new Vector3(targetResourceNode.transform.position.x, 22, targetResourceNode.transform.position.z));
 
@@ -148,8 +153,11 @@ public class CargoShipController : UnitStateController
 
 		foreach (ResourceNodes resourceNode in cargoShip.refineryControllerParent.resourceNodesList)
 		{
-			if (CheckIfCanMineResourceNode(resourceNode))
-				PossibleNodes.Add(resourceNode);
+			if (!resourceNode.isBeingMined.Value && !resourceNode.isEmpty.Value)
+			{
+				if (CheckIfCanMineResourceNode(resourceNode))
+					PossibleNodes.Add(resourceNode);
+			}
 		}
 
 		if (PossibleNodes.Count == 0)
@@ -269,22 +277,14 @@ public class CargoShipController : UnitStateController
 	}
 	public bool CheckIfCanMineResourceNode(ResourceNodes resourceNode)
 	{
-		if (!resourceNode.isBeingMined.Value && !resourceNode.isEmpty.Value)
-		{
-			if (resourceNode.canPOneMine && isPlayerOneEntity)
-				return true;
-			else if (resourceNode.canPTwoMine && !isPlayerOneEntity)
-				return true;
-			else
-			{
-				Debug.LogError("no resource nodes owned by player found");
-				return false;
-			}
-		}
+		if (resourceNode.canPOneMine && isPlayerOneEntity)
+			return true;
+		else if (resourceNode.canPTwoMine && !isPlayerOneEntity)
+			return true;
 		else
 		{
-			Debug.LogError("all resource nodes empty or already being mined");
-			return false; 
+			//Debug.LogError("no resource nodes owned by player found");
+			return false;
 		}
 	}
 	public bool CheckIfInPosition(Vector3 moveDestination)
@@ -292,7 +292,10 @@ public class CargoShipController : UnitStateController
 		float Distance = Vector3.Distance(gameObject.transform.position, moveDestination);
 
 		if (Distance <= 0.1)
+		{
+			Debug.LogError("In Position");
 			return true;
+		}
 		else return false;
 	}
 }

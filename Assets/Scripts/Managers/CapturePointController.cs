@@ -42,7 +42,8 @@ public class CapturePointController : MonoBehaviour
 	public List<UnitStateController> playerOneUnitList;
 	public List<UnitStateController> playerTwoUnitList;
 
-	List<ResourceNodes> resourceNodes = new List<ResourceNodes>();
+	public GameObject ResourceNodeContainerObj;
+	public List<ResourceNodes> resourceNodes = new List<ResourceNodes>();
 
 	public float timer;
 
@@ -69,6 +70,7 @@ public class CapturePointController : MonoBehaviour
 				trackLastCapturePointOwnership = 2;
 			}
 		}
+		SetUpResourceNodes();
 	}
 	public void Update()
 	{
@@ -262,7 +264,7 @@ public class CapturePointController : MonoBehaviour
 	//Manager Capturepont ResourceNodes
 	public void SetUpResourceNodes()
 	{
-		foreach (GameObject resourceNodeObj in gameObject.transform.GetChild(2))
+		foreach (Transform resourceNodeObj in ResourceNodeContainerObj.transform)
 			resourceNodes.Add(resourceNodeObj.GetComponent<ResourceNodes>());
 
 		ChangeOwnershipOfResourceNodes();
