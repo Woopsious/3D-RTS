@@ -18,8 +18,8 @@ public class CargoShipController : UnitStateController
 	public int maxMoveSpeed;
 	public int turnSpeed;
 
-	public int maxCrystalCarryCapacity;
-	public int maxAlloyCarryCapacity;
+	private int maxCrystalCarryCapacity = 200;
+	private int maxAlloyCarryCapacity = 600;
 	public int alloysCount;
 	public int crystalsCount;
 

@@ -1,6 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
+using Unity.Services.Lobbies.Models;
+using Unity.Services.Lobbies;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CapturePointController : MonoBehaviour
 {
@@ -38,6 +42,10 @@ public class CapturePointController : MonoBehaviour
 	public List<UnitStateController> playerOneUnitList;
 	public List<UnitStateController> playerTwoUnitList;
 
+	List<ResourceNodes> resourceNodes = new List<ResourceNodes>();
+
+	public float timer;
+
 	public void Start()
 	{
 		if (HQRef != null)
@@ -64,10 +72,17 @@ public class CapturePointController : MonoBehaviour
 	}
 	public void Update()
 	{
-		StartCoroutine(TrackPointOwnerShip());
+		timer -= Time.deltaTime;
+		if (timer < 0)
+		{
+			timer = 2.5f;
+			TrackPointOwnerShip();
+		}
 	}
+
+
 	//check if buildings exist, check list of player units to fip point ownership 
-	public IEnumerator TrackPointOwnerShip()
+	public void TrackPointOwnerShip()
 	{
 		// check for buildings
 		if (HQRef == null && energyGeneratorBuilding == null && RefinaryBuildings.Count == 0 && lightVehProdBuildings.Count == 0 && 
@@ -107,10 +122,9 @@ public class CapturePointController : MonoBehaviour
 
 				trackLastCapturePointOwnership = 2;
 			}
-			yield return new WaitForSeconds(1);
+			ChangeOwnershipOfResourceNodes();
+
 		}
-		else
-			yield return new WaitForSeconds(1);
 	}
 	public void UpdateFlagColour(int newFlagOwnership)
 	{
@@ -246,5 +260,35 @@ public class CapturePointController : MonoBehaviour
 			playerOneUnitList.Remove(unit);
 		else if (playerTwoUnitList.Contains(unit))
 			playerTwoUnitList.Remove(unit);
+	}
+
+	//Manager Capturepont ResourceNodes
+	public void SetUpResourceNodes()
+	{
+		foreach (GameObject resourceNodeObj in gameObject.transform.GetChild(2))
+			resourceNodes.Add(resourceNodeObj.GetComponent<ResourceNodes>());
+
+		ChangeOwnershipOfResourceNodes();
+	}
+	public void ChangeOwnershipOfResourceNodes()
+	{
+		foreach (ResourceNodes resourceNode in resourceNodes)
+		{
+			if (isNeutralPoint)
+			{
+				resourceNode.canPlayerOneMineThis = false;
+				resourceNode.canPlayerTwoMineThis = false;
+			}
+			else if (isPlayerOnePoint)
+			{
+				resourceNode.canPlayerOneMineThis = true;
+				resourceNode.canPlayerTwoMineThis = false;
+			}
+			else if (isPlayerTwoPoint)
+			{
+				resourceNode.canPlayerOneMineThis = false;
+				resourceNode.canPlayerTwoMineThis = true;
+			}
+		}
 	}
 }
