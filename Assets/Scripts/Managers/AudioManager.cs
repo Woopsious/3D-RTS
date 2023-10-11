@@ -52,4 +52,18 @@ public class AudioManager : MonoBehaviour
 		menuSFXSlider.value = GameManager.Instance.LocalCopyOfPlayerData.menuSFXVolumeData;
 		gameSFXSlider.value = GameManager.Instance.LocalCopyOfPlayerData.gameSFXVolumeData;
 	}
+	public void ResetAudioSettings()
+	{
+		backgroundMusicSlider.value = 0.5f;
+		menuSFXSlider.value = 0.5f;
+		gameSFXSlider.value = 0.5f;
+
+		backgroundMusic.volume = 0.5f;
+		menuSFX.volume = 0.5f;
+		gameSFX.volume = 0.5f;
+
+		GameManager.Instance.LocalCopyOfPlayerData.backgroundMusicVolumeData = backgroundMusicSlider.value;
+		GameManager.Instance.LocalCopyOfPlayerData.menuSFXVolumeData = menuSFXSlider.value;
+		GameManager.Instance.LocalCopyOfPlayerData.gameSFXVolumeData = gameSFXSlider.value;
+	}
 }

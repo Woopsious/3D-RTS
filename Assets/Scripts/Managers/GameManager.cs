@@ -346,7 +346,9 @@ public class GameManager : NetworkBehaviour
 	{
 		//on start up load file if it exists
 		if (!File.Exists(playerDataPath + "/playerData.sav"))
+		{
 			CreatePlayerData();
+		}
 		else
 		{
 			BinaryFormatter formatter = new BinaryFormatter();
@@ -359,6 +361,14 @@ public class GameManager : NetworkBehaviour
 			AudioManager.Instance.LoadSoundSettings();
 			InputManager.Instance.LoadPlayerKeybinds();
 		}
+	}
+	public void ResetPlayerSettings()
+	{
+		InputManager.Instance.ResetKeybindsToDefault();
+		MultiplayerManager.Instance.ResetPlayerName();
+		AudioManager.Instance.ResetAudioSettings();
+
+		SavePlayerData();
 	}
 	public void SaveGameData(string filePath)
 	{
@@ -422,7 +432,7 @@ public class GameManager : NetworkBehaviour
 		{
 			Time.timeScale = 0;
 			gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
-			gameUIManager.isPlayerReadyObj.SetActive(true);
+			gameUIManager.playerReadyUpPanelObj.SetActive(true);
 			gameUIManager.HideGameSpeedButtonsForMP();
 		}
 	}
@@ -443,15 +453,17 @@ public class GameManager : NetworkBehaviour
 	[ClientRpc]
 	public void NotifyOtherPlayerIsReadyClientRPC(ulong clientId)
 	{
-		if (clientId != NetworkManager.Singleton.LocalClientId)
-			gameUIManager.isOtherPlayerReadyText.text = "Other Player Ready";
+		if (clientId == 0)
+			gameUIManager.isPlayerOneReadyText.text = "Player One Ready";
+		else if (clientId != 0)
+			gameUIManager.isPlayerTwoReadyText.text = "Player Two Ready";
 	}
 	[ClientRpc]
 	public void StartGameClientRPC()
 	{
 		gameUIManager.isGamePaused = true;
 		gameUIManager.PauseGame();
-		gameUIManager.isPlayerReadyObj.SetActive(false);
+		gameUIManager.playerReadyUpPanelObj.SetActive(false);
 		playerNotifsManager.DisplayNotifisMessage("GAME STARTING", 3f);
 	}
 

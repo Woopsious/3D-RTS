@@ -42,11 +42,6 @@ public class MenuUIManager : MonoBehaviour
 	public Text lobbyNameText;
 	public Text lobbyNameInputField;
 
-	public Text localClientNameText;
-	public Text localClientIdText;
-	public Text localClientHostText;
-	public Text localClientNetworkedIdText;
-
 	[Header("keybinds Ui")]
 	public GameObject KeybindParentObj;
 	public GameObject keybindPanelPrefab;
@@ -74,13 +69,6 @@ public class MenuUIManager : MonoBehaviour
 	public void Start()
 	{
 		GameManager.Instance.OnSceneLoad(0);
-	}
-	public void Update()
-	{
-		localClientNameText.text = $"Client Name: {MultiplayerManager.Instance.localClientName}";
-		localClientIdText.text = $"Client ID: {MultiplayerManager.Instance.localClientId}";
-		localClientHostText.text = $"Is Client Host?: {MultiplayerManager.Instance.CheckIfHost()}";
-		localClientNetworkedIdText.text = $"Client Networked ID: {MultiplayerManager.Instance.localClientNetworkedId}";
 	}
 	public void PlayButtonSound()
 	{
@@ -161,6 +149,11 @@ public class MenuUIManager : MonoBehaviour
 	public void GetPlayerNameUi()
 	{
 		Instance.playerNameText.text = $"Player Name: {MultiplayerManager.Instance.localClientName}";
+
+		//localClientNameText.text = $"Client Name: {MultiplayerManager.Instance.localClientName}";
+		//localClientIdText.text = $"Client ID: {MultiplayerManager.Instance.localClientId}";
+		//localClientHostText.text = $"Is Client Host?: {MultiplayerManager.Instance.CheckIfHost()}";
+		//localClientNetworkedIdText.text = $"Client Networked ID: {MultiplayerManager.Instance.localClientNetworkedId}";
 	}
 	public void QuitGame()
 	{

@@ -487,6 +487,11 @@ public class MultiplayerManager : NetworkBehaviour
 			}
 		}
 	}
+	public void ResetPlayerName()
+	{
+		Instance.localClientName = "PlayerName";
+		MenuUIManager.Instance.playerNameText.text = $"Player Name: {MultiplayerManager.Instance.localClientName}";
+	}
 
 	//set up player data when joining/creating lobby
 	private Player GetPlayer()

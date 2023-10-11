@@ -35,8 +35,9 @@ public class GameUIManager : MonoBehaviour
 	public GameObject entityInfoTemplatePrefab;
 	public Text gameTimerText;
 
-	public GameObject isPlayerReadyObj;
-	public Text isOtherPlayerReadyText;
+	public GameObject playerReadyUpPanelObj;
+	public Text isPlayerOneReadyText;
+	public Text isPlayerTwoReadyText;
 
 	public GameObject exitAndSaveGameButtonObj;
 	public GameObject exitGameButtonObj;
@@ -120,7 +121,6 @@ public class GameUIManager : MonoBehaviour
 		else
 			//exit via SceneManager for Singleplayer
 
-		//NetworkManager.Singleton.Shutdown();
 		GameManager.Instance.SavePlayerData();
 	}
 	public void SaveAndExitGame()
@@ -145,18 +145,6 @@ public class GameUIManager : MonoBehaviour
 			Time.timeScale = 1;
 	}
 	//function below needs to be removed at somepoint
-	public void ShowPlayersInLobby()
-	{
-		if (MultiplayerManager.Instance.hostLobby != null)
-		{
-			Debug.LogWarning($"players in hosted lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
-			foreach (Player player in MultiplayerManager.Instance.hostLobby.Players)
-			{
-				Debug.LogWarning($"player Id: {player.Id} " +
-					$"player name: {player.Data["PlayerName"].Value}, networked Id {player.Data["NetworkedId"].Value}");
-			}
-		}
-	}
 	public void ShowPlayerDisconnectedPanel()
 	{
 		playerDisconnectedUiPanel.SetActive(true);
