@@ -288,14 +288,6 @@ public class MultiplayerManager : NetworkBehaviour
 			kickPlayerFromLobbyOnFailedToConnectTimer = 11f;
 		}
 	}
-	public Task LockLobby()
-	{
-		UpdateLobbyOptions updateLobbyOptions = new UpdateLobbyOptions();
-		updateLobbyOptions.IsLocked = true;
-
-		LobbyService.Instance.UpdateLobbyAsync(hostLobby.Id, updateLobbyOptions);
-		return Task.CompletedTask;
-	}
 
 	//FUNCTIONS FOR JOINING LOBBY
 	//called when joininglobby from lobbylist

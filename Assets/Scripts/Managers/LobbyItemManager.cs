@@ -19,7 +19,7 @@ public class LobbyItemManager : MonoBehaviour
 		lobbyId = lobby.Id;
 		lobbyName = lobby.Name;
 		lobbyNameUi.text = lobby.Name;
-		playerCountUi.text = $"{lobby.Players.Count}/{lobby.MaxPlayers	}";
+		playerCountUi.text = $"{lobby.Players.Count}/{lobby.MaxPlayers}";
 	}
 
 	public void JoinLobby()
