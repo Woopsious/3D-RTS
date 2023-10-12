@@ -76,6 +76,7 @@
     <Compile Include="Assets\Scripts\Systems\GamePlay\UnitBuildManager.cs" />
     <Compile Include="Assets\Scripts\TestScripts\TestScript.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\ClientNetworkTransform.cs" />
+    <Compile Include="Assets\Scripts\Multiplayer\HostManager.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\ParticleEffects.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\TurretController.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Assets\Scripts\Entities\BuildingScripts\RefineryController.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\ResourceNodes.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\UnitBaseState.cs" />
+    <Compile Include="Assets\Scripts\Multiplayer\ClientManager.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\GameUIManager.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\BuildingPlacementManager.cs" />
     <Compile Include="Assets\Scripts\Entities\BuildingScripts\CargoShipController.cs" />

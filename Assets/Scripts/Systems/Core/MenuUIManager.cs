@@ -26,6 +26,7 @@ public class MenuUIManager : MonoBehaviour
 	[Header("Multiplayer Ui Refs")]
 	public GameObject LobbyItemPrefab;
 	public GameObject PlayerItemPrefab;
+	public GameObject FetchingLobbiesListPanel;
 	public GameObject MpLobbiesListPanel;
 	public Transform LobbyListParentTransform;
 	public GameObject MpLobbyPanel;
@@ -117,6 +118,7 @@ public class MenuUIManager : MonoBehaviour
 	{
 		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
 	}
+
 	//MAIN MENU UI UPDATES
 	public void ShowMainMenuUi()
 	{
@@ -169,7 +171,8 @@ public class MenuUIManager : MonoBehaviour
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Set a Name For Yourself", 3f);
 			return;
 		}
-		ShowLobbiesListUi();
+		MultiplayerManager.Instance.StartMultiplayer();
+		ShowFetchingLobbiesListUi();
 	}
 	public void RefreshLobbiesListButton()
 	{
@@ -177,7 +180,7 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void CreateLobbyButton()
 	{
-		if (MultiplayerManager.Instance.lobbyName == "LobbyName")
+		if (MultiplayerManager.Instance.hostManager.lobbyName == "LobbyName")
 		{
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Set a Name For Your Lobby", 3f);
 			return;
@@ -188,7 +191,6 @@ public class MenuUIManager : MonoBehaviour
 	public void LeaveLobbyButton()
 	{
 		MultiplayerManager.Instance.CloseOrLeaveGameSession();
-		ShowLobbiesListUi();
 		ClearPlayersList();
 	}
 	public void CloseLobbyButton()
@@ -199,7 +201,7 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void StartMultiplayerGameButton()
 	{
-		if (MultiplayerManager.Instance.connectedClientsList.Count == MultiplayerManager.Instance.hostLobby.MaxPlayers)
+		if (MultiplayerManager.Instance.connectedClientsList.Count == MultiplayerManager.Instance.hostManager.hostLobby.MaxPlayers)
 		{
 			GameManager.Instance.playerOneReadyToStart.Value = false;
 			GameManager.Instance.playerTwoReadyToStart.Value = false;
@@ -218,22 +220,33 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void SetLobbyNameButton()
 	{
-		MultiplayerManager.Instance.lobbyName = Instance.lobbyNameInputField.text;
-		Instance.lobbyNameText.text = $"Lobby Name: {MultiplayerManager.Instance.lobbyName}";
+		MultiplayerManager.Instance.hostManager.lobbyName = Instance.lobbyNameInputField.text;
+		Instance.lobbyNameText.text = $"Lobby Name: {MultiplayerManager.Instance.hostManager.lobbyName}";
 		Instance.lobbyNameInputField.text = "";
 	}
 
 	//MP UI UPDATES
+	public void ShowFetchingLobbiesListUi()
+	{
+		ConnectingToLobbyPanelObj.SetActive(false);
+		mainMenuPanelObj.SetActive(false);
+		FetchingLobbiesListPanel.SetActive(true);
+		MpLobbiesListPanel.SetActive(false);
+		MpLobbyPanel.SetActive(false);
+		closeLobbyButtonObj.SetActive(false);
+		leaveLobbyButtonObj.SetActive(false);
+		startGameButtonObj.SetActive(false);
+	}
 	public void ShowLobbiesListUi()
 	{
 		ConnectingToLobbyPanelObj.SetActive(false);
 		mainMenuPanelObj.SetActive(false);
+		FetchingLobbiesListPanel.SetActive(false);
 		MpLobbiesListPanel.SetActive(true);
 		MpLobbyPanel.SetActive(false);
 		closeLobbyButtonObj.SetActive(false);
 		leaveLobbyButtonObj.SetActive(false);
 		startGameButtonObj.SetActive(false);
-		MultiplayerManager.Instance.GetLobbiesList();
 	}
 	public void ShowConnectingToLobbyUi()
 	{
@@ -308,24 +321,6 @@ public class MenuUIManager : MonoBehaviour
 			}
 			index++;
 		}
-	}
-	//remove function below after testing
-	public void ShowPlayersInLobby()
-	{
-		if (MultiplayerManager.Instance.hostLobby.HostId == MultiplayerManager.Instance.localClientId)
-			Debug.LogWarning($"is lobby host");
-		else
-			Debug.LogWarning($"is not lobby host");
-
-		if (SceneManager.GetActiveScene().buildIndex == 0)
-			MenuUIManager.Instance.SyncPlayerListforLobbyUi(MultiplayerManager.Instance.hostLobby);
-
-		if (MultiplayerManager.Instance.CheckIfHost())
-			Debug.LogWarning($"connected Networked clients: {NetworkManager.Singleton.ConnectedClientsList.Count}");
-
-		Debug.LogWarning($"connected clients count: {MultiplayerManager.Instance.connectedClientsList.Count}");
-		Debug.LogWarning($"client in lobby: {MultiplayerManager.Instance.hostLobby.Players.Count}");
-		Debug.LogWarning($"Networked ID: {MultiplayerManager.Instance.localClientNetworkedId}");
 	}
 	public void ClearLobbiesList()
 	{

@@ -25,30 +25,18 @@ using UnityEngine.UI;
 public class MultiplayerManager : NetworkBehaviour
 {
 	public static MultiplayerManager Instance;
-
-	public string lobbyName = "LobbyName";
-	private int maxConnections = 2;
-
-	public Lobby hostLobby;
-	public string lobbyHostCode;
-	public string lobbyJoinCode;
-	public ILobbyEvents lobbyEvents;
-	float lobbyTimer = 0;
-	public float kickPlayerFromLobbyOnFailedToConnectTimer = 10f;
-
-	public NetworkList<ClientData> connectedClientsList;
+	public HostManager hostManager;
+	public ClientManager clientManager;
 
 	public string localClientName = "PlayerName";
 	public string localClientId;
 	public string localClientNetworkedId;
 
-	private Allocation HostAllocation;
-	private JoinAllocation JoinAllocation;
-
-	public int connectedPlayers;
-	public string idOfKickedPlayer;
-	public string idOfLeavingPlayer;
 	public NetworkVariable<bool> isHostClosingLobby;
+	public NetworkList<ClientData> connectedClientsList;
+	public int connectedPlayers;
+
+	public float lobbyUpdatesTimer = 0;
 
 	public void Awake()
 	{
@@ -60,18 +48,108 @@ public class MultiplayerManager : NetworkBehaviour
 		else
 			Destroy(gameObject);
 	}
-	public async void Start()
+	//Auth then get lobbies once Multiplayer is clicked
+	public async void StartMultiplayer()
 	{
 		await AuthenticatePlayer();
 		connectedClientsList = new NetworkList<ClientData>();
+		GetLobbiesList();
 	}
-	public void Update()
+	public async Task AuthenticatePlayer()
 	{
-		HandleLobbyPollForUpdates();
+		await UnityServices.InitializeAsync();
 
-		if (hostLobby != null && Instance.hostLobby.Players.Count == 2)
-			KickPlayerFromLobbyIfFailedToConnectToRelay();
+		AuthenticationService.Instance.SignedIn += () => { Debug.Log($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
+		await AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+		localClientId = AuthenticationService.Instance.PlayerId;
+		Debug.Log($"player Name: {localClientName}");
 	}
+	public async void GetLobbiesList()
+	{
+		MenuUIManager.Instance.ShowFetchingLobbiesListUi();
+		try
+		{
+			QueryLobbiesOptions queryLobbiesOptions = new QueryLobbiesOptions
+			{
+				Count = 25,
+				Filters = new List<QueryFilter> {
+					new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "1", QueryFilter.OpOptions.EQ)
+				}
+			};
+
+			QueryResponse queryResponse = await Lobbies.Instance.QueryLobbiesAsync(queryLobbiesOptions);
+			Debug.Log($"lobbies found: {queryResponse.Results.Count}");
+
+			int index = 1;
+			foreach (Lobby lobby in queryResponse.Results)
+			{
+				Debug.Log($"lobby # {index} lobby Id; {lobby.Id}");
+				index++;
+			}
+
+			MenuUIManager.Instance.SetUpLobbyListUi(queryResponse);
+		}
+		catch (LobbyServiceException e)
+		{
+			Debug.LogError(e.Message);
+		}
+		MenuUIManager.Instance.ShowLobbiesListUi();
+	}
+
+	//START-STOP HostManager
+	public void StartHost()
+	{
+		StartCoroutine(hostManager.RelayConfigureTransportAsHostingPlayer());
+		SubToEvents();
+
+		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = true;
+		isHostClosingLobby.Value = false;
+	}
+	public void StopHost()
+	{
+		isHostClosingLobby.Value = true;
+		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = false;
+		connectedClientsList.Clear();
+
+		UnsubToEvents();
+		ShutDownNetworkManagerIfActive();
+		hostManager.DeleteLobby();
+		hostManager.hostLobby = null;
+
+		if (SceneManager.GetActiveScene().buildIndex == 0)
+			GetLobbiesList();
+
+		else
+			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+	}
+
+	//START-STOP ClientManager
+	public void StartClient(Lobby lobby)
+	{
+		clientManager.JoinLobby(lobby);
+		SubToEvents();
+
+		GameManager.Instance.isPlayerOne = false;
+		GameManager.Instance.isMultiplayerGame = true;
+	}
+	public void StopClient()
+	{
+		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = false;
+		UnsubToEvents();
+		ShutDownNetworkManagerIfActive();
+		clientManager.joinedLobby = null;
+
+		if (SceneManager.GetActiveScene().buildIndex == 0)
+			GetLobbiesList();
+
+		else
+			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+	}
+
 	public void SubToEvents()
 	{
 		NetworkManager.Singleton.OnClientConnectedCallback += PlayerConnectedCallback;
@@ -82,26 +160,33 @@ public class MultiplayerManager : NetworkBehaviour
 		NetworkManager.Singleton.OnClientConnectedCallback -= PlayerConnectedCallback;
 		NetworkManager.Singleton.OnClientDisconnectCallback -= PlayerDisconnectedCallback;
 	}
+
 	//Client data added to networked list of client data when ever client connects to a relay
 	public void PlayerConnectedCallback(ulong id)
 	{
 		//Debug.LogError($"Player Connected, ID: {id}");
-
-		Instance.localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
 		int i = connectedClientsList.Count;
+		Debug.LogError($"number of connected clients: {connectedClientsList.Count}");
 
 		if (CheckIfHost())
 		{
-			//lobby created after host creates relay, for host grab data locally
+			//lobby created after host creates relay, for host save networked id (should always be 0) then grab player data locally
 			if (id == 0)
 			{
+				localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
 				connectedClientsList.Add(new ClientData(localClientName, localClientId, id.ToString()));
 			}
-			//for connecting clients grab data through lobby before it joins host relay
+			//for connecting clients save networked id (should never be 0) then grab data through lobby before it joins host relay
 			else
 			{
-				connectedClientsList.Add(new ClientData(hostLobby.Players[i].Data["PlayerName"].Value,
-					hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
+				Debug.LogError($"number of players in lobby: {hostManager.hostLobby.Players.Count}");
+				Debug.LogError($"player index 0 Id: {hostManager.hostLobby.Players[0].Data["PlayerID"].Value}");
+				Debug.LogError($"player index 1 Id: {hostManager.hostLobby.Players[1].Data["PlayerID"].Value}");
+
+				Debug.LogError("id != 0");
+				localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
+				connectedClientsList.Add(new ClientData(hostManager.hostLobby.Players[i].Data["PlayerName"].Value,
+					hostManager.hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
 			}
 		}
 		if (!MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy)
@@ -123,10 +208,10 @@ public class MultiplayerManager : NetworkBehaviour
 		{
 			if (id != 0 && connectedClientsList[i].clientNetworkedId == id.ToString())
 			{
-				RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
+				hostManager.RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
 
-				if (idOfKickedPlayer != id.ToString() && idOfLeavingPlayer != id.ToString()) //if player left/kicked dont run
-					RemoveClientFromRelayServerRPC(connectedClientsList[i].clientNetworkedId.ToString());
+				if (hostManager.idOfKickedPlayer != id.ToString())	//if player left/kicked dont run
+					hostManager.RemoveClientFromRelayServerRPC(connectedClientsList[i].clientNetworkedId.ToString());
 
 				connectedClientsList.RemoveAt(i);
 				break;
@@ -147,221 +232,6 @@ public class MultiplayerManager : NetworkBehaviour
 		}
 	}
 
-	//authed on start up
-	public async Task AuthenticatePlayer()
-	{
-		await UnityServices.InitializeAsync();
-
-		AuthenticationService.Instance.SignedIn += () => { Debug.LogWarning($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
-		await AuthenticationService.Instance.SignInAnonymouslyAsync();
-
-		localClientId = AuthenticationService.Instance.PlayerId;
-		Debug.LogWarning($"player Name: {Instance.localClientName}");
-	}
-	public async void GetLobbiesList()
-	{
-		try
-		{
-			QueryLobbiesOptions queryLobbiesOptions = new QueryLobbiesOptions
-			{
-				Count = 25,
-				Filters = new List<QueryFilter> {
-					new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "1", QueryFilter.OpOptions.EQ)
-				}
-			};
-
-			QueryResponse queryResponse = await Lobbies.Instance.QueryLobbiesAsync(queryLobbiesOptions);
-			Debug.LogWarning($"lobbies found: {queryResponse.Results.Count}");
-
-			int index = 1;
-			foreach (Lobby lobby in queryResponse.Results)
-			{
-				Debug.LogWarning($"lobby # {index} lobby Id; {lobby.Id}");
-				index++;
-			}
-
-			MenuUIManager.Instance.SetUpLobbyListUi(queryResponse);
-		}
-		catch (LobbyServiceException e)
-		{
-			Debug.LogError(e.Message);
-		}
-	}
-
-	//FUNCTIONS FOR HOSTING LOBBY
-	//called on creating a lobby from MainMenu
-	public void StartHost()
-	{
-		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
-		SubToEvents();
-
-		GameManager.Instance.isPlayerOne = true;
-		GameManager.Instance.isMultiplayerGame = true;
-		isHostClosingLobby.Value = false;
-	}
-	IEnumerator RelayConfigureTransportAsHostingPlayer()
-	{
-		var serverRelayUtilityTask = AllocateRelayServerAndGetJoinCode(2);
-		while (!serverRelayUtilityTask.IsCompleted)
-		{
-			yield return null;
-		}
-		if (serverRelayUtilityTask.IsFaulted)
-		{
-			Debug.LogError("Exception thrown when attempting to start Relay Server. Server not started. Exception: " + serverRelayUtilityTask.Exception.Message);
-			yield break;
-		}
-
-		var relayServerData = serverRelayUtilityTask.Result;
-		NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-		yield return null;
-
-		NetworkManager.Singleton.StartHost();
-		CreateLobby();
-	}
-	public static async Task<RelayServerData> AllocateRelayServerAndGetJoinCode(int maxConnections, string region = null)
-	{
-		Allocation allocation;
-		try
-		{
-			allocation = await RelayService.Instance.CreateAllocationAsync(maxConnections, region);
-		}
-		catch (Exception e)
-		{
-			Debug.LogError($"Relay create allocation request failed {e.Message}");
-			throw;
-		}
-
-		Debug.Log($"server: {allocation.ConnectionData[0]} {allocation.ConnectionData[1]}");
-		Debug.Log($"server: {allocation.AllocationId}");
-
-		try
-		{
-			Instance.lobbyHostCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-		}
-		catch
-		{
-			Debug.LogError("Relay create join code request failed");
-			throw;
-		}
-
-		return new RelayServerData(allocation, "dtls");
-	}
-	public async void CreateLobby()
-	{
-		try
-		{
-			Debug.LogWarning($"code to set as lobby data: {lobbyHostCode}");
-			CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions
-			{
-				IsPrivate = false,
-				Player = GetPlayer(),
-				IsLocked = false,
-				Data = new Dictionary<string, DataObject>
-				{
-					{"joinCode", new DataObject(visibility: DataObject.VisibilityOptions.Public, lobbyHostCode)}
-				}
-			};
-
-			Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxConnections, createLobbyOptions);
-			//SubToLobbyEvents(hostLobby);
-
-			hostLobby = lobby;
-			StartCoroutine(LobbyHeartBeat(20f));
-
-			Debug.LogWarning($"Created lobby with name: {lobby.Name} and Id: {lobby.Id}");
-			Debug.LogWarning($"lobby code: {lobby.Data["joinCode"].Value}");
-		}
-		catch (LobbyServiceException e)
-		{
-			Debug.LogError(e.Message);
-		}
-	}
-	public void KickPlayerFromLobbyIfFailedToConnectToRelay()
-	{
-		kickPlayerFromLobbyOnFailedToConnectTimer -= Time.deltaTime;
-		if (kickPlayerFromLobbyOnFailedToConnectTimer < 0)
-		{
-			if (Instance.hostLobby.Players.Count != connectedClientsList.Count)
-				RemoveClientFromLobby(Instance.hostLobby.Players[1].Id);
-
-			kickPlayerFromLobbyOnFailedToConnectTimer = 11f;
-		}
-	}
-
-	//FUNCTIONS FOR JOINING LOBBY
-	//called when joininglobby from lobbylist
-	public void StartClient(Lobby lobby)
-	{
-		JoinLobby(lobby);
-		SubToEvents();
-
-		GameManager.Instance.isPlayerOne = false;
-		GameManager.Instance.isMultiplayerGame = true;
-	}
-	public async void JoinLobby(Lobby lobby)
-	{
-		try
-		{
-			JoinLobbyByIdOptions joinLobbyByIdOptions = new JoinLobbyByIdOptions
-			{
-				Player = GetPlayer()
-			};
-			await Lobbies.Instance.JoinLobbyByIdAsync(lobby.Id, joinLobbyByIdOptions);
-
-			hostLobby = lobby;
-			lobbyJoinCode = hostLobby.Data["joinCode"].Value;
-		}
-		catch (LobbyServiceException e)
-		{
-			Debug.LogError(e.Message);
-		}
-
-		StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
-	}
-	IEnumerator RelayConfigureTransportAsConnectingPlayer()
-	{
-		// Populate RelayJoinCode beforehand through the UI
-		var clientRelayUtilityTask = JoinRelayServerFromJoinCode(lobbyJoinCode);
-
-		while (!clientRelayUtilityTask.IsCompleted)
-		{
-			yield return null;
-		}
-
-		if (clientRelayUtilityTask.IsFaulted)
-		{
-			Debug.LogError("Exception thrown when attempting to connect to Relay Server. Exception: " + clientRelayUtilityTask.Exception.Message);
-			yield break;
-		}
-
-		var relayServerData = clientRelayUtilityTask.Result;
-
-		NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-		yield return null;
-
-		NetworkManager.Singleton.StartClient();
-	}
-	public static async Task<RelayServerData> JoinRelayServerFromJoinCode(string joinCode)
-	{
-		JoinAllocation allocation;
-		try
-		{
-			allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
-		}
-		catch
-		{
-			Debug.LogError("Relay create join code request failed");
-			throw;
-		}
-
-		Debug.Log($"client: {allocation.ConnectionData[0]} {allocation.ConnectionData[1]}");
-		Debug.Log($"host: {allocation.HostConnectionData[0]} {allocation.HostConnectionData[1]}");
-		Debug.Log($"client: {allocation.AllocationId}");
-
-		return new RelayServerData(allocation, "dtls");
-	}
-
 	//SHARED FUNCTIONS
 	public void CloseOrLeaveGameSession()
 	{
@@ -371,122 +241,55 @@ public class MultiplayerManager : NetworkBehaviour
 		else
 			StopClient();
 	}
-	public void StopHost()
-	{
-		isHostClosingLobby.Value = true;
-		GameManager.Instance.isPlayerOne = true;
-		GameManager.Instance.isMultiplayerGame = false;
-		connectedClientsList.Clear();
-
-		UnsubToEvents();
-		ShutDownNetworkManagerIfActive();
-		DeleteLobby();
-		hostLobby = null;
-
-		if (SceneManager.GetActiveScene().buildIndex == 0)
-			MenuUIManager.Instance.ShowLobbiesListUi();
-
-		else
-			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
-	}
-	public async void DeleteLobby()
-	{
-		await LobbyService.Instance.DeleteLobbyAsync(hostLobby.Id);
-	}
-	public void StopClient()
-	{
-		GameManager.Instance.isPlayerOne = true;
-		GameManager.Instance.isMultiplayerGame = false;
-		UnsubToEvents();
-		ShutDownNetworkManagerIfActive();
-		hostLobby = null;
-
-		if (SceneManager.GetActiveScene().buildIndex == 0)
-			MenuUIManager.Instance.ShowLobbiesListUi();
-
-		else
-			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
-	}
-	public async void RemoveClientFromLobby(string playerId)
-	{
-		try
-		{
-			await LobbyService.Instance.RemovePlayerAsync(hostLobby.Id, playerId);
-			Debug.LogWarning($"player with Id: {playerId} kicked from lobby");
-		}
-		catch (LobbyServiceException e)
-		{
-			Debug.LogError(e.Message);
-		}
-	}
-	[ServerRpc(RequireOwnership = false)]
-	public void RemoveClientFromRelayServerRPC(string networkedId)
-	{
-		idOfLeavingPlayer = networkedId;
-		ulong networkedIdulong = Convert.ToUInt64(networkedId);
-		Debug.LogWarning($"Networked string ID: {networkedId}");
-		Debug.LogWarning($"Networked ulong ID: {networkedIdulong}");
-
-		NetworkManager.Singleton.DisconnectClient(networkedIdulong);
-	}
 	public void ShutDownNetworkManagerIfActive()
 	{
 		if (NetworkManager.Singleton.isActiveAndEnabled)
 			NetworkManager.Singleton.Shutdown();
 	}
-	private IEnumerator LobbyHeartBeat(float waitTime)
+	public async void HandleLobbyPollForUpdates(Lobby lobby)
 	{
-		while (true)
+		if (lobby != null)
 		{
-			if (hostLobby != null)
-				LobbyService.Instance.SendHeartbeatPingAsync(hostLobby.Id);
-			yield return new WaitForSeconds(waitTime);
-		}
-	}
-	private async void HandleLobbyPollForUpdates()
-	{
-		if (hostLobby != null)
-		{
-			lobbyTimer -= Time.deltaTime;
-			if (lobbyTimer < 0)
+			lobbyUpdatesTimer -= Time.deltaTime;
+			if (lobbyUpdatesTimer < 0)
 			{
-				lobbyTimer = 1.5f;
+				lobbyUpdatesTimer = 1.5f;
 				try
 				{
-					Lobby lobby = await LobbyService.Instance.GetLobbyAsync(hostLobby.Id);
-					hostLobby = lobby;
+					Lobby newlobby = await LobbyService.Instance.GetLobbyAsync(lobby.Id);
+					lobby = newlobby;
 
-					if (hostLobby.HostId == localClientId)
+					if (lobby.HostId == localClientId)
 						Debug.LogWarning($"is lobby host");
 					else
 						Debug.LogWarning($"is not lobby host");
 
 					if (SceneManager.GetActiveScene().buildIndex == 0)
-						MenuUIManager.Instance.SyncPlayerListforLobbyUi(hostLobby);
+						MenuUIManager.Instance.SyncPlayerListforLobbyUi(lobby);
 
 					if (CheckIfHost())
 						Debug.LogWarning($"connected Networked clients: {NetworkManager.Singleton.ConnectedClientsList.Count}");
 
 					Debug.LogWarning($"connected clients count: {connectedClientsList.Count}");
-					Debug.LogWarning($"client in lobby: {hostLobby.Players.Count}");
+					Debug.LogWarning($"client in lobby: {lobby.Players.Count}");
 					Debug.LogWarning($"Networked ID: {localClientNetworkedId}");
 				}
 				catch
 				{
-					Debug.LogError($"Lobby with id: {hostLobby.Id} no longer exists");
-					hostLobby = null;
+					Debug.LogError($"Lobby with id: {lobby.Id} no longer exists");
+					lobby = null;
 				}
 			}
 		}
 	}
 	public void ResetPlayerName()
 	{
-		Instance.localClientName = "PlayerName";
-		MenuUIManager.Instance.playerNameText.text = $"Player Name: {MultiplayerManager.Instance.localClientName}";
+		localClientName = "PlayerName";
+		MenuUIManager.Instance.playerNameText.text = $"Player Name: {localClientName}";
 	}
 
 	//set up player data when joining/creating lobby
-	private Player GetPlayer()
+	public Player GetPlayer()
 	{
 		return new Player
 		{

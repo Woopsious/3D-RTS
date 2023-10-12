@@ -116,8 +116,6 @@ public class TechTreeManager : MonoBehaviour
 		techCostCrystals = 250
 	};
 
-	[Header("building Base Stats Info")]
-
 	[Header("Unit Tech Tree Info")]
 	public List<Technology> unitTechList;
 	public List<bool> hasResearchedUnitTechlist;
