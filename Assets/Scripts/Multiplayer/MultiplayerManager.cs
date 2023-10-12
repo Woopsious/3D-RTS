@@ -38,6 +38,9 @@ public class MultiplayerManager : NetworkBehaviour
 
 	public float lobbyUpdatesTimer = 0;
 
+	public bool newPlayerJoined;
+	public string newPlayerJoinedId;
+
 	public void Awake()
 	{
 		if (Instance == null)
@@ -59,7 +62,7 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		await UnityServices.InitializeAsync();
 
-		AuthenticationService.Instance.SignedIn += () => { Debug.Log($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
+		AuthenticationService.Instance.SignedIn += () => { Debug.LogWarning($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
 		await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
 		localClientId = AuthenticationService.Instance.PlayerId;
@@ -180,13 +183,15 @@ public class MultiplayerManager : NetworkBehaviour
 			else
 			{
 				Debug.LogError($"number of players in lobby: {hostManager.hostLobby.Players.Count}");
-				Debug.LogError($"player index 0 Id: {hostManager.hostLobby.Players[0].Data["PlayerID"].Value}");
-				Debug.LogError($"player index 1 Id: {hostManager.hostLobby.Players[1].Data["PlayerID"].Value}");
+				//Debug.LogError($"player index 0 Id: {hostManager.hostLobby.Players[0].Data["PlayerID"].Value}");
+				//Debug.LogError($"player index 1 Id: {hostManager.hostLobby.Players[1].Data["PlayerID"].Value}");
 
-				Debug.LogError("id != 0");
 				localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString();
-				connectedClientsList.Add(new ClientData(hostManager.hostLobby.Players[i].Data["PlayerName"].Value,
-					hostManager.hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
+				newPlayerJoined = true;
+				newPlayerJoinedId = id.ToString();
+
+				//connectedClientsList.Add(new ClientData(hostManager.hostLobby.Players[i].Data["PlayerName"].Value,
+				//hostManager.hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
 			}
 		}
 		if (!MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy)
@@ -278,6 +283,15 @@ public class MultiplayerManager : NetworkBehaviour
 				{
 					Debug.LogError($"Lobby with id: {lobby.Id} no longer exists");
 					lobby = null;
+				}
+
+				if (newPlayerJoined)
+				{
+					int i = connectedClientsList.Count;
+					connectedClientsList.Add(new ClientData(hostManager.hostLobby.Players[i].Data["PlayerName"].Value,
+						hostManager.hostLobby.Players[i].Data["PlayerID"].Value, newPlayerJoinedId.ToString()));
+
+					newPlayerJoined = false;
 				}
 			}
 		}
