@@ -26,6 +26,7 @@ public class MenuUIManager : MonoBehaviour
 	[Header("Multiplayer Ui Refs")]
 	public GameObject LobbyItemPrefab;
 	public GameObject PlayerItemPrefab;
+	public GameObject FetchLobbiesListPanel;
 	public GameObject MpLobbiesListPanel;
 	public Transform LobbyListParentTransform;
 	public GameObject MpLobbyPanel;
@@ -169,7 +170,7 @@ public class MenuUIManager : MonoBehaviour
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Set a Name For Yourself", 3f);
 			return;
 		}
-		ShowLobbiesListUi();
+		MultiplayerManager.Instance.StartMultiplayer();
 	}
 	public void RefreshLobbiesListButton()
 	{
@@ -188,13 +189,13 @@ public class MenuUIManager : MonoBehaviour
 	public void LeaveLobbyButton()
 	{
 		MultiplayerManager.Instance.CloseOrLeaveGameSession();
-		ShowLobbiesListUi();
+		MultiplayerManager.Instance.GetLobbiesList();
 		ClearPlayersList();
 	}
 	public void CloseLobbyButton()
 	{
 		MultiplayerManager.Instance.CloseOrLeaveGameSession();
-		ShowLobbiesListUi();
+		MultiplayerManager.Instance.GetLobbiesList();
 		ClearPlayersList();
 	}
 	public void StartMultiplayerGameButton()
@@ -224,10 +225,23 @@ public class MenuUIManager : MonoBehaviour
 	}
 
 	//MP UI UPDATES
+	public void FetchLobbiesListUi()
+	{
+		ConnectingToLobbyPanelObj.SetActive(false);
+		mainMenuPanelObj.SetActive(false);
+		FetchLobbiesListPanel.SetActive(true);
+		MpLobbiesListPanel.SetActive(false);
+		MpLobbyPanel.SetActive(false);
+		closeLobbyButtonObj.SetActive(false);
+		leaveLobbyButtonObj.SetActive(false);
+		startGameButtonObj.SetActive(false);
+		MultiplayerManager.Instance.GetLobbiesList();
+	}
 	public void ShowLobbiesListUi()
 	{
 		ConnectingToLobbyPanelObj.SetActive(false);
 		mainMenuPanelObj.SetActive(false);
+		FetchLobbiesListPanel.SetActive(false);
 		MpLobbiesListPanel.SetActive(true);
 		MpLobbyPanel.SetActive(false);
 		closeLobbyButtonObj.SetActive(false);
