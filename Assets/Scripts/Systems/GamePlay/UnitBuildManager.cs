@@ -5,7 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class BuildTime : MonoBehaviour
+public class UnitBuildManager : MonoBehaviour
 {
 	public Button cancelProductionButton;
 	public UnitProductionManager unitProductionManager;

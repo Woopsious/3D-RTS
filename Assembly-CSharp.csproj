@@ -69,11 +69,11 @@
     <Compile Include="Assets\Scripts\Multiplayer\LobbyItemManager.cs" />
     <Compile Include="Assets\Scripts\Entities\BuildingScripts\CanPlaceBuilding.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\MenuUIManager.cs" />
-    <Compile Include="Assets\Scripts\Entities\BuildTime.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\WeatherSystem.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\MiniMapManager.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\WeaponSystem.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\CapturePointController.cs" />
+    <Compile Include="Assets\Scripts\Systems\GamePlay\UnitBuildManager.cs" />
     <Compile Include="Assets\Scripts\TestScripts\TestScript.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\ClientNetworkTransform.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\ParticleEffects.cs" />

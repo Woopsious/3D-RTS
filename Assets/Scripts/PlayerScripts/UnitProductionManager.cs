@@ -14,15 +14,15 @@ public class UnitProductionManager : NetworkBehaviour
 
 	[Header("Light Veh Queue Refs")]
 	public GameObject lightVehProdQueueObj;
-	public List<BuildTime> lightVehProdList;
+	public List<UnitBuildManager> lightVehProdList;
 
 	[Header("Heavy Veh Queue Refs")]
 	public GameObject heavyVehProdQueueObj;
-	public List<BuildTime> heavyVehProdList;
+	public List<UnitBuildManager> heavyVehProdList;
 
 	[Header("VTOL Veh Queue Refs")]
 	public GameObject vtolVehProdQueueObj;
-	public List<BuildTime> vtolVehProdList;
+	public List<UnitBuildManager> vtolVehProdList;
 
 	[Header("Player Unit Prefabs")]
 	public GameObject unitScoutVehicle;
@@ -40,8 +40,8 @@ public class UnitProductionManager : NetworkBehaviour
 	public float radarVehicleBuildTime = 75f;
 	public float scoutVehicleBuildTime = 30f;
 
-	public List<BuildTime> currentUnitPlacements;
-	public List<BuildTime> failedUnitPlacements;
+	public List<UnitBuildManager> currentUnitPlacements;
+	public List<UnitBuildManager> failedUnitPlacements;
 
 	public GameObject unitBuildHighlighterParent;
 	public List<GameObject> unitPlacementPoints = new List<GameObject>();
@@ -123,7 +123,7 @@ public class UnitProductionManager : NetworkBehaviour
 		//on left click add all builds to correct lists + check if player can afford them
 		if (Input.GetMouseButtonDown(0) && currentUnitPlacements.Count != 0)
 		{
-			foreach (BuildTime build in currentUnitPlacements)
+			foreach (UnitBuildManager build in currentUnitPlacements)
 			{
 				//run check to see if a building of the correct type for a unit is built in future
 				build.buildPosDestination = unitBuildHighlighterParent.transform.position;
@@ -174,7 +174,7 @@ public class UnitProductionManager : NetworkBehaviour
 			}
 			if (failedUnitPlacements.Count != 0)
 			{
-				foreach (BuildTime failedBuild in failedUnitPlacements)
+				foreach (UnitBuildManager failedBuild in failedUnitPlacements)
 				{
 					failedBuild.RemoveUi();
 				}
@@ -203,7 +203,7 @@ public class UnitProductionManager : NetworkBehaviour
 	public void AddScoutVehToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, lightVehProdQueueObj.transform);
-		BuildTime script = uiObj.GetComponent<BuildTime>();
+		UnitBuildManager script = uiObj.GetComponent<UnitBuildManager>();
 
 		script.UnitPrefab = unitScoutVehicle;
 		script.BuildOrderIndex = buildIndex;
@@ -218,7 +218,7 @@ public class UnitProductionManager : NetworkBehaviour
 	public void AddRadarVehToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, lightVehProdQueueObj.transform);
-		BuildTime script = uiObj.GetComponent<BuildTime>();
+		UnitBuildManager script = uiObj.GetComponent<UnitBuildManager>();
 
 		script.UnitPrefab = unitRadarVehicle;
 		script.BuildOrderIndex = buildIndex;
@@ -233,7 +233,7 @@ public class UnitProductionManager : NetworkBehaviour
 	public void AddLightMechToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, lightVehProdQueueObj.transform);
-		BuildTime script = uiObj.GetComponent<BuildTime>();
+		UnitBuildManager script = uiObj.GetComponent<UnitBuildManager>();
 
 		script.UnitPrefab = unitLightMech;
 		script.BuildOrderIndex = buildIndex;
@@ -248,7 +248,7 @@ public class UnitProductionManager : NetworkBehaviour
 	public void AddHeavyMechKnightToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, heavyVehProdQueueObj.transform);
-		BuildTime script = uiObj.GetComponent<BuildTime>();
+		UnitBuildManager script = uiObj.GetComponent<UnitBuildManager>();
 
 		script.UnitPrefab = unitHeavyMechKnight;
 		script.BuildOrderIndex = buildIndex;
@@ -263,7 +263,7 @@ public class UnitProductionManager : NetworkBehaviour
 	public void AddHeavyMechTankToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, heavyVehProdQueueObj.transform);
-		BuildTime script = uiObj.GetComponent<BuildTime>();
+		UnitBuildManager script = uiObj.GetComponent<UnitBuildManager>();
 
 		script.UnitPrefab = unitHeavyMechTank;
 		script.BuildOrderIndex = buildIndex;
@@ -278,7 +278,7 @@ public class UnitProductionManager : NetworkBehaviour
 	public void AddVTOLToBuildQueue(int buildIndex)
 	{
 		GameObject uiObj = Instantiate(vehicleProdInfoTemplateObj, vtolVehProdQueueObj.transform);
-		BuildTime script = uiObj.GetComponent<BuildTime>();
+		UnitBuildManager script = uiObj.GetComponent<UnitBuildManager>();
 
 		script.UnitPrefab = unitVTOL;
 		script.BuildOrderIndex = buildIndex;
@@ -310,7 +310,7 @@ public class UnitProductionManager : NetworkBehaviour
 
 	//QUEUE UPDATE FUNCTIONS
 	//once first production is done remove it, (index 1 should be index 0 now) and then if condition met start new index 0 production
-	public void RemoveFromQueueAndStartNextBuild(List<BuildTime> list, BuildTime buildNum)
+	public void RemoveFromQueueAndStartNextBuild(List<UnitBuildManager> list, UnitBuildManager buildNum)
 	{
 		list.Remove(buildNum);
 
