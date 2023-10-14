@@ -11,6 +11,7 @@ public class PlayerData
 	public string PlayerName;
 	public float backgroundMusicVolumeData;
 	public float menuSFXVolumeData;
+	public float announcerSFXVolumeData;
 	public float gameSFXVolumeData;
 	public Dictionary<string, KeyCode> KeyBindDictionary;
 }

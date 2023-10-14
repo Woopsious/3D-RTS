@@ -194,7 +194,7 @@ public class Entities : NetworkBehaviour
 		if (audioSFXs.Count != 0)
 		{
 			foreach (AudioSource audio in audioSFXs)
-				audio.volume = AudioManager.Instance.gameSFX.volume;
+				audio.volume = AudioManager.Instance.gameSFXVolume;
 		}
 	}
 }

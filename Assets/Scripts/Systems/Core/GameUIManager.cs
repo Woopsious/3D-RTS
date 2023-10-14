@@ -89,7 +89,7 @@ public class GameUIManager : MonoBehaviour
 		GameManager.Instance.OnSceneLoad(1);
 		GameManager.Instance.LoadPlayerData();
 
-		audioBackButton.onClick.AddListener(delegate { AudioManager.Instance.AdjustAudioVolume(); });
+		audioBackButton.onClick.AddListener(delegate { AudioManager.Instance.AdjustAudioVolumes(); });
 		techTreeManager.currentResearchInfoText.text = "No Tech Currently Researching";
 	}
 	public void Update()
@@ -138,6 +138,7 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void CloseSettings()
 	{
+		AudioManager.Instance.AdjustAudioVolumes();
 		AudioManager.Instance.menuSFX.Play();
 		GameManager.Instance.SavePlayerData();
 		settingsObj.SetActive(false);

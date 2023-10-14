@@ -243,6 +243,11 @@ public class GameManager : NetworkBehaviour
 		//Debug.Log(testUnit.weaponSystem.secondaryWeaponAttackSpeed);
 		//Debug.Log(testUnit.agentNav.speed);
 	}
+	public void Update()
+	{
+		if (Input.GetKeyDown(KeyCode.V))
+			AnnouncerSystem.Instance.PlayActionPositiveSFX();
+	}
 	public void GetResourcesPerSecond()
 	{
 		timer += Time.deltaTime;

@@ -81,6 +81,7 @@
     <Compile Include="Assets\Scripts\Entities\UnitScripts\TurretController.cs" />
     <Compile Include="Assets\Scripts\Entities\TriggerCollision.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\PlayerNotifsManager.cs" />
+    <Compile Include="Assets\Scripts\Systems\GamePlay\AnnouncerSystem.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\InputManager.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\UnitStateController.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\UnitMovingState.cs" />

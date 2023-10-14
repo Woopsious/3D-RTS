@@ -9,7 +9,7 @@ public class ParticleEffects : MonoBehaviour
 
 	public void Start()
 	{
-		Audio.volume = AudioManager.Instance.gameSFX.volume;
+		Audio.volume = AudioManager.Instance.gameSFXVolume;
 		Destroy(gameObject, destroyInSeconds);
 	}
 }
