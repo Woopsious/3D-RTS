@@ -235,7 +235,6 @@ public class MenuUIManager : MonoBehaviour
 		closeLobbyButtonObj.SetActive(false);
 		leaveLobbyButtonObj.SetActive(false);
 		startGameButtonObj.SetActive(false);
-		MultiplayerManager.Instance.GetLobbiesList();
 	}
 	public void ShowLobbiesListUi()
 	{
@@ -247,7 +246,6 @@ public class MenuUIManager : MonoBehaviour
 		closeLobbyButtonObj.SetActive(false);
 		leaveLobbyButtonObj.SetActive(false);
 		startGameButtonObj.SetActive(false);
-		MultiplayerManager.Instance.GetLobbiesList();
 	}
 	public void ShowConnectingToLobbyUi()
 	{

@@ -68,9 +68,9 @@ public class MultiplayerManager : NetworkBehaviour
 	}
 	public async void StartMultiplayer()
 	{
+		connectedClientsList = new NetworkList<ClientData>();
 		await AuthenticatePlayer();
 		GetLobbiesList();
-		connectedClientsList = new NetworkList<ClientData>();
 	}
 	public async Task AuthenticatePlayer()
 	{
@@ -435,7 +435,7 @@ public class MultiplayerManager : NetworkBehaviour
 		if (CheckIfHost())
 		{
 			//lobby created after host creates relay, for host grab data locally
-			if (id == 0)
+			if (CheckIfHost())
 			{
 				connectedClientsList.Add(new ClientData(localClientName, localClientId, id.ToString()));
 			}
@@ -456,8 +456,8 @@ public class MultiplayerManager : NetworkBehaviour
 
 		if (CheckIfHost()) // if host remove client from lobby and relay
 			HandleClientDisconnectsWhenHost(id);
-
-		HandleClientDisconnects(id);
+		else
+			HandleClientDisconnects(id);
 	}
 	public void HandleClientDisconnectsWhenHost(ulong id)
 	{
@@ -467,7 +467,7 @@ public class MultiplayerManager : NetworkBehaviour
 			{
 				RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
 
-				if (idOfKickedPlayer != id.ToString()) //if player left/kicked dont run
+				if (networkIdOfKickedPlayer != id.ToString()) //if player left/kicked dont run
 					RemoveClientFromRelayServerRPC(connectedClientsList[i].clientNetworkedId.ToString());
 
 				connectedClientsList.RemoveAt(i);
@@ -484,7 +484,7 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		if (localClientNetworkedId != "0" && localClientNetworkedId != id.ToString())
 		{
-			StopClient();
+			StopClient(); //if lobbies had more then 1 client this would need to be more complicated
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Connection to Host Lost", 3f);
 		}
 	}
