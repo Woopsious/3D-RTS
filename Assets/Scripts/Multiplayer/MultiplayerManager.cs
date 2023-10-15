@@ -432,35 +432,40 @@ public class MultiplayerManager : NetworkBehaviour
 	//Client data added to networked list of client data when ever client connects to a relay
 	public void PlayerConnectedCallback(ulong id)
 	{
-		//Instance.localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
+		Instance.localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
 
 		if (CheckIfHost())
 		{
-			AddNewPlayerToClientListServerRPC(id);
+			/*
+			if (connectedClientsList.CanClientWrite(NetworkManager.Singleton.LocalClientId)) //it takes the client NetworkId
+			{
+				Debug.Log("client can write");
+			}
+			*/
+			int i = connectedClientsList.Count;
+			//lobby created after host creates relay, for host grab data locally
+			if (CheckIfHost())
+			{
+				StartCoroutine(AddHostToClientList());
+			}
+			//for connecting clients grab data through lobby before it joins host relay
+			else
+			{
+				Instance.connectedClientsList.Add(new ClientData(hostLobby.Players[i].Data["PlayerName"].Value,
+					hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
+			}
 		}
 		if (!MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy)
 			MenuUIManager.Instance.ShowLobbyUi();
 	}
-	[ServerRpc(RequireOwnership = false)]
-	public void AddNewPlayerToClientListServerRPC(ulong id)
+	public IEnumerator AddHostToClientList()
 	{
-		Debug.LogError(NetworkManager.Singleton.LocalClientId);
-		int i = connectedClientsList.Count;
-		//lobby created after host creates relay, for host grab data locally
-		if (CheckIfHost())
-		{
-			ClientData data = new ClientData(Instance.localClientName, Instance.localClientId, id.ToString());
-			Debug.LogError(data.clientName + data.clientId.ToString() + id.ToString());
-			Debug.Log(connectedClientsList.Count);
-			Instance.connectedClientsList.Add(data);
-		}
-		//for connecting clients grab data through lobby before it joins host relay
-		else
-		{
-			Instance.connectedClientsList.Add(new ClientData(hostLobby.Players[i].Data["PlayerName"].Value,
-				hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
-		}
+		yield return new WaitForSeconds(5f);
+
+		ClientData data = new ClientData(Instance.localClientName, Instance.localClientId, "0");
+		Instance.connectedClientsList.Add(data);
 	}
+
 	//StopClient will always be called to handle intentional leaving or unintentional disconnects
 	public void PlayerDisconnectedCallback(ulong id)
 	{
