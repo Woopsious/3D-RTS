@@ -441,6 +441,7 @@ public class MultiplayerManager : NetworkBehaviour
 			if (CheckIfHost())
 			{
 				ClientData data = new ClientData(Instance.localClientName, Instance.localClientId, id.ToString());
+				Debug.LogError(data.clientName + data.clientId.ToString() + id.ToString());
 				Debug.Log(connectedClientsList.Count);
 				Instance.connectedClientsList.Add(data);
 			}
