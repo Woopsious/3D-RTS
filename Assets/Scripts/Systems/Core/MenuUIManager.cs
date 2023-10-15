@@ -312,7 +312,7 @@ public class MenuUIManager : MonoBehaviour
 
 			else if (GameManager.Instance.isPlayerOne && !playerItem.kickPlayerButton.activeInHierarchy)
 			{
-				if (playerItem.playerId == lobby.HostId)
+				if (playerItem.localPlayerNetworkedId == "0")
 					playerItem.kickPlayerButton.SetActive(false);
 
 				else

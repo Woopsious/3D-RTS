@@ -51,7 +51,6 @@ public class MultiplayerManager : NetworkBehaviour
 
 	public void Awake()
 	{
-		connectedClientsList = new NetworkList<ClientData>();
 		if (Instance == null)
 		{
 			Instance = this;
@@ -69,7 +68,6 @@ public class MultiplayerManager : NetworkBehaviour
 	}
 	public async void StartMultiplayer()
 	{
-		//connectedClientsList = new NetworkList<ClientData>();
 		await AuthenticatePlayer();
 		GetLobbiesList();
 	}
@@ -122,8 +120,7 @@ public class MultiplayerManager : NetworkBehaviour
 	//called on creating a lobby from MainMenu
 	public void StartHost()
 	{
-		connectedClientsList = new NetworkList<ClientData>();
-
+		Instance.connectedClientsList = new NetworkList<ClientData>();
 		try
 		{
 			connectedClientsList.Clear();
@@ -233,7 +230,7 @@ public class MultiplayerManager : NetworkBehaviour
 	//called when joininglobby from lobbylist
 	public void StartClient(Lobby lobby)
 	{
-		connectedClientsList = new NetworkList<ClientData>();
+		Instance.connectedClientsList = new NetworkList<ClientData>();
 		JoinLobby(lobby);
 		SubToEvents();
 
@@ -308,7 +305,6 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		if (CheckIfHost())
 			StopHost();
-
 		else
 			StopClient();
 	}
@@ -317,28 +313,31 @@ public class MultiplayerManager : NetworkBehaviour
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = false;
 
+		DeleteLobby();
 		UnsubToEvents();
 		ShutDownNetworkManagerIfActive();
-		DeleteLobby();
-		hostLobby = null;
 
 		if (SceneManager.GetActiveScene().buildIndex == 0)
 			GetLobbiesList();
-
 		else
 			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 	}
 	public async void DeleteLobby()
 	{
-		await LobbyService.Instance.DeleteLobbyAsync(hostLobby.Id);
+		if (hostLobby != null)
+		{
+			await LobbyService.Instance.DeleteLobbyAsync(hostLobby.Id);
+			hostLobby = null;
+		}
 	}
 	public void StopClient()
 	{
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = false;
+		hostLobby = null;
+
 		UnsubToEvents();
 		ShutDownNetworkManagerIfActive();
-		hostLobby = null;
 
 		if (SceneManager.GetActiveScene().buildIndex == 0)
 			GetLobbiesList();
@@ -433,9 +432,7 @@ public class MultiplayerManager : NetworkBehaviour
 	//Client data added to networked list of client data when ever client connects to a relay
 	public void PlayerConnectedCallback(ulong id)
 	{
-		//Debug.LogError($"Player Connected, ID: {id}");
-
-		Instance.localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
+		//Instance.localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
 		int i = connectedClientsList.Count;
 
 		if (CheckIfHost())
@@ -443,13 +440,14 @@ public class MultiplayerManager : NetworkBehaviour
 			//lobby created after host creates relay, for host grab data locally
 			if (CheckIfHost())
 			{
+				ClientData data = new ClientData(Instance.localClientName, Instance.localClientId, id.ToString());
 				Debug.Log(connectedClientsList.Count);
-				connectedClientsList.Add(new ClientData(Instance.localClientName, Instance.localClientId, id.ToString()));
+				Instance.connectedClientsList.Add(data);
 			}
 			//for connecting clients grab data through lobby before it joins host relay
 			else
 			{
-				connectedClientsList.Add(new ClientData(hostLobby.Players[i].Data["PlayerName"].Value,
+				Instance.connectedClientsList.Add(new ClientData(hostLobby.Players[i].Data["PlayerName"].Value,
 					hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
 			}
 		}
@@ -459,8 +457,6 @@ public class MultiplayerManager : NetworkBehaviour
 	//StopClient will always be called to handle intentional leaving or unintentional disconnects
 	public void PlayerDisconnectedCallback(ulong id)
 	{
-		//Debug.LogError($"Player Disconnected, ID: {id}");
-
 		if (CheckIfHost()) // if host remove client from lobby and relay
 			HandleClientDisconnectsWhenHost(id);
 		else
@@ -474,7 +470,7 @@ public class MultiplayerManager : NetworkBehaviour
 			{
 				RemoveClientFromLobby(connectedClientsList[i].clientId.ToString());
 
-				if (networkIdOfKickedPlayer != id.ToString()) //if player left/kicked dont run
+				if (networkIdOfKickedPlayer != id.ToString()) //if player kicked dont run
 					RemoveClientFromRelayServerRPC(connectedClientsList[i].clientNetworkedId.ToString());
 
 				connectedClientsList.RemoveAt(i);
@@ -484,7 +480,7 @@ public class MultiplayerManager : NetworkBehaviour
 		//only stop host when not in main scene as host can still wait in lobby for new player
 		if (SceneManager.GetActiveScene().buildIndex == 1)
 		{
-			StopHost();
+			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 		}
 	}
 	public void HandleClientDisconnects(ulong id)
@@ -493,6 +489,10 @@ public class MultiplayerManager : NetworkBehaviour
 		{
 			StopClient(); //if lobbies had more then 1 client this would need to be more complicated
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Connection to Host Lost", 3f);
+		}
+		if (SceneManager.GetActiveScene().buildIndex == 1)
+		{
+			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 		}
 	}
 	public void ResetPlayerName()
