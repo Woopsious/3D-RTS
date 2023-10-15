@@ -145,7 +145,6 @@ public class GameUIManager : MonoBehaviour
 		if (!gameManager.isMultiplayerGame)
 			Time.timeScale = 1;
 	}
-	//function below needs to be removed at somepoint
 	public void ShowPlayerDisconnectedPanel()
 	{
 		playerDisconnectedUiPanel.SetActive(true);

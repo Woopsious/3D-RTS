@@ -58,7 +58,6 @@ public class WeatherSystem : NetworkBehaviour
 			changeWeatherTimer = Random.Range(minWeatherTimer, maxWeatherTimer);
 		}
 	}
-
 	public void ChangeWeather()
 	{
 		ChangeEmissionRate();

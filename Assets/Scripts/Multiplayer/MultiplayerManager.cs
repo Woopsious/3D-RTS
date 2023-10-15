@@ -51,6 +51,7 @@ public class MultiplayerManager : NetworkBehaviour
 
 	public void Awake()
 	{
+		connectedClientsList = new NetworkList<ClientData>();
 		if (Instance == null)
 		{
 			Instance = this;
@@ -68,7 +69,7 @@ public class MultiplayerManager : NetworkBehaviour
 	}
 	public async void StartMultiplayer()
 	{
-		connectedClientsList = new NetworkList<ClientData>();
+		//connectedClientsList = new NetworkList<ClientData>();
 		await AuthenticatePlayer();
 		GetLobbiesList();
 	}
@@ -76,8 +77,11 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		await UnityServices.InitializeAsync();
 
-		AuthenticationService.Instance.SignedIn += () => { Debug.LogWarning($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
-		await AuthenticationService.Instance.SignInAnonymouslyAsync();
+		if(!AuthenticationService.Instance.IsAuthorized)
+		{
+			AuthenticationService.Instance.SignedIn += () => { Debug.LogWarning($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
+			await AuthenticationService.Instance.SignInAnonymouslyAsync();
+		}
 
 		localClientId = AuthenticationService.Instance.PlayerId;
 		Debug.LogWarning($"player Name: {Instance.localClientName}");
@@ -118,6 +122,8 @@ public class MultiplayerManager : NetworkBehaviour
 	//called on creating a lobby from MainMenu
 	public void StartHost()
 	{
+		connectedClientsList = new NetworkList<ClientData>();
+
 		try
 		{
 			connectedClientsList.Clear();
@@ -227,6 +233,7 @@ public class MultiplayerManager : NetworkBehaviour
 	//called when joininglobby from lobbylist
 	public void StartClient(Lobby lobby)
 	{
+		connectedClientsList = new NetworkList<ClientData>();
 		JoinLobby(lobby);
 		SubToEvents();
 
@@ -309,7 +316,6 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = false;
-		connectedClientsList.Clear();
 
 		UnsubToEvents();
 		ShutDownNetworkManagerIfActive();
@@ -437,7 +443,8 @@ public class MultiplayerManager : NetworkBehaviour
 			//lobby created after host creates relay, for host grab data locally
 			if (CheckIfHost())
 			{
-				connectedClientsList.Add(new ClientData(localClientName, localClientId, id.ToString()));
+				Debug.Log(connectedClientsList.Count);
+				connectedClientsList.Add(new ClientData(Instance.localClientName, Instance.localClientId, id.ToString()));
 			}
 			//for connecting clients grab data through lobby before it joins host relay
 			else
