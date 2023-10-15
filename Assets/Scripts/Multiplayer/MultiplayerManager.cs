@@ -118,9 +118,9 @@ public class MultiplayerManager : NetworkBehaviour
 
 	//FUNCTIONS FOR HOSTING LOBBY
 	//called on creating a lobby from MainMenu
-	public void StartHost()
+	public async void StartHost()
 	{
-		Instance.connectedClientsList = new NetworkList<ClientData>();
+		await CreateNewClientsList();
 		try
 		{
 			connectedClientsList.Clear();
@@ -228,9 +228,9 @@ public class MultiplayerManager : NetworkBehaviour
 
 	//FUNCTIONS FOR JOINING LOBBY
 	//called when joininglobby from lobbylist
-	public void StartClient(Lobby lobby)
+	public async void StartClient(Lobby lobby)
 	{
-		Instance.connectedClientsList = new NetworkList<ClientData>();
+		await CreateNewClientsList();
 		JoinLobby(lobby);
 		SubToEvents();
 
@@ -433,27 +433,33 @@ public class MultiplayerManager : NetworkBehaviour
 	public void PlayerConnectedCallback(ulong id)
 	{
 		//Instance.localClientNetworkedId = NetworkManager.Singleton.LocalClientId.ToString(); //save network ids once connected to relay
-		int i = connectedClientsList.Count;
 
 		if (CheckIfHost())
 		{
-			//lobby created after host creates relay, for host grab data locally
-			if (CheckIfHost())
-			{
-				ClientData data = new ClientData(Instance.localClientName, Instance.localClientId, id.ToString());
-				Debug.LogError(data.clientName + data.clientId.ToString() + id.ToString());
-				Debug.Log(connectedClientsList.Count);
-				Instance.connectedClientsList.Add(data);
-			}
-			//for connecting clients grab data through lobby before it joins host relay
-			else
-			{
-				Instance.connectedClientsList.Add(new ClientData(hostLobby.Players[i].Data["PlayerName"].Value,
-					hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
-			}
+			AddNewPlayerToClientListServerRPC(id);
 		}
 		if (!MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy)
 			MenuUIManager.Instance.ShowLobbyUi();
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void AddNewPlayerToClientListServerRPC(ulong id)
+	{
+		Debug.LogError(NetworkManager.Singleton.LocalClientId);
+		int i = connectedClientsList.Count;
+		//lobby created after host creates relay, for host grab data locally
+		if (CheckIfHost())
+		{
+			ClientData data = new ClientData(Instance.localClientName, Instance.localClientId, id.ToString());
+			Debug.LogError(data.clientName + data.clientId.ToString() + id.ToString());
+			Debug.Log(connectedClientsList.Count);
+			Instance.connectedClientsList.Add(data);
+		}
+		//for connecting clients grab data through lobby before it joins host relay
+		else
+		{
+			Instance.connectedClientsList.Add(new ClientData(hostLobby.Players[i].Data["PlayerName"].Value,
+				hostLobby.Players[i].Data["PlayerID"].Value, id.ToString()));
+		}
 	}
 	//StopClient will always be called to handle intentional leaving or unintentional disconnects
 	public void PlayerDisconnectedCallback(ulong id)
@@ -500,6 +506,14 @@ public class MultiplayerManager : NetworkBehaviour
 	{
 		Instance.localClientName = "PlayerName";
 		MenuUIManager.Instance.playerNameText.text = $"Player Name: {MultiplayerManager.Instance.localClientName}";
+	}
+	public Task CreateNewClientsList()  
+	{
+		NetworkList<ClientData> networkList = new NetworkList<ClientData>(default, 
+			NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
+		connectedClientsList = networkList;
+		return Task.CompletedTask;
 	}
 
 	//set up player data when joining/creating lobby
@@ -555,7 +569,6 @@ public struct ClientData : INetworkSerializable, IEquatable<ClientData>
 		this.clientId = clientId;
 		this.clientNetworkedId = clientNetworkedId;
 	}
-
 	public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
 	{
 		serializer.SerializeValue(ref clientName);
