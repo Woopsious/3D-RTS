@@ -16,8 +16,6 @@ public class HostManager : NetworkBehaviour
 {
 	public static HostManager Instance;
 
-	public float kickPlayerFromLobbyOnFailedToConnectTimer = 10f;
-
 	public NetworkList<ClientDataInfo> connectedClientsList;
 
 	public int connectedPlayers;
@@ -30,20 +28,9 @@ public class HostManager : NetworkBehaviour
 	}
 	public void StartHost()
 	{
-		/*
-		await CreateNewClientsList();
-		try
-		{
-			connectedClientsList.Clear();
-		}
-		catch
-		{
-			//under try catch cause it throws an error, even though without this the list keeps clients from previous sessions
-			Debug.Log("ignore");
-		}
-		*/
 		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
-		Multiplayer.Instance.SubToEvents();
+		ClearPlayers();
+		MultiplayerManager.Instance.SubToEvents();
 
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = true;
@@ -56,11 +43,11 @@ public class HostManager : NetworkBehaviour
 
 		ClearPlayers();
 		LobbyManager.Instance.DeleteLobby();
-		Multiplayer.Instance.UnsubToEvents();
-		Multiplayer.Instance.ShutDownNetworkManagerIfActive();
+		MultiplayerManager.Instance.UnsubToEvents();
+		MultiplayerManager.Instance.ShutDownNetworkManagerIfActive();
 
 		if (SceneManager.GetActiveScene().buildIndex == 0)
-			Multiplayer.Instance.GetLobbiesList();
+			MultiplayerManager.Instance.GetLobbiesList();
 		else
 			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 	}
@@ -137,33 +124,29 @@ public class HostManager : NetworkBehaviour
 			Debug.LogError(e.Message);
 		}
 	}
-	public void KickPlayerFromLobbyIfFailedToConnectToRelay()
-	{
-		kickPlayerFromLobbyOnFailedToConnectTimer -= Time.deltaTime;
-		if (kickPlayerFromLobbyOnFailedToConnectTimer < 0)
-		{
-			if (LobbyManager.Instance._Lobby.Players.Count != connectedClientsList.Count)
-				RemoveClientFromLobby(LobbyManager.Instance._Lobby.Players[1].Id);
-
-			kickPlayerFromLobbyOnFailedToConnectTimer = 11f;
-		}
-	}
 
 	//handle disconnects
 	public void HandlePlayerDisconnectsAsHost(ulong id)
 	{
 		if (SceneManager.GetActiveScene().buildIndex == 0)
 		{
-			foreach ( ClientDataInfo clientData in connectedClientsList)
+			foreach (ClientDataInfo clientData in connectedClientsList)
 			{
 				if (clientData.clientNetworkedId == id)
 				{
+					connectedClientsList.Remove(clientData);
 					RemoveClientFromLobby(clientData.clientId.ToString());
 				}
 			}
 		}
+		else
+		{
+			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+			StopHost();
+		}
 	}
-	private void ClearPlayers()
+	//reset connectedClientsList
+	public void ClearPlayers()
 	{
 		try
 		{
@@ -171,7 +154,7 @@ public class HostManager : NetworkBehaviour
 		}
 		catch
 		{
-			Debug.LogError("failed to clear connectedClientsList");
+			Debug.Log("failed to clear connectedClientsList: Not an issue so far");
 		}
 	}
 }

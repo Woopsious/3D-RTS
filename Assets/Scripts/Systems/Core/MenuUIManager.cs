@@ -184,11 +184,11 @@ public class MenuUIManager : MonoBehaviour
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Set a Name For Yourself", 3f);
 			return;
 		}
-		Multiplayer.Instance.StartMultiplayer();
+		MultiplayerManager.Instance.StartMultiplayer();
 	}
 	public void RefreshLobbiesListButton()
 	{
-		Multiplayer.Instance.GetLobbiesList();
+		MultiplayerManager.Instance.GetLobbiesList();
 	}
 	public void CreateLobbyButton()
 	{
@@ -203,13 +203,13 @@ public class MenuUIManager : MonoBehaviour
 	public void LeaveLobbyButton()
 	{
 		ClientManager.Instance.StopClient();
-		Multiplayer.Instance.GetLobbiesList();
+		MultiplayerManager.Instance.GetLobbiesList();
 		ClearPlayersList();
 	}
 	public void CloseLobbyButton()
 	{
 		HostManager.Instance.StopHost();
-		Multiplayer.Instance.GetLobbiesList();
+		MultiplayerManager.Instance.GetLobbiesList();
 		ClearPlayersList();
 	}
 	public void StartMultiplayerGameButton()
@@ -264,7 +264,6 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void ShowLobbyUi()
 	{
-		Debug.LogError("Showing Lobby Ui");
 		ConnectingToLobbyPanelObj.SetActive(false);
 		MpLobbiesListPanel.SetActive(false);
 		MpLobbyPanel.SetActive(true);
@@ -327,24 +326,6 @@ public class MenuUIManager : MonoBehaviour
 			}
 			index++;
 		}
-	}
-	//remove function below after testing
-	public void ShowPlayersInLobby()
-	{
-		if (LobbyManager.Instance._Lobby.HostId == ClientManager.Instance.clientId)
-			Debug.LogWarning($"is lobby host");
-		else
-			Debug.LogWarning($"is not lobby host");
-
-		if (SceneManager.GetActiveScene().buildIndex == 0)
-			MenuUIManager.Instance.SyncPlayerListforLobbyUi(LobbyManager.Instance._Lobby);
-
-		if (Multiplayer.Instance.CheckIfHost())
-			Debug.LogWarning($"connected Networked clients: {NetworkManager.Singleton.ConnectedClientsList.Count}");
-
-		Debug.LogWarning($"connected clients count: {HostManager.Instance.connectedClientsList.Count}");
-		Debug.LogWarning($"client in lobby: {LobbyManager.Instance._Lobby.Players.Count}");
-		Debug.LogWarning($"Networked ID: {ClientManager.Instance.clientNetworkedId}");
 	}
 	public void ClearLobbiesList()
 	{

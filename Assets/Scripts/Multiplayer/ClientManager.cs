@@ -25,9 +25,8 @@ public class ClientManager : NetworkBehaviour
 	}
 	public void StartClient(Lobby lobby)
 	{
-		//await CreateNewClientsList();
 		LobbyManager.Instance.JoinLobby(lobby);
-		Multiplayer.Instance.SubToEvents();
+		MultiplayerManager.Instance.SubToEvents();
 
 		GameManager.Instance.isPlayerOne = false;
 		GameManager.Instance.isMultiplayerGame = true;
@@ -35,15 +34,16 @@ public class ClientManager : NetworkBehaviour
 	}
 	public void StopClient()
 	{
+		Debug.LogError("STOPPING CLIENT");
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = false;
-		//hostLobby = null;
 
-		Multiplayer.Instance.UnsubToEvents();
-		Multiplayer.Instance.ShutDownNetworkManagerIfActive();
+		LobbyManager.Instance._Lobby = null;
+		MultiplayerManager.Instance.UnsubToEvents();
+		MultiplayerManager.Instance.ShutDownNetworkManagerIfActive();
 
 		if (SceneManager.GetActiveScene().buildIndex == 0)
-			Multiplayer.Instance.GetLobbiesList();
+			MultiplayerManager.Instance.GetLobbiesList();
 
 		else
 			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
@@ -95,9 +95,7 @@ public class ClientManager : NetworkBehaviour
 	//handle disconnects
 	public void HandlePlayerDisconnectsAsClient(ulong id)
 	{
-		if (SceneManager.GetActiveScene().buildIndex == 0)
-		{
-
-		}
+		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Connection to Host Lost", 3f);
+		StopClient();
 	}
 }

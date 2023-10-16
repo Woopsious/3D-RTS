@@ -38,6 +38,6 @@ public class PlayerDataItem : MonoBehaviour
 	public void KickPlayerFromLobby()
 	{
 		HostManager.Instance.networkIdOfKickedPlayer = localPlayerNetworkedId;
-		//HostManager.Instance.RemoveClientFromRelayServerRPC(localPlayerNetworkedId);
+		HostManager.Instance.RemoveClientFromRelay(localPlayerNetworkedId);
 	}
 }

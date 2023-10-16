@@ -53,7 +53,7 @@ public class WeatherSystem : NetworkBehaviour
 			GetNewXDirectionVelocity();
 			GetNewZDirectionVelocity();
 
-			Multiplayer.Instance.SyncWeatherServerRPC();
+			MultiplayerManager.Instance.SyncWeatherServerRPC();
 
 			changeWeatherTimer = Random.Range(minWeatherTimer, maxWeatherTimer);
 		}

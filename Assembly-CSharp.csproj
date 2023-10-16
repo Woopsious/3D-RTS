@@ -72,7 +72,6 @@
     <Compile Include="Assets\Scripts\Systems\Core\MenuUIManager.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\WeatherSystem.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\MiniMapManager.cs" />
-    <Compile Include="Assets\Scripts\Multiplayer\Multiplayer.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\WeaponSystem.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\CapturePointController.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\UnitBuildManager.cs" />

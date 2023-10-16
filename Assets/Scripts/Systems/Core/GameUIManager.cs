@@ -114,7 +114,7 @@ public class GameUIManager : MonoBehaviour
 	//MAIN GAME MENU FUNCTIONS
 	public void ExitGame()
 	{
-		if (Multiplayer.Instance.CheckIfHost())
+		if (MultiplayerManager.Instance.CheckIfHost())
 			HostManager.Instance.StopHost();
 		else
 			ClientManager.Instance.StopClient();
