@@ -337,7 +337,7 @@ public class GameManager : NetworkBehaviour
 		else
 		{
 			//audio is saved when slider value is changed
-			Instance.LocalCopyOfPlayerData.PlayerName = MultiplayerManager.Instance.localClientName;
+			Instance.LocalCopyOfPlayerData.PlayerName = ClientManager.Instance.clientUsername;
 			InputManager.Instance.SavePlayerKeybinds();
 
 			BinaryFormatter formatter = new BinaryFormatter();
@@ -362,7 +362,7 @@ public class GameManager : NetworkBehaviour
 			LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
 			playerData.Close();
 
-			MultiplayerManager.Instance.localClientName = Instance.LocalCopyOfPlayerData.PlayerName;
+			ClientManager.Instance.clientUsername = Instance.LocalCopyOfPlayerData.PlayerName;
 			AudioManager.Instance.LoadSoundSettings();
 			InputManager.Instance.LoadPlayerKeybinds();
 		}
@@ -370,7 +370,7 @@ public class GameManager : NetworkBehaviour
 	public void ResetPlayerSettings()
 	{
 		InputManager.Instance.ResetKeybindsToDefault();
-		MultiplayerManager.Instance.ResetPlayerName();
+		MenuUIManager.Instance.ResetPlayerName();
 		AudioManager.Instance.ResetAudioSettings();
 
 		SavePlayerData();

@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\Systems\GamePlay\DestroyInSeconds.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\UnitProductionManager.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\UnitIdleState.cs" />
+    <Compile Include="Assets\Scripts\Multiplayer\LobbyManager.cs" />
     <Compile Include="Assets\Scripts\Entities\Entities.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\GameManager.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\LobbyItemManager.cs" />
@@ -71,11 +72,14 @@
     <Compile Include="Assets\Scripts\Systems\Core\MenuUIManager.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\WeatherSystem.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\MiniMapManager.cs" />
+    <Compile Include="Assets\Scripts\Multiplayer\Multiplayer.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\WeaponSystem.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\CapturePointController.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\UnitBuildManager.cs" />
+    <Compile Include="Assets\Scripts\Multiplayer\LobbyDataItem.cs" />
     <Compile Include="Assets\Scripts\TestScripts\TestScript.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\ClientNetworkTransform.cs" />
+    <Compile Include="Assets\Scripts\Multiplayer\HostManager.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\ParticleEffects.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\TurretController.cs" />
@@ -83,6 +87,7 @@
     <Compile Include="Assets\Scripts\Systems\Core\PlayerNotifsManager.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\AnnouncerSystem.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\InputManager.cs" />
+    <Compile Include="Assets\Scripts\Multiplayer\ClientDataInfo.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\UnitStateController.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\UnitMovingState.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\NotifsEventManager.cs" />
@@ -98,9 +103,11 @@
     <Compile Include="Assets\Scripts\Multiplayer\MultiplayerManager.cs" />
     <Compile Include="Assets\Scripts\Entities\BuildingScripts\BuildingManager.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\AudioManager.cs" />
+    <Compile Include="Assets\Scripts\Multiplayer\PlayerDataItem.cs" />
     <Compile Include="Assets\Scripts\Entities\BuildingScripts\RefineryController.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\ResourceNodes.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\UnitBaseState.cs" />
+    <Compile Include="Assets\Scripts\Multiplayer\ClientManager.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\GameUIManager.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\BuildingPlacementManager.cs" />
     <Compile Include="Assets\Scripts\Entities\BuildingScripts\CargoShipController.cs" />

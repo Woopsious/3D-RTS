@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerItemManager : MonoBehaviour
+public class PlayerDataItem : MonoBehaviour
 {
-	public string playerName;
+	public string playerUsername;
 	public string playerId;
 	public string localPlayerNetworkedId;
 
@@ -16,17 +16,17 @@ public class PlayerItemManager : MonoBehaviour
 
 	public GameObject kickPlayerButton;
 
-	public void Initialize(string playerName, string playerId, string localPlayerNetworkedId)
+	public void Initialize(string playerUsername, string playerId, string localPlayerNetworkedId)
 	{
-		this.playerName = playerName;
+		this.playerUsername = playerUsername;
 		this.playerId = playerId;
 		this.localPlayerNetworkedId = localPlayerNetworkedId;
-		playerNameUi.text = playerName;
+		playerNameUi.text = playerUsername;
 	}
-	public void UpdateInfo(string playerId, string playerName, string localPlayerNetworkedId)
+	public void UpdateInfo(string playerId, string playerUsername, string localPlayerNetworkedId)
 	{
-		if (this.playerName != playerName)
-			this.playerName = playerName;
+		if (this.playerUsername != playerUsername)
+			this.playerUsername = playerUsername;
 
 		if (this.playerId != playerId)
 			this.playerId = playerId;
@@ -38,6 +38,6 @@ public class PlayerItemManager : MonoBehaviour
 	public void KickPlayerFromLobby()
 	{
 		HostManager.Instance.networkIdOfKickedPlayer = localPlayerNetworkedId;
-		HostManager.Instance.RemoveClientFromRelay(localPlayerNetworkedId);
+		//HostManager.Instance.RemoveClientFromRelayServerRPC(localPlayerNetworkedId);
 	}
 }

@@ -41,7 +41,7 @@ public class WeatherSystem : NetworkBehaviour
 
 	public void Update()
 	{
-		if (MultiplayerManager.Instance.IsHost)
+		if (ClientManager.Instance.clientNetworkedId == 0)
 			GetNewWeatherSettings();
 	}
 	public void GetNewWeatherSettings()
@@ -53,7 +53,7 @@ public class WeatherSystem : NetworkBehaviour
 			GetNewXDirectionVelocity();
 			GetNewZDirectionVelocity();
 
-			MultiplayerManager.Instance.SyncWeatherServerRPC();
+			Multiplayer.Instance.SyncWeatherServerRPC();
 
 			changeWeatherTimer = Random.Range(minWeatherTimer, maxWeatherTimer);
 		}

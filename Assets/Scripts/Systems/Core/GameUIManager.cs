@@ -114,14 +114,13 @@ public class GameUIManager : MonoBehaviour
 	//MAIN GAME MENU FUNCTIONS
 	public void ExitGame()
 	{
-		if (gameManager.isMultiplayerGame)
-		{
-			MultiplayerManager.Instance.CloseOrLeaveGameSession();
-		}
+		if (Multiplayer.Instance.CheckIfHost())
+			HostManager.Instance.StopHost();
 		else
-			//exit via SceneManager for Singleplayer
+			ClientManager.Instance.StopClient();
 
 		GameManager.Instance.SavePlayerData();
+		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
 	}
 	public void SaveAndExitGame()
 	{
