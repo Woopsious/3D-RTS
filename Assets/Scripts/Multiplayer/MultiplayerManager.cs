@@ -29,7 +29,6 @@ public class MultiplayerManager: NetworkBehaviour
 	//run when player clicks button
 	public async void StartMultiplayer()
 	{
-		HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
 		await AuthenticatePlayer();
 		GetLobbiesList();
 	}
@@ -91,20 +90,33 @@ public class MultiplayerManager: NetworkBehaviour
 	{
 		if (CheckIfHost())
 		{
-			int i = HostManager.Instance.connectedClientsList.Count;
 			if (id == 0) //grab host data locally as lobby is not yet made
 			{
+				//HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
+
 				ClientDataInfo data = new ClientDataInfo(ClientManager.Instance.clientUsername, 
 					ClientManager.Instance.clientId, ClientManager.Instance.clientNetworkedId);
 
-				HostManager.Instance.connectedClientsList.Add(data);
+				Debug.LogError(data.clientName);
+				Debug.LogError(data.clientId);
+				Debug.LogError(data.clientNetworkedId);
+
+				//if (!HostManager.Instance.useNewList)
+					HostManager.Instance.connectedClientsList.Add(data);
+				//else if (HostManager.Instance.useNewList)
+					//HostManager.Instance.connectedClientsListTwo.Add(data);
 			}
 			else //grab other clients data through lobby
 			{
+				int i = HostManager.Instance.connectedClientsList.Count;
+
 				ClientDataInfo data = new ClientDataInfo(LobbyManager.Instance._Lobby.Players[i].Data["PlayerName"].Value,
 					LobbyManager.Instance._Lobby.Players[i].Data["PlayerID"].Value, id);
 
-				HostManager.Instance.connectedClientsList.Add(data);
+				//if (!HostManager.Instance.useNewList)
+					HostManager.Instance.connectedClientsList.Add(data);
+				//else if (HostManager.Instance.useNewList)
+					//HostManager.Instance.connectedClientsListTwo.Add(data);
 			}
 		}
 		if (!MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy) //enable lobby ui once connected to relay

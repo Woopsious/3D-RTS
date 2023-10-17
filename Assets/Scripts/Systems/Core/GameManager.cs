@@ -415,6 +415,8 @@ public class GameManager : NetworkBehaviour
 
 		if (sceneIndex == 0)
 		{
+			HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
+			HostManager.Instance.connectedClientsListTwo = new NetworkList<ClientDataInfo>();
 			InputManager.Instance.SetUpKeybindDictionary();
 			MenuUIManager.Instance.SetUpKeybindButtonNames();
 			MenuUIManager.Instance.GetPlayerNameUi();
@@ -429,6 +431,8 @@ public class GameManager : NetworkBehaviour
 			gameUIManager.SetUpUnitShopUi();
 			gameUIManager.SetUpBuildingsShopUi();
 			gameUIManager.techTreeManager.SetUpTechTrees();
+
+			HostManager.Instance.UseNewList();
 
 			if (isMultiplayerGame)
 			{

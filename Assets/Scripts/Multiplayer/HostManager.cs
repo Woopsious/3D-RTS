@@ -17,10 +17,13 @@ public class HostManager : NetworkBehaviour
 	public static HostManager Instance;
 
 	public NetworkList<ClientDataInfo> connectedClientsList;
+	public NetworkList<ClientDataInfo> connectedClientsListTwo;
 
 	public int connectedPlayers;
 	public string idOfKickedPlayer;
 	public string networkIdOfKickedPlayer;
+
+	public bool useNewList;
 
 	public void Awake()
 	{
@@ -31,6 +34,10 @@ public class HostManager : NetworkBehaviour
 		}
 		else
 			Destroy(gameObject);
+
+		//Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
+		//Instance.connectedClientsListTwo = new NetworkList<ClientDataInfo>();
+		useNewList = false;
 	}
 	public void StartHost()
 	{
@@ -161,5 +168,12 @@ public class HostManager : NetworkBehaviour
 		{
 			Debug.Log("failed to clear connectedClientsList: Not an issue so far");
 		}
+	}
+	public void UseNewList()
+	{
+		if (useNewList == false)
+			useNewList = true;
+		else if (useNewList == true)
+			useNewList = false;
 	}
 }
