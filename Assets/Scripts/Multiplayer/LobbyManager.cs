@@ -62,10 +62,8 @@ public class LobbyManager : NetworkBehaviour
 
 			Lobby lobby = await LobbyService.Instance.CreateLobbyAsync(
 				LobbyManager.Instance.lobbyName, LobbyManager.Instance.maxConnections, createLobbyOptions);
-			//SubToLobbyEvents(hostLobby);
 
 			Instance._Lobby = lobby;
-
 			Debug.LogWarning($"Created lobby with name: {lobby.Name} and Id: {lobby.Id}");
 			Debug.LogWarning($"lobby code: {lobby.Data["joinCode"].Value}");
 		}

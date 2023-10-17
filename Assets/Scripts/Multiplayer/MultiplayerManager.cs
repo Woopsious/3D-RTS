@@ -15,6 +15,10 @@ public class MultiplayerManager: NetworkBehaviour
 {
 	public static MultiplayerManager Instance;
 
+	public GameObject NetworkManagerPrefab;
+
+	public NetworkManager networkManagerRef;
+
 	public void Awake()
 	{
 		if (Instance == null)
@@ -25,10 +29,26 @@ public class MultiplayerManager: NetworkBehaviour
 		else
 			Destroy(gameObject);
 	}
+	public Task CheckForNetworkManagerObj()
+	{
+		if (NetworkManager.Singleton == null)
+		{
+			Debug.LogError("Network Singleton null");
+			GameObject Obj = Instantiate(NetworkManagerPrefab);
+			Obj.GetComponent<NetworkManager>().SetSingleton();
+			HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
+		}
+		else
+		{
+			Debug.LogError("Network Singleton NOT null");
+		}
+		return Task.CompletedTask;
+	}
 
 	//run when player clicks button
 	public async void StartMultiplayer()
 	{
+		await CheckForNetworkManagerObj();
 		await AuthenticatePlayer();
 		GetLobbiesList();
 	}
@@ -133,22 +153,29 @@ public class MultiplayerManager: NetworkBehaviour
 	public void ShutDownNetworkManagerIfActive()
 	{
 		if (NetworkManager.Singleton.isActiveAndEnabled)
+		{
 			NetworkManager.Singleton.Shutdown();
+			Destroy(NetworkManager.Singleton.gameObject);
+		}
 	}
 
 	//check if host from anywhere
 	public bool CheckIfHost()
 	{
-		if (NetworkManager.Singleton.IsHost)
+		if (NetworkManager.Singleton != null)
 		{
-			//Debug.LogError("CLIENT IS HOST");
-			return true;
+			if (NetworkManager.Singleton.IsHost)
+			{
+				//Debug.LogError("CLIENT IS HOST");
+				return true;
+			}
+			else
+			{
+				//Debug.LogError("CLIENT IS NOT HOST");
+				return false;
+			}
 		}
-		else
-		{
-			//Debug.LogError("CLIENT IS NOT HOST");
-			return false;
-		}
+		return false;
 	}
 
 	//SYNC WEATHER FOR PLAYERS

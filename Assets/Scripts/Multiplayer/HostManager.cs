@@ -17,7 +17,7 @@ public class HostManager : NetworkBehaviour
 	public static HostManager Instance;
 
 	public NetworkList<ClientDataInfo> connectedClientsList;
-	public NetworkList<ClientDataInfo> connectedClientsListTwo;
+	//public NetworkList<ClientDataInfo> connectedClientsListTwo;
 
 	public int connectedPlayers;
 	public string idOfKickedPlayer;

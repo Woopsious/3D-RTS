@@ -415,8 +415,7 @@ public class GameManager : NetworkBehaviour
 
 		if (sceneIndex == 0)
 		{
-			HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
-			HostManager.Instance.connectedClientsListTwo = new NetworkList<ClientDataInfo>();
+			Time.timeScale = 1f;
 			InputManager.Instance.SetUpKeybindDictionary();
 			MenuUIManager.Instance.SetUpKeybindButtonNames();
 			MenuUIManager.Instance.GetPlayerNameUi();

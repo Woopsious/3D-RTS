@@ -151,7 +151,6 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void ReturnToMainMenuAfterPlayerDisconnect()
 	{
-		PauseGame();
 		GameManager.Instance.LoadScene(GameManager.Instance.mainMenuSceneName);
 	}
 	public void HideGameSpeedButtonsForMP()

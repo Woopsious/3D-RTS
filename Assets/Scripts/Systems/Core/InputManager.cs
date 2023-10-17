@@ -80,7 +80,7 @@ public class InputManager : MonoBehaviour
 			keyBindCameraRotateRightName
 		};
 
-		ResetKeybindsToDefault();
+		LoadPlayerKeybinds();
 	}
 	public void ResetKeybindsToDefault()
 	{
