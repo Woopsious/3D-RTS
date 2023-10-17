@@ -19,10 +19,18 @@ public class AnnouncerSystem : MonoBehaviour
 	public void PlayActionPositiveSFX()
 	{
 		CheckIfAudioIsPlaying();
-
-		int i = Random.Range(0, actionsPositive.Count);
-		announcerSFX.clip = actionsPositive[i];
+		announcerSFX.clip = actionsPositive[GetRandomNumber(actionsPositive.Count)];
 		announcerSFX.Play();
+	}
+	public void PlayActionNegativeSFX()
+	{
+		CheckIfAudioIsPlaying();
+		announcerSFX.clip = actionsNegative[GetRandomNumber(actionsPositive.Count)];
+		announcerSFX.Play();
+	}
+	public int GetRandomNumber(int max)
+	{
+		return Random.Range(0, max);
 	}
 	private void CheckIfAudioIsPlaying()
 	{
