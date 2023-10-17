@@ -21,7 +21,13 @@ public class ClientManager : NetworkBehaviour
 
 	public void Awake()
 	{
-		Instance = this;
+		if (Instance == null)
+		{
+			Instance = this;
+			DontDestroyOnLoad(Instance);
+		}
+		else
+			Destroy(gameObject);
 	}
 	public void StartClient(Lobby lobby)
 	{
@@ -30,7 +36,6 @@ public class ClientManager : NetworkBehaviour
 
 		GameManager.Instance.isPlayerOne = false;
 		GameManager.Instance.isMultiplayerGame = true;
-		ClientManager.Instance.clientNetworkedId = NetworkManager.Singleton.LocalClientId;
 	}
 	public void StopClient()
 	{
@@ -71,6 +76,7 @@ public class ClientManager : NetworkBehaviour
 		yield return null;
 
 		NetworkManager.Singleton.StartClient();
+		ClientManager.Instance.clientNetworkedId = NetworkManager.Singleton.LocalClientId;
 	}
 	public static async Task<RelayServerData> JoinRelayServerFromJoinCode(string joinCode)
 	{

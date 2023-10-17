@@ -25,13 +25,22 @@ public class LobbyManager : NetworkBehaviour
 
 	public void Awake()
 	{
-		Instance = this;
+		if (Instance == null)
+		{
+			Instance = this;
+			DontDestroyOnLoad(Instance);
+		}
+		else
+			Destroy(gameObject);
 	}
 	public void Update()
 	{
-		LobbyHeartBeat();
 		HandleLobbyPollForUpdates();
-		KickPlayerFromLobbyIfFailedToConnectToRelay();
+		if (MultiplayerManager.Instance.CheckIfHost())
+		{
+			LobbyHeartBeat();
+			KickPlayerFromLobbyIfFailedToConnectToRelay();
+		}
 	}
 
 	//create lobby
@@ -166,13 +175,16 @@ public class LobbyManager : NetworkBehaviour
 	//if player fails to join relay after 10s unity timesout, this function will then auto kick player from lobby after 11s
 	public void KickPlayerFromLobbyIfFailedToConnectToRelay()
 	{
-		kickPlayerFromLobbyOnFailedToConnectTimer -= Time.deltaTime;
-		if (kickPlayerFromLobbyOnFailedToConnectTimer < 0)
+		if (_Lobby != null)
 		{
-			if (_Lobby.Players.Count != HostManager.Instance.connectedClientsList.Count)
-				HostManager.Instance.RemoveClientFromLobby(_Lobby.Players[1].Id);
+			kickPlayerFromLobbyOnFailedToConnectTimer -= Time.deltaTime;
+			if (kickPlayerFromLobbyOnFailedToConnectTimer < 0)
+			{
+				if (_Lobby.Players.Count != HostManager.Instance.connectedClientsList.Count)
+					HostManager.Instance.RemoveClientFromLobby(_Lobby.Players[1].Id);
 
-			kickPlayerFromLobbyOnFailedToConnectTimer = 11f;
+				kickPlayerFromLobbyOnFailedToConnectTimer = 11f;
+			}
 		}
 	}
 }

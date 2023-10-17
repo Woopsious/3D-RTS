@@ -24,7 +24,13 @@ public class HostManager : NetworkBehaviour
 
 	public void Awake()
 	{
-		Instance = this;
+		if (Instance == null)
+		{
+			Instance = this;
+			DontDestroyOnLoad(Instance);
+		}
+		else
+			Destroy(gameObject);
 	}
 	public void StartHost()
 	{
@@ -34,7 +40,6 @@ public class HostManager : NetworkBehaviour
 
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = true;
-		ClientManager.Instance.clientNetworkedId = NetworkManager.Singleton.LocalClientId;
 	}
 	public void StopHost()
 	{
@@ -71,6 +76,7 @@ public class HostManager : NetworkBehaviour
 		yield return null;
 
 		NetworkManager.Singleton.StartHost();
+		ClientManager.Instance.clientNetworkedId = NetworkManager.Singleton.LocalClientId;
 		LobbyManager.Instance.CreateLobby();
 	}
 	public static async Task<RelayServerData> AllocateRelayServerAndGetJoinCode(int maxConnections, string region = null)
@@ -101,7 +107,6 @@ public class HostManager : NetworkBehaviour
 
 		return new RelayServerData(allocation, "dtls");
 	}
-
 
 	public void RemoveClientFromRelay(string networkedId)
 	{

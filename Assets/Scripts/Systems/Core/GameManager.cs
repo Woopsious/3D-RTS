@@ -136,11 +136,6 @@ public class GameManager : NetworkBehaviour
 		playerGameDataPath = Path.Combine(Application.persistentDataPath, "Saves");
 
 		GameManager.Instance.errorManager.OnStartUpHandleLogFiles();
-		GameManager.Instance.errorManager.CheckForErrorLogObj();
-		InputManager.Instance.SetUpKeybindDictionary();
-
-		GameManager.Instance.LoadPlayerData();
-		MenuUIManager.Instance.GetPlayerNameUi();
 
 		//assign base building stats
 		buildingHQStats = new BaseBuildingStats
@@ -413,8 +408,14 @@ public class GameManager : NetworkBehaviour
 	}
 	public void OnSceneLoad(int sceneIndex)
 	{
+		GameManager.Instance.LoadPlayerData();
+		GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
+		GameManager.Instance.errorManager.CheckForErrorLogObj();
+		AudioManager.Instance.LoadSoundSettings();
+
 		if (sceneIndex == 0)
 		{
+			InputManager.Instance.SetUpKeybindDictionary();
 			MenuUIManager.Instance.SetUpKeybindButtonNames();
 			MenuUIManager.Instance.GetPlayerNameUi();
 		}
@@ -428,17 +429,14 @@ public class GameManager : NetworkBehaviour
 			gameUIManager.SetUpUnitShopUi();
 			gameUIManager.SetUpBuildingsShopUi();
 			gameUIManager.techTreeManager.SetUpTechTrees();
-		}
-		GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
-		GameManager.Instance.errorManager.CheckForErrorLogObj();
-		AudioManager.Instance.LoadSoundSettings();
 
-		if(isMultiplayerGame)
-		{
-			Time.timeScale = 0;
-			gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
-			gameUIManager.playerReadyUpPanelObj.SetActive(true);
-			gameUIManager.HideGameSpeedButtonsForMP();
+			if (isMultiplayerGame)
+			{
+				Time.timeScale = 0;
+				gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
+				gameUIManager.playerReadyUpPanelObj.SetActive(true);
+				gameUIManager.HideGameSpeedButtonsForMP();
+			}
 		}
 	}
 
