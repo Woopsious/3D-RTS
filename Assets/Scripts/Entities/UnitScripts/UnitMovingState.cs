@@ -32,6 +32,7 @@ public class UnitMovingState : UnitBaseState
 			unit.ChangeStateIdleClientRPC();
 			unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
+			AnnouncerSystem.Instance.PlayNegReplyInvalidUnitPositionSFX();
 		}
 	}
 	public override void Exit(UnitStateController unit)

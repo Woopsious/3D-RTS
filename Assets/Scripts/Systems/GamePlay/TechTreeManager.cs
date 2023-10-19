@@ -367,6 +367,7 @@ public class TechTreeManager : MonoBehaviour
 	public void CompleteResearch(List<Technology> techList, int index) //update bonus values provided by research
 	{
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Research Complete", 2f);
+		AnnouncerSystem.Instance.PlayAlertResearchCompleteSFX();
 
 		if (techList == buildingTechList)
 			gameUIManager.gameManager.UpdateTechBonusesServerRPC(true, index);

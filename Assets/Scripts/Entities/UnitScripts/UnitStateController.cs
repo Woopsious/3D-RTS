@@ -207,13 +207,19 @@ public class UnitStateController : Entities
 	public override void TryDisplayEntityHitNotif()
 	{
 		if (!isCargoShip && !wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", transform.position);
+			AnnouncerSystem.Instance.PlayAlertUnitUnderAttackSFX();
+		}
 	}
 	public override void OnEntityDeath()
 	{
 		base.OnEntityDeath();
 		if (!isCargoShip && ShouldDisplaySpottedNotifToPlayer())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT DESTROYED", transform.position);
+			AnnouncerSystem.Instance.PlayAlertUnitLostSFX();
+		}
 	}
 
 	//ATTACK PLAYER SET TARGET FUNCTIONS

@@ -168,11 +168,13 @@ public class CapturePointController : MonoBehaviour
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Neutral Point Gained By Another Player", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Neutral Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsEnemyCapturedAFlagSFX();
 			}
 			else if (!GameManager.Instance.isPlayerOne)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Neutral Point Gained", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Neutral Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsWeCapturedAFlagSFX();
 			}
 		}
 		if (trackLastCapturePointOwnership == 0 && newPointOwnership == 1)
@@ -181,11 +183,13 @@ public class CapturePointController : MonoBehaviour
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Neutral Point Gained", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Neutral Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsWeCapturedAFlagSFX();
 			}
 			else if (!GameManager.Instance.isPlayerOne)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Neutral Point Gained By Another Player", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Neutral Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsEnemyCapturedAFlagSFX();
 			}
 		}
 
@@ -195,11 +199,13 @@ public class CapturePointController : MonoBehaviour
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Capture Point Lost", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Capture Point Lost", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsEnemyCapturedOurFlagSFX();
 			}
 			else if (!GameManager.Instance.isPlayerOne)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Capture Point Gained", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Capture Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsWeCapturedEnemyFlagSFX();
 			}
 		}
 
@@ -209,11 +215,13 @@ public class CapturePointController : MonoBehaviour
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Capture Point Gained", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Capture Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsWeCapturedEnemyFlagSFX();
 			}
 			else if (!GameManager.Instance.isPlayerOne)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Capture Point Lost", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Capture Point Lost", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsEnemyCapturedOurFlagSFX();
 			}
 		}
 	}

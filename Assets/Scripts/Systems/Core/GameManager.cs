@@ -241,7 +241,7 @@ public class GameManager : NetworkBehaviour
 	public void Update()
 	{
 		if (Input.GetKeyDown(KeyCode.V))
-			AnnouncerSystem.Instance.PlayActionPositiveSFX();
+			AnnouncerSystem.Instance.PlayPositiveRepliesSFX();
 	}
 	public void GetResourcesPerSecond()
 	{

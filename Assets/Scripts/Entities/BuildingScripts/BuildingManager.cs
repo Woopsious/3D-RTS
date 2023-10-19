@@ -58,13 +58,19 @@ public class BuildingManager : Entities
 	public override void TryDisplayEntityHitNotif()
 	{
 		if (!wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
-			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING UNDER ATTACK", transform.position);
+		{
+			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BASE UNDER ATTACK", transform.position);
+			AnnouncerSystem.Instance.PlayAlertBaseUnderAttackSFX();
+		}
 	}
 	public override void OnEntityDeath()
 	{
 		base.OnEntityDeath();
 		if (ShouldDisplaySpottedNotifToPlayer())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING DESTROYED", transform.position);
+			AnnouncerSystem.Instance.PlayAlertBuildingLostSFX();
+		}
 	}
 
 	//UTILITY FUNCTIONS

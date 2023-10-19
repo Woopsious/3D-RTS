@@ -401,6 +401,8 @@ public class UnitSelectionManager : NetworkBehaviour
 			else //else mine selected node
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
+				AnnouncerSystem.Instance.PlayPosReplyMiningSFX();
+
 				SelectedCargoShip.SetResourceNodeFromPlayerInputServerRPC(SelectedCargoShip.GetComponent<NetworkObject>().NetworkObjectId, 
 					resourceNode.GetComponent<NetworkObject>().NetworkObjectId);
 			}
@@ -411,10 +413,11 @@ public class UnitSelectionManager : NetworkBehaviour
 			if (!selectedUnitList[0].isTurret)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Moving!", 1f);
+				AnnouncerSystem.Instance.PlayPosReplyMovingSFX();
 
 				for (int i = 0; i < selectedUnitList.Count; i++)
 				{
-					Vector3 movePos = movePosHighlighterObj[i].transform.position;  //ask server to move units fo clients
+					Vector3 movePos = movePosHighlighterObj[i].transform.position;  //ask server to move units for clients
 					MoveUnitsServerRPC(selectedUnitList[i].EntityNetworkObjId, movePos);
 				}
 			}
@@ -423,6 +426,7 @@ public class UnitSelectionManager : NetworkBehaviour
 	public void TryAttackEnemyEntity(ulong targetEntityNetworkObjId)
 	{
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target!", 1f);
+		AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
 
 		//move selected units closer to target and attack it
 		for (int i = 0; i < selectedUnitList.Count; i++)
@@ -778,14 +782,12 @@ public class UnitSelectionManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void MoveUnitsServerRPC(ulong NetworkObjId, Vector3 destination)
 	{
-		Debug.Log("server call");
 		if (!IsServer) return;
 		MoveUnitsClientRPC(NetworkObjId, destination);
 	}
 	[ClientRpc]
 	public void MoveUnitsClientRPC(ulong NetworkObjId, Vector3 destination)
 	{
-		Debug.Log("client call");
 		NetworkManager.SpawnManager.SpawnedObjects[NetworkObjId].GetComponent<UnitStateController>().MoveToDestination(destination);
 	}
 }

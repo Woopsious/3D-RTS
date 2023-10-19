@@ -230,24 +230,28 @@ public class CanPlaceBuilding : NetworkBehaviour
 					}
 					else
 					{
+						AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
 						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Colliding with another Entity", 2f);
 						return canPlace = false;
 					}
 				}
 				else
 				{
+					AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
 					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Incorrect Placement Height", 2f);
 					return canPlace = false;
 				}
 			}
 			else
 			{
+				AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("You Dont Own This Capturepoint", 2f);
 				return canPlace = false;
 			}
 		}
 		else
 		{
+			AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Not In Buildable Area", 2f);
 			return canPlace = false;
 		}
