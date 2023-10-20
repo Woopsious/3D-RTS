@@ -29,16 +29,6 @@ public class WeatherSystem : NetworkBehaviour
 
 	public float changeWeatherTimer;
 
-	public void Start()
-	{
-		ChangeEmissionRate();
-		ChangeFallVelocity();
-		ChangeXDirectionVelocity();
-		ChangeZDirectionVelocity();
-
-		changeWeatherTimer = Random.Range(minWeatherTimer, maxWeatherTimer);
-	}
-
 	public void Update()
 	{
 		if (MultiplayerManager.Instance.CheckIfHost())
@@ -50,6 +40,7 @@ public class WeatherSystem : NetworkBehaviour
 		if (changeWeatherTimer < 0)
 		{
 			GetNewSnowEmisionRate();
+			ChangeFallVelocity();
 			GetNewXDirectionVelocity();
 			GetNewZDirectionVelocity();
 

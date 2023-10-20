@@ -104,7 +104,7 @@ public class ErrorLogManager : MonoBehaviour
 				{
 					RecordLogMessageToUi(log, Color.red);
 					WriteToLogFile(type, "0", logString);
-					ShowErrorLog();
+					//ShowErrorLog();
 				}
 				else if (type == LogType.Warning)
 				{

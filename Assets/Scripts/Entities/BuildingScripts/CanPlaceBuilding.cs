@@ -144,116 +144,104 @@ public class CanPlaceBuilding : NetworkBehaviour
 	//final bool checks on player mouse click
 	public bool CheckIfCanPlaceBuilding()
 	{
-		if (pointController != null)
-		{
-			if (CheckCapturePointOwnership())
-			{
-				if (CheckPlacementHeight())
-				{
-					if (!isCollidingWithAnotherBuilding)
-					{
-						if (building != null)
-						{
-							if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)
-							{
-								return true;
-							}
-							else if (pointController.energyGeneratorBuilding != null && building.isGeneratorBuilding)
-							{
-								GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Energy Generator Already Exists", 1f);
-								return false;
-							}
-							else if (pointController.RefinaryBuildings.Count < pointController.RefinaryBuildingsPlacementLimit && building.isRefineryBuilding)
-							{
-								return true;
-							}
-							else if (pointController.RefinaryBuildings.Count >= pointController.RefinaryBuildingsPlacementLimit && building.isRefineryBuilding)
-							{
-								GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Refinery Buildings Reached in Control Point", 2f);
-								return false;
-							}
-							else if (pointController.lightVehProdBuildings.Count < pointController.lightVehProdBuildingsPlacementLimit && building.isLightVehProdBuilding)
-							{
-								return true;
-							}
-							else if (pointController.lightVehProdBuildings.Count >= pointController.lightVehProdBuildingsPlacementLimit && building.isLightVehProdBuilding)
-							{
-								GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Light Vehicle Buildings Reached in Control Point", 2f);
-								return false;
-							}
-							else if (pointController.heavyVehProdBuildings.Count < pointController.heavyVehProdBuildingsPlacementLimit && building.isHeavyVehProdBuilding)
-							{
-								return true;
-							}
-							else if (pointController.heavyVehProdBuildings.Count >= pointController.heavyVehProdBuildingsPlacementLimit && building.isHeavyVehProdBuilding)
-							{
-								GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Heavy Vehicle Buildings Reached in Control Point", 2f);
-								return false;
-							}
-							else if (pointController.vtolProdBuildings.Count < pointController.vtolProdBuildingsPlacementLimit && building.isVTOLProdBuilding)
-							{
-								return true;
-							}
-							else if (pointController.vtolProdBuildings.Count >= pointController.vtolProdBuildingsPlacementLimit && building.isVTOLProdBuilding)
-							{
-								GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max VTOL Vehicle Buildings Reached in Control Point", 2f);
-								return false;
-							}
-							else
-							{
-								Debug.LogError("Couldnt place building, this shouldnt happen");
-								return false;
-							}
-						}
-						else if (turret != null)
-						{
-							if (pointController.TurretDefenses.Count < pointController.TurretDefensesPlacementLimit && turret.isTurret)
-							{
-								return true;
-							}
-							else if (pointController.TurretDefenses.Count >= pointController.TurretDefensesPlacementLimit && turret.isTurret)
-							{
-								GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Turret Defense Buildings Reached in Control Point", 2f);
-								return false;
-							}
-							else
-							{
-								Debug.LogError("Couldnt place turret, this shouldnt happen");
-								return false;
-							}
-						}
-						else
-						{
-							Debug.LogError("building/turret reference no assigned or missing, this shouldnt happen");
-							return false;
-						}
-					}
-					else
-					{
-						AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
-						GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Colliding with another Entity", 2f);
-						return canPlace = false;
-					}
-				}
-				else
-				{
-					AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
-					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Incorrect Placement Height", 2f);
-					return canPlace = false;
-				}
-			}
-			else
-			{
-				AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("You Dont Own This Capturepoint", 2f);
-				return canPlace = false;
-			}
-		}
-		else
+		if (pointController == null)
 		{
 			AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Not In Buildable Area", 2f);
 			return canPlace = false;
+		}
+		if (!CheckCapturePointOwnership())
+		{
+			AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("You Dont Own This Capturepoint", 2f);
+			return canPlace = false;
+		}
+		if (!CheckPlacementHeight())
+		{
+			AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Incorrect Placement Height", 2f);
+			return canPlace = false;
+		}
+		if (isCollidingWithAnotherBuilding)
+		{
+			AnnouncerSystem.Instance.PlayNegReplyInvalidBuildingLocationSFX();
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Colliding with another Entity", 2f);
+			return canPlace = false;
+		}
+		if (building != null)
+		{
+			if (pointController.energyGeneratorBuilding == null && building.isGeneratorBuilding)
+			{
+				return true;
+			}
+			else if (pointController.energyGeneratorBuilding != null && building.isGeneratorBuilding)
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Energy Generator Already Exists", 1f);
+				return false;
+			}
+			else if (pointController.RefinaryBuildings.Count < pointController.RefinaryBuildingsPlacementLimit && building.isRefineryBuilding)
+			{
+				return true;
+			}
+			else if (pointController.RefinaryBuildings.Count >= pointController.RefinaryBuildingsPlacementLimit && building.isRefineryBuilding)
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Refinery Buildings Reached in Control Point", 2f);
+				return false;
+			}
+			else if (pointController.lightVehProdBuildings.Count < pointController.lightVehProdBuildingsPlacementLimit && building.isLightVehProdBuilding)
+			{
+				return true;
+			}
+			else if (pointController.lightVehProdBuildings.Count >= pointController.lightVehProdBuildingsPlacementLimit && building.isLightVehProdBuilding)
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Light Vehicle Buildings Reached in Control Point", 2f);
+				return false;
+			}
+			else if (pointController.heavyVehProdBuildings.Count < pointController.heavyVehProdBuildingsPlacementLimit && building.isHeavyVehProdBuilding)
+			{
+				return true;
+			}
+			else if (pointController.heavyVehProdBuildings.Count >= pointController.heavyVehProdBuildingsPlacementLimit && building.isHeavyVehProdBuilding)
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Heavy Vehicle Buildings Reached in Control Point", 2f);
+				return false;
+			}
+			else if (pointController.vtolProdBuildings.Count < pointController.vtolProdBuildingsPlacementLimit && building.isVTOLProdBuilding)
+			{
+				return true;
+			}
+			else if (pointController.vtolProdBuildings.Count >= pointController.vtolProdBuildingsPlacementLimit && building.isVTOLProdBuilding)
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max VTOL Vehicle Buildings Reached in Control Point", 2f);
+				return false;
+			}
+			else
+			{
+				Debug.LogError("Couldnt place building, this shouldnt happen");
+				return false;
+			}
+		}
+		else if (turret != null)
+		{
+			if (pointController.TurretDefenses.Count < pointController.TurretDefensesPlacementLimit && turret.isTurret)
+			{
+				return true;
+			}
+			else if (pointController.TurretDefenses.Count >= pointController.TurretDefensesPlacementLimit && turret.isTurret)
+			{
+				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Max Turret Defense Buildings Reached in Control Point", 2f);
+				return false;
+			}
+			else
+			{
+				Debug.LogError("Couldnt place turret, this shouldnt happen");
+				return false;
+			}
+		}
+		else
+		{
+			Debug.LogError("building/turret reference not assigned or missing, this shouldnt happen");
+			return false;
 		}
 	}
 

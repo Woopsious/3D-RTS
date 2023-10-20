@@ -62,7 +62,9 @@ public class MultiplayerManager: NetworkBehaviour
 			await AuthenticationService.Instance.SignInAnonymouslyAsync();
 		}
 		ClientManager.Instance.clientId = AuthenticationService.Instance.PlayerId;
-
+	}
+	public void UnAuthenticatePlayer()
+	{
 		AuthenticationService.Instance.SignOut();
 	}
 	public async void GetLobbiesList()

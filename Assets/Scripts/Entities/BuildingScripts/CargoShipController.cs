@@ -48,7 +48,7 @@ public class CargoShipController : UnitStateController
 	}
 
 	//FUNCTIONS FOR LOOPING RESOURCE GATHERING
-	//can chnage mine orders here
+	//can change mine orders here
 	public IEnumerator IncreaseHeightFromRefinery()
 	{
 		Debug.LogError("increasing height");
@@ -180,13 +180,19 @@ public class CargoShipController : UnitStateController
 	public override void TryDisplayEntityHitNotif()
 	{
 		if (!wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP UNDER ATTACK", transform.position);
+			AnnouncerSystem.Instance.PlayAlertUnitUnderAttackSFX();
+		}
 	}
 	public override void OnEntityDeath()
 	{
 		base.OnEntityDeath();
 		if (ShouldDisplaySpottedNotifToPlayer())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP DESTROYED", transform.position);
+			AnnouncerSystem.Instance.PlayAlertUnitLostSFX();
+		}
 	}
 
 	//UTILITY FUNCTIONS
@@ -264,7 +270,6 @@ public class CargoShipController : UnitStateController
 	}
 	public void DeleteSelf()
 	{
-		//currentHealth.Value = -10;
 		OnEntityDeath();
 	}
 

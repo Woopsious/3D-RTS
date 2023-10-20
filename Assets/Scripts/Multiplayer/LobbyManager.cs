@@ -158,8 +158,9 @@ public class LobbyManager : NetworkBehaviour
 						Debug.LogWarning($"connected Networked clients: {NetworkManager.Singleton.ConnectedClientsList.Count}");
 
 					Debug.LogWarning($"connected clients count: {HostManager.Instance.connectedClientsList.Count}");
-					Debug.LogWarning($"client in lobby: {_Lobby.Players.Count}");
-					Debug.LogWarning($"Networked ID: {ClientManager.Instance.clientNetworkedId}");
+					Debug.LogWarning($"clients in lobby: {_Lobby.Players.Count}");
+					Debug.LogWarning($"Local Networked ID: {ClientManager.Instance.clientNetworkedId}");
+					Debug.LogWarning($"Lobby Join Code: {_Lobby.Data["joinCode"].Value}");
 				}
 				catch
 				{
