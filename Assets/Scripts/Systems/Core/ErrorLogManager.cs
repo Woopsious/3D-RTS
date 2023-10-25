@@ -92,7 +92,7 @@ public class ErrorLogManager : MonoBehaviour
 			Debug.LogError("log match 3");
 		}
 
-		if (type == LogType.Error || type == LogType.Warning)
+		if (type == LogType.Error || type == LogType.Warning && errorLogWindowObj != null)
 		{
 			if (CheckForRepeatingLogMessages(log))
 			{

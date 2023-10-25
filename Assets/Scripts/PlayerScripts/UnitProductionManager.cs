@@ -411,4 +411,24 @@ public class UnitProductionManager : NetworkBehaviour
 			}
 		}
 	}
+
+	//Refund canceled unit production
+	[ServerRpc(RequireOwnership = false)]
+	public void UnitRefundCostServerRPC(bool wasPlayerOneEntity, int moneyCost, int alloyCost, int crystalCost)
+	{
+		if (wasPlayerOneEntity)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += moneyCost;
+			GameManager.Instance.playerOneCurrentAlloys.Value += alloyCost;
+			GameManager.Instance.playerOneCurrentCrystals.Value += crystalCost;
+		}
+		else if (!wasPlayerOneEntity)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += moneyCost;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += alloyCost;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalCost;
+		}
+
+		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(1f));
+	}
 }
