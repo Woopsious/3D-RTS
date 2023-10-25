@@ -89,7 +89,7 @@ public class AnnouncerSystem : MonoBehaviour
 	}
 	public void PlayAlertUnitUnderAttackSFX()
 	{
-		PlayAudioClip(Alert_UnitLost);
+		PlayAudioClip(Alert_UnitUnderAttack);
 	}
 	public void PlayAlertUnitLostSFX()
 	{

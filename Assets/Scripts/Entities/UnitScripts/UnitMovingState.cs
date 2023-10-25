@@ -11,6 +11,30 @@ public class UnitMovingState : UnitBaseState
 	public override void Enter(UnitStateController unit)
 	{
 		Debug.LogWarning("Entered Moving State");
+
+		if (!CheckAndSetNewPath(unit)) //if path valid move
+		{
+			if (!NavMesh.SamplePosition(unit.movePos, out NavMeshHit navMeshHit, 5, unit.agentNav.areaMask))//if path false try find new one
+			{
+				Debug.LogError("Unit cant find path");
+				unit.ChangeStateIdleClientRPC();
+				unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
+
+				if (unit.playerController != null)
+				{
+					GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
+					AnnouncerSystem.Instance.PlayNegReplyInvalidUnitPositionSFX();
+				}
+				return; //if failed return
+			}
+
+			else //else set new path
+			{
+				unit.movePos = navMeshHit.position;
+				CheckAndSetNewPath(unit);
+			}
+		}
+
 		if (unit.hasRadar)
 		{
 			unit.audioSFXs[2].Stop();
@@ -25,15 +49,6 @@ public class UnitMovingState : UnitBaseState
 			unit.animatorController.SetBool("isAttacking", false);
 
 		unit.agentNav.isStopped = false;
-		if (CheckPath(unit))
-			unit.agentNav.SetPath(unit.navMeshPath);
-		else
-		{
-			unit.ChangeStateIdleClientRPC();
-			unit.ChangeStateIdleServerRPC(unit.EntityNetworkObjId);
-			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Unit Cant find path to location", 2);
-			AnnouncerSystem.Instance.PlayNegReplyInvalidUnitPositionSFX();
-		}
 	}
 	public override void Exit(UnitStateController unit)
 	{
@@ -66,15 +81,17 @@ public class UnitMovingState : UnitBaseState
 			}
 		}
 	}
-	public bool CheckPath(UnitStateController unit)
+	public bool CheckAndSetNewPath(UnitStateController unit)
 	{
 		NavMeshPath path = new NavMeshPath();
 		if (unit.agentNav.CalculatePath(unit.movePos, path))
 		{
-			unit.navMeshPath = path;
+			unit.agentNav.SetPath(path);
 			return true;
 		}
 		else
+		{
 			return false;
+		}
 	}
 }

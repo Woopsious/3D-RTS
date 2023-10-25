@@ -497,7 +497,7 @@ public class GameUIManager : MonoBehaviour
 		}
 	}
 	public void UpdateIncomeResourcesUI(int playerOneMoneyPerSecond, int playerOneAlloysPerSecond, int playerOneCrystalsPerSecond,
-		int aiMoneyPerSecond, int aiAlloysPerSecond, int aiCrystalsPerSecond)
+		int playerTwoMoneyPerSecond, int playerTwoAlloysPerSecond, int playerTwoCrystalsPerSecond)
 	{
 		if(playerController.isPlayerOne)
 		{
@@ -507,9 +507,9 @@ public class GameUIManager : MonoBehaviour
 		}
 		else if (!playerController.isPlayerOne)
 		{
-			IncomeMoneyText.text = aiMoneyPerSecond.ToString() + "s";
-			IncomeAlloysText.text = aiAlloysPerSecond.ToString() + "s";
-			IncomeCrystalsText.text = aiCrystalsPerSecond.ToString() + "s";
+			IncomeMoneyText.text = playerTwoMoneyPerSecond.ToString() + "s";
+			IncomeAlloysText.text = playerTwoAlloysPerSecond.ToString() + "s";
+			IncomeCrystalsText.text = playerTwoCrystalsPerSecond.ToString() + "s";
 		}
 	}
 	public void UpdateUnitGroupUi(List<UnitStateController> unitGroup, int groupToUpdate)

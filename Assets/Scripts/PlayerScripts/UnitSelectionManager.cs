@@ -209,7 +209,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			if (hitInfo.collider.gameObject.GetComponent<Entities>() != null)
 			{
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
-				if (entity.GetComponent<UnitStateController>() != null && entity.isPlayerOneEntity != playerController.isPlayerOne)
+				if (selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne)
 					TryAttackEnemyEntity(entity.NetworkObjectId);
 
 				else if (entity.GetComponent<CargoShipController>() != null)
@@ -538,7 +538,8 @@ public class UnitSelectionManager : NetworkBehaviour
 				if (selectedUnit)
 				selectedUnit.HideUIHealthBar();
 				selectedUnit.selectedHighlighter.SetActive(false);
-				selectedUnit.attackRangeMeshObj.SetActive(false);
+				if (selectedUnit.attackRangeMeshObj != null)
+					selectedUnit.attackRangeMeshObj.SetActive(false);
 				selectedUnit.isSelected = false;
 			}
 

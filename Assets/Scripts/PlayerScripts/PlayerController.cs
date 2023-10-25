@@ -53,9 +53,26 @@ public class PlayerController : NetworkBehaviour
 	}
 	public void PlayerInputs()
 	{
+		if (Input.GetKeyDown(KeyCode.V))
+			ShowAllHealthBars();
+
 		MenuHotkeys();
 		BuyShopItemHotkeys();
 		GameSpeedHotkeys();
+	}
+	public void ShowAllHealthBars()
+	{
+		foreach (GameObject building in GameManager.Instance.PlayerOneBuildingsList)
+			building.GetComponent<BuildingManager>().ShowUIHealthBar();
+
+		foreach (GameObject unit in GameManager.Instance.PlayerOneUnitsList)
+			unit.GetComponent<UnitStateController>().ShowUIHealthBar();
+
+		foreach (GameObject building in GameManager.Instance.PlayerTwoBuildingsList)
+			building.GetComponent<BuildingManager>().ShowUIHealthBar();
+
+		foreach (GameObject unit in GameManager.Instance.PlayerTwoUnitsList)
+			unit.GetComponent<UnitStateController>().ShowUIHealthBar();
 	}
 	public void GameSpeedHotkeys()
 	{

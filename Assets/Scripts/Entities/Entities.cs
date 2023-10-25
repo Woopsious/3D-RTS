@@ -138,13 +138,14 @@ public class Entities : NetworkBehaviour
 	{
 		RecieveDamage(dmg);
 		UpdateHealthBar();
-		RecieveDamageClientRPC(HealthText.text);
+		RecieveDamageClientRPC(HealthText.text, HealthSlider.value);
 	}
 	[ClientRpc]
-	public void RecieveDamageClientRPC(string healthBarUi)
+	public void RecieveDamageClientRPC(string healthBarText, float healthBarPercentage)
 	{
 		ResetIsEntityHitTimer();
-		HealthText.text = healthBarUi;
+		HealthText.text = healthBarText;
+		HealthSlider.value = healthBarPercentage;
 
 		if (currentHealth.Value <= 0)
 			OnEntityDeath();
@@ -174,7 +175,7 @@ public class Entities : NetworkBehaviour
 	}
 
 	//UTILITY FUNCTIONS
-	public bool ShouldDisplaySpottedNotifToPlayer()
+	public bool IsPlayerControllerNull()
 	{
 		if (playerController != null)
 			return true;

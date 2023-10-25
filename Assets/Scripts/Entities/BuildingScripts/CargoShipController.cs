@@ -41,17 +41,13 @@ public class CargoShipController : UnitStateController
 	public override void FixedUpdate()
 	{
 		if (targetResourceNode != null)
-		{
 			transform.position = Vector3.MoveTowards(transform.position, movePos, moveSpeed * Time.deltaTime);
-			Debug.Log("cargoship moving towards res node");
-		}
 	}
 
 	//FUNCTIONS FOR LOOPING RESOURCE GATHERING
 	//can change mine orders here
 	public IEnumerator IncreaseHeightFromRefinery()
 	{
-		Debug.LogError("increasing height");
 		canChangeOrders = true;
 		SetDestination(new Vector3(refineryControllerParent.transform.position.x, 22, refineryControllerParent.transform.position.z));
 
@@ -62,7 +58,6 @@ public class CargoShipController : UnitStateController
 	}	
 	public IEnumerator MoveToResourceNode()
 	{
-		Debug.LogError("Moving to res node");
 		canChangeOrders = true;
 		SetDestination(new Vector3(targetResourceNode.transform.position.x, 22, targetResourceNode.transform.position.z));
 
@@ -179,7 +174,7 @@ public class CargoShipController : UnitStateController
 	//HEALTH/HIT FUNCTIONS OVERRIDES
 	public override void TryDisplayEntityHitNotif()
 	{
-		if (!wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
+		if (!wasRecentlyHit && IsPlayerControllerNull())
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP UNDER ATTACK", transform.position);
 			AnnouncerSystem.Instance.PlayAlertUnitUnderAttackSFX();
@@ -187,19 +182,23 @@ public class CargoShipController : UnitStateController
 	}
 	public override void OnEntityDeath()
 	{
-		base.OnEntityDeath();
-		if (ShouldDisplaySpottedNotifToPlayer())
+		if (IsPlayerControllerNull())
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP DESTROYED", transform.position);
 			AnnouncerSystem.Instance.PlayAlertUnitLostSFX();
+			Debug.LogError("CargoShip Death");
 		}
+
+		base.OnEntityDeath();
 	}
 
 	//UTILITY FUNCTIONS
 	public override void RemoveEntityRefs()
 	{
+		if (playerController != null)
+			playerController.unitListForPlayer.Remove(this);
+
 		targetResourceNode.IsntBeingMinedServerRPC();
-		playerController.unitListForPlayer.Remove(this);
 		refineryControllerParent.CargoShipList.Remove(this);
 		refineryControllerParent.CheckCargoShipsCount();
 	}

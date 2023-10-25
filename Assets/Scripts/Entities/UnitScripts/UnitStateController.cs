@@ -160,7 +160,7 @@ public class UnitStateController : Entities
 			Entities entity = targetList[i].GetComponent<Entities>();
 			if (CheckIfEntityInLineOfSight(entity))
 			{
-				if (!entity.wasRecentlySpotted && ShouldDisplaySpottedNotifToPlayer())
+				if (!entity.wasRecentlySpotted && IsPlayerControllerNull())
 				{
 					if (entity.GetComponent<CargoShipController>() != null)
 						GameManager.Instance.playerNotifsManager.DisplayEventMessage("Enemy CargoShip Spotted", entity.transform.position);
@@ -206,7 +206,7 @@ public class UnitStateController : Entities
 	//HEALTH/HIT FUNCTIONS OVERRIDES
 	public override void TryDisplayEntityHitNotif()
 	{
-		if (!isCargoShip && !wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
+		if (!isCargoShip && !wasRecentlyHit && IsPlayerControllerNull())
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", transform.position);
 			AnnouncerSystem.Instance.PlayAlertUnitUnderAttackSFX();
@@ -214,12 +214,14 @@ public class UnitStateController : Entities
 	}
 	public override void OnEntityDeath()
 	{
-		base.OnEntityDeath();
-		if (!isCargoShip && ShouldDisplaySpottedNotifToPlayer())
+		if (!isCargoShip && IsPlayerControllerNull())
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT DESTROYED", transform.position);
 			AnnouncerSystem.Instance.PlayAlertUnitLostSFX();
+			Debug.LogError("Unit Death");
 		}
+
+		base.OnEntityDeath();
 	}
 
 	//ATTACK PLAYER SET TARGET FUNCTIONS

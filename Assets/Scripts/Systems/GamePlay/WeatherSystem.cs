@@ -31,8 +31,8 @@ public class WeatherSystem : NetworkBehaviour
 
 	public void Update()
 	{
-		if (MultiplayerManager.Instance.CheckIfHost())
-			GetNewWeatherSettings();
+		//if (MultiplayerManager.Instance.CheckIfHost())
+			//GetNewWeatherSettings();
 	}
 	public void GetNewWeatherSettings()
 	{

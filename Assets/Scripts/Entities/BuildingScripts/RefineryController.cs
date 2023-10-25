@@ -55,6 +55,11 @@ public class RefineryController : NetworkBehaviour
 			GameManager.Instance.playerOneCurrentMoney.Value += moneyToAdd;
 			GameManager.Instance.playerOneCurrentAlloys.Value += alloysToAdd;
 			GameManager.Instance.playerOneCurrentCrystals.Value += crystalsToAdd;
+
+			GameManager.Instance.playerOneIncomeMoney.Value += moneyToAdd;
+			GameManager.Instance.playerOneIncomeAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerOneIncomeCrystals.Value += crystalsToAdd;
+
 			RefineResourcesClientRPC();
 		}
 		else if (!cargoShip.isPlayerOneEntity)
@@ -62,6 +67,11 @@ public class RefineryController : NetworkBehaviour
 			GameManager.Instance.playerTwoCurrentMoney.Value += moneyToAdd;
 			GameManager.Instance.playerTwoCurrentAlloys.Value += alloysToAdd;
 			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalsToAdd;
+
+			GameManager.Instance.playerTwoIncomeMoney.Value += moneyToAdd;
+			GameManager.Instance.playerTwoIncomeAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerTwoIncomeCrystals.Value += crystalsToAdd;
+
 			RefineResourcesClientRPC();
 		}
 	}
