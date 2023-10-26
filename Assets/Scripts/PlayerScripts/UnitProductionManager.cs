@@ -136,7 +136,7 @@ public class UnitProductionManager : NetworkBehaviour
 					if (playerController.CheckIfCanBuyEntity(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost))
 					{
 						//then -unit prices and add to correct queue list and start production on first one if not already started, then update resUI
-						playerController.EntityCostServerRPC(playerController.isPlayerOne, 
+						GameManager.Instance.UpdateResourcesServerRPC(playerController.isPlayerOne, true, false, false , 0,
 							broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
 
 						if (build.listNumRef == 1)
@@ -410,25 +410,5 @@ public class UnitProductionManager : NetworkBehaviour
 					unit.agentNav.speed += playerController.gameUIManager.gameManager.playerTwoUnitSpeedBonus.Value;
 			}
 		}
-	}
-
-	//Refund canceled unit production
-	[ServerRpc(RequireOwnership = false)]
-	public void UnitRefundCostServerRPC(bool wasPlayerOneEntity, int moneyCost, int alloyCost, int crystalCost)
-	{
-		if (wasPlayerOneEntity)
-		{
-			GameManager.Instance.playerOneCurrentMoney.Value += moneyCost;
-			GameManager.Instance.playerOneCurrentAlloys.Value += alloyCost;
-			GameManager.Instance.playerOneCurrentCrystals.Value += crystalCost;
-		}
-		else if (!wasPlayerOneEntity)
-		{
-			GameManager.Instance.playerTwoCurrentMoney.Value += moneyCost;
-			GameManager.Instance.playerTwoCurrentAlloys.Value += alloyCost;
-			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalCost;
-		}
-
-		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(1f));
 	}
 }

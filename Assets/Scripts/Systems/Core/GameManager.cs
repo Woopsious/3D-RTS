@@ -7,7 +7,10 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class GameManager : NetworkBehaviour
 {
@@ -47,6 +50,8 @@ public class GameManager : NetworkBehaviour
 	public NetworkVariable<int> playerOneCurrentCrystals = new NetworkVariable<int>();
 	public NetworkVariable<int> playerOneIncomeCrystals = new NetworkVariable<int>();
 
+	public int trackPlayerOneMoneyChanges;
+
 	[Header("Player One Tech Bonus")]
 	public NetworkVariable<float> playerOneBuildingHealthPercentageBonus = new NetworkVariable<float>();
 	public NetworkVariable<float> playerOneBuildingArmourPercentageBonus = new NetworkVariable<float>();
@@ -66,6 +71,8 @@ public class GameManager : NetworkBehaviour
 	public NetworkVariable<int> playerTwoIncomeAlloys = new NetworkVariable<int>();
 	public NetworkVariable<int> playerTwoCurrentCrystals = new NetworkVariable<int>();
 	public NetworkVariable<int> playerTwoIncomeCrystals = new NetworkVariable<int>();
+
+	public int trackPlayerTwoMoneyChanges;
 
 	[Header("Player Two Tech Bonus")]
 	public NetworkVariable<float> playerTwoBuildingHealthPercentageBonus = new NetworkVariable<float>();
@@ -243,6 +250,7 @@ public class GameManager : NetworkBehaviour
 		if (Input.GetKeyDown(KeyCode.V))
 			AnnouncerSystem.Instance.PlayPositiveRepliesSFX();
 	}
+
 	public void GetResourcesPerSecond()
 	{
 		timer += Time.deltaTime;
@@ -286,30 +294,6 @@ public class GameManager : NetworkBehaviour
 				hourCount++;
 				minuteCount %= 60;
 			}
-		}
-	}
-
-	//EDITS TO NETWORKED GAMEOBJECTS 
-	[ServerRpc(RequireOwnership = false)]
-	public void RefundEntityCostServerRPC(ulong entityNetworkedObjId)
-	{
-		Entities entity = NetworkManager.SpawnManager.SpawnedObjects[entityNetworkedObjId].GetComponent<Entities>();
-
-		int refundMoney = (int)(entity.moneyCost / 1.5);
-		int refundAlloy = (int)(entity.alloyCost / 1.5);
-		int refundCrystal = (int)(entity.crystalCost / 1.5);
-
-		if (entity.isPlayerOneEntity)
-		{
-			GameManager.Instance.playerOneCurrentMoney.Value += refundMoney;
-			GameManager.Instance.playerOneCurrentAlloys.Value += refundAlloy;
-			GameManager.Instance.playerOneCurrentCrystals.Value += refundCrystal;
-		}
-		else if (!entity.isPlayerOneEntity)
-		{
-			GameManager.Instance.playerTwoCurrentMoney.Value += refundMoney;
-			GameManager.Instance.playerTwoCurrentAlloys.Value += refundAlloy;
-			GameManager.Instance.playerTwoCurrentCrystals.Value += refundCrystal;
 		}
 	}
 
@@ -876,6 +860,131 @@ public class GameManager : NetworkBehaviour
 			}
 			unit.UpdateHealthBar();
 		}
+	}
+
+	//Functions to change resource values
+	//EDITS TO NETWORKED GAMEOBJECTS
+
+	[ServerRpc(RequireOwnership = false)]
+	public void UpdateResourcesServerRPC(bool isPlayerOneCall, bool isBuying , bool isRefunding, bool isMined,
+		ulong entityNetworkedObjId, int moneyAmount, int alloyAmount, int crystalAmount)
+	{
+		if (isBuying)
+		{
+			PlayerBuyingThing(isPlayerOneCall, moneyAmount, alloyAmount, crystalAmount);
+		}
+		else if (isRefunding)
+		{
+			PlayerRefundingThing(isPlayerOneCall, entityNetworkedObjId);
+		}
+		else if (isMined)
+		{
+			PlayerMinedResources(isPlayerOneCall, moneyAmount, alloyAmount, crystalAmount);
+		}
+		if (isPlayerOneCall)
+			UpdateClientUiClientRPC(isPlayerOneCall, playerOneCurrentMoney.Value);
+		else
+			UpdateClientUiClientRPC(isPlayerOneCall, playerTwoCurrentMoney.Value);
+	}
+	public void PlayerBuyingThing(bool isPlayerOneCall, int moneyAmount, int alloyAmount, int crystalAmount)
+	{
+		if (isPlayerOneCall)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value -= moneyAmount;
+			GameManager.Instance.playerOneCurrentAlloys.Value -= alloyAmount;
+			GameManager.Instance.playerOneCurrentCrystals.Value -= crystalAmount;
+		}
+		else if (!isPlayerOneCall)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value -= moneyAmount;
+			GameManager.Instance.playerTwoCurrentAlloys.Value -= alloyAmount;
+			GameManager.Instance.playerTwoCurrentCrystals.Value -= crystalAmount;
+		}
+	}
+	public void PlayerRefundingThing(bool isPlayerOneCall, ulong entityNetworkedObjId)
+	{
+		Entities entity = NetworkManager.SpawnManager.SpawnedObjects[entityNetworkedObjId].GetComponent<Entities>();
+		int refundMoney = (int)(entity.moneyCost / 1.5);
+		int refundAlloy = (int)(entity.alloyCost / 1.5);
+		int refundCrystal = (int)(entity.crystalCost / 1.5);
+
+		if (isPlayerOneCall)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerOneCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerOneCurrentCrystals.Value += refundCrystal;
+		}
+		else if (!isPlayerOneCall)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += refundCrystal;
+		}
+	}
+	public void PlayerMinedResources(bool isPlayerOneCall, int moneyToAdd, int alloysToAdd, int crystalsToAdd)
+	{
+		if (isPlayerOneCall)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += moneyToAdd;
+			GameManager.Instance.playerOneCurrentAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerOneCurrentCrystals.Value += crystalsToAdd;
+
+			GameManager.Instance.playerOneIncomeMoney.Value += moneyToAdd;
+			GameManager.Instance.playerOneIncomeAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerOneIncomeCrystals.Value += crystalsToAdd;
+		}
+		else if (!isPlayerOneCall)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += moneyToAdd;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalsToAdd;
+
+			GameManager.Instance.playerTwoIncomeMoney.Value += moneyToAdd;
+			GameManager.Instance.playerTwoIncomeAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerTwoIncomeCrystals.Value += crystalsToAdd;
+		}
+	}
+	[ClientRpc]
+	public void UpdateClientUiClientRPC(bool isPlayerOneCall, int oldMoneyValue)
+	{
+		StartCoroutine(CheckForResourceValueChanges(isPlayerOneCall, oldMoneyValue));
+	}
+	public IEnumerator CheckForResourceValueChanges(bool isPlayerOneCall, int oldMoneyValue)
+	{
+		if (isPlayerOne != isPlayerOneCall)
+		{
+			Debug.LogError("not same player");
+			yield return new WaitForSeconds(0);
+		}
+		else
+		{
+			if (gameUIManager.CheckResourceCountMatches()) //whilst they do match loop till they dont
+			{
+				Debug.LogError("values match");
+				yield return new WaitForSeconds(0.1f);
+				StartCoroutine(CheckForResourceValueChanges(isPlayerOneCall, oldMoneyValue));
+			}
+			else
+			{
+				Debug.LogError("values didnt match");
+				gameUIManager.UpdateCurrentResourcesUI();
+			}
+		}
+
+		/*
+		else if (isPlayerOne && oldMoneyValue != playerOneCurrentMoney.Value || !isPlayerOne && oldMoneyValue != playerTwoCurrentMoney.Value)
+		{
+			Debug.LogError("Difference");
+			gameUIManager.UpdateCurrentResourcesUI();
+		}
+		else
+		{
+			Debug.LogError("Else");
+			yield return new WaitForSeconds(0.25f);
+			//gameUIManager.UpdateCurrentResourcesUI();
+			StartCoroutine(CheckForResourceValueChanges(isPlayerOneCall, oldMoneyValue));
+		}
+		*/
 	}
 
 	[System.Serializable]

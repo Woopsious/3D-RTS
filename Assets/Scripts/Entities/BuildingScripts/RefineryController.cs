@@ -25,12 +25,9 @@ public class RefineryController : NetworkBehaviour
 		}
 	}
 	[ServerRpc(RequireOwnership = false)]
-	public void RefineResourcesServerRPC(ulong cargoShipNetworkObjId, ulong refineryNetworkObjId,
-		ServerRpcParams serverRpcParams = default)
+	public void RefineResourcesServerRPC(ulong cargoShipNetworkObjId)
 	{
 		CargoShipController cargoShip = NetworkManager.SpawnManager.SpawnedObjects[cargoShipNetworkObjId].GetComponent<CargoShipController>();
-		RefineryController refinery = NetworkManager.SpawnManager.SpawnedObjects[refineryNetworkObjId].GetComponent<RefineryController>();
-		ulong clientId = serverRpcParams.Receive.SenderClientId;
 		//get what res to increase and by how much
 		//float bonus = refinery.building.playerController.gameUIManager.techTreeManager.buildingBonusToResourceIncome;
 		int moneyToAdd = 0;
@@ -49,36 +46,12 @@ public class RefineryController : NetworkBehaviour
 			alloysToAdd = (int)(cargoShip.alloysCount);// * bonus);
 			crystalsToAdd = 0;
 		}
-
-		if (cargoShip.isPlayerOneEntity)
-		{
-			GameManager.Instance.playerOneCurrentMoney.Value += moneyToAdd;
-			GameManager.Instance.playerOneCurrentAlloys.Value += alloysToAdd;
-			GameManager.Instance.playerOneCurrentCrystals.Value += crystalsToAdd;
-
-			GameManager.Instance.playerOneIncomeMoney.Value += moneyToAdd;
-			GameManager.Instance.playerOneIncomeAlloys.Value += alloysToAdd;
-			GameManager.Instance.playerOneIncomeCrystals.Value += crystalsToAdd;
-
-			RefineResourcesClientRPC();
-		}
-		else if (!cargoShip.isPlayerOneEntity)
-		{
-			GameManager.Instance.playerTwoCurrentMoney.Value += moneyToAdd;
-			GameManager.Instance.playerTwoCurrentAlloys.Value += alloysToAdd;
-			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalsToAdd;
-
-			GameManager.Instance.playerTwoIncomeMoney.Value += moneyToAdd;
-			GameManager.Instance.playerTwoIncomeAlloys.Value += alloysToAdd;
-			GameManager.Instance.playerTwoIncomeCrystals.Value += crystalsToAdd;
-
-			RefineResourcesClientRPC();
-		}
+		GameManager.Instance.UpdateResourcesServerRPC(building.isPlayerOneEntity, false, false, true, 0, moneyToAdd, alloysToAdd, crystalsToAdd);
 	}
 	[ClientRpc]
 	public void RefineResourcesClientRPC()
 	{
-		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(0.5f));
+		//StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(0.5f));
 	}
 	public void CheckCargoShipsCount()
 	{

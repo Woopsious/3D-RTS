@@ -235,8 +235,7 @@ public class CargoShipController : UnitStateController
 	}
 	public void RefineResourcesFromInventroy()
 	{
-		refineryControllerParent.RefineResourcesServerRPC(
-			GetComponent<NetworkObject>().NetworkObjectId, refineryControllerParent.GetComponent<NetworkObject>().NetworkObjectId);
+		refineryControllerParent.RefineResourcesServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 		alloysCount = 0;
 		crystalsCount = 0;
 	}

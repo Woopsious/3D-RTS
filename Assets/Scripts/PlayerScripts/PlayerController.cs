@@ -62,17 +62,9 @@ public class PlayerController : NetworkBehaviour
 	}
 	public void ShowAllHealthBars()
 	{
-		foreach (GameObject building in GameManager.Instance.PlayerOneBuildingsList)
-			building.GetComponent<BuildingManager>().ShowUIHealthBar();
-
-		foreach (GameObject unit in GameManager.Instance.PlayerOneUnitsList)
-			unit.GetComponent<UnitStateController>().ShowUIHealthBar();
-
-		foreach (GameObject building in GameManager.Instance.PlayerTwoBuildingsList)
-			building.GetComponent<BuildingManager>().ShowUIHealthBar();
-
-		foreach (GameObject unit in GameManager.Instance.PlayerTwoUnitsList)
-			unit.GetComponent<UnitStateController>().ShowUIHealthBar();
+		Entities[] entities = FindObjectsOfType<Entities>();
+		foreach (Entities entity in entities)
+			entity.ShowUIHealthBar();
 	}
 	public void GameSpeedHotkeys()
 	{
@@ -235,27 +227,5 @@ public class PlayerController : NetworkBehaviour
 			Debug.LogError("This error shouldnt happen");
 			return false;
 		}
-	}
-	[ServerRpc(RequireOwnership = false)]
-	public void EntityCostServerRPC(bool isPlayerOneCall, int moneyCost, int alloyCost, int crystalCost)
-	{
-		if (isPlayerOneCall)
-		{
-			GameManager.Instance.playerOneCurrentMoney.Value -= moneyCost;
-			GameManager.Instance.playerOneCurrentAlloys.Value -= alloyCost;
-			GameManager.Instance.playerOneCurrentCrystals.Value -= crystalCost;
-		}
-		else if (!isPlayerOneCall)
-		{
-			GameManager.Instance.playerTwoCurrentMoney.Value -= moneyCost;
-			GameManager.Instance.playerTwoCurrentAlloys.Value -= alloyCost;
-			GameManager.Instance.playerTwoCurrentCrystals.Value -= crystalCost;
-		}
-		UpdateClientUiClientRPC();
-	}
-	[ClientRpc]
-	public void UpdateClientUiClientRPC()
-	{
-		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(1f));
 	}
 }

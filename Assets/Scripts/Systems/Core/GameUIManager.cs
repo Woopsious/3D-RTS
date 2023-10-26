@@ -163,7 +163,8 @@ public class GameUIManager : MonoBehaviour
 	{
 		gameSpeed = 1;
 		UpdateGameSpeedUi();
-		StartCoroutine(UpdateCurrentResourcesUI(0f));
+		UpdateCurrentResourcesUI();
+		//StartCoroutine(UpdateCurrentResourcesUI(0f));
 		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
 	}
 
@@ -480,9 +481,9 @@ public class GameUIManager : MonoBehaviour
 		else
 			gameSpeedText.text = "x" + gameSpeed.ToString() + " speed";
 	}
-	public IEnumerator UpdateCurrentResourcesUI(float secondsToWait)
+	public void UpdateCurrentResourcesUI()
 	{
-		yield return new WaitForSeconds(secondsToWait);
+		//yield return new WaitForSeconds(secondsToWait);
 		if (playerController.isPlayerOne)
 		{
 			CurrentMoneyText.text = GameManager.Instance.playerOneCurrentMoney.Value.ToString();
@@ -494,6 +495,23 @@ public class GameUIManager : MonoBehaviour
 			CurrentMoneyText.text = GameManager.Instance.playerTwoCurrentMoney.Value.ToString();
 			CurrentAlloysText.text = GameManager.Instance.playerTwoCurrentAlloys.Value.ToString();
 			CurrentCrystalsText.text = GameManager.Instance.playerTwoCurrentCrystals.Value.ToString();
+		}
+	}
+	public bool CheckResourceCountMatches()
+	{
+		if (gameManager.isPlayerOne)
+		{
+			if (CurrentMoneyText.text == GameManager.Instance.playerOneCurrentMoney.Value.ToString())
+				return true;
+			else
+				return false;
+		}
+		else
+		{
+			if (CurrentMoneyText.text == GameManager.Instance.playerTwoCurrentMoney.Value.ToString())
+				return true;
+			else
+				return false;
 		}
 	}
 	public void UpdateIncomeResourcesUI(int playerOneMoneyPerSecond, int playerOneAlloysPerSecond, int playerOneCrystalsPerSecond,
