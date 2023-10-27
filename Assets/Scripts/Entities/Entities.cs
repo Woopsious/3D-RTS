@@ -138,16 +138,16 @@ public class Entities : NetworkBehaviour
 	{
 		RecieveDamage(dmg);
 		UpdateHealthBar();
-		RecieveDamageClientRPC(HealthText.text, HealthSlider.value);
+		RecieveDamageClientRPC(currentHealth.Value, HealthSlider.value);
 	}
 	[ClientRpc]
-	public void RecieveDamageClientRPC(string healthBarText, float healthBarPercentage)
+	public void RecieveDamageClientRPC(int healthValue, float healthBarPercentage)
 	{
 		ResetIsEntityHitTimer();
-		HealthText.text = healthBarText;
+		HealthText.text = healthValue.ToString() + " / " + maxHealth.Value.ToString();
 		HealthSlider.value = healthBarPercentage;
 
-		if (currentHealth.Value <= 0)
+		if (healthValue <= 0)
 			OnEntityDeath();
 	}
 	public void RecieveDamage(float dmg)
@@ -170,8 +170,6 @@ public class Entities : NetworkBehaviour
 	}
 	public virtual void OnEntityDeath()
 	{
-		Debug.Log("Entity died");
-
 		if (IsServer)
 			GameManager.Instance.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}

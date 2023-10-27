@@ -186,7 +186,6 @@ public class CargoShipController : UnitStateController
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP DESTROYED", transform.position);
 			AnnouncerSystem.Instance.PlayAlertUnitLostSFX();
-			Debug.LogError("CargoShip Death");
 		}
 
 		base.OnEntityDeath();

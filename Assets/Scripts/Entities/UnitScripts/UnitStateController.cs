@@ -218,7 +218,6 @@ public class UnitStateController : Entities
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT DESTROYED", transform.position);
 			AnnouncerSystem.Instance.PlayAlertUnitLostSFX();
-			Debug.LogError("Unit Death");
 		}
 
 		base.OnEntityDeath();

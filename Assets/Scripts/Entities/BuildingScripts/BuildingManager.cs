@@ -69,7 +69,6 @@ public class BuildingManager : Entities
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING DESTROYED", transform.position);
 			AnnouncerSystem.Instance.PlayAlertBuildingLostSFX();
-			Debug.LogError("Building Death");
 		}
 
 		base.OnEntityDeath();
