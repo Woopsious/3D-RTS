@@ -39,8 +39,9 @@ public class HostManager : NetworkBehaviour
 		//Instance.connectedClientsListTwo = new NetworkList<ClientDataInfo>();
 		useNewList = false;
 	}
-	public void StartHost()
+	public async void StartHost()
 	{
+		await MultiplayerManager.Instance.CheckForNetworkManagerObj();
 		StartCoroutine(RelayConfigureTransportAsHostingPlayer());
 		ClearPlayers();
 		MultiplayerManager.Instance.SubToEvents();

@@ -33,22 +33,20 @@ public class MultiplayerManager: NetworkBehaviour
 	{
 		if (NetworkManager.Singleton == null)
 		{
-			Debug.LogError("Network Singleton null");
 			GameObject Obj = Instantiate(NetworkManagerPrefab);
 			Obj.GetComponent<NetworkManager>().SetSingleton();
 			HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
 		}
 		else
-		{
 			Debug.LogError("Network Singleton NOT null");
-		}
+
 		return Task.CompletedTask;
 	}
 
 	//run when player clicks button
 	public async void StartMultiplayer()
 	{
-		await CheckForNetworkManagerObj();
+		//await CheckForNetworkManagerObj();
 		await AuthenticatePlayer();
 		GetLobbiesList();
 	}

@@ -57,7 +57,7 @@ public class BuildingManager : Entities
 	//HEALTH/HIT FUNCTIONS OVERRIDES
 	public override void TryDisplayEntityHitNotif()
 	{
-		if (!wasRecentlyHit && IsPlayerControllerNull())
+		if (!wasRecentlyHit && !IsPlayerControllerNull())
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BASE UNDER ATTACK", transform.position);
 			AnnouncerSystem.Instance.PlayAlertBaseUnderAttackSFX();
@@ -65,7 +65,7 @@ public class BuildingManager : Entities
 	}
 	public override void OnEntityDeath()
 	{
-		if (IsPlayerControllerNull())
+		if (!IsPlayerControllerNull())
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING DESTROYED", transform.position);
 			AnnouncerSystem.Instance.PlayAlertBuildingLostSFX();

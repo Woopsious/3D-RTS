@@ -174,7 +174,7 @@ public class CargoShipController : UnitStateController
 	//HEALTH/HIT FUNCTIONS OVERRIDES
 	public override void TryDisplayEntityHitNotif()
 	{
-		if (!wasRecentlyHit && IsPlayerControllerNull())
+		if (!wasRecentlyHit && !IsPlayerControllerNull())
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP UNDER ATTACK", transform.position);
 			AnnouncerSystem.Instance.PlayAlertUnitUnderAttackSFX();
@@ -182,7 +182,7 @@ public class CargoShipController : UnitStateController
 	}
 	public override void OnEntityDeath()
 	{
-		if (IsPlayerControllerNull())
+		if (!IsPlayerControllerNull())
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP DESTROYED", transform.position);
 			AnnouncerSystem.Instance.PlayAlertUnitLostSFX();

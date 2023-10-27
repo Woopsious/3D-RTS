@@ -170,6 +170,8 @@ public class Entities : NetworkBehaviour
 	}
 	public virtual void OnEntityDeath()
 	{
+		Debug.Log("Entity died");
+
 		if (IsServer)
 			GameManager.Instance.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 	}
@@ -177,7 +179,7 @@ public class Entities : NetworkBehaviour
 	//UTILITY FUNCTIONS
 	public bool IsPlayerControllerNull()
 	{
-		if (playerController != null)
+		if (playerController == null)
 			return true;
 		else
 			return false;

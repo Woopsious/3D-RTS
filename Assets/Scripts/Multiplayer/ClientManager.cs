@@ -29,8 +29,9 @@ public class ClientManager : NetworkBehaviour
 		else
 			Destroy(gameObject);
 	}
-	public void StartClient(Lobby lobby)
+	public async void StartClient(Lobby lobby)
 	{
+		await MultiplayerManager.Instance.CheckForNetworkManagerObj();
 		LobbyManager.Instance.JoinLobby(lobby);
 		MultiplayerManager.Instance.SubToEvents();
 

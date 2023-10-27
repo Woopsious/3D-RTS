@@ -125,6 +125,8 @@ public class GameManager : NetworkBehaviour
 	public NetworkVariable<bool> playerTwoReadyToStart = new NetworkVariable<bool>();
 	public bool isMultiplayerGame;
 
+	public int timeOutCounter;
+
 	public void Awake()
 	{
 		if (Instance == null)
@@ -862,8 +864,7 @@ public class GameManager : NetworkBehaviour
 		}
 	}
 
-	//Functions to change resource values
-	//EDITS TO NETWORKED GAMEOBJECTS
+	//Functions to handle changes to resource values then relay changes to player ui
 
 	[ServerRpc(RequireOwnership = false)]
 	public void UpdateResourcesServerRPC(bool isPlayerOneCall, bool isBuying , bool isRefunding, bool isMined,
@@ -952,39 +953,24 @@ public class GameManager : NetworkBehaviour
 	public IEnumerator CheckForResourceValueChanges(bool isPlayerOneCall, int oldMoneyValue)
 	{
 		if (isPlayerOne != isPlayerOneCall)
-		{
-			Debug.LogError("not same player");
 			yield return new WaitForSeconds(0);
-		}
+
 		else
 		{
-			if (gameUIManager.CheckResourceCountMatches()) //whilst they do match loop till they dont
+			if (gameUIManager.CheckResourceCountMatches() && timeOutCounter < 5) //whilst they do match loop till they dont
 			{
-				Debug.LogError("values match");
-				yield return new WaitForSeconds(0.1f);
+				timeOutCounter++;
+				yield return new WaitForSeconds(0.25f);
 				StartCoroutine(CheckForResourceValueChanges(isPlayerOneCall, oldMoneyValue));
 			}
-			else
+			else if (!gameUIManager.CheckResourceCountMatches())
 			{
-				Debug.LogError("values didnt match");
+				timeOutCounter = 0;
 				gameUIManager.UpdateCurrentResourcesUI();
 			}
+			else
+				timeOutCounter = 0;
 		}
-
-		/*
-		else if (isPlayerOne && oldMoneyValue != playerOneCurrentMoney.Value || !isPlayerOne && oldMoneyValue != playerTwoCurrentMoney.Value)
-		{
-			Debug.LogError("Difference");
-			gameUIManager.UpdateCurrentResourcesUI();
-		}
-		else
-		{
-			Debug.LogError("Else");
-			yield return new WaitForSeconds(0.25f);
-			//gameUIManager.UpdateCurrentResourcesUI();
-			StartCoroutine(CheckForResourceValueChanges(isPlayerOneCall, oldMoneyValue));
-		}
-		*/
 	}
 
 	[System.Serializable]
