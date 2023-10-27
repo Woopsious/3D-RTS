@@ -17,8 +17,6 @@ public class MultiplayerManager : NetworkBehaviour
 
 	public GameObject NetworkManagerPrefab;
 
-	public NetworkManager networkManagerRef;
-
 	public void Awake()
 	{
 		if (Instance == null)
@@ -29,24 +27,9 @@ public class MultiplayerManager : NetworkBehaviour
 		else
 			Destroy(gameObject);
 	}
-	public Task CheckForNetworkManagerObj()
-	{
-		if (NetworkManager.Singleton == null)
-		{
-			GameObject Obj = Instantiate(NetworkManagerPrefab);
-			Obj.GetComponent<NetworkManager>().SetSingleton();
-			//HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
-		}
-		else
-			Debug.LogError("Network Singleton NOT null");
-
-		return Task.CompletedTask;
-	}
-
 	//run when player clicks button
 	public async void StartMultiplayer()
 	{
-		//await CheckForNetworkManagerObj();
 		await AuthenticatePlayer();
 		GetLobbiesList();
 	}
@@ -148,10 +131,7 @@ public class MultiplayerManager : NetworkBehaviour
 	public void ShutDownNetworkManagerIfActive()
 	{
 		if (NetworkManager.Singleton.isActiveAndEnabled)
-		{
 			NetworkManager.Singleton.Shutdown();
-			Destroy(NetworkManager.Singleton.gameObject);
-		}
 	}
 
 	//check if host from anywhere

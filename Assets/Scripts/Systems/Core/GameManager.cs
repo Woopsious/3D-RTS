@@ -429,19 +429,17 @@ public class GameManager : NetworkBehaviour
 
 	//SERVER FUNCTIONS AT RUNTIME
 	[ServerRpc(RequireOwnership = false)]
-	public void SetPlayerToReadyServerRPC(bool isPlayerOne, ServerRpcParams serverRpcParams = default)
+	public void SetPlayerToReadyServerRPC(bool isPlayerOne)
 	{
-		Debug.LogError($"is player P1? {isPlayerOne}");
-		Debug.LogError($"players networkId? {serverRpcParams.Receive.SenderClientId}");
 		if (isPlayerOne)
 		{
 			playerOneReadyToStart.Value = true;
 		}
-		else if (!isPlayerOne)
+		else
 		{
 			playerTwoReadyToStart.Value = true;
 		}
-		NotifyOtherPlayerIsReadyClientRPC(serverRpcParams.Receive.SenderClientId);
+		NotifyOtherPlayerIsReadyClientRPC(isPlayerOne);
 
 		if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
 		{
@@ -451,13 +449,13 @@ public class GameManager : NetworkBehaviour
 		}
 	}
 	[ClientRpc]
-	public void NotifyOtherPlayerIsReadyClientRPC(ulong clientId)
+	public void NotifyOtherPlayerIsReadyClientRPC(bool isPlayerOne)
 	{
-		if (clientId == 0)
+		if (isPlayerOne)
 		{
 			gameUIManager.isPlayerOneReadyText.text = "Player One Ready";
 		}
-		else if (clientId != 0)
+		else if (!isPlayerOne)
 		{
 			gameUIManager.isPlayerTwoReadyText.text = "Player Two Ready";
 		}
