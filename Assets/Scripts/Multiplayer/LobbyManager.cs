@@ -113,9 +113,11 @@ public class LobbyManager : NetworkBehaviour
 			Data = new Dictionary<string, PlayerDataObject>
 				{
 					{ "PlayerName", new PlayerDataObject(
-						PlayerDataObject.VisibilityOptions.Member, ClientManager.Instance.clientUsername.ToString()) },
+						PlayerDataObject.VisibilityOptions.Member, ClientManager.Instance.clientUsername.ToString())},
 					{ "PlayerID", new PlayerDataObject(
-						PlayerDataObject.VisibilityOptions.Member, ClientManager.Instance.clientId.ToString())}
+						PlayerDataObject.VisibilityOptions.Member, ClientManager.Instance.clientId.ToString())},
+					{ "PlayerNetworkID", new PlayerDataObject(
+						PlayerDataObject.VisibilityOptions.Member, ClientManager.Instance.clientNetworkedId.ToString())},
 				}
 		};
 	}

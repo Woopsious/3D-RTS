@@ -417,8 +417,6 @@ public class GameManager : NetworkBehaviour
 			gameUIManager.SetUpBuildingsShopUi();
 			gameUIManager.techTreeManager.SetUpTechTrees();
 
-			HostManager.Instance.UseNewList();
-
 			if (isMultiplayerGame)
 			{
 				Time.timeScale = 0;
@@ -433,22 +431,36 @@ public class GameManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void SetPlayerToReadyServerRPC(bool isPlayerOne, ServerRpcParams serverRpcParams = default)
 	{
+		Debug.LogError($"is player P1? {isPlayerOne}");
+		Debug.LogError($"players networkId? {serverRpcParams.Receive.SenderClientId}");
 		if (isPlayerOne)
+		{
 			playerOneReadyToStart.Value = true;
+		}
 		else if (!isPlayerOne)
+		{
 			playerTwoReadyToStart.Value = true;
+		}
 		NotifyOtherPlayerIsReadyClientRPC(serverRpcParams.Receive.SenderClientId);
 
 		if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+		{
+			playerOneReadyToStart.Value = false;
+			playerTwoReadyToStart.Value = false;
 			StartGameClientRPC();
+		}
 	}
 	[ClientRpc]
 	public void NotifyOtherPlayerIsReadyClientRPC(ulong clientId)
 	{
 		if (clientId == 0)
+		{
 			gameUIManager.isPlayerOneReadyText.text = "Player One Ready";
+		}
 		else if (clientId != 0)
+		{
 			gameUIManager.isPlayerTwoReadyText.text = "Player Two Ready";
+		}
 	}
 	[ClientRpc]
 	public void StartGameClientRPC()

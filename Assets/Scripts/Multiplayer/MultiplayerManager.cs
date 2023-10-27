@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using UnityEngine.SceneManagement;
 using System;
 
-public class MultiplayerManager: NetworkBehaviour
+public class MultiplayerManager : NetworkBehaviour
 {
 	public static MultiplayerManager Instance;
 
@@ -35,7 +35,7 @@ public class MultiplayerManager: NetworkBehaviour
 		{
 			GameObject Obj = Instantiate(NetworkManagerPrefab);
 			Obj.GetComponent<NetworkManager>().SetSingleton();
-			HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
+			//HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
 		}
 		else
 			Debug.LogError("Network Singleton NOT null");
@@ -114,19 +114,10 @@ public class MultiplayerManager: NetworkBehaviour
 		{
 			if (id == 0) //grab host data locally as lobby is not yet made
 			{
-				//HostManager.Instance.connectedClientsList = new NetworkList<ClientDataInfo>();
-
-				ClientDataInfo data = new ClientDataInfo(ClientManager.Instance.clientUsername, 
+				ClientDataInfo data = new ClientDataInfo(ClientManager.Instance.clientUsername,
 					ClientManager.Instance.clientId, ClientManager.Instance.clientNetworkedId);
 
-				Debug.LogError(data.clientName);
-				Debug.LogError(data.clientId);
-				Debug.LogError(data.clientNetworkedId);
-
-				//if (!HostManager.Instance.useNewList)
-					HostManager.Instance.connectedClientsList.Add(data);
-				//else if (HostManager.Instance.useNewList)
-					//HostManager.Instance.connectedClientsListTwo.Add(data);
+				HostManager.Instance.connectedClientsList.Add(data);
 			}
 			else //grab other clients data through lobby
 			{
@@ -135,14 +126,16 @@ public class MultiplayerManager: NetworkBehaviour
 				ClientDataInfo data = new ClientDataInfo(LobbyManager.Instance._Lobby.Players[i].Data["PlayerName"].Value,
 					LobbyManager.Instance._Lobby.Players[i].Data["PlayerID"].Value, id);
 
-				//if (!HostManager.Instance.useNewList)
-					HostManager.Instance.connectedClientsList.Add(data);
-				//else if (HostManager.Instance.useNewList)
-					//HostManager.Instance.connectedClientsListTwo.Add(data);
+				HostManager.Instance.connectedClientsList.Add(data);
 			}
 		}
 		if (!MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy) //enable lobby ui once connected to relay
 			MenuUIManager.Instance.ShowLobbyUi();
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void SendClientDataToHostServerRPC(string clientUserName, string clientId, ulong clientNetworkId)
+	{
+		HostManager.Instance.connectedClientsInfoList.Add(new ClientDataInfo(clientUserName, clientId, clientNetworkId));
 	}
 	public void PlayerDisconnectedCallback(ulong id)
 	{
