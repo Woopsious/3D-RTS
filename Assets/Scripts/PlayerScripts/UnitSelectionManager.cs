@@ -38,6 +38,7 @@ public class UnitSelectionManager : NetworkBehaviour
 	public List<TurretController> selectedTurretList;
 	public List<UnitStateController> dragSelectedUnitList;
 	int unitCount = 0;
+	bool isAddingUnits;
 
 	public BuildingManager selectedBuilding;
 	public CargoShipController SelectedCargoShip;
@@ -85,12 +86,12 @@ public class UnitSelectionManager : NetworkBehaviour
 			mouseDownTime = 0;
 		}
 		//clear selected list
-		if (Input.GetMouseButtonDown(1) && selectedUnitList.Count != 0 && !selectedUnitList[0].isTurret)
+		if (Input.GetMouseButtonDown(1) && selectedUnitList.Count != 0)
 		{
 			DeselectUnits();
 			SetUnitRefundButtonActiveUnactive();
 		}
-		else if (Input.GetMouseButtonDown(1) && selectedUnitList.Count != 0 && selectedUnitList[0].isTurret)
+		else if (Input.GetMouseButtonDown(1) && selectedTurretList.Count != 0)
 		{
 			DeselectTurrets();
 		}
@@ -497,10 +498,51 @@ public class UnitSelectionManager : NetworkBehaviour
 		selectionBoxUi.sizeDelta = new Vector2(Mathf.Abs(width), Mathf.Abs(height));
 
 		bounds = new Bounds(selectionBoxRect.anchoredPosition, selectionBoxRect.sizeDelta);
+
 		foreach (UnitStateController unit in playerController.unitListForPlayer)
 		{
-			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf && 
+
+			//decide weather drag select should be turrets or units
+			if (dragSelectedUnitList.Count == 0)
+			{
+				if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf &&
+					unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne && !unit.isCargoShip)
+				{
+					if (!unit.isTurret)
+						isAddingUnits = true;
+					else
+						isAddingUnits = false;
+				}
+			}
+			AddOrRemoveEntitesToDragSelection(unit, isAddingUnits);
+		}
+	}
+	public void AddOrRemoveEntitesToDragSelection(UnitStateController unit, bool isAddingUnits)
+	{
+		if (isAddingUnits)
+		{
+			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf &&
 				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne && !unit.isTurret && !unit.isCargoShip)
+			{
+				unit.ShowUIHealthBar();
+				unit.selectedHighlighter.SetActive(true);
+				unit.isSelected = true;
+				dragSelectedUnitList.Add(unit);
+				unitCount++;
+			}
+			else if (!UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && unit.selectedHighlighter.activeSelf)
+			{
+				unit.HideUIHealthBar();
+				unit.selectedHighlighter.SetActive(false);
+				unit.isSelected = false;
+				dragSelectedUnitList.Remove(unit);
+				unitCount--;
+			}
+		}
+		else if (!isAddingUnits)
+		{
+			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf &&
+				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne && unit.isTurret && !unit.isCargoShip)
 			{
 				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
@@ -531,8 +573,10 @@ public class UnitSelectionManager : NetworkBehaviour
 		}
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{
-			if(unit.isPlayerOneEntity != !playerController.isPlayerOne && !unit.isTurret && !unit.isCargoShip)
+			if (isAddingUnits)
 				selectedUnitList.Add(unit);
+			else if (!isAddingUnits)
+				selectedTurretList.Add(unit.GetComponent<TurretController>());
 		}
 		dragSelectedUnitList.Clear();
 		selectionBoxRect.gameObject.SetActive(false);
@@ -590,7 +634,6 @@ public class UnitSelectionManager : NetworkBehaviour
 	{
 		if (selectedTurretList.Count != 0)
 		{
-			SetUnitRefundButtonActiveUnactive();
 			foreach (TurretController selectedTurret in selectedTurretList)
 			{
 				selectedTurret.HideUIHealthBar();
@@ -598,12 +641,6 @@ public class UnitSelectionManager : NetworkBehaviour
 				selectedTurret.attackRangeMeshObj.SetActive(false);
 				selectedTurret.isSelected = false;
 				selectedTurret.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(false);
-			}
-
-			foreach (GameObject obj in movePosHighlighterObj)
-			{
-				if (obj.activeInHierarchy)
-					obj.SetActive(false);
 			}
 			selectedTurretList.Clear();
 		}
