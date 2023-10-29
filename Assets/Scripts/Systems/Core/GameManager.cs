@@ -877,7 +877,7 @@ public class GameManager : NetworkBehaviour
 	//Functions to handle changes to resource values then relay changes to player ui
 
 	[ServerRpc(RequireOwnership = false)]
-	public void UpdateResourcesServerRPC(bool isPlayerOneCall, bool isBuying , bool isRefunding, bool isMined,
+	public void UpdateResourcesServerRPC(bool isPlayerOneCall, bool isBuying , bool isRefunding, bool isCancellingUnit,bool isMined,
 		ulong entityNetworkedObjId, int moneyAmount, int alloyAmount, int crystalAmount)
 	{
 		if (isBuying)
@@ -887,6 +887,10 @@ public class GameManager : NetworkBehaviour
 		else if (isRefunding)
 		{
 			PlayerRefundingThing(isPlayerOneCall, entityNetworkedObjId);
+		}
+		else if (isCancellingUnit)
+		{
+			PlayerCancellingUnit(isPlayerOneCall, moneyAmount, alloyAmount, crystalAmount);
 		}
 		else if (isMined)
 		{
@@ -919,6 +923,21 @@ public class GameManager : NetworkBehaviour
 		int refundAlloy = (int)(entity.alloyCost / 1.5);
 		int refundCrystal = (int)(entity.crystalCost / 1.5);
 
+		if (isPlayerOneCall)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerOneCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerOneCurrentCrystals.Value += refundCrystal;
+		}
+		else if (!isPlayerOneCall)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += refundCrystal;
+		}
+	}
+	public void PlayerCancellingUnit(bool isPlayerOneCall, int refundMoney, int refundAlloy, int refundCrystal)
+	{
 		if (isPlayerOneCall)
 		{
 			GameManager.Instance.playerOneCurrentMoney.Value += refundMoney;

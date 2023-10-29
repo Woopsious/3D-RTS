@@ -46,7 +46,8 @@ public class RefineryController : NetworkBehaviour
 			alloysToAdd = (int)(cargoShip.alloysCount);// * bonus);
 			crystalsToAdd = 0;
 		}
-		GameManager.Instance.UpdateResourcesServerRPC(building.isPlayerOneEntity, false, false, true, 0, moneyToAdd, alloysToAdd, crystalsToAdd);
+		GameManager.Instance.UpdateResourcesServerRPC(building.isPlayerOneEntity, false, false, false, true,
+			0, moneyToAdd, alloysToAdd, crystalsToAdd);
 	}
 	[ClientRpc]
 	public void RefineResourcesClientRPC()

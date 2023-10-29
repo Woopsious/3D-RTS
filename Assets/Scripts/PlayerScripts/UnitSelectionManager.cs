@@ -210,7 +210,10 @@ public class UnitSelectionManager : NetworkBehaviour
 			{
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
 				if (selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne)
-					TryAttackEnemyEntity(entity.NetworkObjectId);
+				{
+					//TryAttackEnemyEntity(entity.NetworkObjectId);
+					TryAttackEnemyEntityTest(entity);
+				}
 
 				else if (entity.GetComponent<CargoShipController>() != null)
 					TrySelectCargoShip(entity.GetComponent<CargoShipController>());
@@ -423,17 +426,44 @@ public class UnitSelectionManager : NetworkBehaviour
 			}
 		}
 	}
-	public void TryAttackEnemyEntity(ulong targetEntityNetworkObjId)
+	public void TryAttackEnemyEntityTest(Entities targetEntity)
 	{
-		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target!", 1f);
-		AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
-
 		//move selected units closer to target and attack it
-		for (int i = 0; i < selectedUnitList.Count; i++)
+		if (selectedUnitList.Count != 0)
 		{
-			UnitStateController unit = selectedUnitList[i];
-			unit.TryAttackPlayerSetTargetServerRPC(unit.EntityNetworkObjId, targetEntityNetworkObjId);
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target!", 1f);
+			AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
+
+			foreach (UnitStateController unit in selectedUnitList)
+			{
+				unit.hasReachedPlayerSetTarget = false;
+				SetPlayerSetTargetServerRPC(unit.EntityNetworkObjId, targetEntity.EntityNetworkObjId);
+
+				if (!unit.IsPlayerSetTargetSpotted(targetEntity))
+					MoveUnitsServerRPC(unit.EntityNetworkObjId, targetEntity.transform.position);
+			}
 		}
+		//set turrets to attack if in range
+		else if (selectedTurretList.Count != 0)
+		{
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target if turret is in range!", 3f);
+			AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
+
+			foreach (UnitStateController turret in selectedTurretList)
+				SetPlayerSetTargetServerRPC(turret.EntityNetworkObjId, targetEntity.EntityNetworkObjId);
+		}
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void SetPlayerSetTargetServerRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId)
+	{
+		SetPlayerTargetClientRPC(unitNetworkObjId, targetEntityNetworkObjId);
+	}
+	[ClientRpc]
+	public void SetPlayerTargetClientRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkObjId].GetComponent<UnitStateController>();
+		Entities targetEntity = NetworkManager.SpawnManager.SpawnedObjects[targetEntityNetworkObjId].GetComponent<Entities>();
+		unit.playerSetTarget = targetEntity;
 	}
 
 	//remove selected unit from selectedunitlist if it died whilst selected
@@ -570,7 +600,7 @@ public class UnitSelectionManager : NetworkBehaviour
 				if (obj.activeInHierarchy)
 					obj.SetActive(false);
 			}
-			selectedUnitList.Clear();
+			selectedTurretList.Clear();
 		}
 	}
 

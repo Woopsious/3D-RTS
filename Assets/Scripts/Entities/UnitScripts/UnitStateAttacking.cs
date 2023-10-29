@@ -15,7 +15,6 @@ public class UnitStateAttacking : UnitBaseState
 {	
 	public override void Enter(UnitStateController unit)
 	{
-		Debug.LogWarning("Entered Attacking State");
 		if (unit.isTurret)
 			unit.turretController.ActivateTurret();
 		if (unit.isUnitArmed && unit.currentUnitTarget == null && unit.currentBuildingTarget == null)

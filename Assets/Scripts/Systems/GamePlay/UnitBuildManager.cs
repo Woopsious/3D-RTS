@@ -124,7 +124,8 @@ public class UnitBuildManager : MonoBehaviour
 	public void CancelProduction()
 	{
 		UnitStateController unit = UnitPrefab.GetComponent<UnitStateController>();
-		GameManager.Instance.UpdateResourcesServerRPC(isPlayerOne, false, true, false, 0, unit.moneyCost, unit.alloyCost, unit.crystalCost);
+		GameManager.Instance.UpdateResourcesServerRPC(isPlayerOne, false, false, true, false, 
+			0, unit.moneyCost, unit.alloyCost, unit.crystalCost);
 
 		if (isSpawnPointStillValid)
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("unit production canceled", 1f);

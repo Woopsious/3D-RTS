@@ -222,26 +222,6 @@ public class UnitStateController : Entities
 
 		base.OnEntityDeath();
 	}
-
-	//ATTACK PLAYER SET TARGET FUNCTIONS
-	[ServerRpc(RequireOwnership = false)]
-	public virtual void TryAttackPlayerSetTargetServerRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId,
-		ServerRpcParams serverRpcParams = default)
-	{
-		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkObjId].GetComponent<UnitStateController>();
-		Entities targetEntity = NetworkManager.SpawnManager.SpawnedObjects[targetEntityNetworkObjId].GetComponent<Entities>();
-		hasReachedPlayerSetTarget = false;
-
-		if (unit.IsPlayerSetTargetSpotted(targetEntity)) //check if already spotted in target lists
-		{
-			unit.playerSetTarget = targetEntity;
-		}
-		else //walk in line of sight of enemy then switch to that target
-		{
-			unit.playerSetTarget = targetEntity;
-			MoveToDestination(targetEntity.transform.position);
-		}
-	}
 	public bool IsPlayerSetTargetSpotted(Entities entity)
 	{
 		if (entity.GetComponent<UnitStateController>() != null)
@@ -265,16 +245,12 @@ public class UnitStateController : Entities
 	//UNIT MOVE FUNCTION
 	public void MoveToDestination(Vector3 newMovePos)
 	{
-		if (!isTurret)
-		{
-			if (isFlying)
-				movePos = new Vector3(newMovePos.x, newMovePos.y + 7, newMovePos.z);
-			else
-				movePos = newMovePos;
+		if (isFlying)
+			movePos = new Vector3(newMovePos.x, newMovePos.y + 7, newMovePos.z);
+		else
+			movePos = newMovePos;
 
-			ChangeStateMovingClientRPC();
-			ChangeStateMovingServerRPC(EntityNetworkObjId);
-		}
+		ChangeStateMovingServerRPC(EntityNetworkObjId);
 	}
 
 	//UTILITY FUNCTIONS

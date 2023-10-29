@@ -10,8 +10,6 @@ public class UnitMovingState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		Debug.LogWarning("Entered Moving State");
-
 		if (!CheckAndSetNewPath(unit)) //if path valid move
 		{
 			if (!NavMesh.SamplePosition(unit.movePos, out NavMeshHit navMeshHit, 5, unit.agentNav.areaMask))//if path false try find new one

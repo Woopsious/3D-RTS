@@ -186,7 +186,7 @@ public class Entities : NetworkBehaviour
 	{
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Refunded 75% of resources", 1f);
 		RemoveEntityRefs();
-		playerController.gameUIManager.gameManager.UpdateResourcesServerRPC(isPlayerOneEntity, false, true, false,
+		playerController.gameUIManager.gameManager.UpdateResourcesServerRPC(isPlayerOneEntity, false, true, false, false,
 			GetComponent<NetworkObject>().NetworkObjectId, 0, 0, 0);
 		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 		//StartCoroutine(playerController.gameUIManager.UpdateCurrentResourcesUI(0f));
