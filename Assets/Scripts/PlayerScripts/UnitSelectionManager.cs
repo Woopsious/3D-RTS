@@ -209,10 +209,11 @@ public class UnitSelectionManager : NetworkBehaviour
 			if (hitInfo.collider.gameObject.GetComponent<Entities>() != null)
 			{
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
-				if (selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne)
+				if (selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne ||
+					selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne)
 				{
-					//TryAttackEnemyEntity(entity.NetworkObjectId);
-					TryAttackEnemyEntityTest(entity);
+					Debug.LogError("setting player set target");
+					TryAttackEnemyEntity(entity);
 				}
 
 				else if (entity.GetComponent<CargoShipController>() != null)
@@ -426,11 +427,12 @@ public class UnitSelectionManager : NetworkBehaviour
 			}
 		}
 	}
-	public void TryAttackEnemyEntityTest(Entities targetEntity)
+	public void TryAttackEnemyEntity(Entities targetEntity)
 	{
 		//move selected units closer to target and attack it
 		if (selectedUnitList.Count != 0)
 		{
+			Debug.LogError("for units");
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target!", 1f);
 			AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
 
@@ -446,12 +448,15 @@ public class UnitSelectionManager : NetworkBehaviour
 		//set turrets to attack if in range
 		else if (selectedTurretList.Count != 0)
 		{
+			Debug.LogError("for turrets");
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target if turret is in range!", 3f);
 			AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
 
 			foreach (UnitStateController turret in selectedTurretList)
 				SetPlayerSetTargetServerRPC(turret.EntityNetworkObjId, targetEntity.EntityNetworkObjId);
 		}
+		else
+			Debug.LogError("no matches shouldnt happen");
 	}
 	[ServerRpc(RequireOwnership = false)]
 	public void SetPlayerSetTargetServerRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId)
