@@ -189,7 +189,6 @@ public class Entities : NetworkBehaviour
 		playerController.gameUIManager.gameManager.UpdateResourcesServerRPC(isPlayerOneEntity, false, true, false, false,
 			GetComponent<NetworkObject>().NetworkObjectId, 0, 0, 0);
 		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
-		//StartCoroutine(playerController.gameUIManager.UpdateCurrentResourcesUI(0f));
 	}
 	public void UpdateEntityAudioVolume()
 	{

@@ -211,7 +211,7 @@ public class UnitSelectionManager : NetworkBehaviour
 			{
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
 				if (selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne ||
-					selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne)
+					selectedTurretList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne)
 				{
 					Debug.LogError("setting player set target");
 					TryAttackEnemyEntity(entity);
@@ -468,15 +468,36 @@ public class UnitSelectionManager : NetworkBehaviour
 	public void SetPlayerTargetClientRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId)
 	{
 		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkObjId].GetComponent<UnitStateController>();
-		Entities targetEntity = NetworkManager.SpawnManager.SpawnedObjects[targetEntityNetworkObjId].GetComponent<Entities>();
-		unit.playerSetTarget = targetEntity;
+		try //if not in spawned obj list then its probably one of the HQ's
+		{
+			Entities targetEntity = NetworkManager.SpawnManager.SpawnedObjects[targetEntityNetworkObjId].GetComponent<Entities>();
+			unit.playerSetTarget = targetEntity;
+		}
+		catch
+		{
+			Debug.LogError("Player Hq's not in spawned obj list, handling exception");
+			if (unit.isPlayerOneEntity)
+			{
+				Entities targetEntity = GameManager.Instance.playerTwoHQ.GetComponent<Entities>();
+				unit.playerSetTarget = targetEntity;
+			}
+			else if (!unit.isPlayerOneEntity)
+			{
+				Entities targetEntity = GameManager.Instance.playerOneHQ.GetComponent<Entities>();
+				unit.playerSetTarget = targetEntity;
+			}
+		}
 	}
 
-	//remove selected unit from selectedunitlist if it died whilst selected
+	//remove selected entities from lists if it died whilst selected
 	public void RemoveDeadUnitFromSelectedUnits(UnitStateController unit)
 	{
 		selectedUnitList.Remove(unit);
 		movePosHighlighterObj[selectedUnitList.Count].SetActive(false);
+	}
+	public void RemoveDeadTurretFromSelectedTurrets(TurretController turret)
+	{
+		selectedTurretList.Remove(turret);
 	}
 
 	//DRAG SELECT FUNCTIONS
@@ -649,7 +670,7 @@ public class UnitSelectionManager : NetworkBehaviour
 	//UNIT GROUP SAVING AND SELECTING FUNCTIONS
 	public void ManageSelectedUnitsAndGroups()
 	{
-		if (selectedUnitList.Count != 0 && !selectedUnitList[0].isTurret)
+		if (selectedUnitList.Count != 0)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
@@ -672,7 +693,7 @@ public class UnitSelectionManager : NetworkBehaviour
 				AssignUnitsToGroupFive();
 			}
 		}
-		else if (selectedUnitList.Count == 0 && !selectedUnitList[0].isTurret)
+		else if (selectedUnitList.Count == 0)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{

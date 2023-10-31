@@ -56,14 +56,10 @@ public class CanPlaceBuilding : NetworkBehaviour
 		CanPlaceHighliterRed();
 
 		PlayerController playerCon = FindObjectOfType<PlayerController>(); //set player refs here
-		if (building.isPlayerOneEntity)
-		{
-			Debug.LogWarning("Player One HQ: " + playerCon.isPlayerOne);
-		}
-		else if (!building.isPlayerOneEntity)
-		{
-			Debug.LogWarning("Player Two HQ: " + playerCon.isPlayerOne);
-		}
+		if (building.isHQ && building.isPlayerOneEntity)	//assign player HQ's to game manager
+			GameManager.Instance.playerOneHQ = this.gameObject;
+		else if (building.isHQ && !building.isPlayerOneEntity)
+			GameManager.Instance.playerTwoHQ = this.gameObject;
 
 		if (playerCon.isPlayerOne != !entity.isPlayerOneEntity)
 		{

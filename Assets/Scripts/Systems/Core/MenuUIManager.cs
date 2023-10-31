@@ -203,14 +203,20 @@ public class MenuUIManager : MonoBehaviour
 	public void LeaveLobbyButton()
 	{
 		ClientManager.Instance.StopClient();
-		MultiplayerManager.Instance.GetLobbiesList();
+		StartCoroutine(DelayLobbyListRefresh());
 		ClearPlayersList();
 	}
 	public void CloseLobbyButton()
 	{
 		HostManager.Instance.StopHost();
-		MultiplayerManager.Instance.GetLobbiesList();
+		StartCoroutine(DelayLobbyListRefresh());
 		ClearPlayersList();
+	}
+	public IEnumerator DelayLobbyListRefresh()
+	{
+		MenuUIManager.Instance.FetchLobbiesListUi();
+		yield return new WaitForSeconds(1f);
+		MultiplayerManager.Instance.GetLobbiesList();
 	}
 	public void StartMultiplayerGameButton()
 	{

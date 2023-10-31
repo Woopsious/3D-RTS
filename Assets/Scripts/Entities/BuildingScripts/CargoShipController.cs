@@ -195,7 +195,11 @@ public class CargoShipController : UnitStateController
 	public override void RemoveEntityRefs()
 	{
 		if (playerController != null)
+		{
 			playerController.unitListForPlayer.Remove(this);
+			if (this == playerController.unitSelectionManager.SelectedCargoShip)
+				playerController.unitSelectionManager.SelectedCargoShip = null;
+		}
 
 		targetResourceNode.IsntBeingMinedServerRPC();
 		refineryControllerParent.CargoShipList.Remove(this);

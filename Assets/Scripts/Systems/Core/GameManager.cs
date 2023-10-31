@@ -127,6 +127,9 @@ public class GameManager : NetworkBehaviour
 
 	public int timeOutCounter;
 
+	public GameObject playerOneHQ;
+	public GameObject playerTwoHQ;
+
 	public void Awake()
 	{
 		if (Instance == null)

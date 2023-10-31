@@ -141,7 +141,11 @@ public class BuildingManager : Entities
 	public override void RemoveEntityRefs()
 	{
 		if (playerController != null)
+		{
 			playerController.buildingListForPlayer.Remove(this);
+			if (this == playerController.unitSelectionManager.selectedBuilding)
+				playerController.unitSelectionManager.selectedBuilding = null;
+		}
 
 		if (isGeneratorBuilding)
 		{

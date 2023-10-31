@@ -293,7 +293,10 @@ public class UnitStateController : Entities
 				}
 			}
 			else if (isTurret)
+			{
+				playerController.unitSelectionManager.RemoveDeadTurretFromSelectedTurrets(GetComponent<TurretController>());
 				turretController.capturePointController.TurretDefenses.Remove(turretController);
+			}
 		}
 	}
 	public void OnDrawGizmosSelected()

@@ -90,6 +90,7 @@ public class LobbyManager : NetworkBehaviour
 		catch (LobbyServiceException e)
 		{
 			Debug.LogError(e.Message);
+			return;
 		}
 
 		StartCoroutine(ClientManager.Instance.RelayConfigureTransportAsConnectingPlayer());

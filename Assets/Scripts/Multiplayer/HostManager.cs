@@ -54,9 +54,7 @@ public class HostManager : NetworkBehaviour
 		MultiplayerManager.Instance.UnsubToEvents();
 		MultiplayerManager.Instance.ShutDownNetworkManagerIfActive();
 
-		if (SceneManager.GetActiveScene().buildIndex == 0)
-			MultiplayerManager.Instance.GetLobbiesList();
-		else
+		if (SceneManager.GetActiveScene().buildIndex == 1)
 			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 	}
 
