@@ -15,11 +15,15 @@ public class PlayerController : NetworkBehaviour
 	public Camera miniMapCameraRenderer;
 	public CameraController mainCameraParent;
 	public GameUIManager gameUIManager;
+
+	[Header("Refs")]
 	public UnitSelectionManager unitSelectionManager;
 	public BuildingPlacementManager buildingPlacementManager;
 	public UnitProductionManager unitProductionManager;
+	public List<CapturePointController> capturePointsList;
 
 	public bool isPlayerOne;
+	public bool isInTacticalView;
 
 	[Header("Dynamic Refs")]
 	public List<UnitStateController> SpottedUnitsList;
@@ -33,6 +37,8 @@ public class PlayerController : NetworkBehaviour
 	public void Start()
 	{
 		isPlayerOne = GameManager.Instance.isPlayerOne;
+		isInTacticalView = false;
+
 		if (isPlayerOne)
 		{
 			int playerOneMiniMapLayer = LayerMask.NameToLayer("PlayerOneMiniMapRender");
@@ -54,17 +60,54 @@ public class PlayerController : NetworkBehaviour
 	public void PlayerInputs()
 	{
 		if (Input.GetKeyDown(KeyCode.V))
-			ShowAllHealthBars();
+			TacticalViewMode();
 
 		MenuHotkeys();
 		BuyShopItemHotkeys();
 		GameSpeedHotkeys();
+	}
+	public void TacticalViewMode()
+	{
+		if (!isInTacticalView)
+		{
+			isInTacticalView = true;
+			ShowAllHealthBars();
+			ShowAllResourceAmountInNodes();
+		}
+		else
+		{
+			isInTacticalView = false;
+			HideAllHealthBars();
+			HideAllResourceAmountInNodes();
+		}
 	}
 	public void ShowAllHealthBars()
 	{
 		Entities[] entities = FindObjectsOfType<Entities>();
 		foreach (Entities entity in entities)
 			entity.ShowUIHealthBar();
+	}
+	public void ShowAllResourceAmountInNodes()
+	{
+		foreach (CapturePointController capturePoint in capturePointsList)
+		{
+			foreach (ResourceNodes resourceNode in capturePoint.resourceNodes)
+				resourceNode.ShowResourceCounterUi();
+		}
+	}
+	public void HideAllHealthBars()
+	{
+		Entities[] entities = FindObjectsOfType<Entities>();
+		foreach (Entities entity in entities)
+			entity.HideUIHealthBar();
+	}
+	public void HideAllResourceAmountInNodes()
+	{
+		foreach (CapturePointController capturePoint in capturePointsList)
+		{
+			foreach (ResourceNodes resourceNode in capturePoint.resourceNodes)
+				resourceNode.HideResourceCounterUi();
+		}
 	}
 	public void GameSpeedHotkeys()
 	{

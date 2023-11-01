@@ -39,7 +39,6 @@ public class ClientManager : NetworkBehaviour
 	}
 	public void StopClient()
 	{
-		Debug.LogError("STOPPING CLIENT");
 		GameManager.Instance.isPlayerOne = true;
 		GameManager.Instance.isMultiplayerGame = false;
 

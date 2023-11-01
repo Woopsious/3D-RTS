@@ -273,8 +273,10 @@ public class CapturePointController : MonoBehaviour
 	public void SetUpResourceNodes()
 	{
 		foreach (Transform resourceNodeObj in ResourceNodeContainerObj.transform)
+		{
 			resourceNodes.Add(resourceNodeObj.GetComponent<ResourceNodes>());
-
+			resourceNodeObj.GetComponent<ResourceNodes>().capturePoint = this;
+		}
 		ChangeOwnershipOfResourceNodes();
 	}
 	public void ChangeOwnershipOfResourceNodes()

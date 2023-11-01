@@ -234,7 +234,7 @@ public class CargoShipController : UnitStateController
 				targetResourceNode.resourcesAmount.Value -= targetResourceNode.resourcesAmount.Value;
 			}
 		}
-		targetResourceNode.CheckResourceCountServerRpc();
+		targetResourceNode.CheckResourceCountServerRpc(targetResourceNode.resourcesAmount.Value);
 	}
 	public void RefineResourcesFromInventroy()
 	{

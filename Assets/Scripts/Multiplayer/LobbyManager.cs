@@ -48,7 +48,6 @@ public class LobbyManager : NetworkBehaviour
 	{
 		try
 		{
-			Debug.LogWarning($"code to set as lobby data: {lobbyJoinCode}");
 			CreateLobbyOptions createLobbyOptions = new CreateLobbyOptions
 			{
 				IsPrivate = false,
@@ -89,11 +88,17 @@ public class LobbyManager : NetworkBehaviour
 		}
 		catch (LobbyServiceException e)
 		{
-			Debug.LogError(e.Message);
+			ReturnToLobbyListWhenFailedToJoinLobby();
+			Debug.LogWarning("Failed to join lobby: " + e.Message);
 			return;
 		}
 
 		StartCoroutine(ClientManager.Instance.RelayConfigureTransportAsConnectingPlayer());
+	}
+	public void ReturnToLobbyListWhenFailedToJoinLobby()
+	{
+		MultiplayerManager.Instance.GetLobbiesList();
+		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Failed to join Lobby", 3f);
 	}
 
 	//delete lobby

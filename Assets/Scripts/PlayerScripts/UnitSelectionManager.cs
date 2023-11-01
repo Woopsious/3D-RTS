@@ -213,7 +213,6 @@ public class UnitSelectionManager : NetworkBehaviour
 				if (selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne ||
 					selectedTurretList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne)
 				{
-					Debug.LogError("setting player set target");
 					TryAttackEnemyEntity(entity);
 				}
 
@@ -262,6 +261,15 @@ public class UnitSelectionManager : NetworkBehaviour
 			SelectedCargoShip = cargoShip;
 			SelectedCargoShip.selectedHighlighter.SetActive(true);
 			SelectedCargoShip.isSelected = true;
+
+			foreach (CapturePointController capturePoint in playerController.capturePointsList)
+			{
+				foreach (ResourceNodes resourceNode in capturePoint.resourceNodes)
+				{
+					resourceNode.ShowMineResourceButtonUi();
+					resourceNode.ShowResourceCounterUi();
+				}
+			}
 		}
 	}
 	public void TrySelectBuilding(BuildingManager building)
@@ -392,25 +400,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		//move selected cargoShip
 		if(SelectedCargoShip != null)
 		{
-			ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
-
-			if (!resourceNode.canPOneMine && playerController.isPlayerOne || !resourceNode.canPTwoMine && !playerController.isPlayerOne)
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("You need to own the Capturepoint to mine this resource node", 4f);
-
-			else if (resourceNode.isBeingMined.Value)
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
-
-			else if (resourceNode.isEmpty.Value)
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
-
-			else //else mine selected node
-			{
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
-				AnnouncerSystem.Instance.PlayPosReplyMiningSFX();
-
-				SelectedCargoShip.SetResourceNodeFromPlayerInputServerRPC(SelectedCargoShip.GetComponent<NetworkObject>().NetworkObjectId, 
-					resourceNode.GetComponent<NetworkObject>().NetworkObjectId);
-			}
+			TryMineResourceNode(Obj);
 		}
 		//move selected units to mouse pos
 		else if (selectedUnitList.Count != 0)
@@ -426,6 +416,28 @@ public class UnitSelectionManager : NetworkBehaviour
 					MoveUnitsServerRPC(selectedUnitList[i].EntityNetworkObjId, movePos);
 				}
 			}
+		}
+	}
+	public void TryMineResourceNode(GameObject Obj)
+	{
+		ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
+
+		if (!resourceNode.canPOneMine && playerController.isPlayerOne || !resourceNode.canPTwoMine && !playerController.isPlayerOne)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("You need to own the Capturepoint to mine this resource node", 4f);
+
+		else if (resourceNode.isBeingMined.Value)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
+
+		else if (resourceNode.isEmpty.Value)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
+
+		else //else mine selected node
+		{
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
+			AnnouncerSystem.Instance.PlayPosReplyMiningSFX();
+
+			SelectedCargoShip.SetResourceNodeFromPlayerInputServerRPC(SelectedCargoShip.GetComponent<NetworkObject>().NetworkObjectId,
+				resourceNode.GetComponent<NetworkObject>().NetworkObjectId);
 		}
 	}
 	public void TryAttackEnemyEntity(Entities targetEntity)
@@ -614,6 +626,14 @@ public class UnitSelectionManager : NetworkBehaviour
 			SelectedCargoShip.selectedHighlighter.SetActive(false);
 			SelectedCargoShip.isSelected = false;
 			SelectedCargoShip = null;
+		}
+		foreach (CapturePointController capturePoint in playerController.capturePointsList)
+		{
+			foreach (ResourceNodes resourceNode in capturePoint.resourceNodes)
+			{
+				resourceNode.HideMineResourceButtonUi();
+				resourceNode.HideResourceCounterUi();
+			}
 		}
 	}
 	public void DeselectBuilding()

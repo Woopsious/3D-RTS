@@ -62,16 +62,9 @@ public class MultiplayerManager : NetworkBehaviour
 			};
 
 			QueryResponse queryResponse = await Lobbies.Instance.QueryLobbiesAsync(queryLobbiesOptions);
-			Debug.LogWarning($"lobbies found: {queryResponse.Results.Count}");
-
-			int index = 1;
-			foreach (Lobby lobby in queryResponse.Results)
-			{
-				Debug.LogWarning($"lobby # {index} lobby Id; {lobby.Id}");
-				index++;
-			}
-
 			MenuUIManager.Instance.SetUpLobbyListUi(queryResponse);
+
+			Debug.Log($"lobbies found: {queryResponse.Results.Count}");
 		}
 		catch (LobbyServiceException e)
 		{
