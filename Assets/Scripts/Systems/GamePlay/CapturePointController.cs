@@ -283,6 +283,12 @@ public class CapturePointController : MonoBehaviour
 	{
 		foreach (ResourceNodes resourceNode in resourceNodes)
 		{
+			if (GameManager.Instance.gameUIManager.playerController.isInTacticalView ||
+				GameManager.Instance.gameUIManager.playerController.unitSelectionManager.SelectedCargoShip != null)
+			{
+				resourceNode.ShowMineResourceButtonUi(); //update ui if it needs to be
+			}
+
 			if (isNeutralPoint)
 			{
 				resourceNode.canPOneMine = false;

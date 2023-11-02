@@ -298,10 +298,7 @@ public class CargoShipController : UnitStateController
 		float Distance = Vector3.Distance(gameObject.transform.position, moveDestination);
 
 		if (Distance <= 0.1)
-		{
-			Debug.LogError("In Position");
 			return true;
-		}
 		else return false;
 	}
 }

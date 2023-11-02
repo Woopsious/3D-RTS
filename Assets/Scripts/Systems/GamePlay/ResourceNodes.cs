@@ -10,6 +10,7 @@ public class ResourceNodes : NetworkBehaviour
 
 	public NetworkVariable<bool> isCrystalNode = new NetworkVariable<bool>();
 	public NetworkVariable<int> resourcesAmount = new NetworkVariable<int>();
+	private int startingResourceAmount;
 
 	public NetworkVariable<bool> isBeingMined = new NetworkVariable<bool>();
 	public NetworkVariable<bool> isEmpty = new NetworkVariable<bool>();
@@ -26,6 +27,8 @@ public class ResourceNodes : NetworkBehaviour
 	{
 		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
 		UiObj.transform.rotation = Quaternion.identity;
+
+		startingResourceAmount = resourcesAmount.Value;
 		SyncUiClientRPC(resourcesAmount.Value);
 	}
 	public void Update()
@@ -72,7 +75,7 @@ public class ResourceNodes : NetworkBehaviour
 	[ClientRpc]
 	public void SyncUiClientRPC(int newResourceCount)
 	{
-		resourceCounter.text = newResourceCount.ToString();
+		resourceCounter.text = newResourceCount.ToString() + " / " + startingResourceAmount;
 	}
 	[ServerRpc(RequireOwnership = false)]
 	public void IsBeingMinedServerRPC()

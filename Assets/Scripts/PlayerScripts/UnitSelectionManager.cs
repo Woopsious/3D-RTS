@@ -431,7 +431,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		else if (resourceNode.isEmpty.Value)
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
 
-		else //else mine selected node
+		else if (SelectedCargoShip != null) //else mine selected node if cargoship not null
 		{
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
 			AnnouncerSystem.Instance.PlayPosReplyMiningSFX();
