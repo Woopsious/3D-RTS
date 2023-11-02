@@ -53,8 +53,10 @@ public class CargoShipController : UnitStateController
 
 		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);
 
-		if(targetResourceNode != null && CheckIfCanMineResourceNode(targetResourceNode))
+		if (targetResourceNode != null && CheckIfCanMineResourceNode(targetResourceNode)) //check if node still valid to mine
 			StartCoroutine(MoveToResourceNode());
+		else
+			FindClosestTargetResourcesNodeServerRPC(GetComponent<NetworkObject>().NetworkObjectId); //else find new closest valid res node
 	}	
 	public IEnumerator MoveToResourceNode()
 	{
@@ -287,11 +289,7 @@ public class CargoShipController : UnitStateController
 			return true;
 		else if (resourceNode.canPTwoMine && !isPlayerOneEntity)
 			return true;
-		else
-		{
-			//Debug.LogError("no resource nodes owned by player found");
-			return false;
-		}
+		else return false;
 	}
 	public bool CheckIfInPosition(Vector3 moveDestination)
 	{

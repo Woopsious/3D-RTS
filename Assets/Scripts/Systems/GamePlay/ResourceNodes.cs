@@ -29,7 +29,7 @@ public class ResourceNodes : NetworkBehaviour
 		UiObj.transform.rotation = Quaternion.identity;
 
 		startingResourceAmount = resourcesAmount.Value;
-		SyncUiClientRPC(resourcesAmount.Value);
+		SyncUiClientRPC(resourcesAmount.Value, startingResourceAmount);
 	}
 	public void Update()
 	{
@@ -50,9 +50,11 @@ public class ResourceNodes : NetworkBehaviour
 	}
 	public void ShowMineResourceButtonUi()
 	{
-		if (GameManager.Instance.gameUIManager.playerController.isPlayerOne == capturePoint.isPlayerOnePoint)
+		if (capturePoint.isNeutralPoint)
+			mineResourceButtonObj.SetActive(false);
+		else if (GameManager.Instance.gameUIManager.playerController.isPlayerOne == capturePoint.isPlayerOnePoint)
 			mineResourceButtonObj.SetActive(true);
-		else if (!GameManager.Instance.gameUIManager.playerController.isPlayerOne == !capturePoint.isPlayerOnePoint)
+		else if (!GameManager.Instance.gameUIManager.playerController.isPlayerOne == capturePoint.isPlayerTwoPoint)
 			mineResourceButtonObj.SetActive(true);
 		else
 			mineResourceButtonObj.SetActive(false);
@@ -65,7 +67,7 @@ public class ResourceNodes : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void CheckResourceCountServerRpc(int newResourceCount)
 	{
-		SyncUiClientRPC(newResourceCount);
+		SyncUiClientRPC(newResourceCount, startingResourceAmount);
 		if (resourcesAmount.Value <= 0)
 		{
 			isEmpty.Value = true;
@@ -73,7 +75,7 @@ public class ResourceNodes : NetworkBehaviour
 		}
 	}
 	[ClientRpc]
-	public void SyncUiClientRPC(int newResourceCount)
+	public void SyncUiClientRPC(int newResourceCount, int startingResourceAmount)
 	{
 		resourceCounter.text = newResourceCount.ToString() + " / " + startingResourceAmount;
 	}

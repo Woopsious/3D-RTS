@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 
 public class CapturePointController : MonoBehaviour
 {
+	public PlayerController playerController;
+
 	[Header("CapturePointRefs")]
 	public GameObject miniMapIndicatorMaterial;
 	public GameObject flagMaterial;
@@ -283,11 +285,8 @@ public class CapturePointController : MonoBehaviour
 	{
 		foreach (ResourceNodes resourceNode in resourceNodes)
 		{
-			if (GameManager.Instance.gameUIManager.playerController.isInTacticalView ||
-				GameManager.Instance.gameUIManager.playerController.unitSelectionManager.SelectedCargoShip != null)
-			{
+			if (playerController.unitSelectionManager.SelectedCargoShip != null)
 				resourceNode.ShowMineResourceButtonUi(); //update ui if it needs to be
-			}
 
 			if (isNeutralPoint)
 			{
