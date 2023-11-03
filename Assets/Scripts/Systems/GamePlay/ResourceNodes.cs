@@ -50,6 +50,11 @@ public class ResourceNodes : NetworkBehaviour
 	}
 	public void ShowMineResourceButtonUi()
 	{
+		if (capturePoint.CheckCapturePointOwnership())
+			mineResourceButtonObj.SetActive(true);
+		else
+			mineResourceButtonObj.SetActive(false);
+		/*
 		if (capturePoint.isNeutralPoint)
 			mineResourceButtonObj.SetActive(false);
 		else if (GameManager.Instance.gameUIManager.playerController.isPlayerOne == capturePoint.isPlayerOnePoint)
@@ -58,6 +63,7 @@ public class ResourceNodes : NetworkBehaviour
 			mineResourceButtonObj.SetActive(true);
 		else
 			mineResourceButtonObj.SetActive(false);
+		*/
 	}
 	public void HideMineResourceButtonUi()
 	{

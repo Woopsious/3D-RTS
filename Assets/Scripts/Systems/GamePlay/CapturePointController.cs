@@ -13,6 +13,7 @@ public class CapturePointController : MonoBehaviour
 	[Header("CapturePointRefs")]
 	public GameObject miniMapIndicatorMaterial;
 	public GameObject flagMaterial;
+	public GameObject buildAreaMesh;
 
 	public int trackLastCapturePointOwnership; //0 = netural, 1 = P1, 2 = P2
 
@@ -124,7 +125,10 @@ public class CapturePointController : MonoBehaviour
 
 				trackLastCapturePointOwnership = 2;
 			}
+			//update ui for cap point on ownership changes
 			ChangeOwnershipOfResourceNodes();
+			if (playerController.buildingPlacementManager.currentBuildingPlacement != null)
+				ShowBuildableArea();
 		}
 	}
 	public void UpdateFlagColour(int newFlagOwnership)
@@ -271,7 +275,28 @@ public class CapturePointController : MonoBehaviour
 			playerTwoUnitList.Remove(unit);
 	}
 
-	//Manager Capturepont ResourceNodes
+	//show/hide build area
+	public void ShowBuildableArea()
+	{
+		if (CheckCapturePointOwnership())
+			buildAreaMesh.SetActive(true);
+		else
+			buildAreaMesh.SetActive(false);
+	}
+	public void HideBuildableArea()
+	{
+		buildAreaMesh.SetActive(false);
+	}
+	public void ShowCapturePointArea()
+	{
+		buildAreaMesh.SetActive(true);
+	}
+	public void HideCapturePointArea()
+	{
+		buildAreaMesh.SetActive(false);
+	}
+
+	//Manage Capturepont ResourceNodes
 	public void SetUpResourceNodes()
 	{
 		foreach (Transform resourceNodeObj in ResourceNodeContainerObj.transform)
@@ -304,5 +329,18 @@ public class CapturePointController : MonoBehaviour
 				resourceNode.canPTwoMine = true;
 			}
 		}
+	}
+
+	//bool checks
+	public bool CheckCapturePointOwnership()
+	{
+		if (isNeutralPoint)
+			return false;
+		else if (GameManager.Instance.gameUIManager.playerController.isPlayerOne == isPlayerOnePoint)
+			return true;
+		else if (!GameManager.Instance.gameUIManager.playerController.isPlayerOne == isPlayerTwoPoint)
+			return true;
+		else
+			return false;
 	}
 }

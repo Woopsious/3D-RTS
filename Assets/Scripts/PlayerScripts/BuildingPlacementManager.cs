@@ -89,7 +89,12 @@ public class BuildingPlacementManager : NetworkBehaviour
 			TryPlaceCurrentBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
 
 		if (Input.GetMouseButtonDown(1))
+		{
 			CancelBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
+
+			foreach (CapturePointController capturePoint in playerController.capturePointsList)
+				capturePoint.HideBuildableArea();
+		}
 	}
 	[ServerRpc(RequireOwnership = false)]
 	public void ApplyTechUpgradesToNewBuildingsServerRPC(ulong buildingNetworkedId)
@@ -189,7 +194,12 @@ public class BuildingPlacementManager : NetworkBehaviour
 		if (currentBuildingPlacement == null)
 		{
 			if (playerController.CheckIfCanBuyEntity(building.moneyCost, building.alloyCost, building.crystalCost))
+			{
 				SpawnPlayerBuildingServerRPC(buildingIndex);
+
+				foreach (CapturePointController capturePoint in playerController.capturePointsList)
+					capturePoint.ShowBuildableArea();
+			}
 			else
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford building", 2);
 		}
@@ -267,5 +277,8 @@ public class BuildingPlacementManager : NetworkBehaviour
 			currentBuildingPlacement = null;
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
 		}
+
+		foreach (CapturePointController capturePoint in playerController.capturePointsList)
+			capturePoint.HideBuildableArea();
 	}
 }

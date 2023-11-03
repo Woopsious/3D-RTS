@@ -69,23 +69,34 @@ public class PlayerController : NetworkBehaviour
 	public void TacticalViewMode()
 	{
 		if (!isInTacticalView)
-		{
-			isInTacticalView = true;
-			ShowAllHealthBars();
-			ShowAllResourceAmountInNodes();
-		}
+			ShowTacticalView();
 		else
-		{
-			isInTacticalView = false;
-			HideAllHealthBars();
-			HideAllResourceAmountInNodes();
-		}
+			HideTacticalView();
+	}
+	public void ShowTacticalView()
+	{
+		isInTacticalView = true;
+		ShowAllHealthBars();
+		ShowAllCapturpointAreas();
+		ShowAllResourceAmountInNodes();
+	}
+	public void HideTacticalView()
+	{
+		isInTacticalView = false;
+		HideAllHealthBars();
+		HideAllCapturpointAreas();
+		HideAllResourceAmountInNodes();
 	}
 	public void ShowAllHealthBars()
 	{
 		Entities[] entities = FindObjectsOfType<Entities>();
 		foreach (Entities entity in entities)
 			entity.ShowUIHealthBar();
+	}
+	public void ShowAllCapturpointAreas()
+	{
+		foreach (CapturePointController capturePoint in capturePointsList)
+			capturePoint.ShowCapturePointArea();
 	}
 	public void ShowAllResourceAmountInNodes()
 	{
@@ -100,6 +111,11 @@ public class PlayerController : NetworkBehaviour
 		Entities[] entities = FindObjectsOfType<Entities>();
 		foreach (Entities entity in entities)
 			entity.HideUIHealthBar();
+	}
+	public void HideAllCapturpointAreas()
+	{
+		foreach (CapturePointController capturePoint in capturePointsList)
+			capturePoint.HideCapturePointArea();
 	}
 	public void HideAllResourceAmountInNodes()
 	{

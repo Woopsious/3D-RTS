@@ -86,22 +86,13 @@ public class UnitSelectionManager : NetworkBehaviour
 			mouseDownTime = 0;
 		}
 		//clear selected list
-		if (Input.GetMouseButtonDown(1) && selectedUnitList.Count != 0)
-		{
-			DeselectUnits();
-			SetUnitRefundButtonActiveUnactive();
-		}
-		else if (Input.GetMouseButtonDown(1) && selectedTurretList.Count != 0)
-		{
-			DeselectTurrets();
-		}
-		if (Input.GetMouseButtonDown(1) && selectedBuilding != null)
-		{
-			DeselectBuilding();
-		}
-		if (Input.GetMouseButtonDown(1) && SelectedCargoShip != null)
+		if (Input.GetMouseButtonDown(1))
 		{
 			DeselectCargoShip();
+			DeselectBuilding();
+			DeselectUnits();
+			SetUnitRefundButtonActiveUnactive();
+			DeselectTurrets();
 		}
 		//add selected list to group list
 		if (Input.GetKey(KeyCode.LeftShift))
@@ -209,6 +200,9 @@ public class UnitSelectionManager : NetworkBehaviour
 			//handle selecting of entities
 			if (hitInfo.collider.gameObject.GetComponent<Entities>() != null)
 			{
+				if (playerController.isInTacticalView)
+					playerController.HideTacticalView();
+
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
 				if (selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne ||
 					selectedTurretList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne)
@@ -239,6 +233,9 @@ public class UnitSelectionManager : NetworkBehaviour
 
 				else
 				{
+					if (playerController.isInTacticalView)
+						playerController.HideTacticalView();
+
 					DeselectCargoShip();
 					DeselectBuilding();
 					DeselectTurrets();
