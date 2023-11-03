@@ -63,9 +63,7 @@ public class BuildingPlacementManager : NetworkBehaviour
 	public void Update()
 	{
 		BuildingFollowsMouseCursor();
-
-		if (currentBuildingPlacement != null && !playerController.IsMouseOverUI())
-			PlaceBuildingManager();
+		PlaceBuildingManager();
 	}
 	public void BuildingFollowsMouseCursor()
 	{
@@ -85,15 +83,18 @@ public class BuildingPlacementManager : NetworkBehaviour
 	//place building and toggle it on
 	public void PlaceBuildingManager()
 	{
-		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlaceBuilding())
-			TryPlaceCurrentBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
-
-		if (Input.GetMouseButtonDown(1))
+		if (currentBuildingPlacement != null && !playerController.IsMouseOverUI())
 		{
-			CancelBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
+			if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlaceBuilding())
+				TryPlaceCurrentBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
 
-			foreach (CapturePointController capturePoint in playerController.capturePointsList)
-				capturePoint.HideBuildableArea();
+			if (Input.GetMouseButtonDown(1))
+			{
+				CancelBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
+
+				foreach (CapturePointController capturePoint in playerController.capturePointsList)
+					capturePoint.HideBuildableArea();
+			}
 		}
 	}
 	[ServerRpc(RequireOwnership = false)]

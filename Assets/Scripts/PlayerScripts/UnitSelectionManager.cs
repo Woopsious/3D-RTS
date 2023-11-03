@@ -64,7 +64,13 @@ public class UnitSelectionManager : NetworkBehaviour
 	}
 	public void Update()
 	{
-		ShowUnitGhostProjections();
+		EntitySelectionAndDeselection();
+		ManageSelectedUnitsAndGroups();
+		ManageUnitGhostProjections();
+		TrackIfGhostProjectionsAreTouchingNavMesh();
+	}
+	public void EntitySelectionAndDeselection()
+	{
 		//unit selection
 		if (Input.GetMouseButtonDown(0))
 		{
@@ -94,32 +100,6 @@ public class UnitSelectionManager : NetworkBehaviour
 			SetUnitRefundButtonActiveUnactive();
 			DeselectTurrets();
 		}
-		//add selected list to group list
-		if (Input.GetKey(KeyCode.LeftShift))
-		{
-			ManageSelectedUnitsAndGroups();
-		}
-
-		if (movePosHighlighterObj[0].activeInHierarchy)
-		{
-			for (int i = 0; i < movePosHighlighterObj.Count; i++)
-			{
-				if (movePosHighlighterObj[i].activeInHierarchy)
-				{
-					GameObject obj = movePosHighlighterObj[i].gameObject;
-					Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
-					NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 2.5f, filter);
-
-					if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
-					{
-						if (obj.transform.position.y >= hit.position.y)
-							obj.GetComponent<Renderer>().material.SetColor("_Color", transparentGreen);
-					}
-					else
-						obj.GetComponent<Renderer>().material.SetColor("_Color", transparentRed);
-				}
-			}
-		}
 	}
 	public void RefundSelectedUnits()
 	{
@@ -143,7 +123,7 @@ public class UnitSelectionManager : NetworkBehaviour
 	}
 
 	//UNIT GHOST PROJECTION WHEN UNITS ARE HIGHLIGHTED
-	public void ShowUnitGhostProjections()
+	public void ManageUnitGhostProjections()
 	{
 		if (selectedUnitList.Count != 0)
 		{
@@ -175,6 +155,29 @@ public class UnitSelectionManager : NetworkBehaviour
 							movePosHighlighterObj[i].SetActive(true);
 						}
 					}
+				}
+			}
+		}
+	}
+	public void TrackIfGhostProjectionsAreTouchingNavMesh()
+	{
+		if (movePosHighlighterObj[0].activeInHierarchy)
+		{
+			for (int i = 0; i < movePosHighlighterObj.Count; i++)
+			{
+				if (movePosHighlighterObj[i].activeInHierarchy)
+				{
+					GameObject obj = movePosHighlighterObj[i].gameObject;
+					Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
+					NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 2.5f, filter);
+
+					if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+					{
+						if (obj.transform.position.y >= hit.position.y)
+							obj.GetComponent<Renderer>().material.SetColor("_Color", transparentGreen);
+					}
+					else
+						obj.GetComponent<Renderer>().material.SetColor("_Color", transparentRed);
 				}
 			}
 		}
@@ -687,6 +690,9 @@ public class UnitSelectionManager : NetworkBehaviour
 	//UNIT GROUP SAVING AND SELECTING FUNCTIONS
 	public void ManageSelectedUnitsAndGroups()
 	{
+		//add selected list to group list
+		if (!Input.GetKey(KeyCode.LeftShift)) return;
+
 		if (selectedUnitList.Count != 0)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))

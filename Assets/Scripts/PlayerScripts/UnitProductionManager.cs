@@ -79,7 +79,6 @@ public class UnitProductionManager : NetworkBehaviour
 	public void Update()
 	{
 		ShowUnitBuildGhostProjections();
-
 		PlaceUnitManager();
 	}
 	public void ShowUnitBuildGhostProjections()
