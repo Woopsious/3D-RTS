@@ -264,6 +264,8 @@ public class GameUIManager : MonoBehaviour
 	{
 		for (int i = 0; i < GameManager.Instance.PlayerOneBuildingsList.Count; i++)
 		{
+			if (i == 6) return;
+
 			if (i < 3)
 			{
 				SetUpEntityTemplate(i, GameManager.Instance.PlayerOneBuildingsList, buildingsBaseUiShopObj);
@@ -278,6 +280,8 @@ public class GameUIManager : MonoBehaviour
 	{
 		for (int i = 0; i < GameManager.Instance.PlayerOneUnitsList.Count; i++)
 		{
+			if (i == 6) return;
+
 			if (i < 3)
 			{
 				SetUpEntityTemplate(i, GameManager.Instance.PlayerOneUnitsList, unitsLightUiShopOneObj);
@@ -297,17 +301,18 @@ public class GameUIManager : MonoBehaviour
 		Text entityInfoText = go.transform.GetChild(3).GetComponent<Text>();
 
 		entityTitleText.text = entitysList[i].GetComponent<Entities>().entityName;
-		//entityImage = List of images in GameManager at some point
 
 		if (entitysList == GameManager.Instance.PlayerOneBuildingsList)
-			GrabBuildingInfo(i, entityInfoText);
+			GrabBuildingInfo(i, entityInfoText, entityImage);
 		else if (entitysList == GameManager.Instance.PlayerOneUnitsList)
-			GrabUnitInfo(i, entityInfoText);
+			GrabUnitInfo(i, entityInfoText, entityImage);
 
 		LinkBuyButtons(i, entityBuyButton, entitysList);
 	}
-	public void GrabBuildingInfo(int i, Text textInfo)
+	public void GrabBuildingInfo(int i, Text textInfo, Image buildingImage)
 	{
+		buildingImage.sprite = gameManager.buildingImageList[i];
+
 		if (i == 2)
 		{
 			TurretController building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<TurretController>();
@@ -349,8 +354,10 @@ public class GameUIManager : MonoBehaviour
 			textInfo.text = costInfo + healthInfo + specialInfo;
 		}
 	}
-	public void GrabUnitInfo(int i, Text textInfo)
+	public void GrabUnitInfo(int i, Text textInfo, Image unitImage)
 	{
+		unitImage.sprite = gameManager.unitImageList[i];
+
 		UnitStateController unit = GameManager.Instance.PlayerOneUnitsList[i].GetComponent<UnitStateController>();
 		NavMeshAgent unitNavMesh = unit.GetComponent<NavMeshAgent>(); 
 
@@ -483,7 +490,6 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void UpdateCurrentResourcesUI()
 	{
-		//yield return new WaitForSeconds(secondsToWait);
 		if (playerController.isPlayerOne)
 		{
 			CurrentMoneyText.text = GameManager.Instance.playerOneCurrentMoney.Value.ToString();

@@ -52,8 +52,6 @@ public class Entities : NetworkBehaviour
 		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
 		UiObj.transform.rotation = Quaternion.identity;
 		HideUIHealthBar();
-
-		//FoVMeshObj.SetActive(true);
 	}
 	public virtual void Update()
 	{

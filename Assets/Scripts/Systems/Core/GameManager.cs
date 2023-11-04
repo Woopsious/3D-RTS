@@ -86,16 +86,12 @@ public class GameManager : NetworkBehaviour
 	public NetworkVariable<int> playerTwoUnitAttackRangeBonus = new NetworkVariable<int>();
 	public NetworkVariable<int> playerTwoUnitSpeedBonus = new NetworkVariable<int>();
 
-	[Header("PlayerOne Building Prefabs")]
+	[Header("Player Entity Prefabs")]
+	public List<Sprite> buildingImageList;
+	public List<Sprite> unitImageList;
 	public List<GameObject> PlayerOneBuildingsList;
-
-	[Header("PlayerOne Unit Prefabs")]
 	public List<GameObject> PlayerOneUnitsList;
-
-	[Header("PlayerTwo Building Prefabs")]
 	public List<GameObject> PlayerTwoBuildingsList;
-
-	[Header("PlayerTwo Unit Prefabs")]
 	public List<GameObject> PlayerTwoUnitsList;
 
 	[Header("Base Building Stats")]
