@@ -164,7 +164,7 @@ public class MenuUIManager : MonoBehaviour
 		//localClientHostText.text = $"Is Client Host?: {MultiplayerManager.Instance.CheckIfHost()}";
 		//localClientNetworkedIdText.text = $"Client Networked ID: {MultiplayerManager.Instance.localClientNetworkedId}";
 	}
-	public void ResetPlayerName()
+	public void ResetPlayerNameLocally()
 	{
 		ClientManager.Instance.clientUsername = "PlayerName";
 		MenuUIManager.Instance.playerNameText.text = $"Player Name: {ClientManager.Instance.clientUsername}";
@@ -347,6 +347,8 @@ public class MenuUIManager : MonoBehaviour
 	//FUNCTIONS TO CHANGE KEYBINDS
 	public void SetUpKeybindButtonNames()
 	{
+		Debug.LogWarning(InputManager.Instance.keyBindDictionary.Count);
+
 		for (int i = 0; i < InputManager.Instance.keyBindDictionary.Count; i++)
 		{
 			int closureIndex = i;
@@ -356,19 +358,25 @@ public class MenuUIManager : MonoBehaviour
 			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate
 			{ KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
 			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
+
+			Debug.LogWarning(InputManager.Instance.keybindNames[closureIndex].ToString());
+
+
 			keybindPanelObj.transform.GetChild(1).GetComponentInChildren<Text>().text =
 				InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
 		}
 	}
 	public void UpdateKeybindButtonDisplay()
 	{
-		int i = 0;
+		int i = 1;
 		foreach (Transform child in KeybindParentObj.transform)
 		{
 			Text buttonText = child.GetChild(1).GetComponentInChildren<Text>();
 			KeyCode keyCode = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[i]];
 			buttonText.text = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[i]].ToString();
 			i++;
+
+			Debug.LogWarning(i);
 		}
 	}
 	public void KeyToRebind(string buttonName)

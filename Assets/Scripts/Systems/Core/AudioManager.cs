@@ -92,7 +92,7 @@ public class AudioManager : MonoBehaviour
 		announcerSFXSlider.value = GameManager.Instance.LocalCopyOfPlayerData.announcerSFXVolumeData;
 		gameSFXSlider.value = GameManager.Instance.LocalCopyOfPlayerData.gameSFXVolumeData;
 	}
-	public void ResetAudioSettings()
+	public void ResetAudioSettingsLocally()
 	{
 		backgroundMusicSlider.value = 0.5f;
 		menuSFXSlider.value = 0.5f;

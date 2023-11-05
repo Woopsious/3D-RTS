@@ -108,6 +108,7 @@
     <Compile Include="Assets\Scripts\Entities\UnitScripts\UnitBaseState.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\ClientManager.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\GameUIManager.cs" />
+    <Compile Include="Assets\Scripts\Systems\Core\ResolutionManager.cs" />
     <Compile Include="Assets\Scripts\PlayerScripts\BuildingPlacementManager.cs" />
     <Compile Include="Assets\Scripts\Entities\BuildingScripts\CargoShipController.cs" />
   </ItemGroup>

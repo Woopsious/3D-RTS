@@ -59,7 +59,7 @@ public class PlayerController : NetworkBehaviour
 	}
 	public void PlayerInputs()
 	{
-		if (Input.GetKeyDown(KeyCode.V))
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTacViewName]))
 			TacticalViewMode();
 
 		MenuHotkeys();

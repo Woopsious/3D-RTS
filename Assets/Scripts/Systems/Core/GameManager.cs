@@ -8,6 +8,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.ProBuilder;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
@@ -319,6 +320,7 @@ public class GameManager : NetworkBehaviour
 			//audio is saved when slider value is changed
 			Instance.LocalCopyOfPlayerData.PlayerName = ClientManager.Instance.clientUsername;
 			InputManager.Instance.SavePlayerKeybinds();
+			//ResolutionManager.Instance.SaveScreenResolution();
 
 			BinaryFormatter formatter = new BinaryFormatter();
 			FileStream playerData = File.Open(playerDataPath + "/playerData.sav", FileMode.Create);
@@ -342,16 +344,49 @@ public class GameManager : NetworkBehaviour
 			LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
 			playerData.Close();
 
-			ClientManager.Instance.clientUsername = Instance.LocalCopyOfPlayerData.PlayerName;
-			AudioManager.Instance.LoadSoundSettings();
-			InputManager.Instance.LoadPlayerKeybinds();
+			TryLoadSavedPlayerData();
 		}
 	}
-	public void ResetPlayerSettings()
+	public void TryLoadSavedPlayerData()
 	{
+		try
+		{
+			AudioManager.Instance.LoadSoundSettings();
+		}
+		catch
+		{
+			Debug.LogError("Audio settings data corrupt, resetting");
+			AudioManager.Instance.ResetAudioSettingsLocally();
+		}
+		try
+		{
+			InputManager.Instance.LoadPlayerKeybinds();
+		}
+		catch
+		{
+			Debug.LogError("Input settings data corrupt, resetting");
+			InputManager.Instance.ResetKeybindsToDefault();
+			InputManager.Instance.SavePlayerKeybinds();
+		}
+		try
+		{
+			//ResolutionManager.Instance.LoadScreenResolution();
+		}
+		catch
+		{
+			//Debug.LogError("Screen Resolution settings data corrupt, resetting");
+			//ResolutionManager.Instance.ResetScreenResolutionLocally();
+			//ResolutionManager.Instance.SaveScreenResolution();
+		}
+
+		GameManager.Instance.SavePlayerData();
+	}
+
+	public void ResetPlayerSettingsLocally()
+	{
+		AudioManager.Instance.ResetAudioSettingsLocally();
 		InputManager.Instance.ResetKeybindsToDefault();
-		MenuUIManager.Instance.ResetPlayerName();
-		AudioManager.Instance.ResetAudioSettings();
+		ResolutionManager.Instance.ResetScreenResolutionLocally();
 
 		SavePlayerData();
 	}
@@ -399,30 +434,34 @@ public class GameManager : NetworkBehaviour
 		AudioManager.Instance.LoadSoundSettings();
 
 		if (sceneIndex == 0)
-		{
-			Time.timeScale = 1f;
-			InputManager.Instance.SetUpKeybindDictionary();
-			MenuUIManager.Instance.SetUpKeybindButtonNames();
-			MenuUIManager.Instance.GetPlayerNameUi();
-		}
+			LoadMainMenuScene();
 		else if (sceneIndex == 1)
+			LoadMapOneScene();
+	}
+	public void LoadMainMenuScene()
+	{
+		Time.timeScale = 1f;
+		InputManager.Instance.SetUpKeybindDictionary();
+		MenuUIManager.Instance.SetUpKeybindButtonNames();
+		MenuUIManager.Instance.GetPlayerNameUi();
+	}
+	public void LoadMapOneScene()
+	{
+		gameUIManager = FindObjectOfType<GameUIManager>();
+		gameUIManager.gameManager = this;
+
+		gameUIManager.ResetUi();
+		gameUIManager.ResetUnitGroupUI();
+		gameUIManager.SetUpUnitShopUi();
+		gameUIManager.SetUpBuildingsShopUi();
+		gameUIManager.techTreeManager.SetUpTechTrees();
+
+		if (isMultiplayerGame)
 		{
-			gameUIManager = FindObjectOfType<GameUIManager>();
-			gameUIManager.gameManager = this;
-
-			gameUIManager.ResetUi();
-			gameUIManager.ResetUnitGroupUI();
-			gameUIManager.SetUpUnitShopUi();
-			gameUIManager.SetUpBuildingsShopUi();
-			gameUIManager.techTreeManager.SetUpTechTrees();
-
-			if (isMultiplayerGame)
-			{
-				Time.timeScale = 0;
-				gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
-				gameUIManager.playerReadyUpPanelObj.SetActive(true);
-				gameUIManager.HideGameSpeedButtonsForMP();
-			}
+			Time.timeScale = 0;
+			gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
+			gameUIManager.playerReadyUpPanelObj.SetActive(true);
+			gameUIManager.HideGameSpeedButtonsForMP();
 		}
 	}
 

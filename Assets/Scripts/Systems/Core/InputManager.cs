@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Xml;
 using UnityEngine;
 
@@ -20,6 +21,7 @@ public class InputManager : MonoBehaviour
 	public readonly string keyBindUnitProdQueue = "Unit Prod Queue";
 	public readonly string keyBindUnitGroupsList = "Unit Group List";
 	public readonly string keyBindMiniMapName = "Minimap";
+	public readonly string keyBindTacViewName = "Tactical View";
 
 	public readonly string keyBindCameraForwardName = "Camera Forward";
 	public readonly string keyBindCameraBackwardsName = "Camera Backwards";
@@ -57,7 +59,13 @@ public class InputManager : MonoBehaviour
 	}
 
 	//KEY REBINDING FUNCTIONS
-	public void SetUpKeybindDictionary()
+	public async void SetUpKeybindDictionary()
+	{
+		await SetKeyBindNames();
+		await ResetKeybindsToDefault();
+		MenuUIManager.Instance.SetUpKeybindButtonNames();
+	}
+	public Task SetKeyBindNames()
 	{
 		keybindNames = new List<string>
 		{
@@ -69,6 +77,7 @@ public class InputManager : MonoBehaviour
 			keyBindUnitProdQueue,
 			keyBindUnitGroupsList,
 			keyBindMiniMapName,
+			keyBindTacViewName,
 
 			keyBindCameraForwardName,
 			keyBindCameraBackwardsName,
@@ -79,10 +88,9 @@ public class InputManager : MonoBehaviour
 			keyBindCameraRotateLeftName,
 			keyBindCameraRotateRightName
 		};
-
-		LoadPlayerKeybinds();
+		return Task.CompletedTask;
 	}
-	public void ResetKeybindsToDefault()
+	public Task ResetKeybindsToDefault()
 	{
 		keyBindDictionary = new Dictionary<string, KeyCode>
 		{
@@ -94,6 +102,7 @@ public class InputManager : MonoBehaviour
 			[keyBindUnitProdQueue] = KeyCode.Tab,
 			[keyBindUnitGroupsList] = KeyCode.CapsLock,
 			[keyBindMiniMapName] = KeyCode.M,
+			[keyBindTacViewName] = KeyCode.V,
 
 			[keyBindCameraForwardName] = KeyCode.W,
 			[keyBindCameraBackwardsName] = KeyCode.S,
@@ -104,6 +113,7 @@ public class InputManager : MonoBehaviour
 			[keyBindCameraRotateLeftName] = KeyCode.Q,
 			[keyBindCameraRotateRightName] = KeyCode.E
 		};
+		return Task.CompletedTask;
 	}
 	public void CheckForInputWhenRebindingKey()
 	{
