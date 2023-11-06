@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class InputManager : MonoBehaviour
@@ -51,21 +52,29 @@ public class InputManager : MonoBehaviour
 	//save load player keybinds
 	public void SavePlayerKeybinds()
 	{
+		GameManager.Instance.LocalCopyOfPlayerData.keybindNames = InputManager.Instance.keybindNames;
 		GameManager.Instance.LocalCopyOfPlayerData.KeyBindDictionary = InputManager.Instance.keyBindDictionary;
 	}
 	public void LoadPlayerKeybinds()
 	{
-		InputManager.Instance.keyBindDictionary = GameManager.Instance.LocalCopyOfPlayerData.KeyBindDictionary;
+		try
+		{
+			InputManager.Instance.keybindNames = GameManager.Instance.LocalCopyOfPlayerData.keybindNames;
+			InputManager.Instance.keyBindDictionary = GameManager.Instance.LocalCopyOfPlayerData.KeyBindDictionary;
+		}
+		catch
+		{
+			Debug.LogError("failed to load keybinds player data");
+			ResetKeybinds();
+		}
 	}
 
-	//KEY REBINDING FUNCTIONS
-	public async void SetUpKeybindDictionary()
+	public async Task CreateKeyBindDictionary()
 	{
-		await SetKeyBindNames();
-		await ResetKeybindsToDefault();
-		MenuUIManager.Instance.SetUpKeybindButtonNames();
+		await CreateNamesList();
+		await CreateDictionary();
 	}
-	public Task SetKeyBindNames()
+	public Task CreateNamesList()
 	{
 		keybindNames = new List<string>
 		{
@@ -90,7 +99,7 @@ public class InputManager : MonoBehaviour
 		};
 		return Task.CompletedTask;
 	}
-	public Task ResetKeybindsToDefault()
+	public Task CreateDictionary()
 	{
 		keyBindDictionary = new Dictionary<string, KeyCode>
 		{
@@ -114,6 +123,44 @@ public class InputManager : MonoBehaviour
 			[keyBindCameraRotateRightName] = KeyCode.E
 		};
 		return Task.CompletedTask;
+	}
+	public Task CheckForKeyBindChangesInData()
+	{
+		if (GameManager.Instance.LocalCopyOfPlayerData.keybindNames.Count != keybindNames.Count)
+		{
+			Debug.LogError("count change detected");
+			ResetKeybinds();
+			GameManager.Instance.SavePlayerData();
+
+			LoadPlayerKeybinds();
+			return Task.CompletedTask;
+		}
+		int i = 0;
+		foreach (string name in GameManager.Instance.LocalCopyOfPlayerData.keybindNames)
+		{
+			if (name != keybindNames[i])
+			{
+				Debug.LogError(name);
+				Debug.LogError(keybindNames[i]);
+
+				Debug.LogError("name change detected");
+				ResetKeybinds();
+				GameManager.Instance.SavePlayerData();
+
+				LoadPlayerKeybinds();
+				return Task.CompletedTask;
+			}
+			i++;
+		}
+
+		LoadPlayerKeybinds();
+		return Task.CompletedTask;
+	}
+	public async void ResetKeybinds()
+	{
+		await CreateNamesList();
+		await CreateDictionary();
+		GameManager.Instance.SavePlayerData();
 	}
 	public void CheckForInputWhenRebindingKey()
 	{

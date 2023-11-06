@@ -344,52 +344,12 @@ public class GameManager : NetworkBehaviour
 			LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
 			playerData.Close();
 
-			TryLoadSavedPlayerData();
-		}
-	}
-	public void TryLoadSavedPlayerData()
-	{
-		try
-		{
+			ClientManager.Instance.clientUsername = Instance.LocalCopyOfPlayerData.PlayerName;
 			AudioManager.Instance.LoadSoundSettings();
-		}
-		catch
-		{
-			Debug.LogError("Audio settings data corrupt, resetting");
-			AudioManager.Instance.ResetAudioSettingsLocally();
-		}
-		try
-		{
 			InputManager.Instance.LoadPlayerKeybinds();
 		}
-		catch
-		{
-			Debug.LogError("Input settings data corrupt, resetting");
-			InputManager.Instance.ResetKeybindsToDefault();
-			InputManager.Instance.SavePlayerKeybinds();
-		}
-		try
-		{
-			//ResolutionManager.Instance.LoadScreenResolution();
-		}
-		catch
-		{
-			//Debug.LogError("Screen Resolution settings data corrupt, resetting");
-			//ResolutionManager.Instance.ResetScreenResolutionLocally();
-			//ResolutionManager.Instance.SaveScreenResolution();
-		}
-
-		GameManager.Instance.SavePlayerData();
 	}
 
-	public void ResetPlayerSettingsLocally()
-	{
-		AudioManager.Instance.ResetAudioSettingsLocally();
-		InputManager.Instance.ResetKeybindsToDefault();
-		ResolutionManager.Instance.ResetScreenResolutionLocally();
-
-		SavePlayerData();
-	}
 	public void SaveGameData(string filePath)
 	{
 		//create directory if it doesnt exist
@@ -438,10 +398,11 @@ public class GameManager : NetworkBehaviour
 		else if (sceneIndex == 1)
 			LoadMapOneScene();
 	}
-	public void LoadMainMenuScene()
+	public async void LoadMainMenuScene()
 	{
 		Time.timeScale = 1f;
-		InputManager.Instance.SetUpKeybindDictionary();
+		await InputManager.Instance.CreateKeyBindDictionary();
+		await InputManager.Instance.CheckForKeyBindChangesInData();
 		MenuUIManager.Instance.SetUpKeybindButtonNames();
 		MenuUIManager.Instance.GetPlayerNameUi();
 	}

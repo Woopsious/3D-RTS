@@ -358,25 +358,19 @@ public class MenuUIManager : MonoBehaviour
 			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate
 			{ KeyToRebind(InputManager.Instance.keybindNames[closureIndex]); });
 			keybindPanelObj.transform.GetChild(1).GetComponent<Button>().onClick.AddListener(delegate { KeyToRebindButtonNum(closureIndex); });
-
-			Debug.LogWarning(InputManager.Instance.keybindNames[closureIndex].ToString());
-
-
 			keybindPanelObj.transform.GetChild(1).GetComponentInChildren<Text>().text =
 				InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[closureIndex]].ToString();
 		}
 	}
 	public void UpdateKeybindButtonDisplay()
 	{
-		int i = 1;
+		int i = 0;
 		foreach (Transform child in KeybindParentObj.transform)
 		{
 			Text buttonText = child.GetChild(1).GetComponentInChildren<Text>();
 			KeyCode keyCode = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[i]];
 			buttonText.text = InputManager.Instance.keyBindDictionary[InputManager.Instance.keybindNames[i]].ToString();
 			i++;
-
-			Debug.LogWarning(i);
 		}
 	}
 	public void KeyToRebind(string buttonName)
@@ -402,7 +396,7 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void KeyBindsReset()
 	{
-		InputManager.Instance.ResetKeybindsToDefault();
+		InputManager.Instance.CreateKeyBindDictionary();
 		UpdateKeybindButtonDisplay();
 	}
 }
