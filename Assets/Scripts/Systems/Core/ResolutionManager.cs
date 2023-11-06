@@ -13,11 +13,16 @@ public class ResolutionManager : MonoBehaviour
 
 	public GameObject resolutionListContainerObj;
 
+	public void Awake()
+	{
+		Instance = this;
+	}
+
+	//change screen resolution
 	public void ChangeScreenResolutionButton()
 	{
 		resolutionListContainerObj.SetActive(true);
 	}
-
 	public void SetResolutionOneButton()
 	{
 		SetNewResolution(1280, 720);
@@ -35,20 +40,26 @@ public class ResolutionManager : MonoBehaviour
 	{
 		screenWidthResolution = width; screenHeightResolution = height;
 		resolutionListContainerObj.SetActive(false);
-		SaveScreenResolution();
+		GameManager.Instance.SavePlayerData();
 
-		FindObjectOfType<CanvasScaler>().referenceResolution = new Vector2(screenWidthResolution, screenHeightResolution);
+		ChangeScreenToNewResolution(width, height);
+	}
+	public void ChangeScreenToNewResolution(int width, int height)
+	{
+		FindObjectOfType<CanvasScaler>().referenceResolution = new Vector2(width, height);
 	}
 
 	public void SaveScreenResolution()
 	{
-		GameManager.Instance.LocalCopyOfPlayerData.screenWidthResolution = Instance.screenWidthResolution;
-		GameManager.Instance.LocalCopyOfPlayerData.screenHeightResolution = Instance.screenHeightResolution;
+		GameManager.Instance.LocalCopyOfPlayerData.screenWidthResolution = screenWidthResolution;
+		GameManager.Instance.LocalCopyOfPlayerData.screenHeightResolution = screenHeightResolution;
 	}
 	public void LoadScreenResolution()
 	{
-		Instance.screenWidthResolution = GameManager.Instance.LocalCopyOfPlayerData.screenWidthResolution;
-		Instance.screenHeightResolution = GameManager.Instance.LocalCopyOfPlayerData.screenHeightResolution;
+		screenWidthResolution = GameManager.Instance.LocalCopyOfPlayerData.screenWidthResolution;
+		screenHeightResolution = GameManager.Instance.LocalCopyOfPlayerData.screenHeightResolution;
+
+		ChangeScreenToNewResolution(screenWidthResolution, screenHeightResolution);
 	}
 	public void ResetScreenResolutionLocally()
 	{

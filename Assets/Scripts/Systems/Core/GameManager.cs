@@ -317,10 +317,10 @@ public class GameManager : NetworkBehaviour
 			CreatePlayerData();
 		else
 		{
-			//audio is saved when slider value is changed
 			Instance.LocalCopyOfPlayerData.PlayerName = ClientManager.Instance.clientUsername;
+			//audio is saved when slider value is changed
 			InputManager.Instance.SavePlayerKeybinds();
-			//ResolutionManager.Instance.SaveScreenResolution();
+			ResolutionManager.Instance.SaveScreenResolution();
 
 			BinaryFormatter formatter = new BinaryFormatter();
 			FileStream playerData = File.Open(playerDataPath + "/playerData.sav", FileMode.Create);
@@ -347,6 +347,7 @@ public class GameManager : NetworkBehaviour
 			ClientManager.Instance.clientUsername = Instance.LocalCopyOfPlayerData.PlayerName;
 			AudioManager.Instance.LoadSoundSettings();
 			InputManager.Instance.LoadPlayerKeybinds();
+			ResolutionManager.Instance.LoadScreenResolution();
 		}
 	}
 
@@ -391,7 +392,6 @@ public class GameManager : NetworkBehaviour
 		GameManager.Instance.LoadPlayerData();
 		GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
-		AudioManager.Instance.LoadSoundSettings();
 
 		if (sceneIndex == 0)
 			LoadMainMenuScene();
