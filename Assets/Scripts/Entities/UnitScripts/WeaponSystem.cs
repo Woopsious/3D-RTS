@@ -201,7 +201,11 @@ public class WeaponSystem : NetworkBehaviour
 	public void SyncCurrentBuildingTargetClientRPC(ulong unitId, ulong BuildingTargetId)
 	{
 		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitId].GetComponent<UnitStateController>();
+
+		Debug.LogError(NetworkManager.SpawnManager.SpawnedObjects[BuildingTargetId]);
+
 		BuildingManager BuildingTarget = NetworkManager.SpawnManager.SpawnedObjects[BuildingTargetId].GetComponent<BuildingManager>();
+
 		unit.currentBuildingTarget = BuildingTarget;
 	}
 	public void AimProjectileAtTarget(GameObject particleObject, Vector3 targetPos) //function to shoot projectile at target center

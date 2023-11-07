@@ -501,7 +501,10 @@ public class GameManager : NetworkBehaviour
 	[ClientRpc]
 	public void RemoveEntityUiClientRPC(ulong networkObjId)
 	{
+		Debug.LogError(NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId]);
+
 		GameObject entityObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].gameObject;
+
 		entityObj.GetComponent<Entities>().RemoveEntityRefs();
 		Instantiate(entityObj.GetComponent<Entities>().DeathObj, entityObj.transform.position, Quaternion.identity);
 		Destroy(entityObj.GetComponent<Entities>().UiObj);
