@@ -45,9 +45,6 @@ public class ClientManager : NetworkBehaviour
 		LobbyManager.Instance._Lobby = null;
 		MultiplayerManager.Instance.UnsubToEvents();
 		MultiplayerManager.Instance.ShutDownNetworkManagerIfActive();
-
-		if (SceneManager.GetActiveScene().buildIndex == 1)
-			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 	}
 	//join relay server
 	public IEnumerator RelayConfigureTransportAsConnectingPlayer()
@@ -95,9 +92,14 @@ public class ClientManager : NetworkBehaviour
 	}
 
 	//handle disconnects
-	public void HandlePlayerDisconnectsAsClient(ulong id)
+	public void HandlePlayerDisconnectsAsClient()
 	{
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Connection to Host Lost", 3f);
 		StopClient();
+
+		if (SceneManager.GetActiveScene().buildIndex == 0)
+			StartCoroutine(MenuUIManager.Instance.DelayLobbyListRefresh());
+		else
+			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 	}
 }

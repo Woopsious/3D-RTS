@@ -26,22 +26,27 @@ public class GameUIManager : MonoBehaviour
 	public GameObject buildingsVehicleProdUiShopObj;
 	public GameObject unitsLightUiShopOneObj;
 	public GameObject unitsHeavyUiShopTwoObj;
-
 	public GameObject techTreeParentObj;
 	public GameObject unitGroupsParentObj;
 	public GameObject unitProdQueuesParentObj;
+
 	public Button audioBackButton;
 
 	public GameObject entityInfoTemplatePrefab;
 	public Text gameTimerText;
 
+	[Header("User ReadyUp Refs")]
 	public GameObject playerReadyUpPanelObj;
 	public Text isPlayerOneReadyText;
 	public Text isPlayerTwoReadyText;
 
-	public GameObject exitAndSaveGameButtonObj;
-	public GameObject exitGameButtonObj;
+	[Header("User Disconnect/Leave Refs")]
 	public GameObject playerDisconnectedUiPanel;
+	public GameObject exitAndSaveGameButtonObj;
+
+	[Header("User GameOver Refs")]
+	public GameObject gameOverUiPanel;
+	public Text gameOverUiText;
 
 	[Header("User Resource Refs")]
 	public Text CurrentMoneyText;

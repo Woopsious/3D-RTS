@@ -394,9 +394,9 @@ public class MenuUIManager : MonoBehaviour
 	{
 		GameManager.Instance.SavePlayerData();
 	}
-	public void KeyBindsReset()
+	public async void KeyBindsResetButton()
 	{
-		InputManager.Instance.CreateKeyBindDictionary();
+		await InputManager.Instance.CreateKeyBindDictionary();
 		UpdateKeybindButtonDisplay();
 	}
 }

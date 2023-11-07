@@ -69,8 +69,10 @@ public class BuildingManager : Entities
 		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING DESTROYED", transform.position);
 			AnnouncerSystem.Instance.PlayAlertBuildingLostSFX();
-		}
 
+			if (isHQ)
+				GameManager.Instance.GameOverPlayerHQDestroyedServerRPC(playerController.isPlayerOne);
+		}
 		base.OnEntityDeath();
 	}
 

@@ -468,6 +468,29 @@ public class GameManager : NetworkBehaviour
 		playerNotifsManager.DisplayNotifisMessage("GAME STARTING", 3f);
 	}
 
+	//SERVER FUNCTIONS WHEN GAME OVER
+	[ServerRpc(RequireOwnership = false)]
+	public void GameOverPlayerHQDestroyedServerRPC(bool isPlayerOneCall)
+	{
+		GameOverPlayerHQDestroyedClientRPC(isPlayerOneCall);
+	}
+	[ClientRpc]
+	public void GameOverPlayerHQDestroyedClientRPC(bool isPlayerOneCall)
+	{
+		if (isPlayerOneCall && isPlayerOne)
+			gameUIManager.gameOverUiText.text = "HQ Destroyed You Lost";
+		else if (isPlayerOneCall && !isPlayerOne)
+			gameUIManager.gameOverUiText.text = "Enemy HQ Destroyed You Win";
+
+		else if (!isPlayerOneCall && isPlayerOne)
+			gameUIManager.gameOverUiText.text = "Enemy HQ Destroyed You Win";
+		else if (!isPlayerOneCall && isPlayerOne)
+			gameUIManager.gameOverUiText.text = "HQ Destroyed You Lost";
+
+		gameUIManager.gameOverUiPanel.SetActive(true);
+		Time.timeScale = 0;
+	}
+
 	//FUNCTIONS ON ENTITY DEATH
 	[ServerRpc(RequireOwnership = false)]
 	public void RemoveEntityServerRPC(ulong networkObjId)

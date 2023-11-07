@@ -118,7 +118,7 @@ public class MultiplayerManager : NetworkBehaviour
 		if (CheckIfHost())
 			HostManager.Instance.HandlePlayerDisconnectsAsHost(id);
 		else
-			ClientManager.Instance.HandlePlayerDisconnectsAsClient(id);
+			ClientManager.Instance.HandlePlayerDisconnectsAsClient();
 	}
 	
 	public void ShutDownNetworkManagerIfActive()
