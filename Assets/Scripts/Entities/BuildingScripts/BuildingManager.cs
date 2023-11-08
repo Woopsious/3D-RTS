@@ -38,7 +38,6 @@ public class BuildingManager : Entities
 	public override void Start()
 	{
 		base.Start();
-		OnBuildingStartUp();
 	}
 	public override void Update()
 	{
@@ -46,6 +45,23 @@ public class BuildingManager : Entities
 	}
 	public void OnBuildingStartUp()
 	{
+		//enable building triggers, navMeshObstacle, set layer and unhighlight
+		GetComponent<BuildingManager>().enabled = true;
+
+		if (isVTOLProdBuilding)
+			GetComponent<SphereCollider>().isTrigger = true;
+		else
+			GetComponent<BoxCollider>().isTrigger = true;
+
+		if (isPlayerOneEntity)
+			gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
+		else
+			gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
+
+		GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
+		GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
+		GetComponent<CanPlaceBuilding>().isPlaced = true;
+
 		AddBuildingRefs();
 
 		if (isGeneratorBuilding)

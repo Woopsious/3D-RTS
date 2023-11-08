@@ -245,31 +245,12 @@ public class BuildingPlacementManager : NetworkBehaviour
 	public void BuildingPlacedClientRPC(ulong networkObjId)
 	{
 		NetworkObject buildingObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId];
-		//enable building triggers, navMeshObstacle, set layer and unhighlight, -building cost and update resUI
+		//enable script, -building cost and update resUI
 		if (buildingObj.GetComponent<BuildingManager>() != null)
-		{
-			buildingObj.GetComponent<BuildingManager>().enabled = true;
+			buildingObj.GetComponent<BuildingManager>().OnBuildingStartUp();
 
-			if (buildingObj.GetComponent<BuildingManager>().isVTOLProdBuilding)
-				buildingObj.GetComponent<SphereCollider>().isTrigger = true;
-			else
-				buildingObj.GetComponent<BoxCollider>().isTrigger = true;
-		}
-		else if (buildingObj.GetComponent<TurretController>() != null)
-		{
-			buildingObj.GetComponent<TurretController>().enabled = true;
-			buildingObj.GetComponent<BoxCollider>().isTrigger = true;
-			buildingObj.transform.GetChild(4).GetComponent<SphereCollider>().enabled = true;
-		}
-
-		if (buildingObj.GetComponent<Entities>().isPlayerOneEntity)
-			buildingObj.GetComponent<Entities>().gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
-		else
-			buildingObj.GetComponent<Entities>().gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
-
-		buildingObj.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
-		buildingObj.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
-		buildingObj.GetComponent<CanPlaceBuilding>().isPlaced = true;
+		if (buildingObj.GetComponent<TurretController>() != null)
+			buildingObj.GetComponent<TurretController>().OnTurretStartUp();
 
 		if (currentBuildingPlacement != null && currentBuildingPlacement.GetComponent<NetworkObject>().IsOwner)
 		{

@@ -12,6 +12,13 @@ public class TurretController : UnitStateController
 	public GameObject turretTower;
 	public GameObject turretGuns;
 
+	public void OnTurretStartUp()
+	{
+		GetComponent<TurretController>().enabled = true;
+		GetComponent<BoxCollider>().isTrigger = true;
+		gameObject.transform.GetChild(4).GetComponent<SphereCollider>().enabled = true;
+	}
+
 	public void ActivateTurret()
 	{
 		animatorController.SetBool("isIdle", false);
