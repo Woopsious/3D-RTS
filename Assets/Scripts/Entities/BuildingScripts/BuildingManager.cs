@@ -155,6 +155,16 @@ public class BuildingManager : Entities
 			if (playerController != null)
 				playerController.vtolVehProdBuildingsList.Add(this);
 		}
+		else if (isHQ)
+		{
+			foreach (CapturePointController capturePoint in GameManager.Instance.gameUIManager.playerController.capturePointsList)
+			{
+				if (capturePoint.isPlayerOneSpawn)
+					capturePoint.SetOwnershipBasedOnHq(this);
+				else if (capturePoint.isPlayerTwoSpawn)
+					capturePoint.SetOwnershipBasedOnHq(this);
+			}
+		}
 	}
 	public override void RemoveEntityRefs()
 	{

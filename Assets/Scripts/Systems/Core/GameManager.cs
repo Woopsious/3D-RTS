@@ -466,6 +466,42 @@ public class GameManager : NetworkBehaviour
 		gameUIManager.PauseGame();
 		gameUIManager.playerReadyUpPanelObj.SetActive(false);
 		playerNotifsManager.DisplayNotifisMessage("GAME STARTING", 3f);
+
+		if (!IsServer) return;
+
+		foreach (CapturePointController capturePoint in gameUIManager.playerController.capturePointsList)
+		{
+			if (capturePoint.isPlayerOneSpawn)
+				GameManager.Instance.SpawnPlayerHQsServerRPC(true,
+					capturePoint.playerHQSpawnPoint.transform.position, capturePoint.playerHQSpawnPoint.transform.rotation);
+
+			else if ( capturePoint.isPlayerTwoSpawn)
+				GameManager.Instance.SpawnPlayerHQsServerRPC(false,
+					capturePoint.playerHQSpawnPoint.transform.position, capturePoint.playerHQSpawnPoint.transform.rotation);
+		}
+	}
+
+	//SERVER SPAWN PLAYER HQ's
+	[ServerRpc(RequireOwnership = false)]
+	public void SpawnPlayerHQsServerRPC(bool spawnPlayerOneHq, Vector3 position, Quaternion rotation)
+	{
+		if (spawnPlayerOneHq)
+		{
+			GameObject obj = Instantiate(GameManager.Instance.PlayerOneBuildingsList[6], position, rotation);
+			obj.GetComponent<NetworkObject>().SpawnWithOwnership(HostManager.Instance.connectedClientsList[0].clientNetworkedId);
+			SpawnPlayerHQsClientRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
+		}
+		else
+		{
+			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoBuildingsList[6], position, rotation);
+			obj.GetComponent<NetworkObject>().SpawnWithOwnership(HostManager.Instance.connectedClientsList[1].clientNetworkedId);
+			SpawnPlayerHQsClientRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
+		}
+	}
+	[ClientRpc]
+	public void SpawnPlayerHQsClientRPC(ulong networkObjId)
+	{
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<BuildingManager>().OnBuildingStartUp();
 	}
 
 	//SERVER FUNCTIONS WHEN GAME OVER

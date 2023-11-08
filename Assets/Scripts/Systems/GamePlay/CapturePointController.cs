@@ -5,6 +5,7 @@ using Unity.Services.Lobbies.Models;
 using Unity.Services.Lobbies;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class CapturePointController : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class CapturePointController : MonoBehaviour
 	public GameObject miniMapIndicatorMaterial;
 	public GameObject flagMaterial;
 	public GameObject buildAreaMesh;
+	public GameObject playerHQSpawnPoint;
 
 	public int trackLastCapturePointOwnership; //0 = netural, 1 = P1, 2 = P2
 
@@ -31,6 +33,8 @@ public class CapturePointController : MonoBehaviour
 	public readonly int TurretDefensesPlacementLimit = 3;
 
 	[Header("Optional Refs")]
+	public bool isPlayerOneSpawn;
+	public bool isPlayerTwoSpawn;
 	public BuildingManager HQRef;
 
 	[Header("Dynamic Refs")] 
@@ -52,27 +56,6 @@ public class CapturePointController : MonoBehaviour
 
 	public void Start()
 	{
-		if (HQRef != null)
-		{
-			if (HQRef.isPlayerOneEntity)
-			{
-				isNeutralPoint = false;
-				isPlayerOnePoint = true;
-				isPlayerTwoPoint = false;
-
-				UpdateFlagColour(1);
-				trackLastCapturePointOwnership = 1;
-			}
-			else if (!HQRef.isPlayerOneEntity)
-			{
-				isNeutralPoint = false;
-				isPlayerOnePoint = false;
-				isPlayerTwoPoint = true;
-
-				UpdateFlagColour(2);
-				trackLastCapturePointOwnership = 2;
-			}
-		}
 		SetUpResourceNodes();
 	}
 	public void Update()
@@ -84,6 +67,30 @@ public class CapturePointController : MonoBehaviour
 			TrackPointOwnership();
 		}
 	}
+	public void SetOwnershipBasedOnHq(BuildingManager Hq)
+	{
+		HQRef = Hq;
+
+		if (isPlayerOneSpawn)
+		{
+			isNeutralPoint = false;
+			isPlayerOnePoint = true;
+			isPlayerTwoPoint = false;
+
+			UpdateFlagColour(1);
+			trackLastCapturePointOwnership = 1;
+		}
+		else if (isPlayerTwoSpawn)
+		{
+			isNeutralPoint = false;
+			isPlayerOnePoint = false;
+			isPlayerTwoPoint = true;
+
+			UpdateFlagColour(2);
+			trackLastCapturePointOwnership = 2;
+		}
+	}
+
 	//check if buildings exist, check list of player units to fip point ownership 
 	public void TrackPointOwnership()
 	{
