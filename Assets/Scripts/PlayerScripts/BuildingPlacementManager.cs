@@ -60,11 +60,6 @@ public class BuildingPlacementManager : NetworkBehaviour
 			}
 		}
 	}
-	public void Update()
-	{
-		BuildingFollowsMouseCursor();
-		PlaceBuildingManager();
-	}
 	public void BuildingFollowsMouseCursor()
 	{
 		if (currentBuildingPlacement != null)

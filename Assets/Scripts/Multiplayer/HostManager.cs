@@ -53,9 +53,6 @@ public class HostManager : NetworkBehaviour
 		LobbyManager.Instance.DeleteLobby();
 		MultiplayerManager.Instance.UnsubToEvents();
 		MultiplayerManager.Instance.ShutDownNetworkManagerIfActive();
-
-		if (SceneManager.GetActiveScene().buildIndex == 1)
-			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 	}
 
 	//create relay server
@@ -134,20 +131,24 @@ public class HostManager : NetworkBehaviour
 	//handle disconnects
 	public void HandlePlayerDisconnectsAsHost(ulong id)
 	{
-		if (SceneManager.GetActiveScene().buildIndex == 0)
+		foreach (ClientDataInfo clientData in connectedClientsList)
 		{
-			foreach (ClientDataInfo clientData in connectedClientsList)
+			if (clientData.clientNetworkedId == id)
 			{
-				if (clientData.clientNetworkedId == id)
-				{
-					connectedClientsList.Remove(clientData);
-					RemoveClientFromLobby(clientData.clientId.ToString());
-				}
+				connectedClientsList.Remove(clientData);
+				RemoveClientFromLobby(clientData.clientId.ToString());
 			}
 		}
-		else
+
+		if (SceneManager.GetActiveScene().buildIndex == 0)
 		{
-			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+			if (GameManager.Instance.hasGameEnded.Value == false)
+				GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+			else if (GameManager.Instance.hasGameEnded.Value == true)
+			{
+
+			}
+
 			StopHost();
 		}
 	}

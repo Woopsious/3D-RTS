@@ -52,19 +52,30 @@ public class PlayerController : NetworkBehaviour
 	}
 	public void Update()
 	{
-		if (SceneManager.GetActiveScene().buildIndex == 1)
-			PlayerInputs();
-
+		PlayerInputs();
 		IsMouseOverUI();
 	}
 	public void PlayerInputs()
 	{
+		if (GameManager.Instance.hasGameStarted.Value == false || GameManager.Instance.hasGameEnded.Value == true) return;
+
 		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTacViewName]))
 			TacticalViewMode();
 
 		MenuHotkeys();
 		BuyShopItemHotkeys();
 		GameSpeedHotkeys();
+
+		buildingPlacementManager.BuildingFollowsMouseCursor();
+		buildingPlacementManager.PlaceBuildingManager();
+
+		unitProductionManager.ShowUnitBuildGhostProjections();
+		unitProductionManager.PlaceUnitManager();
+
+		unitSelectionManager.EntitySelectionAndDeselection();
+		unitSelectionManager.ManageSelectedUnitsAndGroups();
+		unitSelectionManager.ManageUnitGhostProjections();
+		unitSelectionManager.TrackIfGhostProjectionsAreTouchingNavMesh();
 	}
 	public void TacticalViewMode()
 	{

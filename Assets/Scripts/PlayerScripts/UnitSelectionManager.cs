@@ -62,13 +62,6 @@ public class UnitSelectionManager : NetworkBehaviour
 		transparentGreen = new Color(0, 1, 0, 0.1f);
 		transparentRed = new Color(1, 0, 0, 0.1f);
 	}
-	public void Update()
-	{
-		EntitySelectionAndDeselection();
-		ManageSelectedUnitsAndGroups();
-		ManageUnitGhostProjections();
-		TrackIfGhostProjectionsAreTouchingNavMesh();
-	}
 	public void EntitySelectionAndDeselection()
 	{
 		//unit selection

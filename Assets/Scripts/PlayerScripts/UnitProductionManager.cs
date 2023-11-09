@@ -76,11 +76,6 @@ public class UnitProductionManager : NetworkBehaviour
 				unitVTOL = unit.gameObject;
 		}
 	}
-	public void Update()
-	{
-		ShowUnitBuildGhostProjections();
-		PlaceUnitManager();
-	}
 	public void ShowUnitBuildGhostProjections()
 	{
 		if (playerController.unitProductionManager.currentUnitPlacements.Count != 0)

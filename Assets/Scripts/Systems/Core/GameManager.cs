@@ -120,6 +120,8 @@ public class GameManager : NetworkBehaviour
 	public UnitStateController testUnit;
 
 	[Header("MP Refs")]
+	public NetworkVariable<bool> hasGameStarted = new NetworkVariable<bool>();
+	public NetworkVariable<bool> hasGameEnded = new NetworkVariable<bool>();
 	public List<BuildingManager> playerBuildingsList = new List<BuildingManager>();
 	public List<UnitStateController> playerUnitsList = new List<UnitStateController>();
 
@@ -287,6 +289,8 @@ public class GameManager : NetworkBehaviour
 	}
 	public void GameClock() //game timer in hrs, mins and secs
 	{
+		if (hasGameStarted.Value == false || hasGameEnded.Value == true) return;
+
 		secondsCount += Time.deltaTime;
 		if (secondsCount >= 60)
 		{
@@ -416,7 +420,7 @@ public class GameManager : NetworkBehaviour
 	public void LoadMapOneScene()
 	{
 		Instance.ResetGameClock();
-		Instance.ResetResourceValuesServerRPC();
+		Instance.ResetGameSceneValuesServerRPC();
 		Instance.ResetResourceIncomeCountServerRPC();
 
 		gameUIManager = FindObjectOfType<GameUIManager>();
@@ -430,7 +434,7 @@ public class GameManager : NetworkBehaviour
 
 		if (isMultiplayerGame)
 		{
-			Time.timeScale = 0;
+			//Time.timeScale = 0;
 			gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
 			gameUIManager.playerReadyUpPanelObj.SetActive(true);
 			gameUIManager.HideGameSpeedButtonsForMP();
@@ -455,6 +459,7 @@ public class GameManager : NetworkBehaviour
 		{
 			playerOneReadyToStart.Value = false;
 			playerTwoReadyToStart.Value = false;
+			hasGameStarted.Value = true;
 			StartGameClientRPC();
 		}
 	}
@@ -473,8 +478,6 @@ public class GameManager : NetworkBehaviour
 	[ClientRpc]
 	public void StartGameClientRPC()
 	{
-		gameUIManager.isGamePaused = true;
-		gameUIManager.PauseGame();
 		gameUIManager.playerReadyUpPanelObj.SetActive(false);
 		playerNotifsManager.DisplayNotifisMessage("GAME STARTING", 3f);
 
@@ -494,8 +497,11 @@ public class GameManager : NetworkBehaviour
 
 	//reset scene values
 	[ServerRpc]
-	public void ResetResourceValuesServerRPC()
+	public void ResetGameSceneValuesServerRPC()
 	{
+		Instance.hasGameEnded.Value = false;
+		Instance.hasGameStarted.Value = false;
+
 		Instance.playerOneCurrentMoney.Value = defaultMoney;
 		Instance.playerOneCurrentAlloys.Value = defaultAlloys;
 		Instance.playerOneCurrentCrystals.Value = defaultCrystals;
@@ -532,6 +538,7 @@ public class GameManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void GameOverPlayerHQDestroyedServerRPC(bool isPlayerOneCall)
 	{
+		hasGameEnded.Value = true;
 		GameOverPlayerHQDestroyedClientRPC(isPlayerOneCall);
 	}
 	[ClientRpc]
@@ -544,11 +551,10 @@ public class GameManager : NetworkBehaviour
 
 		else if (!isPlayerOneCall && isPlayerOne)
 			gameUIManager.gameOverUiText.text = "Enemy HQ Destroyed You Win";
-		else if (!isPlayerOneCall && isPlayerOne)
+		else if (!isPlayerOneCall && !isPlayerOne)
 			gameUIManager.gameOverUiText.text = "HQ Destroyed You Lost";
 
 		gameUIManager.gameOverUiPanel.SetActive(true);
-		Time.timeScale = 0;
 	}
 
 	//FUNCTIONS ON ENTITY DEATHS
@@ -561,11 +567,9 @@ public class GameManager : NetworkBehaviour
 	[ClientRpc]
 	public void RemoveEntityUiClientRPC(ulong networkObjId)
 	{
-		Debug.LogError(NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId]);
-
 		GameObject entityObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].gameObject;
-
 		entityObj.GetComponent<Entities>().RemoveEntityRefs();
+
 		Instantiate(entityObj.GetComponent<Entities>().DeathObj, entityObj.transform.position, Quaternion.identity);
 		Destroy(entityObj.GetComponent<Entities>().UiObj);
 	}

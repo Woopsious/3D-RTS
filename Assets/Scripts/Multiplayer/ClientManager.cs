@@ -99,7 +99,12 @@ public class ClientManager : NetworkBehaviour
 
 		if (SceneManager.GetActiveScene().buildIndex == 0)
 			StartCoroutine(MenuUIManager.Instance.DelayLobbyListRefresh());
-		else
+
+		else if (GameManager.Instance.hasGameEnded.Value == false)
 			GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+		else if (GameManager.Instance.hasGameEnded.Value == true)
+		{
+
+		}
 	}
 }
