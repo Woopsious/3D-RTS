@@ -43,6 +43,11 @@ public class GameManager : NetworkBehaviour
 	public string mainMenuSceneName = "MainMenu";
 	public string mapOneSceneName = "MapOne";
 
+	[Header("Default GameSceneStats")]
+	public int defaultMoney = 5000000;
+	public int defaultAlloys = 50000;
+	public int defaultCrystals = 5000;
+
 	[Header("player One Stats")]
 	public NetworkVariable<int> playerOneCurrentMoney = new NetworkVariable<int>();
 	public NetworkVariable<int> playerOneIncomeMoney = new NetworkVariable<int>();
@@ -247,12 +252,8 @@ public class GameManager : NetworkBehaviour
 		//Debug.Log(testUnit.weaponSystem.secondaryWeaponAttackSpeed);
 		//Debug.Log(testUnit.agentNav.speed);
 	}
-	public void Update()
-	{
-		if (Input.GetKeyDown(KeyCode.V))
-			AnnouncerSystem.Instance.PlayPositiveRepliesSFX();
-	}
 
+	//track resource income per minuite
 	public void GetResourcesPerSecond()
 	{
 		timer += Time.deltaTime;
@@ -269,12 +270,12 @@ public class GameManager : NetworkBehaviour
 			gameUIManager.UpdateIncomeResourcesUI(playerOneMoneyPerSecond, playerOneAlloysPerSecond, playerOneCrystalsPerSecond,
 				playerTwoMoneyPerSecond, playerTwoAlloysPerSecond, playerTwoCrystalsPerSecond);
 
-			ResetIncomeCountServerRPC();
+			ResetResourceIncomeCountServerRPC();
 			timer = 0;
 		}
 	}
 	[ServerRpc(RequireOwnership = false)]
-	public void ResetIncomeCountServerRPC()
+	public void ResetResourceIncomeCountServerRPC()
 	{
 		playerOneIncomeMoney.Value = 0;
 		playerOneIncomeAlloys.Value = 0;
@@ -297,6 +298,12 @@ public class GameManager : NetworkBehaviour
 				minuteCount %= 60;
 			}
 		}
+	}
+	public void ResetGameClock()
+	{
+		Instance.hourCount = 0;
+		Instance.minuteCount = 0;
+		Instance.secondsCount = 0;
 	}
 
 	//save/load player and game data
@@ -408,6 +415,10 @@ public class GameManager : NetworkBehaviour
 	}
 	public void LoadMapOneScene()
 	{
+		Instance.ResetGameClock();
+		Instance.ResetResourceValuesServerRPC();
+		Instance.ResetResourceIncomeCountServerRPC();
+
 		gameUIManager = FindObjectOfType<GameUIManager>();
 		gameUIManager.gameManager = this;
 
@@ -426,7 +437,7 @@ public class GameManager : NetworkBehaviour
 		}
 	}
 
-	//SERVER FUNCTIONS AT RUNTIME
+	//SERVER FUNCTIONS AT GAME START
 	[ServerRpc(RequireOwnership = false)]
 	public void SetPlayerToReadyServerRPC(bool isPlayerOne)
 	{
@@ -475,14 +486,27 @@ public class GameManager : NetworkBehaviour
 				GameManager.Instance.SpawnPlayerHQsServerRPC(true,
 					capturePoint.playerHQSpawnPoint.transform.position, capturePoint.playerHQSpawnPoint.transform.rotation);
 
-			else if ( capturePoint.isPlayerTwoSpawn)
+			else if (capturePoint.isPlayerTwoSpawn)
 				GameManager.Instance.SpawnPlayerHQsServerRPC(false,
 					capturePoint.playerHQSpawnPoint.transform.position, capturePoint.playerHQSpawnPoint.transform.rotation);
 		}
 	}
 
-	//SERVER SPAWN PLAYER HQ's
-	[ServerRpc(RequireOwnership = false)]
+	//reset scene values
+	[ServerRpc]
+	public void ResetResourceValuesServerRPC()
+	{
+		Instance.playerOneCurrentMoney.Value = defaultMoney;
+		Instance.playerOneCurrentAlloys.Value = defaultAlloys;
+		Instance.playerOneCurrentCrystals.Value = defaultCrystals;
+
+		Instance.playerTwoCurrentMoney.Value = defaultMoney;
+		Instance.playerTwoCurrentAlloys.Value = defaultAlloys;
+		Instance.playerTwoCurrentCrystals.Value = defaultCrystals;
+	}
+
+	//spawn player HQ's
+	[ServerRpc]
 	public void SpawnPlayerHQsServerRPC(bool spawnPlayerOneHq, Vector3 position, Quaternion rotation)
 	{
 		if (spawnPlayerOneHq)
@@ -527,7 +551,7 @@ public class GameManager : NetworkBehaviour
 		Time.timeScale = 0;
 	}
 
-	//FUNCTIONS ON ENTITY DEATH
+	//FUNCTIONS ON ENTITY DEATHS
 	[ServerRpc(RequireOwnership = false)]
 	public void RemoveEntityServerRPC(ulong networkObjId)
 	{
@@ -546,7 +570,7 @@ public class GameManager : NetworkBehaviour
 		Destroy(entityObj.GetComponent<Entities>().UiObj);
 	}
 
-	//functions for tech
+	//SERVER FUNCTIONS FOR TECH
 	[ServerRpc(RequireOwnership = false)]
 	public void UpdateTechBonusesServerRPC(bool isBuildingTech, int index, ServerRpcParams serverRpcParams = default)
 	{
@@ -935,7 +959,7 @@ public class GameManager : NetworkBehaviour
 		}
 	}
 
-	//Functions to handle changes to resource values then relay changes to player ui
+	//SERVER FUNCTIONS FOR RESOURCE CHANGES THEN RELAYING TO PLAYER UI
 
 	[ServerRpc(RequireOwnership = false)]
 	public void UpdateResourcesServerRPC(bool isPlayerOneCall, bool isBuying , bool isRefunding, bool isCancellingUnit,bool isMined,
