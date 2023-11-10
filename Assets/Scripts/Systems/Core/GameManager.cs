@@ -483,6 +483,7 @@ public class GameManager : NetworkBehaviour
 			else if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
 				gameUIManager.playAgainUiText.text = "2/2";
 		}
+		Debug.Log(isPlayerOne);
 	}
 	[ClientRpc]
 	public void StartGameClientRPC()
