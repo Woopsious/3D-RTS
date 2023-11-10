@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Events;
@@ -434,7 +435,6 @@ public class GameManager : NetworkBehaviour
 
 		if (isMultiplayerGame)
 		{
-			//Time.timeScale = 0;
 			gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
 			gameUIManager.playerReadyUpPanelObj.SetActive(true);
 			gameUIManager.HideGameSpeedButtonsForMP();
@@ -445,14 +445,17 @@ public class GameManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void SetPlayerToReadyServerRPC(bool isPlayerOne)
 	{
-
 		if (isPlayerOne)
 			playerOneReadyToStart.Value = true;
 		else
 			playerTwoReadyToStart.Value = true;
 
-		NotifyOtherPlayerIsReadyClientRPC(isPlayerOne);
+		if (playerOneReadyToStart.Value == true || playerTwoReadyToStart.Value == true)
+			NotifyOtherPlayerIsReadyClientRPC(isPlayerOne, 1);
+		else if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+			NotifyOtherPlayerIsReadyClientRPC(isPlayerOne, 2);
 
+		//start game first time in scene
 		if (hasGameEnded.Value == false)
 		{
 			if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
@@ -463,11 +466,17 @@ public class GameManager : NetworkBehaviour
 				StartGameClientRPC();
 			}
 		}
-		else if (hasGameEnded.Value == true)
+		//restart game after a game has ended
+		else if (hasGameEnded.Value == true && playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+		{
+			playerOneReadyToStart.Value = false;
+			playerTwoReadyToStart.Value = false;
+			ResetSceneObjectsServerRPC();
 			GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+		}
 	}
 	[ClientRpc]
-	public void NotifyOtherPlayerIsReadyClientRPC(bool isPlayerOne)
+	public void NotifyOtherPlayerIsReadyClientRPC(bool isPlayerOne, int num)
 	{
 		if (hasGameEnded.Value == false)
 		{
@@ -477,13 +486,7 @@ public class GameManager : NetworkBehaviour
 				gameUIManager.isPlayerTwoReadyText.text = "Player Two Ready";
 		}
 		else if (hasGameEnded.Value == true)
-		{
-			if (playerOneReadyToStart.Value == true || playerTwoReadyToStart.Value == true)
-				gameUIManager.playAgainUiText.text = "1/2";
-			else if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
-				gameUIManager.playAgainUiText.text = "2/2";
-		}
-		Debug.Log(isPlayerOne);
+			gameUIManager.playAgainUiText.text = num + "/2";
 	}
 	[ClientRpc]
 	public void StartGameClientRPC()
@@ -505,7 +508,20 @@ public class GameManager : NetworkBehaviour
 		}
 	}
 
-	//reset scene values
+	//reset scene
+	[ServerRpc]
+	public void ResetSceneObjectsServerRPC()
+	{
+		List<ulong> networkObjIdList = new List<ulong>();
+
+		foreach (NetworkObject Obj in NetworkManager.Singleton.SpawnManager.SpawnedObjects.Values)
+			networkObjIdList = NetworkManager.Singleton.SpawnManager.SpawnedObjects.Keys.ToList();
+
+		for (int i = NetworkManager.Singleton.SpawnManager.SpawnedObjects.Count - 1; i > 0; i--)
+		{
+			NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjIdList[i]].Despawn();
+		}
+	}
 	[ServerRpc]
 	public void ResetGameSceneValuesServerRPC()
 	{

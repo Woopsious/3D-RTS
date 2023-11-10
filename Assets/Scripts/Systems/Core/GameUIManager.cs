@@ -175,6 +175,10 @@ public class GameUIManager : MonoBehaviour
 	{
 		gameManager.SetPlayerToReadyServerRPC(playerController.isPlayerOne);
 	}
+	public void DebugEndGameButton()
+	{
+		GameManager.Instance.GameOverPlayerHQDestroyedServerRPC(playerController.isPlayerOne);
+	}
 
 	//SHOW UI ELEMENTS
 	public void ShowBuildingsBaseShop()
@@ -491,7 +495,7 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void UpdateGameSpeedUi()
 	{
-		if (!isGamePaused)
+		if (isGamePaused)
 			gameSpeedText.text = "Game Paused";
 		else
 			gameSpeedText.text = "x" + gameSpeed.ToString() + " speed";
