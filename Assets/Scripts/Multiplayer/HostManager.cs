@@ -146,9 +146,9 @@ public class HostManager : NetworkBehaviour
 				GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
 			else if (GameManager.Instance.hasGameEnded.Value == true)
 			{
-
+				GameManager.Instance.gameUIManager.playAgainButtonObj.SetActive(false);
+				GameManager.Instance.gameUIManager.playAgainUiText.text = "Other Player Left";
 			}
-
 			StopHost();
 		}
 	}

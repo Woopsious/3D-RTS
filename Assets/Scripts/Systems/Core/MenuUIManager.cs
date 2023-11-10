@@ -221,11 +221,7 @@ public class MenuUIManager : MonoBehaviour
 	public void StartMultiplayerGameButton()
 	{
 		if (HostManager.Instance.connectedClientsList.Count == LobbyManager.Instance._Lobby.MaxPlayers)
-		{
-			GameManager.Instance.playerOneReadyToStart.Value = false;
-			GameManager.Instance.playerTwoReadyToStart.Value = false;
 			GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
-		}
 		else
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Two players are needed to start the game", 3f);
 	}

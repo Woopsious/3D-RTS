@@ -47,6 +47,8 @@ public class GameUIManager : MonoBehaviour
 	[Header("User GameOver Refs")]
 	public GameObject gameOverUiPanel;
 	public Text gameOverUiText;
+	public GameObject playAgainButtonObj;
+	public Text playAgainUiText;
 
 	[Header("User Resource Refs")]
 	public Text CurrentMoneyText;
@@ -105,11 +107,6 @@ public class GameUIManager : MonoBehaviour
 
 		if(techTreeManager.isCurrentlyReseaching)
 			UpdateTechUiComplete();
-	}
-	//function called when player clicks ready on button for MP only
-	public void SetPlayerReady()
-	{
-		gameManager.SetPlayerToReadyServerRPC(playerController.isPlayerOne);
 	}
 	public void PlayButtonSound()
 	{
@@ -171,6 +168,12 @@ public class GameUIManager : MonoBehaviour
 		UpdateCurrentResourcesUI();
 		//StartCoroutine(UpdateCurrentResourcesUI(0f));
 		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
+	}
+
+	//MP Button functions
+	public void SetPlayerReady()
+	{
+		gameManager.SetPlayerToReadyServerRPC(playerController.isPlayerOne);
 	}
 
 	//SHOW UI ELEMENTS

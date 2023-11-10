@@ -445,34 +445,43 @@ public class GameManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void SetPlayerToReadyServerRPC(bool isPlayerOne)
 	{
+
 		if (isPlayerOne)
-		{
 			playerOneReadyToStart.Value = true;
-		}
 		else
-		{
 			playerTwoReadyToStart.Value = true;
-		}
+
 		NotifyOtherPlayerIsReadyClientRPC(isPlayerOne);
 
-		if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+		if (hasGameEnded.Value == false)
 		{
-			playerOneReadyToStart.Value = false;
-			playerTwoReadyToStart.Value = false;
-			hasGameStarted.Value = true;
-			StartGameClientRPC();
+			if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+			{
+				playerOneReadyToStart.Value = false;
+				playerTwoReadyToStart.Value = false;
+				hasGameStarted.Value = true;
+				StartGameClientRPC();
+			}
 		}
+		else if (hasGameEnded.Value == true)
+			GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
 	}
 	[ClientRpc]
 	public void NotifyOtherPlayerIsReadyClientRPC(bool isPlayerOne)
 	{
-		if (isPlayerOne)
+		if (hasGameEnded.Value == false)
 		{
-			gameUIManager.isPlayerOneReadyText.text = "Player One Ready";
+			if (isPlayerOne)
+				gameUIManager.isPlayerOneReadyText.text = "Player One Ready";
+			else if (!isPlayerOne)
+				gameUIManager.isPlayerTwoReadyText.text = "Player Two Ready";
 		}
-		else if (!isPlayerOne)
+		else if (hasGameEnded.Value == true)
 		{
-			gameUIManager.isPlayerTwoReadyText.text = "Player Two Ready";
+			if (playerOneReadyToStart.Value == true || playerTwoReadyToStart.Value == true)
+				gameUIManager.playAgainUiText.text = "1/2";
+			else if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+				gameUIManager.playAgainUiText.text = "2/2";
 		}
 	}
 	[ClientRpc]
@@ -538,7 +547,9 @@ public class GameManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void GameOverPlayerHQDestroyedServerRPC(bool isPlayerOneCall)
 	{
-		hasGameEnded.Value = true;
+		GameManager.Instance.playerOneReadyToStart.Value = false;
+		GameManager.Instance.playerTwoReadyToStart.Value = false;
+		GameManager.Instance.hasGameEnded.Value = true;
 		GameOverPlayerHQDestroyedClientRPC(isPlayerOneCall);
 	}
 	[ClientRpc]
@@ -554,7 +565,9 @@ public class GameManager : NetworkBehaviour
 		else if (!isPlayerOneCall && !isPlayerOne)
 			gameUIManager.gameOverUiText.text = "HQ Destroyed You Lost";
 
+		gameUIManager.playAgainUiText.text = "0/2";
 		gameUIManager.gameOverUiPanel.SetActive(true);
+		GameManager.Instance.gameUIManager.playAgainButtonObj.SetActive(true);
 	}
 
 	//FUNCTIONS ON ENTITY DEATHS

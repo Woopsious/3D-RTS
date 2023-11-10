@@ -438,7 +438,6 @@ public class UnitSelectionManager : NetworkBehaviour
 		//move selected units closer to target and attack it
 		if (selectedUnitList.Count != 0)
 		{
-			Debug.LogError("for units");
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target!", 1f);
 			AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
 
@@ -454,7 +453,6 @@ public class UnitSelectionManager : NetworkBehaviour
 		//set turrets to attack if in range
 		else if (selectedTurretList.Count != 0)
 		{
-			Debug.LogError("for turrets");
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target if turret is in range!", 3f);
 			AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
 
