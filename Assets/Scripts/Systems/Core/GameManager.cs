@@ -519,7 +519,9 @@ public class GameManager : NetworkBehaviour
 
 		for (int i = NetworkManager.Singleton.SpawnManager.SpawnedObjects.Count - 1; i > 0; i--)
 		{
-			NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjIdList[i]].Despawn();
+			if (NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjIdList[i]].GetComponent<MultiplayerManager>()) return;
+			else
+				NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjIdList[i]].Despawn();
 		}
 	}
 	[ServerRpc]
