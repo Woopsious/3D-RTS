@@ -140,7 +140,7 @@ public class HostManager : NetworkBehaviour
 			}
 		}
 
-		if (SceneManager.GetActiveScene().buildIndex == 0)
+		if (SceneManager.GetActiveScene().buildIndex == 1)
 		{
 			if (GameManager.Instance.hasGameEnded.Value == false)
 				GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
