@@ -35,6 +35,16 @@ public class GameUIManager : MonoBehaviour
 	public GameObject entityInfoTemplatePrefab;
 	public Text gameTimerText;
 
+	[Header("Buttons With changable Keybinds")]
+	public Text techTreeButtonText;
+	public Text unitGroupsButtonText;
+	public Text unitProductionButtonText;
+
+	public Text baseBuildingsButtonText;
+	public Text vehProdBuildingsButtonText;
+	public Text lightVehiclesButtonText;
+	public Text heavyVehiclesButtonText;
+
 	[Header("User ReadyUp Refs")]
 	public GameObject playerReadyUpPanelObj;
 	public Text isPlayerOneReadyText;
@@ -163,11 +173,10 @@ public class GameUIManager : MonoBehaviour
 	}
 	public void ResetUi()
 	{
-		gameSpeed = 1;
 		UpdateGameSpeedUi();
 		UpdateCurrentResourcesUI();
-		//StartCoroutine(UpdateCurrentResourcesUI(0f));
 		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
+		UpdateUiKeyBindsDisplay();
 	}
 	public void RefundSelectedUnitsButton()
 	{
@@ -335,13 +344,9 @@ public class GameUIManager : MonoBehaviour
 			if (i == 6) return;
 
 			if (i < 3)
-			{
 				SetUpEntityTemplate(i, GameManager.Instance.PlayerOneUnitsList, unitsLightUiShopOneObj);
-			}
 			else if (i >= 3)
-			{
 				SetUpEntityTemplate(i, GameManager.Instance.PlayerOneUnitsList, unitsHeavyUiShopTwoObj);
-			}
 		}
 	}
 	public void SetUpEntityTemplate(int i, List<GameObject> entitysList, GameObject parent)
@@ -448,26 +453,32 @@ public class GameUIManager : MonoBehaviour
 				case 0:
 				buyEnergyGenBuilding = buttonToLink;
 				buyEnergyGenBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceEnergyGenBuilding(); });
+				buyEnergyGenBuilding.transform.GetChild(0).GetComponent<Text>().text = "Buy \"1\"";
 				break;
 				case 1:
 				buyRefineryBuilding = buttonToLink;
 				buyRefineryBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceRefineryBuilding(); });
+				buyRefineryBuilding.transform.GetChild(0).GetComponent<Text>().text = "Buy \"2\"";
 				break;
 				case 2:
 				buyDefenseTurret = buttonToLink;
 				buyDefenseTurret.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceDefenseTurret(); });
+				buyDefenseTurret.transform.GetChild(0).GetComponent<Text>().text = "Buy \"3\"";
 				break;
 				case 3:
 				buyLightVehProdBuilding = buttonToLink;
 				buyLightVehProdBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceLightVehProdBuilding(); });
+				buyLightVehProdBuilding.transform.GetChild(0).GetComponent<Text>().text = "Buy \"1\"";
 				break;
 				case 4:
 				buyHeavyVehProdBuilding = buttonToLink;
 				buyHeavyVehProdBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceHeavyVehProdBuilding(); });
+				buyHeavyVehProdBuilding.transform.GetChild(0).GetComponent<Text>().text = "Buy \"2\"";
 				break;
 				case 5:
 				buyVTOLVehProdBuilding = buttonToLink;
 				buyVTOLVehProdBuilding.onClick.AddListener(delegate { playerController.buildingPlacementManager.PlaceVTOLProdBuilding(); });
+				buyVTOLVehProdBuilding.transform.GetChild(0).GetComponent<Text>().text = "Buy \"3\"";
 				break;
 			}
 		}
@@ -478,32 +489,56 @@ public class GameUIManager : MonoBehaviour
 				case 0:
 				buyScoutVehicle = buttonToLink;
 				buyScoutVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddScoutVehToBuildQueue(0); });
+				buyScoutVehicle.transform.GetChild(0).GetComponent<Text>().text = "Buy \"1\"";
 				break;
 				case 1:
 				buyRadarVehicle = buttonToLink;
 				buyRadarVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddRadarVehToBuildQueue(1); });
+				buyRadarVehicle.transform.GetChild(0).GetComponent<Text>().text = "Buy \"2\"";
 				break;
 				case 2:
 				buyLightMechVehicle = buttonToLink;
 				buyLightMechVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddLightMechToBuildQueue(2); });
+				buyLightMechVehicle.transform.GetChild(0).GetComponent<Text>().text = "Buy \"3\"";
 				break;
 				case 3:
 				buyHeavyMechKnightVehicle = buttonToLink;
 				buyHeavyMechKnightVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechKnightToBuildQueue(3); });
+				buyHeavyMechKnightVehicle.transform.GetChild(0).GetComponent<Text>().text = "Buy \"1\"";
 				break;
 				case 4:
 				buyHeavyMechTankVehicle = buttonToLink;
 				buyHeavyMechTankVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddHeavyMechTankToBuildQueue(4); });
+				buyHeavyMechTankVehicle.transform.GetChild(0).GetComponent<Text>().text = "Buy \"2\"";
 				break;
 				case 5:
 				buyVTOLVehicle = buttonToLink;
 				buyVTOLVehicle.onClick.AddListener(delegate { playerController.unitProductionManager.AddVTOLToBuildQueue(5); });
+				buyVTOLVehicle.transform.GetChild(0).GetComponent<Text>().text = "Buy \"3\"";
 				break;
 			}
 		}
 	}
 
 	//UI UPDATES
+	public void UpdateUiKeyBindsDisplay()
+	{
+		techTreeButtonText.text = "Tech Tree \"" + 
+			InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTechTreeName] + "\"";
+		unitGroupsButtonText.text = "Unit Groups \"" +
+			InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindUnitGroupsList] + "\"";
+		unitProductionButtonText.text = "Unit Production Queues \"" + 
+			InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindUnitProdQueue] + "\"";
+
+		baseBuildingsButtonText.text = "Basic Buildings \"" +
+			InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopBaseBuildingsName] + "\"";
+		vehProdBuildingsButtonText.text = "Veh Prod Buildings \"" +
+			InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopVehProdBuildingsName] + "\"";
+		lightVehiclesButtonText.text = "Light Vehicles \"" +
+			InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopLightUnitsName] + "\"";
+		heavyVehiclesButtonText.text = "Heavy Vehicles \"" +
+			InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindShopHeavyUnitsName] + "\"";
+	}
 	public IEnumerator ResetTechUi(float timeToWaitSeconds)
 	{
 		yield return new WaitForSeconds(timeToWaitSeconds);

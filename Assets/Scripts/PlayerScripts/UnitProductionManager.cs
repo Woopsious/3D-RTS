@@ -292,7 +292,7 @@ public class UnitProductionManager : NetworkBehaviour
 	}
 	public IEnumerator ChangeBuiltUnitState(ulong NetworkUnitId, Vector3 destination)
 	{
-		yield return new WaitForSeconds(0.1f);
+		yield return new WaitForSeconds(1f);
 		playerController.unitSelectionManager.MoveUnitsServerRPC(NetworkUnitId, destination);
 	}
 	public IEnumerator OpenCloseDoors(VehProdSpawnLocation VehSpawnLocation)
