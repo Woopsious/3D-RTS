@@ -732,6 +732,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		}
 	}
 	//reset ui list count, recount units in group to update ui
+	//Add
 	public void AssignUnitsToGroupOne()
 	{
 		playerController.gameUIManager.ResetUnitGroupUI();
@@ -787,6 +788,21 @@ public class UnitSelectionManager : NetworkBehaviour
 		AddSelectedUnitsToNewGroup(unitGroupFive, 5);
 		playerController.gameUIManager.ShowGroupedUnitsWhenCreatingGroup();
 	}
+
+	//remove all units from group
+	public void RemoveUnitsFromGroup(int groupIndex)
+	{
+		CheckForUnitInList(unitGroupOne, groupIndex);
+	}
+	public void RemoveSelectedUnitsFromAllGroups()
+	{
+		CheckForUnitInList(unitGroupOne, 1);
+		CheckForUnitInList(unitGroupTwo, 2);
+		CheckForUnitInList(unitGroupThree, 3);
+		CheckForUnitInList(unitGroupFour, 4);
+		CheckForUnitInList(unitGroupFive, 5);
+	}
+
 	//checks group for unit, if unit in group remove unit from group, then add unit to new group, update ui for changes 
 	public void CheckForUnitInList(List<UnitStateController> unitGroup, int groupToUpdate)
 	{

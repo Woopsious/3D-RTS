@@ -169,6 +169,46 @@ public class GameUIManager : MonoBehaviour
 		//StartCoroutine(UpdateCurrentResourcesUI(0f));
 		UpdateIncomeResourcesUI(0, 0, 0, 0, 0, 0);
 	}
+	public void RefundSelectedUnitsButton()
+	{
+		playerController.unitSelectionManager.RefundSelectedUnits();
+	}
+
+	//Unit Group Functions
+	public void SelectGroupButton(int groupIndex)
+	{
+		if (groupIndex == 1)
+			playerController.unitSelectionManager.SelectUnitsFromGroup(playerController.unitSelectionManager.unitGroupOne);
+		if (groupIndex == 2)
+			playerController.unitSelectionManager.SelectUnitsFromGroup(playerController.unitSelectionManager.unitGroupTwo);
+		if (groupIndex == 3)
+			playerController.unitSelectionManager.SelectUnitsFromGroup(playerController.unitSelectionManager.unitGroupThree);
+		if (groupIndex == 4)
+			playerController.unitSelectionManager.SelectUnitsFromGroup(playerController.unitSelectionManager.unitGroupFour);
+		if (groupIndex == 5)
+			playerController.unitSelectionManager.SelectUnitsFromGroup(playerController.unitSelectionManager.unitGroupFive);
+	}
+	public void RemoveUnitsFromGroupButton(int groupIndex)
+	{
+		playerController.unitSelectionManager.RemoveUnitsFromGroup(groupIndex);
+	}
+	public void AddUnitsToGroupButton(int groupIndex)
+	{
+		if (groupIndex == 1)
+			playerController.unitSelectionManager.AddSelectedUnitsToNewGroup(playerController.unitSelectionManager.unitGroupOne, 1);
+		if (groupIndex == 2)
+			playerController.unitSelectionManager.AddSelectedUnitsToNewGroup(playerController.unitSelectionManager.unitGroupTwo, 2);
+		if (groupIndex == 3)
+			playerController.unitSelectionManager.AddSelectedUnitsToNewGroup(playerController.unitSelectionManager.unitGroupThree, 3);
+		if (groupIndex == 4)
+			playerController.unitSelectionManager.AddSelectedUnitsToNewGroup(playerController.unitSelectionManager.unitGroupFour, 4);
+		if (groupIndex == 5)
+			playerController.unitSelectionManager.AddSelectedUnitsToNewGroup(playerController.unitSelectionManager.unitGroupFive, 5);
+	}
+	public void RemoveSelectedUnitsFromAllGroupsButton()
+	{
+		playerController.unitSelectionManager.RemoveSelectedUnitsFromAllGroups();
+	}
 
 	//MP Button functions
 	public void SetPlayerReady()
