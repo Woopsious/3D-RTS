@@ -346,8 +346,8 @@ public class TechTreeManager : MonoBehaviour
 				StartCoroutine(ResearchCountdownTimer(techList, index, unitTechList[index].TimeToResearchSec, UiElement));
 			}
 		}
-		gameUIManager.playerController.EntityCostServerRPC(gameUIManager.playerController.isPlayerOne,
-			techList[index].techCostMoney, techList[index].techCostAlloys, techList[index].techCostCrystals);
+		GameManager.Instance.UpdateResourcesServerRPC(gameUIManager.playerController.isPlayerOne, true, false, false, false, 
+			0, techList[index].techCostMoney, techList[index].techCostAlloys, techList[index].techCostCrystals);
 	}
 	public IEnumerator ResearchCountdownTimer(List<Technology> techList, int index, float researchTime, GameObject UiElement)
 	{
@@ -365,6 +365,7 @@ public class TechTreeManager : MonoBehaviour
 	public void CompleteResearch(List<Technology> techList, int index) //update bonus values provided by research
 	{
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Research Complete", 2f);
+		AnnouncerSystem.Instance.PlayAlertResearchCompleteSFX();
 
 		if (techList == buildingTechList)
 			gameUIManager.gameManager.UpdateTechBonusesServerRPC(true, index);

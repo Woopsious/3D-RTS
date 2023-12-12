@@ -15,11 +15,15 @@ public class PlayerController : NetworkBehaviour
 	public Camera miniMapCameraRenderer;
 	public CameraController mainCameraParent;
 	public GameUIManager gameUIManager;
+
+	[Header("Refs")]
 	public UnitSelectionManager unitSelectionManager;
 	public BuildingPlacementManager buildingPlacementManager;
 	public UnitProductionManager unitProductionManager;
+	public List<CapturePointController> capturePointsList;
 
 	public bool isPlayerOne;
+	public bool isInTacticalView;
 
 	[Header("Dynamic Refs")]
 	public List<UnitStateController> SpottedUnitsList;
@@ -33,6 +37,8 @@ public class PlayerController : NetworkBehaviour
 	public void Start()
 	{
 		isPlayerOne = GameManager.Instance.isPlayerOne;
+		isInTacticalView = false;
+
 		if (isPlayerOne)
 		{
 			int playerOneMiniMapLayer = LayerMask.NameToLayer("PlayerOneMiniMapRender");
@@ -46,16 +52,89 @@ public class PlayerController : NetworkBehaviour
 	}
 	public void Update()
 	{
-		if (SceneManager.GetActiveScene().buildIndex == 1)
-			PlayerInputs();
-
+		PlayerInputs();
 		IsMouseOverUI();
 	}
 	public void PlayerInputs()
 	{
+		if (GameManager.Instance.hasGameStarted.Value == false || GameManager.Instance.hasGameEnded.Value == true) return;
+
+		if (Input.GetKeyDown(InputManager.Instance.keyBindDictionary[InputManager.Instance.keyBindTacViewName]))
+			TacticalViewMode();
+
 		MenuHotkeys();
 		BuyShopItemHotkeys();
 		GameSpeedHotkeys();
+
+		buildingPlacementManager.BuildingFollowsMouseCursor();
+		buildingPlacementManager.PlaceBuildingManager();
+
+		unitProductionManager.ShowUnitBuildGhostProjections();
+		unitProductionManager.PlaceUnitManager();
+
+		unitSelectionManager.EntitySelectionAndDeselection();
+		unitSelectionManager.ManageSelectedUnitsAndGroups();
+		unitSelectionManager.ManageUnitGhostProjections();
+		unitSelectionManager.TrackIfGhostProjectionsAreTouchingNavMesh();
+	}
+	public void TacticalViewMode()
+	{
+		if (!isInTacticalView)
+			ShowTacticalView();
+		else
+			HideTacticalView();
+	}
+	public void ShowTacticalView()
+	{
+		isInTacticalView = true;
+		ShowAllHealthBars();
+		ShowAllCapturpointAreas();
+		ShowAllResourceAmountInNodes();
+	}
+	public void HideTacticalView()
+	{
+		isInTacticalView = false;
+		HideAllHealthBars();
+		HideAllCapturpointAreas();
+		HideAllResourceAmountInNodes();
+	}
+	public void ShowAllHealthBars()
+	{
+		Entities[] entities = FindObjectsOfType<Entities>();
+		foreach (Entities entity in entities)
+			entity.ShowUIHealthBar();
+	}
+	public void ShowAllCapturpointAreas()
+	{
+		foreach (CapturePointController capturePoint in capturePointsList)
+			capturePoint.ShowCapturePointArea();
+	}
+	public void ShowAllResourceAmountInNodes()
+	{
+		foreach (CapturePointController capturePoint in capturePointsList)
+		{
+			foreach (ResourceNodes resourceNode in capturePoint.resourceNodes)
+				resourceNode.ShowResourceCounterUi();
+		}
+	}
+	public void HideAllHealthBars()
+	{
+		Entities[] entities = FindObjectsOfType<Entities>();
+		foreach (Entities entity in entities)
+			entity.HideUIHealthBar();
+	}
+	public void HideAllCapturpointAreas()
+	{
+		foreach (CapturePointController capturePoint in capturePointsList)
+			capturePoint.HideCapturePointArea();
+	}
+	public void HideAllResourceAmountInNodes()
+	{
+		foreach (CapturePointController capturePoint in capturePointsList)
+		{
+			foreach (ResourceNodes resourceNode in capturePoint.resourceNodes)
+				resourceNode.HideResourceCounterUi();
+		}
 	}
 	public void GameSpeedHotkeys()
 	{
@@ -218,27 +297,5 @@ public class PlayerController : NetworkBehaviour
 			Debug.LogError("This error shouldnt happen");
 			return false;
 		}
-	}
-	[ServerRpc(RequireOwnership = false)]
-	public void EntityCostServerRPC(bool isPlayerOneCall, int moneyCost, int alloyCost, int crystalCost)
-	{
-		if (isPlayerOneCall)
-		{
-			GameManager.Instance.playerOneCurrentMoney.Value -= moneyCost;
-			GameManager.Instance.playerOneCurrentAlloys.Value -= alloyCost;
-			GameManager.Instance.playerOneCurrentCrystals.Value -= crystalCost;
-		}
-		else if (!isPlayerOneCall)
-		{
-			GameManager.Instance.playerTwoCurrentMoney.Value -= moneyCost;
-			GameManager.Instance.playerTwoCurrentAlloys.Value -= alloyCost;
-			GameManager.Instance.playerTwoCurrentCrystals.Value -= crystalCost;
-		}
-		UpdateClientUiClientRPC();
-	}
-	[ClientRpc]
-	public void UpdateClientUiClientRPC()
-	{
-		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(1f));
 	}
 }

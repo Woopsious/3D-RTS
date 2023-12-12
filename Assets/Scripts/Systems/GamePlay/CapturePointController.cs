@@ -5,12 +5,17 @@ using Unity.Services.Lobbies.Models;
 using Unity.Services.Lobbies;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class CapturePointController : MonoBehaviour
 {
+	public PlayerController playerController;
+
 	[Header("CapturePointRefs")]
 	public GameObject miniMapIndicatorMaterial;
 	public GameObject flagMaterial;
+	public GameObject buildAreaMesh;
+	public GameObject playerHQSpawnPoint;
 
 	public int trackLastCapturePointOwnership; //0 = netural, 1 = P1, 2 = P2
 
@@ -28,6 +33,8 @@ public class CapturePointController : MonoBehaviour
 	public readonly int TurretDefensesPlacementLimit = 3;
 
 	[Header("Optional Refs")]
+	public bool isPlayerOneSpawn;
+	public bool isPlayerTwoSpawn;
 	public BuildingManager HQRef;
 
 	[Header("Dynamic Refs")] 
@@ -49,27 +56,6 @@ public class CapturePointController : MonoBehaviour
 
 	public void Start()
 	{
-		if (HQRef != null)
-		{
-			if (HQRef.isPlayerOneEntity)
-			{
-				isNeutralPoint = false;
-				isPlayerOnePoint = true;
-				isPlayerTwoPoint = false;
-
-				UpdateFlagColour(1);
-				trackLastCapturePointOwnership = 1;
-			}
-			else if (!HQRef.isPlayerOneEntity)
-			{
-				isNeutralPoint = false;
-				isPlayerOnePoint = false;
-				isPlayerTwoPoint = true;
-
-				UpdateFlagColour(2);
-				trackLastCapturePointOwnership = 2;
-			}
-		}
 		SetUpResourceNodes();
 	}
 	public void Update()
@@ -81,6 +67,30 @@ public class CapturePointController : MonoBehaviour
 			TrackPointOwnership();
 		}
 	}
+	public void SetOwnershipBasedOnHq(BuildingManager Hq)
+	{
+		HQRef = Hq;
+
+		if (isPlayerOneSpawn)
+		{
+			isNeutralPoint = false;
+			isPlayerOnePoint = true;
+			isPlayerTwoPoint = false;
+
+			UpdateFlagColour(1);
+			trackLastCapturePointOwnership = 1;
+		}
+		else if (isPlayerTwoSpawn)
+		{
+			isNeutralPoint = false;
+			isPlayerOnePoint = false;
+			isPlayerTwoPoint = true;
+
+			UpdateFlagColour(2);
+			trackLastCapturePointOwnership = 2;
+		}
+	}
+
 	//check if buildings exist, check list of player units to fip point ownership 
 	public void TrackPointOwnership()
 	{
@@ -122,7 +132,10 @@ public class CapturePointController : MonoBehaviour
 
 				trackLastCapturePointOwnership = 2;
 			}
+			//update ui for cap point on ownership changes
 			ChangeOwnershipOfResourceNodes();
+			if (playerController.buildingPlacementManager.currentBuildingPlacement != null)
+				ShowBuildableArea();
 		}
 	}
 	public void UpdateFlagColour(int newFlagOwnership)
@@ -168,11 +181,13 @@ public class CapturePointController : MonoBehaviour
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Neutral Point Gained By Another Player", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Neutral Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsEnemyCapturedAFlagSFX();
 			}
 			else if (!GameManager.Instance.isPlayerOne)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Neutral Point Gained", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Neutral Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsWeCapturedAFlagSFX();
 			}
 		}
 		if (trackLastCapturePointOwnership == 0 && newPointOwnership == 1)
@@ -181,11 +196,13 @@ public class CapturePointController : MonoBehaviour
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Neutral Point Gained", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Neutral Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsWeCapturedAFlagSFX();
 			}
 			else if (!GameManager.Instance.isPlayerOne)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Neutral Point Gained By Another Player", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Neutral Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsEnemyCapturedAFlagSFX();
 			}
 		}
 
@@ -195,11 +212,13 @@ public class CapturePointController : MonoBehaviour
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Capture Point Lost", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Capture Point Lost", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsEnemyCapturedOurFlagSFX();
 			}
 			else if (!GameManager.Instance.isPlayerOne)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Capture Point Gained", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Capture Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsWeCapturedEnemyFlagSFX();
 			}
 		}
 
@@ -209,11 +228,13 @@ public class CapturePointController : MonoBehaviour
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Capture Point Gained", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Capture Point Gained", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsWeCapturedEnemyFlagSFX();
 			}
 			else if (!GameManager.Instance.isPlayerOne)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Capture Point Lost", 3f);
 				GameManager.Instance.playerNotifsManager.DisplayEventMessage("Capture Point Lost", gameObject.transform.position);
+				AnnouncerSystem.Instance.PlayFlagsEnemyCapturedOurFlagSFX();
 			}
 		}
 	}
@@ -261,18 +282,44 @@ public class CapturePointController : MonoBehaviour
 			playerTwoUnitList.Remove(unit);
 	}
 
-	//Manager Capturepont ResourceNodes
+	//show/hide build area
+	public void ShowBuildableArea()
+	{
+		if (CheckCapturePointOwnership())
+			buildAreaMesh.SetActive(true);
+		else
+			buildAreaMesh.SetActive(false);
+	}
+	public void HideBuildableArea()
+	{
+		buildAreaMesh.SetActive(false);
+	}
+	public void ShowCapturePointArea()
+	{
+		buildAreaMesh.SetActive(true);
+	}
+	public void HideCapturePointArea()
+	{
+		buildAreaMesh.SetActive(false);
+	}
+
+	//Manage Capturepont ResourceNodes
 	public void SetUpResourceNodes()
 	{
 		foreach (Transform resourceNodeObj in ResourceNodeContainerObj.transform)
+		{
 			resourceNodes.Add(resourceNodeObj.GetComponent<ResourceNodes>());
-
+			resourceNodeObj.GetComponent<ResourceNodes>().capturePoint = this;
+		}
 		ChangeOwnershipOfResourceNodes();
 	}
 	public void ChangeOwnershipOfResourceNodes()
 	{
 		foreach (ResourceNodes resourceNode in resourceNodes)
 		{
+			if (playerController.unitSelectionManager.SelectedCargoShip != null)
+				resourceNode.ShowMineResourceButtonUi(); //update ui if it needs to be
+
 			if (isNeutralPoint)
 			{
 				resourceNode.canPOneMine = false;
@@ -289,5 +336,18 @@ public class CapturePointController : MonoBehaviour
 				resourceNode.canPTwoMine = true;
 			}
 		}
+	}
+
+	//bool checks
+	public bool CheckCapturePointOwnership()
+	{
+		if (isNeutralPoint)
+			return false;
+		else if (GameManager.Instance.gameUIManager.playerController.isPlayerOne == isPlayerOnePoint)
+			return true;
+		else if (!GameManager.Instance.gameUIManager.playerController.isPlayerOne == isPlayerTwoPoint)
+			return true;
+		else
+			return false;
 	}
 }

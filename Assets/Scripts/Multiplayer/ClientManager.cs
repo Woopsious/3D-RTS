@@ -1,8 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Unity.Netcode.Transports.UTP;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Lobbies;
@@ -14,47 +14,43 @@ using UnityEngine.SceneManagement;
 public class ClientManager : NetworkBehaviour
 {
 	public static ClientManager Instance;
-	//private JoinAllocation JoinAllocation;
 
-	public Lobby joinedLobby;
-	public string joinedLobbyRelayCode;
+	public string clientUsername = "PlayerName";
+	public string clientId;
+	public ulong clientNetworkedId;
 
 	public void Awake()
 	{
 		if (Instance == null)
+		{
 			Instance = this;
+			DontDestroyOnLoad(Instance);
+		}
 		else
 			Destroy(gameObject);
 	}
-	public void Update()
+	public void StartClient(Lobby lobby)
 	{
-		MultiplayerManager.Instance.HandleLobbyPollForUpdates(joinedLobby);
-	}
+		LobbyManager.Instance.JoinLobby(lobby);
+		MultiplayerManager.Instance.SubToEvents();
 
-	public async void JoinLobby(Lobby lobby)
+		GameManager.Instance.isPlayerOne = false;
+		GameManager.Instance.isMultiplayerGame = true;
+	}
+	public void StopClient()
 	{
-		try
-		{
-			JoinLobbyByIdOptions joinLobbyByIdOptions = new JoinLobbyByIdOptions
-			{
-				Player = MultiplayerManager.Instance.GetPlayer()
-			};
-			await Lobbies.Instance.JoinLobbyByIdAsync(lobby.Id, joinLobbyByIdOptions);
+		GameManager.Instance.isPlayerOne = true;
+		GameManager.Instance.isMultiplayerGame = false;
 
-			joinedLobby = lobby;
-			joinedLobbyRelayCode = joinedLobby.Data["joinCode"].Value;
-		}
-		catch (LobbyServiceException e)
-		{
-			Debug.LogError(e.Message);
-		}
-
-		StartCoroutine(RelayConfigureTransportAsConnectingPlayer());
+		LobbyManager.Instance._Lobby = null;
+		MultiplayerManager.Instance.UnsubToEvents();
+		MultiplayerManager.Instance.ShutDownNetworkManagerIfActive();
 	}
-	IEnumerator RelayConfigureTransportAsConnectingPlayer()
+	//join relay server
+	public IEnumerator RelayConfigureTransportAsConnectingPlayer()
 	{
 		// Populate RelayJoinCode beforehand through the UI
-		var clientRelayUtilityTask = JoinRelayServerFromJoinCode(joinedLobbyRelayCode);
+		var clientRelayUtilityTask = JoinRelayServerFromJoinCode(LobbyManager.Instance.lobbyJoinCode);
 
 		while (!clientRelayUtilityTask.IsCompleted)
 		{
@@ -73,6 +69,7 @@ public class ClientManager : NetworkBehaviour
 		yield return null;
 
 		NetworkManager.Singleton.StartClient();
+		ClientManager.Instance.clientNetworkedId = NetworkManager.Singleton.LocalClientId;
 	}
 	public static async Task<RelayServerData> JoinRelayServerFromJoinCode(string joinCode)
 	{
@@ -86,11 +83,26 @@ public class ClientManager : NetworkBehaviour
 			Debug.LogError("Relay create join code request failed");
 			throw;
 		}
-
-		Debug.Log($"client: {allocation.ConnectionData[0]} {allocation.ConnectionData[1]}");
-		Debug.Log($"host: {allocation.HostConnectionData[0]} {allocation.HostConnectionData[1]}");
-		Debug.Log($"client: {allocation.AllocationId}");
-
 		return new RelayServerData(allocation, "dtls");
+	}
+
+	//handle disconnects
+	public void HandlePlayerDisconnectsAsClient()
+	{
+		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Connection to Host Lost", 3f);
+		StopClient();
+
+		if (SceneManager.GetActiveScene().buildIndex == 0)
+			StartCoroutine(MenuUIManager.Instance.DelayLobbyListRefresh());
+		else
+		{
+			if (GameManager.Instance.hasGameEnded.Value == false)
+				GameManager.Instance.gameUIManager.ShowPlayerDisconnectedPanel();
+			else if (GameManager.Instance.hasGameEnded.Value == true)
+			{
+				GameManager.Instance.gameUIManager.playAgainButtonObj.SetActive(false);
+				GameManager.Instance.gameUIManager.playAgainUiText.text = "Other Player Left";
+			}
+		}
 	}
 }

@@ -38,7 +38,6 @@ public class BuildingManager : Entities
 	public override void Start()
 	{
 		base.Start();
-		OnBuildingStartUp();
 	}
 	public override void Update()
 	{
@@ -46,6 +45,23 @@ public class BuildingManager : Entities
 	}
 	public void OnBuildingStartUp()
 	{
+		//enable building triggers, navMeshObstacle, set layer and unhighlight
+		GetComponent<BuildingManager>().enabled = true;
+
+		if (isVTOLProdBuilding)
+			GetComponent<SphereCollider>().isTrigger = true;
+		else
+			GetComponent<BoxCollider>().isTrigger = true;
+
+		if (isPlayerOneEntity)
+			gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
+		else
+			gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
+
+		GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
+		GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
+		GetComponent<CanPlaceBuilding>().isPlaced = true;
+
 		AddBuildingRefs();
 
 		if (isGeneratorBuilding)
@@ -57,14 +73,23 @@ public class BuildingManager : Entities
 	//HEALTH/HIT FUNCTIONS OVERRIDES
 	public override void TryDisplayEntityHitNotif()
 	{
-		if (!wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
-			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING UNDER ATTACK", transform.position);
+		if (!wasRecentlyHit && !IsPlayerControllerNull())
+		{
+			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BASE UNDER ATTACK", transform.position);
+			AnnouncerSystem.Instance.PlayAlertBaseUnderAttackSFX();
+		}
 	}
 	public override void OnEntityDeath()
 	{
-		base.OnEntityDeath();
-		if (ShouldDisplaySpottedNotifToPlayer())
+		if (!IsPlayerControllerNull())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("BUILDING DESTROYED", transform.position);
+			AnnouncerSystem.Instance.PlayAlertBuildingLostSFX();
+
+			if (isHQ)
+				GameManager.Instance.GameOverPlayerHQDestroyedServerRPC(playerController.isPlayerOne);
+		}
+		base.OnEntityDeath();
 	}
 
 	//UTILITY FUNCTIONS
@@ -130,11 +155,25 @@ public class BuildingManager : Entities
 			if (playerController != null)
 				playerController.vtolVehProdBuildingsList.Add(this);
 		}
+		else if (isHQ)
+		{
+			foreach (CapturePointController capturePoint in GameManager.Instance.gameUIManager.playerController.capturePointsList)
+			{
+				if (capturePoint.isPlayerOneSpawn)
+					capturePoint.SetOwnershipBasedOnHq(this);
+				else if (capturePoint.isPlayerTwoSpawn)
+					capturePoint.SetOwnershipBasedOnHq(this);
+			}
+		}
 	}
 	public override void RemoveEntityRefs()
 	{
 		if (playerController != null)
+		{
 			playerController.buildingListForPlayer.Remove(this);
+			if (this == playerController.unitSelectionManager.selectedBuilding)
+				playerController.unitSelectionManager.selectedBuilding = null;
+		}
 
 		if (isGeneratorBuilding)
 		{

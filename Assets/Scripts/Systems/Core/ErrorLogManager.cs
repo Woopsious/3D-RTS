@@ -75,10 +75,24 @@ public class ErrorLogManager : MonoBehaviour
 		string log = stackTrace + "\n" + logString;
 
 		//get rid of the error thrown by networkanimator when entities are moving
-		if (log.Contains("/Library/PackageCache/com.unity.netcode.gameobjects@1.5.2/Components/NetworkAnimator.cs:1181)"))
-			return;
+		if (stackTrace.Contains("/Library/PackageCache/com.unity.netcode.gameobjects@1.5.2/Runtime/Logging/NetworkLog.cs:34"))
+		{
+			Debug.LogError(logString);
+		}
+		if (logString.Contains("/Library/PackageCache/com.unity.netcode.gameobjects@1.5.2/Components/NetworkAnimator.cs:1181"))
+		{
+			Debug.LogError("log match 1");
+		}
+		if (logString.Contains("[Netcode][DestinationState To Transition Info] Layer (0) does not exist!"))
+		{
+			Debug.LogError("log match 2");
+		}
+		if (logString.Contains("Unity.Netcode.Components.NetworkAnimator:UpdateAnimationState (Unity.Netcode.Components.NetworkAnimator/AnimationState) (at"))
+		{
+			Debug.LogError("log match 3");
+		}
 
-		if (type == LogType.Error || type == LogType.Warning)
+		if (type == LogType.Error || type == LogType.Warning && errorLogWindowObj != null)
 		{
 			if (CheckForRepeatingLogMessages(log))
 			{
@@ -90,7 +104,7 @@ public class ErrorLogManager : MonoBehaviour
 				{
 					RecordLogMessageToUi(log, Color.red);
 					WriteToLogFile(type, "0", logString);
-					ShowErrorLog();
+					//ShowErrorLog();
 				}
 				else if (type == LogType.Warning)
 				{

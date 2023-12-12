@@ -26,7 +26,7 @@ public class MenuUIManager : MonoBehaviour
 	[Header("Multiplayer Ui Refs")]
 	public GameObject LobbyItemPrefab;
 	public GameObject PlayerItemPrefab;
-	public GameObject FetchingLobbiesListPanel;
+	public GameObject FetchLobbiesListPanel;
 	public GameObject MpLobbiesListPanel;
 	public Transform LobbyListParentTransform;
 	public GameObject MpLobbyPanel;
@@ -148,14 +148,28 @@ public class MenuUIManager : MonoBehaviour
 		mainMenuPanelObj.SetActive(false);
 		singlePlayerPanelObj.SetActive(true);
 	}
+	public void SetPlayerNameButton()
+	{
+		ClientManager.Instance.clientUsername = Instance.playerNameInputField.text;
+		Instance.playerNameText.text = $"Player Name: {ClientManager.Instance.clientUsername}";
+		Instance.playerNameInputField.text = "";
+
+		GameManager.Instance.SavePlayerData();
+	}
 	public void GetPlayerNameUi()
 	{
-		Instance.playerNameText.text = $"Player Name: {MultiplayerManager.Instance.localClientName}";
+		Instance.playerNameText.text = $"Player Name: {ClientManager.Instance.clientUsername}";
 
 		//localClientNameText.text = $"Client Name: {MultiplayerManager.Instance.localClientName}";
 		//localClientIdText.text = $"Client ID: {MultiplayerManager.Instance.localClientId}";
 		//localClientHostText.text = $"Is Client Host?: {MultiplayerManager.Instance.CheckIfHost()}";
 		//localClientNetworkedIdText.text = $"Client Networked ID: {MultiplayerManager.Instance.localClientNetworkedId}";
+	}
+	public void ResetPlayerNameLocally()
+	{
+		ClientManager.Instance.clientUsername = "PlayerName";
+		MenuUIManager.Instance.playerNameText.text = $"Player Name: {ClientManager.Instance.clientUsername}";
+		GameManager.Instance.LocalCopyOfPlayerData.PlayerName = ClientManager.Instance.clientUsername;
 	}
 	public void QuitGame()
 	{
@@ -166,13 +180,12 @@ public class MenuUIManager : MonoBehaviour
 	//MP BUTTON FUNCTIONS
 	public void PlayMultiplayerButton()
 	{
-		if (MultiplayerManager.Instance.localClientName == "PlayerName")
+		if (ClientManager.Instance.clientUsername == "PlayerName")
 		{
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Set a Name For Yourself", 3f);
 			return;
 		}
 		MultiplayerManager.Instance.StartMultiplayer();
-		ShowFetchingLobbiesListUi();
 	}
 	public void RefreshLobbiesListButton()
 	{
@@ -180,57 +193,52 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void CreateLobbyButton()
 	{
-		if (MultiplayerManager.Instance.hostManager.lobbyName == "LobbyName")
+		if (LobbyManager.Instance.lobbyName == "LobbyName")
 		{
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Set a Name For Your Lobby", 3f);
 			return;
 		}
-		MultiplayerManager.Instance.StartHost();
+		HostManager.Instance.StartHost();
 		MenuUIManager.Instance.ShowConnectingToLobbyUi();
 	}
 	public void LeaveLobbyButton()
 	{
-		MultiplayerManager.Instance.CloseOrLeaveGameSession();
+		ClientManager.Instance.StopClient();
+		StartCoroutine(DelayLobbyListRefresh());
 		ClearPlayersList();
 	}
 	public void CloseLobbyButton()
 	{
-		MultiplayerManager.Instance.CloseOrLeaveGameSession();
-		ShowLobbiesListUi();
+		HostManager.Instance.StopHost();
+		StartCoroutine(DelayLobbyListRefresh());
 		ClearPlayersList();
+	}
+	public IEnumerator DelayLobbyListRefresh()
+	{
+		MenuUIManager.Instance.FetchLobbiesListUi();
+		yield return new WaitForSeconds(1f);
+		MultiplayerManager.Instance.GetLobbiesList();
 	}
 	public void StartMultiplayerGameButton()
 	{
-		if (MultiplayerManager.Instance.connectedClientsList.Count == MultiplayerManager.Instance.hostManager.hostLobby.MaxPlayers)
-		{
-			GameManager.Instance.playerOneReadyToStart.Value = false;
-			GameManager.Instance.playerTwoReadyToStart.Value = false;
+		if (HostManager.Instance.connectedClientsList.Count == LobbyManager.Instance._Lobby.MaxPlayers)
 			GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
-		}
 		else
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Two players are needed to start the game", 3f);
 	}
-	public void SetPlayerNameButton()
-	{
-		MultiplayerManager.Instance.localClientName = Instance.playerNameInputField.text;
-		Instance.playerNameText.text = $"Player Name: {MultiplayerManager.Instance.localClientName}";
-		Instance.playerNameInputField.text = "";
-
-		GameManager.Instance.SavePlayerData();
-	}
 	public void SetLobbyNameButton()
 	{
-		MultiplayerManager.Instance.hostManager.lobbyName = Instance.lobbyNameInputField.text;
-		Instance.lobbyNameText.text = $"Lobby Name: {MultiplayerManager.Instance.hostManager.lobbyName}";
+		LobbyManager.Instance.lobbyName = Instance.lobbyNameInputField.text;
+		Instance.lobbyNameText.text = $"Lobby Name: {LobbyManager.Instance.lobbyName}";
 		Instance.lobbyNameInputField.text = "";
 	}
 
 	//MP UI UPDATES
-	public void ShowFetchingLobbiesListUi()
+	public void FetchLobbiesListUi()
 	{
 		ConnectingToLobbyPanelObj.SetActive(false);
 		mainMenuPanelObj.SetActive(false);
-		FetchingLobbiesListPanel.SetActive(true);
+		FetchLobbiesListPanel.SetActive(true);
 		MpLobbiesListPanel.SetActive(false);
 		MpLobbyPanel.SetActive(false);
 		closeLobbyButtonObj.SetActive(false);
@@ -241,7 +249,7 @@ public class MenuUIManager : MonoBehaviour
 	{
 		ConnectingToLobbyPanelObj.SetActive(false);
 		mainMenuPanelObj.SetActive(false);
-		FetchingLobbiesListPanel.SetActive(false);
+		FetchLobbiesListPanel.SetActive(false);
 		MpLobbiesListPanel.SetActive(true);
 		MpLobbyPanel.SetActive(false);
 		closeLobbyButtonObj.SetActive(false);
@@ -283,12 +291,12 @@ public class MenuUIManager : MonoBehaviour
 	}
 	public void SyncPlayerListforLobbyUi(Lobby lobby)
 	{
-		if (MultiplayerManager.Instance.connectedClientsList.Count < LobbyScreenParentTransform.childCount)
+		if (HostManager.Instance.connectedClientsList.Count < LobbyScreenParentTransform.childCount)
 		{
 			Transform childTransform = LobbyScreenParentTransform.GetChild(LobbyScreenParentTransform.childCount - 1);
 			Destroy(childTransform.gameObject);
 		}
-		else if (MultiplayerManager.Instance.connectedClientsList.Count > LobbyScreenParentTransform.childCount)
+		else if (HostManager.Instance.connectedClientsList.Count > LobbyScreenParentTransform.childCount)
 		{
 			Instantiate(PlayerItemPrefab, LobbyScreenParentTransform);
 			UpdatePlayerList(lobby);
@@ -303,9 +311,9 @@ public class MenuUIManager : MonoBehaviour
 		{
 			PlayerItemManager playerItem = child.GetComponent<PlayerItemManager>();
 			playerItem.Initialize(
-				MultiplayerManager.Instance.connectedClientsList[index].clientName.ToString(),
-				MultiplayerManager.Instance.connectedClientsList[index].clientId.ToString(),
-				MultiplayerManager.Instance.connectedClientsList[index].clientNetworkedId.ToString()
+				HostManager.Instance.connectedClientsList[index].clientName.ToString(),
+				HostManager.Instance.connectedClientsList[index].clientId.ToString(),
+				HostManager.Instance.connectedClientsList[index].clientNetworkedId.ToString()
 				);
 
 			if (!GameManager.Instance.isPlayerOne && playerItem.kickPlayerButton.activeInHierarchy)
@@ -313,7 +321,7 @@ public class MenuUIManager : MonoBehaviour
 
 			else if (GameManager.Instance.isPlayerOne && !playerItem.kickPlayerButton.activeInHierarchy)
 			{
-				if (playerItem.playerId == lobby.HostId)
+				if (playerItem.localPlayerNetworkedId == "0")
 					playerItem.kickPlayerButton.SetActive(false);
 
 				else
@@ -381,9 +389,9 @@ public class MenuUIManager : MonoBehaviour
 	{
 		GameManager.Instance.SavePlayerData();
 	}
-	public void KeyBindsReset()
+	public async void KeyBindsResetButton()
 	{
-		InputManager.Instance.ResetKeybindsToDefault();
+		await InputManager.Instance.CreateKeyBindDictionary();
 		UpdateKeybindButtonDisplay();
 	}
 }

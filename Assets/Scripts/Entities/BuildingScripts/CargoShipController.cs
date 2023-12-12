@@ -41,28 +41,25 @@ public class CargoShipController : UnitStateController
 	public override void FixedUpdate()
 	{
 		if (targetResourceNode != null)
-		{
 			transform.position = Vector3.MoveTowards(transform.position, movePos, moveSpeed * Time.deltaTime);
-			Debug.Log("cargoship moving towards res node");
-		}
 	}
 
 	//FUNCTIONS FOR LOOPING RESOURCE GATHERING
-	//can chnage mine orders here
+	//can change mine orders here
 	public IEnumerator IncreaseHeightFromRefinery()
 	{
-		Debug.LogError("increasing height");
 		canChangeOrders = true;
 		SetDestination(new Vector3(refineryControllerParent.transform.position.x, 22, refineryControllerParent.transform.position.z));
 
 		yield return new WaitUntil(() => CheckIfInPosition(movePos) == true);
 
-		if(targetResourceNode != null && CheckIfCanMineResourceNode(targetResourceNode))
+		if (targetResourceNode != null && CheckIfCanMineResourceNode(targetResourceNode)) //check if node still valid to mine
 			StartCoroutine(MoveToResourceNode());
+		else
+			FindClosestTargetResourcesNodeServerRPC(GetComponent<NetworkObject>().NetworkObjectId); //else find new closest valid res node
 	}	
 	public IEnumerator MoveToResourceNode()
 	{
-		Debug.LogError("Moving to res node");
 		canChangeOrders = true;
 		SetDestination(new Vector3(targetResourceNode.transform.position.x, 22, targetResourceNode.transform.position.z));
 
@@ -179,21 +176,34 @@ public class CargoShipController : UnitStateController
 	//HEALTH/HIT FUNCTIONS OVERRIDES
 	public override void TryDisplayEntityHitNotif()
 	{
-		if (!wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
+		if (!wasRecentlyHit && !IsPlayerControllerNull())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP UNDER ATTACK", transform.position);
+			AnnouncerSystem.Instance.PlayAlertUnitUnderAttackSFX();
+		}
 	}
 	public override void OnEntityDeath()
 	{
-		base.OnEntityDeath();
-		if (ShouldDisplaySpottedNotifToPlayer())
+		if (!IsPlayerControllerNull())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("CARGOSHIP DESTROYED", transform.position);
+			AnnouncerSystem.Instance.PlayAlertUnitLostSFX();
+		}
+
+		base.OnEntityDeath();
 	}
 
 	//UTILITY FUNCTIONS
 	public override void RemoveEntityRefs()
 	{
+		if (playerController != null)
+		{
+			playerController.unitListForPlayer.Remove(this);
+			if (this == playerController.unitSelectionManager.SelectedCargoShip)
+				playerController.unitSelectionManager.SelectedCargoShip = null;
+		}
+
 		targetResourceNode.IsntBeingMinedServerRPC();
-		playerController.unitListForPlayer.Remove(this);
 		refineryControllerParent.CargoShipList.Remove(this);
 		refineryControllerParent.CheckCargoShipsCount();
 	}
@@ -226,12 +236,11 @@ public class CargoShipController : UnitStateController
 				targetResourceNode.resourcesAmount.Value -= targetResourceNode.resourcesAmount.Value;
 			}
 		}
-		targetResourceNode.CheckResourceCountServerRpc();
+		targetResourceNode.CheckResourceCountServerRpc(targetResourceNode.resourcesAmount.Value);
 	}
 	public void RefineResourcesFromInventroy()
 	{
-		refineryControllerParent.RefineResourcesServerRPC(
-			GetComponent<NetworkObject>().NetworkObjectId, refineryControllerParent.GetComponent<NetworkObject>().NetworkObjectId);
+		refineryControllerParent.RefineResourcesServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
 		alloysCount = 0;
 		crystalsCount = 0;
 	}
@@ -264,7 +273,6 @@ public class CargoShipController : UnitStateController
 	}
 	public void DeleteSelf()
 	{
-		//currentHealth.Value = -10;
 		OnEntityDeath();
 	}
 
@@ -281,21 +289,14 @@ public class CargoShipController : UnitStateController
 			return true;
 		else if (resourceNode.canPTwoMine && !isPlayerOneEntity)
 			return true;
-		else
-		{
-			//Debug.LogError("no resource nodes owned by player found");
-			return false;
-		}
+		else return false;
 	}
 	public bool CheckIfInPosition(Vector3 moveDestination)
 	{
 		float Distance = Vector3.Distance(gameObject.transform.position, moveDestination);
 
 		if (Distance <= 0.1)
-		{
-			Debug.LogError("In Position");
 			return true;
-		}
 		else return false;
 	}
 }

@@ -160,7 +160,7 @@ public class UnitStateController : Entities
 			Entities entity = targetList[i].GetComponent<Entities>();
 			if (CheckIfEntityInLineOfSight(entity))
 			{
-				if (!entity.wasRecentlySpotted && ShouldDisplaySpottedNotifToPlayer())
+				if (!entity.wasRecentlySpotted && !IsPlayerControllerNull())
 				{
 					if (entity.GetComponent<CargoShipController>() != null)
 						GameManager.Instance.playerNotifsManager.DisplayEventMessage("Enemy CargoShip Spotted", entity.transform.position);
@@ -206,34 +206,21 @@ public class UnitStateController : Entities
 	//HEALTH/HIT FUNCTIONS OVERRIDES
 	public override void TryDisplayEntityHitNotif()
 	{
-		if (!isCargoShip && !wasRecentlyHit && ShouldDisplaySpottedNotifToPlayer())
+		if (!isCargoShip && !wasRecentlyHit && !IsPlayerControllerNull())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT UNDER ATTACK", transform.position);
+			AnnouncerSystem.Instance.PlayAlertUnitUnderAttackSFX();
+		}
 	}
 	public override void OnEntityDeath()
 	{
-		base.OnEntityDeath();
-		if (!isCargoShip && ShouldDisplaySpottedNotifToPlayer())
+		if (!isCargoShip && !IsPlayerControllerNull())
+		{
 			GameManager.Instance.playerNotifsManager.DisplayEventMessage("UNIT DESTROYED", transform.position);
-	}
-
-	//ATTACK PLAYER SET TARGET FUNCTIONS
-	[ServerRpc(RequireOwnership = false)]
-	public virtual void TryAttackPlayerSetTargetServerRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId,
-		ServerRpcParams serverRpcParams = default)
-	{
-		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkObjId].GetComponent<UnitStateController>();
-		Entities targetEntity = NetworkManager.SpawnManager.SpawnedObjects[targetEntityNetworkObjId].GetComponent<Entities>();
-		hasReachedPlayerSetTarget = false;
-
-		if (unit.IsPlayerSetTargetSpotted(targetEntity)) //check if already spotted in target lists
-		{
-			unit.playerSetTarget = targetEntity;
+			AnnouncerSystem.Instance.PlayAlertUnitLostSFX();
 		}
-		else //walk in line of sight of enemy then switch to that target
-		{
-			unit.playerSetTarget = targetEntity;
-			MoveToDestination(targetEntity.transform.position);
-		}
+
+		base.OnEntityDeath();
 	}
 	public bool IsPlayerSetTargetSpotted(Entities entity)
 	{
@@ -258,16 +245,12 @@ public class UnitStateController : Entities
 	//UNIT MOVE FUNCTION
 	public void MoveToDestination(Vector3 newMovePos)
 	{
-		if (!isTurret)
-		{
-			if (isFlying)
-				movePos = new Vector3(newMovePos.x, newMovePos.y + 7, newMovePos.z);
-			else
-				movePos = newMovePos;
+		if (isFlying)
+			movePos = new Vector3(newMovePos.x, newMovePos.y + 7, newMovePos.z);
+		else
+			movePos = newMovePos;
 
-			ChangeStateMovingClientRPC();
-			ChangeStateMovingServerRPC(EntityNetworkObjId);
-		}
+		ChangeStateMovingServerRPC(EntityNetworkObjId);
 	}
 
 	//UTILITY FUNCTIONS
@@ -310,7 +293,10 @@ public class UnitStateController : Entities
 				}
 			}
 			else if (isTurret)
+			{
+				playerController.unitSelectionManager.RemoveDeadTurretFromSelectedTurrets(GetComponent<TurretController>());
 				turretController.capturePointController.TurretDefenses.Remove(turretController);
+			}
 		}
 	}
 	public void OnDrawGizmosSelected()

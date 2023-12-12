@@ -5,9 +5,14 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.ProBuilder;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class GameManager : NetworkBehaviour
 {
@@ -39,6 +44,11 @@ public class GameManager : NetworkBehaviour
 	public string mainMenuSceneName = "MainMenu";
 	public string mapOneSceneName = "MapOne";
 
+	[Header("Default GameSceneStats")]
+	public int defaultMoney = 5000000;
+	public int defaultAlloys = 50000;
+	public int defaultCrystals = 5000;
+
 	[Header("player One Stats")]
 	public NetworkVariable<int> playerOneCurrentMoney = new NetworkVariable<int>();
 	public NetworkVariable<int> playerOneIncomeMoney = new NetworkVariable<int>();
@@ -46,6 +56,8 @@ public class GameManager : NetworkBehaviour
 	public NetworkVariable<int> playerOneIncomeAlloys = new NetworkVariable<int>();
 	public NetworkVariable<int> playerOneCurrentCrystals = new NetworkVariable<int>();
 	public NetworkVariable<int> playerOneIncomeCrystals = new NetworkVariable<int>();
+
+	public int trackPlayerOneMoneyChanges;
 
 	[Header("Player One Tech Bonus")]
 	public NetworkVariable<float> playerOneBuildingHealthPercentageBonus = new NetworkVariable<float>();
@@ -67,6 +79,8 @@ public class GameManager : NetworkBehaviour
 	public NetworkVariable<int> playerTwoCurrentCrystals = new NetworkVariable<int>();
 	public NetworkVariable<int> playerTwoIncomeCrystals = new NetworkVariable<int>();
 
+	public int trackPlayerTwoMoneyChanges;
+
 	[Header("Player Two Tech Bonus")]
 	public NetworkVariable<float> playerTwoBuildingHealthPercentageBonus = new NetworkVariable<float>();
 	public NetworkVariable<float> playerTwoBuildingArmourPercentageBonus = new NetworkVariable<float>();
@@ -79,16 +93,12 @@ public class GameManager : NetworkBehaviour
 	public NetworkVariable<int> playerTwoUnitAttackRangeBonus = new NetworkVariable<int>();
 	public NetworkVariable<int> playerTwoUnitSpeedBonus = new NetworkVariable<int>();
 
-	[Header("PlayerOne Building Prefabs")]
+	[Header("Player Entity Prefabs")]
+	public List<Sprite> buildingImageList;
+	public List<Sprite> unitImageList;
 	public List<GameObject> PlayerOneBuildingsList;
-
-	[Header("PlayerOne Unit Prefabs")]
 	public List<GameObject> PlayerOneUnitsList;
-
-	[Header("PlayerTwo Building Prefabs")]
 	public List<GameObject> PlayerTwoBuildingsList;
-
-	[Header("PlayerTwo Unit Prefabs")]
 	public List<GameObject> PlayerTwoUnitsList;
 
 	[Header("Base Building Stats")]
@@ -111,12 +121,19 @@ public class GameManager : NetworkBehaviour
 	public UnitStateController testUnit;
 
 	[Header("MP Refs")]
+	public NetworkVariable<bool> hasGameStarted = new NetworkVariable<bool>();
+	public NetworkVariable<bool> hasGameEnded = new NetworkVariable<bool>();
 	public List<BuildingManager> playerBuildingsList = new List<BuildingManager>();
 	public List<UnitStateController> playerUnitsList = new List<UnitStateController>();
 
 	public NetworkVariable<bool> playerOneReadyToStart = new NetworkVariable<bool>();
 	public NetworkVariable<bool> playerTwoReadyToStart = new NetworkVariable<bool>();
 	public bool isMultiplayerGame;
+
+	public int timeOutCounter;
+
+	public GameObject playerOneHQ;
+	public GameObject playerTwoHQ;
 
 	public void Awake()
 	{
@@ -136,11 +153,6 @@ public class GameManager : NetworkBehaviour
 		playerGameDataPath = Path.Combine(Application.persistentDataPath, "Saves");
 
 		GameManager.Instance.errorManager.OnStartUpHandleLogFiles();
-		GameManager.Instance.errorManager.CheckForErrorLogObj();
-		InputManager.Instance.SetUpKeybindDictionary();
-
-		GameManager.Instance.LoadPlayerData();
-		MenuUIManager.Instance.GetPlayerNameUi();
 
 		//assign base building stats
 		buildingHQStats = new BaseBuildingStats
@@ -243,6 +255,8 @@ public class GameManager : NetworkBehaviour
 		//Debug.Log(testUnit.weaponSystem.secondaryWeaponAttackSpeed);
 		//Debug.Log(testUnit.agentNav.speed);
 	}
+
+	//track resource income per minuite
 	public void GetResourcesPerSecond()
 	{
 		timer += Time.deltaTime;
@@ -259,12 +273,12 @@ public class GameManager : NetworkBehaviour
 			gameUIManager.UpdateIncomeResourcesUI(playerOneMoneyPerSecond, playerOneAlloysPerSecond, playerOneCrystalsPerSecond,
 				playerTwoMoneyPerSecond, playerTwoAlloysPerSecond, playerTwoCrystalsPerSecond);
 
-			ResetIncomeCountServerRPC();
+			ResetResourceIncomeCountServerRPC();
 			timer = 0;
 		}
 	}
 	[ServerRpc(RequireOwnership = false)]
-	public void ResetIncomeCountServerRPC()
+	public void ResetResourceIncomeCountServerRPC()
 	{
 		playerOneIncomeMoney.Value = 0;
 		playerOneIncomeAlloys.Value = 0;
@@ -276,6 +290,8 @@ public class GameManager : NetworkBehaviour
 	}
 	public void GameClock() //game timer in hrs, mins and secs
 	{
+		if (hasGameStarted.Value == false || hasGameEnded.Value == true) return;
+
 		secondsCount += Time.deltaTime;
 		if (secondsCount >= 60)
 		{
@@ -288,29 +304,11 @@ public class GameManager : NetworkBehaviour
 			}
 		}
 	}
-
-	//EDITS TO NETWORKED GAMEOBJECTS 
-	[ServerRpc(RequireOwnership = false)]
-	public void RefundEntityCostServerRPC(ulong entityNetworkedObjId)
+	public void ResetGameClock()
 	{
-		Entities entity = NetworkManager.SpawnManager.SpawnedObjects[entityNetworkedObjId].GetComponent<Entities>();
-
-		int refundMoney = (int)(entity.moneyCost / 1.5);
-		int refundAlloy = (int)(entity.alloyCost / 1.5);
-		int refundCrystal = (int)(entity.crystalCost / 1.5);
-
-		if (entity.isPlayerOneEntity)
-		{
-			GameManager.Instance.playerOneCurrentMoney.Value += refundMoney;
-			GameManager.Instance.playerOneCurrentAlloys.Value += refundAlloy;
-			GameManager.Instance.playerOneCurrentCrystals.Value += refundCrystal;
-		}
-		else if (!entity.isPlayerOneEntity)
-		{
-			GameManager.Instance.playerTwoCurrentMoney.Value += refundMoney;
-			GameManager.Instance.playerTwoCurrentAlloys.Value += refundAlloy;
-			GameManager.Instance.playerTwoCurrentCrystals.Value += refundCrystal;
-		}
+		Instance.hourCount = 0;
+		Instance.minuteCount = 0;
+		Instance.secondsCount = 0;
 	}
 
 	//save/load player and game data
@@ -331,9 +329,10 @@ public class GameManager : NetworkBehaviour
 			CreatePlayerData();
 		else
 		{
+			Instance.LocalCopyOfPlayerData.PlayerName = ClientManager.Instance.clientUsername;
 			//audio is saved when slider value is changed
-			Instance.LocalCopyOfPlayerData.PlayerName = MultiplayerManager.Instance.localClientName;
 			InputManager.Instance.SavePlayerKeybinds();
+			ResolutionManager.Instance.SaveScreenResolution();
 
 			BinaryFormatter formatter = new BinaryFormatter();
 			FileStream playerData = File.Open(playerDataPath + "/playerData.sav", FileMode.Create);
@@ -357,19 +356,13 @@ public class GameManager : NetworkBehaviour
 			LocalCopyOfPlayerData = (PlayerData)formatter.Deserialize(playerData);
 			playerData.Close();
 
-			MultiplayerManager.Instance.localClientName = Instance.LocalCopyOfPlayerData.PlayerName;
+			ClientManager.Instance.clientUsername = Instance.LocalCopyOfPlayerData.PlayerName;
 			AudioManager.Instance.LoadSoundSettings();
 			InputManager.Instance.LoadPlayerKeybinds();
+			ResolutionManager.Instance.LoadScreenResolution();
 		}
 	}
-	public void ResetPlayerSettings()
-	{
-		InputManager.Instance.ResetKeybindsToDefault();
-		MultiplayerManager.Instance.ResetPlayerName();
-		AudioManager.Instance.ResetAudioSettings();
 
-		SavePlayerData();
-	}
 	public void SaveGameData(string filePath)
 	{
 		//create directory if it doesnt exist
@@ -408,66 +401,192 @@ public class GameManager : NetworkBehaviour
 	}
 	public void OnSceneLoad(int sceneIndex)
 	{
-		if (sceneIndex == 0)
-		{
-			MenuUIManager.Instance.SetUpKeybindButtonNames();
-			MenuUIManager.Instance.GetPlayerNameUi();
-		}
-		else if (sceneIndex == 1)
-		{
-			gameUIManager = FindObjectOfType<GameUIManager>();
-			gameUIManager.gameManager = this;
-
-			gameUIManager.ResetUi();
-			gameUIManager.ResetUnitGroupUI();
-			gameUIManager.SetUpUnitShopUi();
-			gameUIManager.SetUpBuildingsShopUi();
-			gameUIManager.techTreeManager.SetUpTechTrees();
-		}
+		GameManager.Instance.LoadPlayerData();
 		GameManager.Instance.playerNotifsManager.CheckForPlayerNotifsObj();
 		GameManager.Instance.errorManager.CheckForErrorLogObj();
-		AudioManager.Instance.LoadSoundSettings();
 
-		if(isMultiplayerGame)
+		if (sceneIndex == 0)
+			LoadMainMenuScene();
+		else if (sceneIndex == 1)
+			LoadMapOneScene();
+	}
+	public async void LoadMainMenuScene()
+	{
+		Time.timeScale = 1f;
+		await InputManager.Instance.CreateKeyBindDictionary();
+		await InputManager.Instance.CheckForKeyBindChangesInData();
+		MenuUIManager.Instance.SetUpKeybindButtonNames();
+		MenuUIManager.Instance.GetPlayerNameUi();
+	}
+	public void LoadMapOneScene()
+	{
+		Instance.ResetGameClock();
+		Instance.ResetGameSceneValuesServerRPC();
+		Instance.ResetResourceIncomeCountServerRPC();
+
+		gameUIManager = FindObjectOfType<GameUIManager>();
+		gameUIManager.gameManager = this;
+
+		gameUIManager.ResetUi();
+		gameUIManager.ResetUnitGroupUI();
+		gameUIManager.SetUpUnitShopUi();
+		gameUIManager.SetUpBuildingsShopUi();
+		gameUIManager.techTreeManager.SetUpTechTrees();
+
+		if (isMultiplayerGame)
 		{
-			Time.timeScale = 0;
 			gameUIManager.exitAndSaveGameButtonObj.SetActive(false);
 			gameUIManager.playerReadyUpPanelObj.SetActive(true);
 			gameUIManager.HideGameSpeedButtonsForMP();
 		}
 	}
 
-	//SERVER FUNCTIONS AT RUNTIME
+	//SERVER FUNCTIONS AT GAME START
 	[ServerRpc(RequireOwnership = false)]
-	public void SetPlayerToReadyServerRPC(bool isPlayerOne, ServerRpcParams serverRpcParams = default)
+	public void SetPlayerToReadyServerRPC(bool isPlayerOne)
 	{
 		if (isPlayerOne)
 			playerOneReadyToStart.Value = true;
-		else if (!isPlayerOne)
+		else
 			playerTwoReadyToStart.Value = true;
-		NotifyOtherPlayerIsReadyClientRPC(serverRpcParams.Receive.SenderClientId);
 
-		if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+		if (playerOneReadyToStart.Value == true || playerTwoReadyToStart.Value == true)
+			NotifyOtherPlayerIsReadyClientRPC(isPlayerOne, 1);
+		else if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+			NotifyOtherPlayerIsReadyClientRPC(isPlayerOne, 2);
+
+		//start game first time in scene
+		if (hasGameEnded.Value == false && playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+		{
+			playerOneReadyToStart.Value = false;
+			playerTwoReadyToStart.Value = false;
+			hasGameStarted.Value = true;
 			StartGameClientRPC();
+		}
+		//restart game after a game has ended
+		else if (hasGameEnded.Value == true && playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
+		{
+			playerOneReadyToStart.Value = false;
+			playerTwoReadyToStart.Value = false;
+			ResetSceneObjectsServerRPC();
+			GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
+		}
 	}
 	[ClientRpc]
-	public void NotifyOtherPlayerIsReadyClientRPC(ulong clientId)
+	public void NotifyOtherPlayerIsReadyClientRPC(bool isPlayerOne, int num)
 	{
-		if (clientId == 0)
-			gameUIManager.isPlayerOneReadyText.text = "Player One Ready";
-		else if (clientId != 0)
-			gameUIManager.isPlayerTwoReadyText.text = "Player Two Ready";
+		if (hasGameEnded.Value == false)
+		{
+			if (isPlayerOne)
+				gameUIManager.isPlayerOneReadyText.text = "Player One Ready";
+			else if (!isPlayerOne)
+				gameUIManager.isPlayerTwoReadyText.text = "Player Two Ready";
+		}
+		else if (hasGameEnded.Value == true)
+			gameUIManager.playAgainUiText.text = num + "/2";
 	}
 	[ClientRpc]
 	public void StartGameClientRPC()
 	{
-		gameUIManager.isGamePaused = true;
-		gameUIManager.PauseGame();
 		gameUIManager.playerReadyUpPanelObj.SetActive(false);
 		playerNotifsManager.DisplayNotifisMessage("GAME STARTING", 3f);
+
+		if (!IsServer) return;
+
+		foreach (CapturePointController capturePoint in gameUIManager.playerController.capturePointsList)
+		{
+			if (capturePoint.isPlayerOneSpawn)
+				GameManager.Instance.SpawnPlayerHQsServerRPC(true,
+					capturePoint.playerHQSpawnPoint.transform.position, capturePoint.playerHQSpawnPoint.transform.rotation);
+
+			else if (capturePoint.isPlayerTwoSpawn)
+				GameManager.Instance.SpawnPlayerHQsServerRPC(false,
+					capturePoint.playerHQSpawnPoint.transform.position, capturePoint.playerHQSpawnPoint.transform.rotation);
+		}
 	}
 
-	//FUNCTIONS ON ENTITY DEATH
+	//reset scene
+	[ServerRpc]
+	public void ResetSceneObjectsServerRPC()
+	{
+		List<ulong> networkObjIdList = new List<ulong>();
+
+		foreach (NetworkObject Obj in NetworkManager.Singleton.SpawnManager.SpawnedObjects.Values)
+			networkObjIdList = NetworkManager.Singleton.SpawnManager.SpawnedObjects.Keys.ToList();
+
+		for (int i = NetworkManager.Singleton.SpawnManager.SpawnedObjects.Count - 1; i > 0; i--)
+		{
+			if (NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjIdList[i]].GetComponent<MultiplayerManager>()) return;
+			else
+				NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjIdList[i]].Despawn();
+		}
+	}
+	[ServerRpc]
+	public void ResetGameSceneValuesServerRPC()
+	{
+		Instance.hasGameEnded.Value = false;
+		Instance.hasGameStarted.Value = false;
+
+		Instance.playerOneCurrentMoney.Value = defaultMoney;
+		Instance.playerOneCurrentAlloys.Value = defaultAlloys;
+		Instance.playerOneCurrentCrystals.Value = defaultCrystals;
+
+		Instance.playerTwoCurrentMoney.Value = defaultMoney;
+		Instance.playerTwoCurrentAlloys.Value = defaultAlloys;
+		Instance.playerTwoCurrentCrystals.Value = defaultCrystals;
+	}
+
+	//spawn player HQ's
+	[ServerRpc]
+	public void SpawnPlayerHQsServerRPC(bool spawnPlayerOneHq, Vector3 position, Quaternion rotation)
+	{
+		if (spawnPlayerOneHq)
+		{
+			GameObject obj = Instantiate(GameManager.Instance.PlayerOneBuildingsList[6], position, rotation);
+			obj.GetComponent<NetworkObject>().SpawnWithOwnership(HostManager.Instance.connectedClientsList[0].clientNetworkedId);
+			SpawnPlayerHQsClientRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
+		}
+		else
+		{
+			GameObject obj = Instantiate(GameManager.Instance.PlayerTwoBuildingsList[6], position, rotation);
+			obj.GetComponent<NetworkObject>().SpawnWithOwnership(HostManager.Instance.connectedClientsList[1].clientNetworkedId);
+			SpawnPlayerHQsClientRPC(obj.GetComponent<NetworkObject>().NetworkObjectId);
+		}
+	}
+	[ClientRpc]
+	public void SpawnPlayerHQsClientRPC(ulong networkObjId)
+	{
+		NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].GetComponent<BuildingManager>().OnBuildingStartUp();
+	}
+
+	//SERVER FUNCTIONS WHEN GAME OVER
+	[ServerRpc(RequireOwnership = false)]
+	public void GameOverPlayerHQDestroyedServerRPC(bool isPlayerOneCall)
+	{
+		GameManager.Instance.playerOneReadyToStart.Value = false;
+		GameManager.Instance.playerTwoReadyToStart.Value = false;
+		GameManager.Instance.hasGameEnded.Value = true;
+		GameOverPlayerHQDestroyedClientRPC(isPlayerOneCall);
+	}
+	[ClientRpc]
+	public void GameOverPlayerHQDestroyedClientRPC(bool isPlayerOneCall)
+	{
+		if (isPlayerOneCall && isPlayerOne)
+			gameUIManager.gameOverUiText.text = "HQ Destroyed You Lost";
+		else if (isPlayerOneCall && !isPlayerOne)
+			gameUIManager.gameOverUiText.text = "Enemy HQ Destroyed You Win";
+
+		else if (!isPlayerOneCall && isPlayerOne)
+			gameUIManager.gameOverUiText.text = "Enemy HQ Destroyed You Win";
+		else if (!isPlayerOneCall && !isPlayerOne)
+			gameUIManager.gameOverUiText.text = "HQ Destroyed You Lost";
+
+		gameUIManager.playAgainUiText.text = "0/2";
+		gameUIManager.gameOverUiPanel.SetActive(true);
+		GameManager.Instance.gameUIManager.playAgainButtonObj.SetActive(true);
+	}
+
+	//FUNCTIONS ON ENTITY DEATHS
 	[ServerRpc(RequireOwnership = false)]
 	public void RemoveEntityServerRPC(ulong networkObjId)
 	{
@@ -479,11 +598,12 @@ public class GameManager : NetworkBehaviour
 	{
 		GameObject entityObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId].gameObject;
 		entityObj.GetComponent<Entities>().RemoveEntityRefs();
+
 		Instantiate(entityObj.GetComponent<Entities>().DeathObj, entityObj.transform.position, Quaternion.identity);
 		Destroy(entityObj.GetComponent<Entities>().UiObj);
 	}
 
-	//functions for tech
+	//SERVER FUNCTIONS FOR TECH
 	[ServerRpc(RequireOwnership = false)]
 	public void UpdateTechBonusesServerRPC(bool isBuildingTech, int index, ServerRpcParams serverRpcParams = default)
 	{
@@ -869,6 +989,134 @@ public class GameManager : NetworkBehaviour
 				}
 			}
 			unit.UpdateHealthBar();
+		}
+	}
+
+	//SERVER FUNCTIONS FOR RESOURCE CHANGES THEN RELAYING TO PLAYER UI
+
+	[ServerRpc(RequireOwnership = false)]
+	public void UpdateResourcesServerRPC(bool isPlayerOneCall, bool isBuying , bool isRefunding, bool isCancellingUnit,bool isMined,
+		ulong entityNetworkedObjId, int moneyAmount, int alloyAmount, int crystalAmount)
+	{
+		if (isBuying)
+		{
+			PlayerBuyingThing(isPlayerOneCall, moneyAmount, alloyAmount, crystalAmount);
+		}
+		else if (isRefunding)
+		{
+			PlayerRefundingThing(isPlayerOneCall, entityNetworkedObjId);
+		}
+		else if (isCancellingUnit)
+		{
+			PlayerCancellingUnit(isPlayerOneCall, moneyAmount, alloyAmount, crystalAmount);
+		}
+		else if (isMined)
+		{
+			PlayerMinedResources(isPlayerOneCall, moneyAmount, alloyAmount, crystalAmount);
+		}
+		if (isPlayerOneCall)
+			UpdateClientUiClientRPC(isPlayerOneCall, playerOneCurrentMoney.Value);
+		else
+			UpdateClientUiClientRPC(isPlayerOneCall, playerTwoCurrentMoney.Value);
+	}
+	public void PlayerBuyingThing(bool isPlayerOneCall, int moneyAmount, int alloyAmount, int crystalAmount)
+	{
+		if (isPlayerOneCall)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value -= moneyAmount;
+			GameManager.Instance.playerOneCurrentAlloys.Value -= alloyAmount;
+			GameManager.Instance.playerOneCurrentCrystals.Value -= crystalAmount;
+		}
+		else if (!isPlayerOneCall)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value -= moneyAmount;
+			GameManager.Instance.playerTwoCurrentAlloys.Value -= alloyAmount;
+			GameManager.Instance.playerTwoCurrentCrystals.Value -= crystalAmount;
+		}
+	}
+	public void PlayerRefundingThing(bool isPlayerOneCall, ulong entityNetworkedObjId)
+	{
+		Entities entity = NetworkManager.SpawnManager.SpawnedObjects[entityNetworkedObjId].GetComponent<Entities>();
+		int refundMoney = (int)(entity.moneyCost / 1.5);
+		int refundAlloy = (int)(entity.alloyCost / 1.5);
+		int refundCrystal = (int)(entity.crystalCost / 1.5);
+
+		if (isPlayerOneCall)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerOneCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerOneCurrentCrystals.Value += refundCrystal;
+		}
+		else if (!isPlayerOneCall)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += refundCrystal;
+		}
+	}
+	public void PlayerCancellingUnit(bool isPlayerOneCall, int refundMoney, int refundAlloy, int refundCrystal)
+	{
+		if (isPlayerOneCall)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerOneCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerOneCurrentCrystals.Value += refundCrystal;
+		}
+		else if (!isPlayerOneCall)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += refundMoney;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += refundAlloy;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += refundCrystal;
+		}
+	}
+	public void PlayerMinedResources(bool isPlayerOneCall, int moneyToAdd, int alloysToAdd, int crystalsToAdd)
+	{
+		if (isPlayerOneCall)
+		{
+			GameManager.Instance.playerOneCurrentMoney.Value += moneyToAdd;
+			GameManager.Instance.playerOneCurrentAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerOneCurrentCrystals.Value += crystalsToAdd;
+
+			GameManager.Instance.playerOneIncomeMoney.Value += moneyToAdd;
+			GameManager.Instance.playerOneIncomeAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerOneIncomeCrystals.Value += crystalsToAdd;
+		}
+		else if (!isPlayerOneCall)
+		{
+			GameManager.Instance.playerTwoCurrentMoney.Value += moneyToAdd;
+			GameManager.Instance.playerTwoCurrentAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalsToAdd;
+
+			GameManager.Instance.playerTwoIncomeMoney.Value += moneyToAdd;
+			GameManager.Instance.playerTwoIncomeAlloys.Value += alloysToAdd;
+			GameManager.Instance.playerTwoIncomeCrystals.Value += crystalsToAdd;
+		}
+	}
+	[ClientRpc]
+	public void UpdateClientUiClientRPC(bool isPlayerOneCall, int oldMoneyValue)
+	{
+		StartCoroutine(CheckForResourceValueChanges(isPlayerOneCall, oldMoneyValue));
+	}
+	public IEnumerator CheckForResourceValueChanges(bool isPlayerOneCall, int oldMoneyValue)
+	{
+		if (isPlayerOne != isPlayerOneCall)
+			yield return new WaitForSeconds(0);
+
+		else
+		{
+			if (gameUIManager.CheckResourceCountMatches() && timeOutCounter < 5) //whilst they do match loop till they dont
+			{
+				timeOutCounter++;
+				yield return new WaitForSeconds(0.25f);
+				StartCoroutine(CheckForResourceValueChanges(isPlayerOneCall, oldMoneyValue));
+			}
+			else if (!gameUIManager.CheckResourceCountMatches())
+			{
+				timeOutCounter = 0;
+				gameUIManager.UpdateCurrentResourcesUI();
+			}
+			else
+				timeOutCounter = 0;
 		}
 	}
 

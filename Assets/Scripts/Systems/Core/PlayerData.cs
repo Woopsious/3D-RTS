@@ -9,10 +9,17 @@ public class PlayerData
 	public static PlayerData Instance;
 
 	public string PlayerName;
+
 	public float backgroundMusicVolumeData;
 	public float menuSFXVolumeData;
+	public float announcerSFXVolumeData;
 	public float gameSFXVolumeData;
+
+	public List<string> keybindNames;
 	public Dictionary<string, KeyCode> KeyBindDictionary;
+
+	public int screenWidthResolution;
+	public int screenHeightResolution;
 }
 
 [System.Serializable]

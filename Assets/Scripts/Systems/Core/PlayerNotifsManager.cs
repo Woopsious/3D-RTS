@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerNotifsManager : MonoBehaviour
@@ -35,6 +36,12 @@ public class PlayerNotifsManager : MonoBehaviour
 
 		playerEventNotifsWindowObj = playerNotifsWindowParent.transform.GetChild(1).gameObject;
 		playerEventNotifsScrollBar = playerNotifsWindowParent.transform.GetChild(2).GetComponent<Scrollbar>();
+
+		if (SceneManager.GetActiveScene().buildIndex == 1)
+		{
+			playerEventNotifsWindowObj.gameObject.SetActive(true);
+			playerEventNotifsScrollBar.gameObject.SetActive(true);
+		}
 	}
 
 	//FUNCTIONS FOR PLAYER NOTIFICATIONS

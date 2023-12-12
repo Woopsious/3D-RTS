@@ -76,12 +76,6 @@ public class UnitProductionManager : NetworkBehaviour
 				unitVTOL = unit.gameObject;
 		}
 	}
-	public void Update()
-	{
-		ShowUnitBuildGhostProjections();
-
-		PlaceUnitManager();
-	}
 	public void ShowUnitBuildGhostProjections()
 	{
 		if (playerController.unitProductionManager.currentUnitPlacements.Count != 0)
@@ -136,7 +130,7 @@ public class UnitProductionManager : NetworkBehaviour
 					if (playerController.CheckIfCanBuyEntity(broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost))
 					{
 						//then -unit prices and add to correct queue list and start production on first one if not already started, then update resUI
-						playerController.EntityCostServerRPC(playerController.isPlayerOne, 
+						GameManager.Instance.UpdateResourcesServerRPC(playerController.isPlayerOne, true, false, false, false , 0,
 							broughtUnit.moneyCost, broughtUnit.alloyCost, broughtUnit.crystalCost);
 
 						if (build.listNumRef == 1)
@@ -298,7 +292,7 @@ public class UnitProductionManager : NetworkBehaviour
 	}
 	public IEnumerator ChangeBuiltUnitState(ulong NetworkUnitId, Vector3 destination)
 	{
-		yield return new WaitForSeconds(0.1f);
+		yield return new WaitForSeconds(1f);
 		playerController.unitSelectionManager.MoveUnitsServerRPC(NetworkUnitId, destination);
 	}
 	public IEnumerator OpenCloseDoors(VehProdSpawnLocation VehSpawnLocation)

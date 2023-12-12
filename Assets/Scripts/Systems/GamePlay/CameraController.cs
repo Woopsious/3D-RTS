@@ -37,6 +37,8 @@ public class CameraController : MonoBehaviour
 	}
 	public void Update()
 	{
+		if (GameManager.Instance.hasGameStarted.Value == false || GameManager.Instance.hasGameEnded.Value == true) return;
+
 		MoveCamera();
 		RotateCamera();
 		ClampPosition();

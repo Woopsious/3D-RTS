@@ -7,7 +7,6 @@ public class UnitIdleState : UnitBaseState
 {
 	public override void Enter(UnitStateController unit)
 	{
-		Debug.LogWarning("Entered Idle State");
 		if (!unit.isTurret)
 		{
 			if (unit.hasRadar)

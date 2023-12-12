@@ -38,6 +38,7 @@ public class UnitSelectionManager : NetworkBehaviour
 	public List<TurretController> selectedTurretList;
 	public List<UnitStateController> dragSelectedUnitList;
 	int unitCount = 0;
+	bool isAddingUnits;
 
 	public BuildingManager selectedBuilding;
 	public CargoShipController SelectedCargoShip;
@@ -61,9 +62,8 @@ public class UnitSelectionManager : NetworkBehaviour
 		transparentGreen = new Color(0, 1, 0, 0.1f);
 		transparentRed = new Color(1, 0, 0, 0.1f);
 	}
-	public void Update()
+	public void EntitySelectionAndDeselection()
 	{
-		ShowUnitGhostProjections();
 		//unit selection
 		if (Input.GetMouseButtonDown(0))
 		{
@@ -85,48 +85,13 @@ public class UnitSelectionManager : NetworkBehaviour
 			mouseDownTime = 0;
 		}
 		//clear selected list
-		if (Input.GetMouseButtonDown(1) && selectedUnitList.Count != 0 && !selectedUnitList[0].isTurret)
-		{
-			DeselectUnits();
-			SetUnitRefundButtonActiveUnactive();
-		}
-		else if (Input.GetMouseButtonDown(1) && selectedUnitList.Count != 0 && selectedUnitList[0].isTurret)
-		{
-			DeselectTurrets();
-		}
-		if (Input.GetMouseButtonDown(1) && selectedBuilding != null)
-		{
-			DeselectBuilding();
-		}
-		if (Input.GetMouseButtonDown(1) && SelectedCargoShip != null)
+		if (Input.GetMouseButtonDown(1))
 		{
 			DeselectCargoShip();
-		}
-		//add selected list to group list
-		if (Input.GetKey(KeyCode.LeftShift))
-		{
-			ManageSelectedUnitsAndGroups();
-		}
-
-		if (movePosHighlighterObj[0].activeInHierarchy)
-		{
-			for (int i = 0; i < movePosHighlighterObj.Count; i++)
-			{
-				if (movePosHighlighterObj[i].activeInHierarchy)
-				{
-					GameObject obj = movePosHighlighterObj[i].gameObject;
-					Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
-					NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 2.5f, filter);
-
-					if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
-					{
-						if (obj.transform.position.y >= hit.position.y)
-							obj.GetComponent<Renderer>().material.SetColor("_Color", transparentGreen);
-					}
-					else
-						obj.GetComponent<Renderer>().material.SetColor("_Color", transparentRed);
-				}
-			}
+			DeselectBuilding();
+			DeselectUnits();
+			SetUnitRefundButtonActiveUnactive();
+			DeselectTurrets();
 		}
 	}
 	public void RefundSelectedUnits()
@@ -151,7 +116,7 @@ public class UnitSelectionManager : NetworkBehaviour
 	}
 
 	//UNIT GHOST PROJECTION WHEN UNITS ARE HIGHLIGHTED
-	public void ShowUnitGhostProjections()
+	public void ManageUnitGhostProjections()
 	{
 		if (selectedUnitList.Count != 0)
 		{
@@ -187,6 +152,29 @@ public class UnitSelectionManager : NetworkBehaviour
 			}
 		}
 	}
+	public void TrackIfGhostProjectionsAreTouchingNavMesh()
+	{
+		if (movePosHighlighterObj[0].activeInHierarchy)
+		{
+			for (int i = 0; i < movePosHighlighterObj.Count; i++)
+			{
+				if (movePosHighlighterObj[i].activeInHierarchy)
+				{
+					GameObject obj = movePosHighlighterObj[i].gameObject;
+					Vector3 targetPos = new Vector3(obj.transform.position.x, obj.transform.position.y - 5, obj.transform.position.z);
+					NavMesh.SamplePosition(obj.transform.position, out NavMeshHit hit, 2.5f, filter);
+
+					if (Mathf.Approximately(obj.transform.position.x, hit.position.x) && Mathf.Approximately(obj.transform.position.z, hit.position.z))
+					{
+						if (obj.transform.position.y >= hit.position.y)
+							obj.GetComponent<Renderer>().material.SetColor("_Color", transparentGreen);
+					}
+					else
+						obj.GetComponent<Renderer>().material.SetColor("_Color", transparentRed);
+				}
+			}
+		}
+	}
 	public void HideAllGhostProjections()
 	{
 		if (selectedUnitList.Count == 0 && selectedTurretList.Count == 0)
@@ -208,9 +196,15 @@ public class UnitSelectionManager : NetworkBehaviour
 			//handle selecting of entities
 			if (hitInfo.collider.gameObject.GetComponent<Entities>() != null)
 			{
+				if (playerController.isInTacticalView)
+					playerController.HideTacticalView();
+
 				Entities entity = hitInfo.collider.gameObject.GetComponent<Entities>();
-				if (entity.GetComponent<UnitStateController>() != null && entity.isPlayerOneEntity != playerController.isPlayerOne)
-					TryAttackEnemyEntity(entity.NetworkObjectId);
+				if (selectedUnitList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne ||
+					selectedTurretList.Count != 0 && entity.isPlayerOneEntity != playerController.isPlayerOne)
+				{
+					TryAttackEnemyEntity(entity);
+				}
 
 				else if (entity.GetComponent<CargoShipController>() != null)
 					TrySelectCargoShip(entity.GetComponent<CargoShipController>());
@@ -235,6 +229,9 @@ public class UnitSelectionManager : NetworkBehaviour
 
 				else
 				{
+					if (playerController.isInTacticalView)
+						playerController.HideTacticalView();
+
 					DeselectCargoShip();
 					DeselectBuilding();
 					DeselectTurrets();
@@ -257,6 +254,15 @@ public class UnitSelectionManager : NetworkBehaviour
 			SelectedCargoShip = cargoShip;
 			SelectedCargoShip.selectedHighlighter.SetActive(true);
 			SelectedCargoShip.isSelected = true;
+
+			foreach (CapturePointController capturePoint in playerController.capturePointsList)
+			{
+				foreach (ResourceNodes resourceNode in capturePoint.resourceNodes)
+				{
+					resourceNode.ShowMineResourceButtonUi();
+					resourceNode.ShowResourceCounterUi();
+				}
+			}
 		}
 	}
 	public void TrySelectBuilding(BuildingManager building)
@@ -387,23 +393,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		//move selected cargoShip
 		if(SelectedCargoShip != null)
 		{
-			ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
-
-			if (!resourceNode.canPOneMine && playerController.isPlayerOne || !resourceNode.canPTwoMine && !playerController.isPlayerOne)
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("You need to own the Capturepoint to mine this resource node", 4f);
-
-			else if (resourceNode.isBeingMined.Value)
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
-
-			else if (resourceNode.isEmpty.Value)
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
-
-			else //else mine selected node
-			{
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
-				SelectedCargoShip.SetResourceNodeFromPlayerInputServerRPC(SelectedCargoShip.GetComponent<NetworkObject>().NetworkObjectId, 
-					resourceNode.GetComponent<NetworkObject>().NetworkObjectId);
-			}
+			TryMineResourceNode(Obj);
 		}
 		//move selected units to mouse pos
 		else if (selectedUnitList.Count != 0)
@@ -411,32 +401,106 @@ public class UnitSelectionManager : NetworkBehaviour
 			if (!selectedUnitList[0].isTurret)
 			{
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Moving!", 1f);
+				AnnouncerSystem.Instance.PlayPosReplyMovingSFX();
 
 				for (int i = 0; i < selectedUnitList.Count; i++)
 				{
-					Vector3 movePos = movePosHighlighterObj[i].transform.position;  //ask server to move units fo clients
+					Vector3 movePos = movePosHighlighterObj[i].transform.position;  //ask server to move units for clients
 					MoveUnitsServerRPC(selectedUnitList[i].EntityNetworkObjId, movePos);
 				}
 			}
 		}
 	}
-	public void TryAttackEnemyEntity(ulong targetEntityNetworkObjId)
+	public void TryMineResourceNode(GameObject Obj)
 	{
-		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target!", 1f);
+		ResourceNodes resourceNode = Obj.GetComponent<ResourceNodes>();
 
-		//move selected units closer to target and attack it
-		for (int i = 0; i < selectedUnitList.Count; i++)
+		if (!resourceNode.canPOneMine && playerController.isPlayerOne || !resourceNode.canPTwoMine && !playerController.isPlayerOne)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("You need to own the Capturepoint to mine this resource node", 4f);
+
+		else if (resourceNode.isBeingMined.Value)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node already being mined!", 2f);
+
+		else if (resourceNode.isEmpty.Value)
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Resource node is empty!", 2f);
+
+		else if (SelectedCargoShip != null) //else mine selected node if cargoship not null
 		{
-			UnitStateController unit = selectedUnitList[i];
-			unit.TryAttackPlayerSetTargetServerRPC(unit.EntityNetworkObjId, targetEntityNetworkObjId);
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Orders Recieved", 2f);
+			AnnouncerSystem.Instance.PlayPosReplyMiningSFX();
+
+			SelectedCargoShip.SetResourceNodeFromPlayerInputServerRPC(SelectedCargoShip.GetComponent<NetworkObject>().NetworkObjectId,
+				resourceNode.GetComponent<NetworkObject>().NetworkObjectId);
+		}
+	}
+	public void TryAttackEnemyEntity(Entities targetEntity)
+	{
+		//move selected units closer to target and attack it
+		if (selectedUnitList.Count != 0)
+		{
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target!", 1f);
+			AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
+
+			foreach (UnitStateController unit in selectedUnitList)
+			{
+				unit.hasReachedPlayerSetTarget = false;
+				SetPlayerSetTargetServerRPC(unit.EntityNetworkObjId, targetEntity.EntityNetworkObjId);
+
+				if (!unit.IsPlayerSetTargetSpotted(targetEntity))
+					MoveUnitsServerRPC(unit.EntityNetworkObjId, targetEntity.transform.position);
+			}
+		}
+		//set turrets to attack if in range
+		else if (selectedTurretList.Count != 0)
+		{
+			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Attacking Target if turret is in range!", 3f);
+			AnnouncerSystem.Instance.PlayPosReplyEngagingSFX();
+
+			foreach (UnitStateController turret in selectedTurretList)
+				SetPlayerSetTargetServerRPC(turret.EntityNetworkObjId, targetEntity.EntityNetworkObjId);
+		}
+		else
+			Debug.LogError("no matches shouldnt happen");
+	}
+	[ServerRpc(RequireOwnership = false)]
+	public void SetPlayerSetTargetServerRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId)
+	{
+		SetPlayerTargetClientRPC(unitNetworkObjId, targetEntityNetworkObjId);
+	}
+	[ClientRpc]
+	public void SetPlayerTargetClientRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId)
+	{
+		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkObjId].GetComponent<UnitStateController>();
+		try //if not in spawned obj list then its probably one of the HQ's
+		{
+			Entities targetEntity = NetworkManager.SpawnManager.SpawnedObjects[targetEntityNetworkObjId].GetComponent<Entities>();
+			unit.playerSetTarget = targetEntity;
+		}
+		catch
+		{
+			Debug.LogError("Player Hq's not in spawned obj list, handling exception");
+			if (unit.isPlayerOneEntity)
+			{
+				Entities targetEntity = GameManager.Instance.playerTwoHQ.GetComponent<Entities>();
+				unit.playerSetTarget = targetEntity;
+			}
+			else if (!unit.isPlayerOneEntity)
+			{
+				Entities targetEntity = GameManager.Instance.playerOneHQ.GetComponent<Entities>();
+				unit.playerSetTarget = targetEntity;
+			}
 		}
 	}
 
-	//remove selected unit from selectedunitlist if it died whilst selected
+	//remove selected entities from lists if it died whilst selected
 	public void RemoveDeadUnitFromSelectedUnits(UnitStateController unit)
 	{
 		selectedUnitList.Remove(unit);
 		movePosHighlighterObj[selectedUnitList.Count].SetActive(false);
+	}
+	public void RemoveDeadTurretFromSelectedTurrets(TurretController turret)
+	{
+		selectedTurretList.Remove(turret);
 	}
 
 	//DRAG SELECT FUNCTIONS
@@ -458,10 +522,51 @@ public class UnitSelectionManager : NetworkBehaviour
 		selectionBoxUi.sizeDelta = new Vector2(Mathf.Abs(width), Mathf.Abs(height));
 
 		bounds = new Bounds(selectionBoxRect.anchoredPosition, selectionBoxRect.sizeDelta);
+
 		foreach (UnitStateController unit in playerController.unitListForPlayer)
 		{
-			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf && 
+
+			//decide weather drag select should be turrets or units
+			if (dragSelectedUnitList.Count == 0)
+			{
+				if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf &&
+					unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne && !unit.isCargoShip)
+				{
+					if (!unit.isTurret)
+						isAddingUnits = true;
+					else
+						isAddingUnits = false;
+				}
+			}
+			AddOrRemoveEntitesToDragSelection(unit, isAddingUnits);
+		}
+	}
+	public void AddOrRemoveEntitesToDragSelection(UnitStateController unit, bool isAddingUnits)
+	{
+		if (isAddingUnits)
+		{
+			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf &&
 				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne && !unit.isTurret && !unit.isCargoShip)
+			{
+				unit.ShowUIHealthBar();
+				unit.selectedHighlighter.SetActive(true);
+				unit.isSelected = true;
+				dragSelectedUnitList.Add(unit);
+				unitCount++;
+			}
+			else if (!UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && unit.selectedHighlighter.activeSelf)
+			{
+				unit.HideUIHealthBar();
+				unit.selectedHighlighter.SetActive(false);
+				unit.isSelected = false;
+				dragSelectedUnitList.Remove(unit);
+				unitCount--;
+			}
+		}
+		else if (!isAddingUnits)
+		{
+			if (UnitInSelectionBox(Camera.main.WorldToScreenPoint(unit.transform.position), bounds) && !unit.selectedHighlighter.activeSelf &&
+				unitCount < 8 && !unit.isPlayerOneEntity != playerController.isPlayerOne && unit.isTurret && !unit.isCargoShip)
 			{
 				unit.ShowUIHealthBar();
 				unit.selectedHighlighter.SetActive(true);
@@ -492,8 +597,10 @@ public class UnitSelectionManager : NetworkBehaviour
 		}
 		foreach (UnitStateController unit in dragSelectedUnitList)
 		{
-			if(unit.isPlayerOneEntity != !playerController.isPlayerOne && !unit.isTurret && !unit.isCargoShip)
+			if (isAddingUnits)
 				selectedUnitList.Add(unit);
+			else if (!isAddingUnits)
+				selectedTurretList.Add(unit.GetComponent<TurretController>());
 		}
 		dragSelectedUnitList.Clear();
 		selectionBoxRect.gameObject.SetActive(false);
@@ -510,6 +617,14 @@ public class UnitSelectionManager : NetworkBehaviour
 			SelectedCargoShip.selectedHighlighter.SetActive(false);
 			SelectedCargoShip.isSelected = false;
 			SelectedCargoShip = null;
+		}
+		foreach (CapturePointController capturePoint in playerController.capturePointsList)
+		{
+			foreach (ResourceNodes resourceNode in capturePoint.resourceNodes)
+			{
+				resourceNode.HideMineResourceButtonUi();
+				resourceNode.HideResourceCounterUi();
+			}
 		}
 	}
 	public void DeselectBuilding()
@@ -534,7 +649,8 @@ public class UnitSelectionManager : NetworkBehaviour
 				if (selectedUnit)
 				selectedUnit.HideUIHealthBar();
 				selectedUnit.selectedHighlighter.SetActive(false);
-				selectedUnit.attackRangeMeshObj.SetActive(false);
+				if (selectedUnit.attackRangeMeshObj != null)
+					selectedUnit.attackRangeMeshObj.SetActive(false);
 				selectedUnit.isSelected = false;
 			}
 
@@ -550,7 +666,6 @@ public class UnitSelectionManager : NetworkBehaviour
 	{
 		if (selectedTurretList.Count != 0)
 		{
-			SetUnitRefundButtonActiveUnactive();
 			foreach (TurretController selectedTurret in selectedTurretList)
 			{
 				selectedTurret.HideUIHealthBar();
@@ -559,20 +674,17 @@ public class UnitSelectionManager : NetworkBehaviour
 				selectedTurret.isSelected = false;
 				selectedTurret.GetComponent<TurretController>().refundBuildingBackgroundObj.SetActive(false);
 			}
-
-			foreach (GameObject obj in movePosHighlighterObj)
-			{
-				if (obj.activeInHierarchy)
-					obj.SetActive(false);
-			}
-			selectedUnitList.Clear();
+			selectedTurretList.Clear();
 		}
 	}
 
 	//UNIT GROUP SAVING AND SELECTING FUNCTIONS
 	public void ManageSelectedUnitsAndGroups()
 	{
-		if (selectedUnitList.Count != 0 && !selectedUnitList[0].isTurret)
+		//add selected list to group list
+		if (!Input.GetKey(KeyCode.LeftShift)) return;
+
+		if (selectedUnitList.Count != 0)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
@@ -595,7 +707,7 @@ public class UnitSelectionManager : NetworkBehaviour
 				AssignUnitsToGroupFive();
 			}
 		}
-		else if (selectedUnitList.Count == 0 && !selectedUnitList[0].isTurret)
+		else if (selectedUnitList.Count == 0)
 		{
 			if (Input.GetKeyDown(KeyCode.Alpha1))
 			{
@@ -620,6 +732,7 @@ public class UnitSelectionManager : NetworkBehaviour
 		}
 	}
 	//reset ui list count, recount units in group to update ui
+	//Add
 	public void AssignUnitsToGroupOne()
 	{
 		playerController.gameUIManager.ResetUnitGroupUI();
@@ -675,6 +788,21 @@ public class UnitSelectionManager : NetworkBehaviour
 		AddSelectedUnitsToNewGroup(unitGroupFive, 5);
 		playerController.gameUIManager.ShowGroupedUnitsWhenCreatingGroup();
 	}
+
+	//remove all units from group
+	public void RemoveUnitsFromGroup(int groupIndex)
+	{
+		CheckForUnitInList(unitGroupOne, groupIndex);
+	}
+	public void RemoveSelectedUnitsFromAllGroups()
+	{
+		CheckForUnitInList(unitGroupOne, 1);
+		CheckForUnitInList(unitGroupTwo, 2);
+		CheckForUnitInList(unitGroupThree, 3);
+		CheckForUnitInList(unitGroupFour, 4);
+		CheckForUnitInList(unitGroupFive, 5);
+	}
+
 	//checks group for unit, if unit in group remove unit from group, then add unit to new group, update ui for changes 
 	public void CheckForUnitInList(List<UnitStateController> unitGroup, int groupToUpdate)
 	{
@@ -778,14 +906,12 @@ public class UnitSelectionManager : NetworkBehaviour
 	[ServerRpc(RequireOwnership = false)]
 	public void MoveUnitsServerRPC(ulong NetworkObjId, Vector3 destination)
 	{
-		Debug.Log("server call");
 		if (!IsServer) return;
 		MoveUnitsClientRPC(NetworkObjId, destination);
 	}
 	[ClientRpc]
 	public void MoveUnitsClientRPC(ulong NetworkObjId, Vector3 destination)
 	{
-		Debug.Log("client call");
 		NetworkManager.SpawnManager.SpawnedObjects[NetworkObjId].GetComponent<UnitStateController>().MoveToDestination(destination);
 	}
 }

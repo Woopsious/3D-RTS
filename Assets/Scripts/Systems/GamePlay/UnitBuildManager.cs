@@ -124,8 +124,8 @@ public class UnitBuildManager : MonoBehaviour
 	public void CancelProduction()
 	{
 		UnitStateController unit = UnitPrefab.GetComponent<UnitStateController>();
-		UnitRefundCostServerRPC(isPlayerOne, unit.moneyCost, unit.alloyCost, unit.crystalCost);
-		StartCoroutine(GameManager.Instance.gameUIManager.UpdateCurrentResourcesUI(1f));
+		GameManager.Instance.UpdateResourcesServerRPC(isPlayerOne, false, false, true, false, 
+			0, unit.moneyCost, unit.alloyCost, unit.crystalCost);
 
 		if (isSpawnPointStillValid)
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("unit production canceled", 1f);
@@ -146,21 +146,5 @@ public class UnitBuildManager : MonoBehaviour
 
 		unitProductionManager.currentUnitPlacements.Remove(this);
 		Destroy(gameObject);
-	}
-	[ServerRpc(RequireOwnership = false)]
-	public void UnitRefundCostServerRPC(bool wasPlayerOneEntity, int moneyCost, int alloyCost, int crystalCost)
-	{
-		if (wasPlayerOneEntity)
-		{
-			GameManager.Instance.playerOneCurrentMoney.Value += moneyCost;
-			GameManager.Instance.playerOneCurrentAlloys.Value += alloyCost;
-			GameManager.Instance.playerOneCurrentCrystals.Value += crystalCost;
-		}
-		else if (!wasPlayerOneEntity)
-		{
-			GameManager.Instance.playerTwoCurrentMoney.Value += moneyCost;
-			GameManager.Instance.playerTwoCurrentAlloys.Value += alloyCost;
-			GameManager.Instance.playerTwoCurrentCrystals.Value += crystalCost;
-		}
 	}
 }

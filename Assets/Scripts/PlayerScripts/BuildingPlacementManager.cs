@@ -60,13 +60,6 @@ public class BuildingPlacementManager : NetworkBehaviour
 			}
 		}
 	}
-	public void Update()
-	{
-		BuildingFollowsMouseCursor();
-
-		if (currentBuildingPlacement != null && !playerController.IsMouseOverUI())
-			PlaceBuildingManager();
-	}
 	public void BuildingFollowsMouseCursor()
 	{
 		if (currentBuildingPlacement != null)
@@ -85,11 +78,19 @@ public class BuildingPlacementManager : NetworkBehaviour
 	//place building and toggle it on
 	public void PlaceBuildingManager()
 	{
-		if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlaceBuilding())
-			TryPlaceCurrentBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
+		if (currentBuildingPlacement != null && !playerController.IsMouseOverUI())
+		{
+			if (Input.GetMouseButtonDown(0) && currentBuildingPlacement.GetComponent<CanPlaceBuilding>().CheckIfCanPlaceBuilding())
+				TryPlaceCurrentBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
 
-		if (Input.GetMouseButtonDown(1))
-			CancelBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
+			if (Input.GetMouseButtonDown(1))
+			{
+				CancelBuildingPlacementServerRPC(currentBuildingPlacement.GetComponent<NetworkObject>().NetworkObjectId);
+
+				foreach (CapturePointController capturePoint in playerController.capturePointsList)
+					capturePoint.HideBuildableArea();
+			}
+		}
 	}
 	[ServerRpc(RequireOwnership = false)]
 	public void ApplyTechUpgradesToNewBuildingsServerRPC(ulong buildingNetworkedId)
@@ -189,7 +190,12 @@ public class BuildingPlacementManager : NetworkBehaviour
 		if (currentBuildingPlacement == null)
 		{
 			if (playerController.CheckIfCanBuyEntity(building.moneyCost, building.alloyCost, building.crystalCost))
+			{
 				SpawnPlayerBuildingServerRPC(buildingIndex);
+
+				foreach (CapturePointController capturePoint in playerController.capturePointsList)
+					capturePoint.ShowBuildableArea();
+			}
 			else
 				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Cant Afford building", 2);
 		}
@@ -234,38 +240,22 @@ public class BuildingPlacementManager : NetworkBehaviour
 	public void BuildingPlacedClientRPC(ulong networkObjId)
 	{
 		NetworkObject buildingObj = NetworkManager.Singleton.SpawnManager.SpawnedObjects[networkObjId];
-		//enable building triggers, navMeshObstacle, set layer and unhighlight, -building cost and update resUI
+		//enable script, -building cost and update resUI
 		if (buildingObj.GetComponent<BuildingManager>() != null)
-		{
-			buildingObj.GetComponent<BuildingManager>().enabled = true;
+			buildingObj.GetComponent<BuildingManager>().OnBuildingStartUp();
 
-			if (buildingObj.GetComponent<BuildingManager>().isVTOLProdBuilding)
-				buildingObj.GetComponent<SphereCollider>().isTrigger = true;
-			else
-				buildingObj.GetComponent<BoxCollider>().isTrigger = true;
-		}
-		else if (buildingObj.GetComponent<TurretController>() != null)
-		{
-			buildingObj.GetComponent<TurretController>().enabled = true;
-			buildingObj.GetComponent<BoxCollider>().isTrigger = true;
-			buildingObj.transform.GetChild(4).GetComponent<SphereCollider>().enabled = true;
-		}
-
-		if (buildingObj.GetComponent<Entities>().isPlayerOneEntity)
-			buildingObj.GetComponent<Entities>().gameObject.layer = LayerMask.NameToLayer("PlayerOneUnits");
-		else
-			buildingObj.GetComponent<Entities>().gameObject.layer = LayerMask.NameToLayer("PlayerTwoUnits");
-
-		buildingObj.GetComponent<CanPlaceBuilding>().highlighterObj.SetActive(false);
-		buildingObj.GetComponent<CanPlaceBuilding>().navMeshObstacle.enabled = true;
-		buildingObj.GetComponent<CanPlaceBuilding>().isPlaced = true;
+		if (buildingObj.GetComponent<TurretController>() != null)
+			buildingObj.GetComponent<TurretController>().OnTurretStartUp();
 
 		if (currentBuildingPlacement != null && currentBuildingPlacement.GetComponent<NetworkObject>().IsOwner)
 		{
-			playerController.EntityCostServerRPC(playerController.isPlayerOne,
-				currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
+			GameManager.Instance.UpdateResourcesServerRPC(playerController.isPlayerOne, true, false, false, false, 
+				0, currentBuildingPlacement.moneyCost, currentBuildingPlacement.alloyCost, currentBuildingPlacement.crystalCost);
 			currentBuildingPlacement = null;
 			GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Building placed", 1f);
 		}
+
+		foreach (CapturePointController capturePoint in playerController.capturePointsList)
+			capturePoint.HideBuildableArea();
 	}
 }

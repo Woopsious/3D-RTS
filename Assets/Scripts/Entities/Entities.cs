@@ -52,8 +52,6 @@ public class Entities : NetworkBehaviour
 		UiObj.transform.SetParent(FindObjectOfType<GameUIManager>().gameObject.transform);
 		UiObj.transform.rotation = Quaternion.identity;
 		HideUIHealthBar();
-
-		//FoVMeshObj.SetActive(true);
 	}
 	public virtual void Update()
 	{
@@ -138,15 +136,16 @@ public class Entities : NetworkBehaviour
 	{
 		RecieveDamage(dmg);
 		UpdateHealthBar();
-		RecieveDamageClientRPC(HealthText.text);
+		RecieveDamageClientRPC(currentHealth.Value, HealthSlider.value);
 	}
 	[ClientRpc]
-	public void RecieveDamageClientRPC(string healthBarUi)
+	public void RecieveDamageClientRPC(int healthValue, float healthBarPercentage)
 	{
 		ResetIsEntityHitTimer();
-		HealthText.text = healthBarUi;
+		HealthText.text = healthValue.ToString() + " / " + maxHealth.Value.ToString();
+		HealthSlider.value = healthBarPercentage;
 
-		if (currentHealth.Value <= 0)
+		if (healthValue <= 0)
 			OnEntityDeath();
 	}
 	public void RecieveDamage(float dmg)
@@ -174,9 +173,9 @@ public class Entities : NetworkBehaviour
 	}
 
 	//UTILITY FUNCTIONS
-	public bool ShouldDisplaySpottedNotifToPlayer()
+	public bool IsPlayerControllerNull()
 	{
-		if (playerController != null)
+		if (playerController == null)
 			return true;
 		else
 			return false;
@@ -185,16 +184,16 @@ public class Entities : NetworkBehaviour
 	{
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Refunded 75% of resources", 1f);
 		RemoveEntityRefs();
-		playerController.gameUIManager.gameManager.RefundEntityCostServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
+		playerController.gameUIManager.gameManager.UpdateResourcesServerRPC(isPlayerOneEntity, false, true, false, false,
+			GetComponent<NetworkObject>().NetworkObjectId, 0, 0, 0);
 		playerController.gameUIManager.gameManager.RemoveEntityServerRPC(GetComponent<NetworkObject>().NetworkObjectId);
-		StartCoroutine(playerController.gameUIManager.UpdateCurrentResourcesUI(0f));
 	}
 	public void UpdateEntityAudioVolume()
 	{
 		if (audioSFXs.Count != 0)
 		{
 			foreach (AudioSource audio in audioSFXs)
-				audio.volume = AudioManager.Instance.gameSFX.volume;
+				audio.volume = AudioManager.Instance.gameSFXVolume;
 		}
 	}
 }

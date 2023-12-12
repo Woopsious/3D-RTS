@@ -4,7 +4,7 @@ using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LobbyItemManager : MonoBehaviour
+public class LobbyDataItem : MonoBehaviour
 {
 	public Lobby lobby;
 	public string lobbyId;

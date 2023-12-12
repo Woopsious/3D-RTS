@@ -12,6 +12,13 @@ public class TurretController : UnitStateController
 	public GameObject turretTower;
 	public GameObject turretGuns;
 
+	public void OnTurretStartUp()
+	{
+		GetComponent<TurretController>().enabled = true;
+		GetComponent<BoxCollider>().isTrigger = true;
+		gameObject.transform.GetChild(4).GetComponent<SphereCollider>().enabled = true;
+	}
+
 	public void ActivateTurret()
 	{
 		animatorController.SetBool("isIdle", false);
@@ -23,24 +30,6 @@ public class TurretController : UnitStateController
 	{
 		animatorController.SetBool("isIdle", true);
 		audioSFXs[1].Play();
-	}
-	[ServerRpc(RequireOwnership = false)]
-	public override void TryAttackPlayerSetTargetServerRPC(ulong unitNetworkObjId, ulong targetEntityNetworkObjId, 
-		ServerRpcParams serverRpcParams = default)
-	{
-		UnitStateController unit = NetworkManager.SpawnManager.SpawnedObjects[unitNetworkObjId].GetComponent<UnitStateController>();
-		Entities targetEntity = NetworkManager.SpawnManager.SpawnedObjects[targetEntityNetworkObjId].GetComponent<Entities>();
-		ulong clientId = serverRpcParams.Receive.SenderClientId;
-
-		if (IsPlayerSetTargetSpotted(targetEntity)) //check if already spotted in target lists
-			unit.playerSetTarget = targetEntity;
-		else //let player know its out of view/range of turret
-		{
-			if (clientId == 0)
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Target Out of Attack Range", 1.5f);
-			else if (clientId == 1)
-				GameManager.Instance.playerNotifsManager.DisplayNotifisMessage("Target Out of Attack Range", 1.5f);
-		}
 	}
 
 	//functions to make turret tower/guns aim at enemy targets
