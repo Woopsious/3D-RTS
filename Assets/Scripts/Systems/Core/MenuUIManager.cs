@@ -118,6 +118,7 @@ public class MenuUIManager : MonoBehaviour
 	{
 		GameManager.Instance.LoadScene(GameManager.Instance.mapOneSceneName);
 	}
+
 	//MAIN MENU UI UPDATES
 	public void ShowMainMenuUi()
 	{
