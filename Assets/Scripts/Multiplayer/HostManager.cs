@@ -90,9 +90,6 @@ public class HostManager : NetworkBehaviour
 			throw;
 		}
 
-		Debug.Log($"server: {allocation.ConnectionData[0]} {allocation.ConnectionData[1]}");
-		Debug.Log($"server: {allocation.AllocationId}");
-
 		try
 		{
 			LobbyManager.Instance.lobbyJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
@@ -102,7 +99,6 @@ public class HostManager : NetworkBehaviour
 			Debug.LogError("Relay create join code request failed");
 			throw;
 		}
-
 		return new RelayServerData(allocation, "dtls");
 	}
 
@@ -110,8 +106,6 @@ public class HostManager : NetworkBehaviour
 	{
 		networkIdOfKickedPlayer = networkedId;
 		ulong networkedIdulong = Convert.ToUInt64(networkedId);
-		Debug.LogWarning($"Networked string ID: {networkedId}");
-		Debug.LogWarning($"Networked ulong ID: {networkedIdulong}");
 
 		NetworkManager.Singleton.DisconnectClient(networkedIdulong);
 	}
@@ -120,7 +114,7 @@ public class HostManager : NetworkBehaviour
 		try
 		{
 			await LobbyService.Instance.RemovePlayerAsync(LobbyManager.Instance._Lobby.Id, playerId);
-			Debug.LogWarning($"player with Id: {playerId} kicked from lobby");
+			Debug.Log($"player with Id: {playerId} kicked from lobby");
 		}
 		catch (LobbyServiceException e)
 		{

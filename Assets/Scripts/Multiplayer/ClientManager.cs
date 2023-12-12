@@ -83,11 +83,6 @@ public class ClientManager : NetworkBehaviour
 			Debug.LogError("Relay create join code request failed");
 			throw;
 		}
-
-		Debug.Log($"client: {allocation.ConnectionData[0]} {allocation.ConnectionData[1]}");
-		Debug.Log($"host: {allocation.HostConnectionData[0]} {allocation.HostConnectionData[1]}");
-		Debug.Log($"client: {allocation.AllocationId}");
-
 		return new RelayServerData(allocation, "dtls");
 	}
 

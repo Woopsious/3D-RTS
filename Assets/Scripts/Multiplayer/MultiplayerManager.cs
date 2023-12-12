@@ -39,7 +39,7 @@ public class MultiplayerManager : NetworkBehaviour
 
 		if (!AuthenticationService.Instance.IsAuthorized)
 		{
-			AuthenticationService.Instance.SignedIn += () => { Debug.LogWarning($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
+			AuthenticationService.Instance.SignedIn += () => { Debug.Log($"Player Id: {AuthenticationService.Instance.PlayerId}"); };
 			await AuthenticationService.Instance.SignInAnonymouslyAsync();
 		}
 		ClientManager.Instance.clientId = AuthenticationService.Instance.PlayerId;

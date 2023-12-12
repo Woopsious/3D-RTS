@@ -456,15 +456,12 @@ public class GameManager : NetworkBehaviour
 			NotifyOtherPlayerIsReadyClientRPC(isPlayerOne, 2);
 
 		//start game first time in scene
-		if (hasGameEnded.Value == false)
+		if (hasGameEnded.Value == false && playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
 		{
-			if (playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)
-			{
-				playerOneReadyToStart.Value = false;
-				playerTwoReadyToStart.Value = false;
-				hasGameStarted.Value = true;
-				StartGameClientRPC();
-			}
+			playerOneReadyToStart.Value = false;
+			playerTwoReadyToStart.Value = false;
+			hasGameStarted.Value = true;
+			StartGameClientRPC();
 		}
 		//restart game after a game has ended
 		else if (hasGameEnded.Value == true && playerOneReadyToStart.Value == true && playerTwoReadyToStart.Value == true)

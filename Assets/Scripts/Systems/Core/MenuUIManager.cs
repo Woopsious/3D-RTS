@@ -343,8 +343,6 @@ public class MenuUIManager : MonoBehaviour
 	//FUNCTIONS TO CHANGE KEYBINDS
 	public void SetUpKeybindButtonNames()
 	{
-		Debug.LogWarning(InputManager.Instance.keyBindDictionary.Count);
-
 		for (int i = 0; i < InputManager.Instance.keyBindDictionary.Count; i++)
 		{
 			int closureIndex = i;

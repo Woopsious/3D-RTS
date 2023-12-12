@@ -154,14 +154,10 @@ public class LobbyManager : NetworkBehaviour
 					Lobby lobby = await LobbyService.Instance.GetLobbyAsync(_Lobby.Id);
 					_Lobby = lobby;
 
-					if (_Lobby.HostId == ClientManager.Instance.clientId)
-						Debug.LogWarning($"is lobby host");
-					else
-						Debug.LogWarning($"is not lobby host");
-
 					if (SceneManager.GetActiveScene().buildIndex == 0)
 						MenuUIManager.Instance.SyncPlayerListforLobbyUi(_Lobby);
 
+					/*
 					if (MultiplayerManager.Instance.CheckIfHost())
 						Debug.LogWarning($"connected Networked clients: {NetworkManager.Singleton.ConnectedClientsList.Count}");
 
@@ -169,6 +165,7 @@ public class LobbyManager : NetworkBehaviour
 					Debug.LogWarning($"clients in lobby: {_Lobby.Players.Count}");
 					Debug.LogWarning($"Local Networked ID: {ClientManager.Instance.clientNetworkedId}");
 					Debug.LogWarning($"Lobby Join Code: {_Lobby.Data["joinCode"].Value}");
+					*/
 				}
 				catch
 				{

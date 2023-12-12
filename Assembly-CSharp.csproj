@@ -93,6 +93,7 @@
     <Compile Include="Assets\Scripts\PlayerScripts\UnitSelectionManager.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\TechTreeManager.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\PlayerData.cs" />
+    <Compile Include="Assets\Scripts\Systems\Core\ToolTipManager.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\PlayerItemManager.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\Collisions.cs" />
     <Compile Include="Assets\Scripts\Entities\BuildingScripts\VehProdSpawnLocation.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Assets\Scripts\Multiplayer\PlayerDataItem.cs" />
     <Compile Include="Assets\Scripts\Entities\BuildingScripts\RefineryController.cs" />
     <Compile Include="Assets\Scripts\Systems\GamePlay\ResourceNodes.cs" />
+    <Compile Include="Assets\Scripts\Systems\Core\ToolTips.cs" />
     <Compile Include="Assets\Scripts\Entities\UnitScripts\UnitBaseState.cs" />
     <Compile Include="Assets\Scripts\Multiplayer\ClientManager.cs" />
     <Compile Include="Assets\Scripts\Systems\Core\GameUIManager.cs" />
