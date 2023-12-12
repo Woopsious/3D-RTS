@@ -63,8 +63,6 @@ public class MultiplayerManager : NetworkBehaviour
 
 			QueryResponse queryResponse = await Lobbies.Instance.QueryLobbiesAsync(queryLobbiesOptions);
 			MenuUIManager.Instance.SetUpLobbyListUi(queryResponse);
-
-			Debug.Log($"lobbies found: {queryResponse.Results.Count}");
 		}
 		catch (LobbyServiceException e)
 		{
@@ -108,10 +106,18 @@ public class MultiplayerManager : NetworkBehaviour
 		if (!MenuUIManager.Instance.MpLobbyPanel.activeInHierarchy) //enable lobby ui once connected to relay
 			MenuUIManager.Instance.ShowLobbyUi();
 	}
+	public void PlayerDisconnectedCallback(ulong id)
+	{
+		if (CheckIfHost())
+			HostManager.Instance.HandlePlayerDisconnectsAsHost(id);
+		else
+			ClientManager.Instance.HandlePlayerDisconnectsAsClient();
+	}
 	[ServerRpc(RequireOwnership = false)]
 	public void SendClientDataToHostServerRPC(string clientUserName, string clientId, ulong clientNetworkId)
 	{
 		HostManager.Instance.connectedClientsInfoList.Add(new ClientDataInfo(clientUserName, clientId, clientNetworkId));
+	}
 	public void ShutDownNetworkManagerIfActive()
 	{
 		if (NetworkManager.Singleton.isActiveAndEnabled)
