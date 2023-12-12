@@ -110,21 +110,11 @@ public class MultiplayerManager : NetworkBehaviour
 	public void SendClientDataToHostServerRPC(string clientUserName, string clientId, ulong clientNetworkId)
 	{
 		HostManager.Instance.connectedClientsInfoList.Add(new ClientDataInfo(clientUserName, clientId, clientNetworkId));
-	}
-	public void PlayerDisconnectedCallback(ulong id)
-	{
-		if (CheckIfHost())
-			HostManager.Instance.HandlePlayerDisconnectsAsHost(id);
-		else
-			ClientManager.Instance.HandlePlayerDisconnectsAsClient();
-	}
-	
 	public void ShutDownNetworkManagerIfActive()
 	{
 		if (NetworkManager.Singleton.isActiveAndEnabled)
 			NetworkManager.Singleton.Shutdown();
 	}
-
 	//check if host from anywhere
 	public bool CheckIfHost()
 	{
