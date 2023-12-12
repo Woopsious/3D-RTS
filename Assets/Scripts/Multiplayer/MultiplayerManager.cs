@@ -63,8 +63,6 @@ public class MultiplayerManager : NetworkBehaviour
 
 			QueryResponse queryResponse = await Lobbies.Instance.QueryLobbiesAsync(queryLobbiesOptions);
 			MenuUIManager.Instance.SetUpLobbyListUi(queryResponse);
-
-			Debug.Log($"lobbies found: {queryResponse.Results.Count}");
 		}
 		catch (LobbyServiceException e)
 		{
