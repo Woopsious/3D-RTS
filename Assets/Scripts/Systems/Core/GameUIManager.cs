@@ -358,15 +358,16 @@ public class GameUIManager : MonoBehaviour
 		Text entityInfoText = go.transform.GetChild(3).GetComponent<Text>();
 
 		entityTitleText.text = entitysList[i].GetComponent<Entities>().entityName;
+		ToolTips toolTip = go.GetComponent<ToolTips>();
 
 		if (entitysList == GameManager.Instance.PlayerOneBuildingsList)
-			GrabBuildingInfo(i, entityInfoText, entityImage);
+			GrabBuildingInfo(i, entityInfoText, entityImage, toolTip);
 		else if (entitysList == GameManager.Instance.PlayerOneUnitsList)
-			GrabUnitInfo(i, entityInfoText, entityImage);
+			GrabUnitInfo(i, entityInfoText, entityImage, toolTip);
 
 		LinkBuyButtons(i, entityBuyButton, entitysList);
 	}
-	public void GrabBuildingInfo(int i, Text textInfo, Image buildingImage)
+	public void GrabBuildingInfo(int i, Text textInfo, Image buildingImage, ToolTips toolTip)
 	{
 		buildingImage.sprite = gameManager.buildingImageList[i];
 
@@ -374,75 +375,101 @@ public class GameUIManager : MonoBehaviour
 		{
 			TurretController building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<TurretController>();
 
-			string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
-			string healthInfo = "Stats:\n Health " + building.maxHealth.Value + ", Armour " + building.armour.Value + "\n";
+			string costInfo = "Cost:\n Money: " + building.moneyCost + ", Alloys: " + building.alloyCost + ", Crystals: " + building.crystalCost + "\n";
+			string healthInfo = "Stats:\n Health: " + building.maxHealth.Value + ", Armour: " + building.armour.Value + "\n";
 
 			WeaponSystem weaponSystem = building.GetComponent<WeaponSystem>();
 			float mainWeaponDPS = weaponSystem.mainWeaponDamage.Value / weaponSystem.mainWeaponAttackSpeed;
 			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage.Value / weaponSystem.secondaryWeaponAttackSpeed;
 			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
 
-			string combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + building.attackRange + "\n";
-			string specialInfo = "A Defensive Turret";
+			string combatInfo = "DPS: " + DPS + ", Attack Range: " + building.attackRange.Value + "\n";
+			string specialInfo = "A Defensive Turret to protect captured areas under your control";
 
-			textInfo.text = costInfo + healthInfo + combatInfo + specialInfo;
+			toolTip.tipToShow = specialInfo;
+			textInfo.text = costInfo + healthInfo + combatInfo;
 		}
 		else
 		{
 			BuildingManager building = GameManager.Instance.PlayerOneBuildingsList[i].GetComponent<BuildingManager>();
 
-			string costInfo = "Cost:\n Money " + building.moneyCost + ", Alloys " + building.alloyCost + ", Crystals " + building.crystalCost + "\n";
-			string healthInfo = "Stats:\n Health " + building.maxHealth.Value + ", Armour " + building.armour.Value + "\n";
+			string costInfo = "Cost:\n Money: " + building.moneyCost + ", Alloys: " + building.alloyCost + ", Crystals: " + building.crystalCost + "\n";
+			string healthInfo = "Stats:\n Health: " + building.maxHealth.Value + ", Armour: " + building.armour.Value + "\n";
 			string specialInfo = "";
 
 			if (building.isGeneratorBuilding)
-				specialInfo = "Special: \n Provides power so other \n buildings can work";
+				specialInfo = "Provides power to other buildings";
 			if (building.isRefineryBuilding)
-				specialInfo = "Special: \n Houses two cargoships \n that collect resources";
-			if (building.isGeneratorBuilding)
-				specialInfo = "Special: \n Provides power so other \n buildings can work";
+				specialInfo = "Houses two cargoships to collect resources from nodes, cargoships will automatically respawn here when destroyed" +
+					"\n\nCargoships can be reassigned to nodes by clicking on them then clicking on a resource node";
 			if (building.isLightVehProdBuilding)
-				specialInfo = "Special: \n Allows production of \n light vehicle units";
+				specialInfo = "Allows the production of light units";
 			if (building.isHeavyVehProdBuilding)
-				specialInfo = "Special: \n Allows production of \n heavy vehicle units";
+				specialInfo = "Allows the production of heavy units";
 			if (building.isVTOLProdBuilding)
-				specialInfo = "Special: \n Allows production of \n VTOL Gunship units";
+				specialInfo = "Allows the production of VTOL Gunship";
 
-			textInfo.text = costInfo + healthInfo + specialInfo;
+			toolTip.tipToShow = specialInfo;
+			textInfo.text = costInfo + healthInfo;
 		}
 	}
-	public void GrabUnitInfo(int i, Text textInfo, Image unitImage)
+	public void GrabUnitInfo(int i, Text textInfo, Image unitImage, ToolTips toolTip)
 	{
 		unitImage.sprite = gameManager.unitImageList[i];
 
 		UnitStateController unit = GameManager.Instance.PlayerOneUnitsList[i].GetComponent<UnitStateController>();
 		NavMeshAgent unitNavMesh = unit.GetComponent<NavMeshAgent>(); 
 
-		string costInfo = "Cost:\n Money " + unit.moneyCost + ", Alloys " + unit.alloyCost + ", Crystals " + unit.crystalCost + "\n";
-		string healthInfo = "Stats:\n Health " + unit.maxHealth.Value + ", Armour " + unit.armour.Value + 
-			", View Range " + unit.ViewRange + "\n";
-		string specialInfo = "Is Armed: NO, Can Fly: NO, Speed " + unitNavMesh.speed * 5 + "MPH \n";
-		string prodInfo = "Built at Light Vehicle Production Building";
-		if (unit.isFlying)
-		{
-			specialInfo = "Is Armed: NO, Can Fly: Yes, Speed " + unitNavMesh.speed * 5 + "MPH \n";
-			prodInfo = "Built at VTOL Production Building";
-		}
+		string costInfo = "Cost:\n Money: " + unit.moneyCost + ", Alloys: " + unit.alloyCost + ", Crystals: " + unit.crystalCost + "\n";
+		string healthInfo = "Stats:\n Health: " + unit.maxHealth.Value + ", Armour: " + unit.armour.Value + 
+			", View Range " + unit.ViewRange + "\n" + "Speed: " + unitNavMesh.speed * 5 + "MPH \n";
+
+		string specialInfo = "An Unarmed unit that cant fly, and is great for scouting and finding the enemy";
+		string prodInfo = "Needs a Light Vehicle Production Building to be able to buy and place";
 
 		string combatInfo = "";
 		if (unit.isUnitArmed)
 		{
 			WeaponSystem weaponSystem = unit.GetComponent<WeaponSystem>();
 			float mainWeaponDPS = weaponSystem.mainWeaponDamage.Value / weaponSystem.mainWeaponAttackSpeed;
-			float SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage.Value / weaponSystem.secondaryWeaponAttackSpeed;
+			float SecondaryWeaponDPS = 0;
 			float DPS = mainWeaponDPS + SecondaryWeaponDPS;
 
-			combatInfo = "Total DPS ignoring armour " + DPS + ", Attack Range " + unit.attackRange.Value + "\n";
+			combatInfo = "DPS:" + DPS + ", Attack Range: " + unit.attackRange.Value + "\n";
+			specialInfo = "An Armed unit that cant fly and is fairly cheap to build in mass numbers, the standerd go to unit with a light autocannon " +
+				"great at dealing with light and some medium armored units";
 
-			if (weaponSystem.secondaryWeaponDamage.Value != 0)
-				prodInfo = "Built at Heavy Vehicle Production Building";
+			if (weaponSystem.hasSecondaryWeapon)
+			{
+				SecondaryWeaponDPS = weaponSystem.secondaryWeaponDamage.Value / weaponSystem.secondaryWeaponAttackSpeed;
+				DPS = mainWeaponDPS + SecondaryWeaponDPS;
+				combatInfo = "DPS:" + DPS + ", Attack Range: " + unit.attackRange.Value + "\n";
+
+				//Heavy Mech Support
+				if (unit.entityName == "Heavy Mech Tank")
+				{
+					specialInfo = "An Armed unit that cant fly and excells at taking damage and shredding armored units up close with a " +
+						"powerful but slow firing plasma bolt, later models now come equipped with a support laser mini gun for lighter armed units." +
+						"A big downside is its heavy weight and size, limiting its speed compared to other units of its size";
+				}
+				else if (unit.entityName == "Heavy Mech Knight")
+				{
+					specialInfo = "An Armed unit that cant fly and excells at dealing consistent damage from medium to long range with dual heavy " +
+						"autocannons, it also has decent armor to shrug off shots from most units and has many backup systems" +
+						"Has a suprising amount of speed for its size but still lacks it compared to smaller units";
+				}
+				prodInfo = "\nNeeds a Heavy Vehicle Production Building to be able to buy and place";
+			}
 		}
-		textInfo.text = costInfo + healthInfo + specialInfo + combatInfo + prodInfo;
+		if (unit.isFlying)
+		{
+			specialInfo = "An Armed unit that can fly and easily pass over most canyons and mountains for ambushes, comes equipped with a powerful " +
+				"gauss cannon, capable of punching small holes in most heavily armored units. It does however lack the armor compared to most units";
+			prodInfo = "\nNeeds a VTOL Vehicle Production Building to be able to buy and place";
+		}
+
+		toolTip.tipToShow = specialInfo + "\n" + prodInfo;
+		textInfo.text = costInfo + healthInfo + combatInfo;
 	}
 	public void LinkBuyButtons(int i, Button buttonToLink, List<GameObject> listType)
 	{

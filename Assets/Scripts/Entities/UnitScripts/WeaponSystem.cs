@@ -18,14 +18,14 @@ public class WeaponSystem : NetworkBehaviour
 	public ParticleSystem mainWeaponProjectileParticle;
 	public NetworkVariable<float> mainWeaponDamage = new NetworkVariable<float>();
 	public float mainWeaponAttackSpeed;
-	public float mainWeaponAttackSpeedTimer;
+	private float mainWeaponAttackSpeedTimer;
 
 	public AudioSource secondaryWeaponAudio;
 	public ParticleSystem secondaryWeaponParticles;
 	public ParticleSystem secondaryWeaponProjectileParticle;
 	public NetworkVariable<float> secondaryWeaponDamage = new NetworkVariable<float>();
 	public float secondaryWeaponAttackSpeed;
-	public float secondaryWeaponAttackSpeedTimer;
+	private float secondaryWeaponAttackSpeedTimer;
 
 	public bool hasSecondaryWeapon;
 
