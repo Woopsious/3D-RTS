@@ -69,7 +69,8 @@ public class CapturePointController : MonoBehaviour
 	}
 	public void SetOwnershipBasedOnHq(BuildingManager Hq)
 	{
-		HQRef = Hq;
+		if (Hq.isPlayerOneEntity == isPlayerOneSpawn || !Hq.isPlayerOneEntity == isPlayerTwoSpawn)
+			HQRef = Hq;
 
 		if (isPlayerOneSpawn)
 		{

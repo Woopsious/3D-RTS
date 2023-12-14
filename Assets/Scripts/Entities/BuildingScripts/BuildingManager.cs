@@ -38,10 +38,16 @@ public class BuildingManager : Entities
 	public override void Start()
 	{
 		base.Start();
+		if (unpoweredBuildingIndicatorObj != null)
+			unpoweredBuildingIndicatorObj.transform.SetParent(FindObjectOfType<Canvas>().transform);
 	}
 	public override void Update()
 	{
 		base.Update();
+
+		if (unpoweredBuildingIndicatorObj != null && unpoweredBuildingIndicatorObj.activeInHierarchy)
+			unpoweredBuildingIndicatorObj.transform.position = Camera.main.WorldToScreenPoint(
+				gameObject.transform.position + new Vector3(0, 7f, 0));
 	}
 	public void OnBuildingStartUp()
 	{
@@ -63,6 +69,11 @@ public class BuildingManager : Entities
 		GetComponent<CanPlaceBuilding>().isPlaced = true;
 
 		AddBuildingRefs();
+		if (isPlayerOneEntity == FindObjectOfType<PlayerController>().isPlayerOne && unpoweredBuildingIndicatorObj != null)
+		{
+			Debug.LogWarning("pass");
+			unpoweredBuildingIndicatorObj.SetActive(true);
+		}
 
 		if (isGeneratorBuilding)
 			gameObject.GetComponent<EnergyGenController>().PowerBuildings();
@@ -96,6 +107,11 @@ public class BuildingManager : Entities
 	public void PowerBuilding()
 	{
 		isPowered = true;
+		if (isPlayerOneEntity == FindObjectOfType<PlayerController>().isPlayerOne && unpoweredBuildingIndicatorObj != null)
+		{
+			Debug.LogWarning("power");
+			unpoweredBuildingIndicatorObj.SetActive(false);
+		}
 
 		if (isRefineryBuilding)
 		{
@@ -112,6 +128,11 @@ public class BuildingManager : Entities
 	public void UnpowerBuilding()
 	{
 		isPowered = false;
+		if (isPlayerOneEntity == FindObjectOfType<PlayerController>().isPlayerOne && unpoweredBuildingIndicatorObj != null)
+		{
+			Debug.LogWarning("unpower");
+			unpoweredBuildingIndicatorObj.SetActive(true);
+		}
 
 		if (isRefineryBuilding)
 		{
