@@ -26,9 +26,9 @@ public class TechTreeManager : MonoBehaviour
 
 	Technology buildingTechHealthOne = new Technology
 	{
-		TechName = "BuildingTech HealthOne",
-		TechInfo = "Increases Health by 10%",
-		TimeToResearchSec = 10,
+		TechName = "Back Up Life Support",
+		TechInfo = "Increases Health of Buildings by 10%",
+		TimeToResearchSec = 120,
 		canBeReseached = true,
 		isBuildingTech = true,
 		hasResearched = false,
@@ -39,9 +39,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology buildingTechArmourOne = new Technology
 	{
-		TechName = "BuildingTech ArmourOne",
-		TechInfo = "Increases Armour by 10%",
-		TimeToResearchSec = 10,
+		TechName = "Blast Resistant Materials",
+		TechInfo = "Increases Armour of Buildings by 10%",
+		TimeToResearchSec = 120,
 		canBeReseached = true,
 		isBuildingTech = true,
 		hasResearched = false,
@@ -52,9 +52,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology buildingTechRefineryBoost = new Technology
 	{
-		TechName = "BuildingTech RefineryBoost",
+		TechName = "Enrichment Injectors",
 		TechInfo = "Increases Resource Income by 10%",
-		TimeToResearchSec = 20,
+		TimeToResearchSec = 180,
 		canBeReseached = false,
 		isBuildingTech = true,
 		hasResearched = false,
@@ -65,9 +65,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology buildingTechHeavyMechs = new Technology
 	{
-		TechName = "BuildingTech HeavyMechs",
+		TechName = "Heavy Mechs",
 		TechInfo = "Unlocks Heavy Mechs",
-		TimeToResearchSec = 20,
+		TimeToResearchSec = 150,
 		canBeReseached = false,
 		isBuildingTech = true,
 		hasResearched = false,
@@ -78,9 +78,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology buildingTechVTOLS = new Technology
 	{
-		TechName = "BuildingTech VTOLS",
+		TechName = "VTOL Crafts",
 		TechInfo = "Unlocks Flying VTOL Gunships",
-		TimeToResearchSec = 20,
+		TimeToResearchSec = 150,
 		canBeReseached = false,
 		isBuildingTech = true,
 		hasResearched = false,
@@ -91,9 +91,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology buildingTechHealthTwo = new Technology
 	{
-		TechName = "BuildingTech HealthTwo",
-		TechInfo = "Increases Health by 15%",
-		TimeToResearchSec = 15,
+		TechName = "Additional Staff",
+		TechInfo = "Increases Health of Buildings by 15%",
+		TimeToResearchSec = 210,
 		canBeReseached = false,
 		isBuildingTech = true,
 		hasResearched = false,
@@ -104,9 +104,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology buildingTechArmourTwo = new Technology
 	{
-		TechName = "BuildingTech ArmourTwo",
-		TechInfo = "Increases Armour by 15%",
-		TimeToResearchSec = 15,
+		TechName = "Active Defense Systems",
+		TechInfo = "Increases Armour of Buildings by 15%",
+		TimeToResearchSec = 240,
 		canBeReseached = false,
 		isBuildingTech = true,
 		hasResearched = false,
@@ -122,9 +122,9 @@ public class TechTreeManager : MonoBehaviour
 
 	Technology unitTechHealthOne = new Technology
 	{
-		TechName = "UnitTech HealthOne",
-		TechInfo = "Increases Health by 5%",
-		TimeToResearchSec = 10,
+		TechName = "Back Up Systems",
+		TechInfo = "Increases Health of Units by 5%",
+		TimeToResearchSec = 120,
 		canBeReseached = true,
 		isBuildingTech = false,
 		hasResearched = false,
@@ -135,9 +135,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology unitTechArmourOne = new Technology
 	{
-		TechName = "UnitTech ArmourOne",
-		TechInfo = "Increases Armour by 10%",
-		TimeToResearchSec = 10,
+		TechName = "Additional Reactive Armor",
+		TechInfo = "Increases Armour of Units by 10%",
+		TimeToResearchSec = 120,
 		canBeReseached = true,
 		isBuildingTech = false,
 		hasResearched = false,
@@ -148,9 +148,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology unitTechSpeedOne = new Technology
 	{
-		TechName = "UnitTech SpeedOne",
-		TechInfo = "Increases Unit Speeds by 10MPH",
-		TimeToResearchSec = 20,
+		TechName = "Better Servos",
+		TechInfo = "Increases Speed of Units by 10MPH",
+		TimeToResearchSec = 120,
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
@@ -161,8 +161,8 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology unitTechHealthTwo = new Technology
 	{
-		TechName = "UnitTech HealthTwo",
-		TechInfo = "Increases Health by 10%",
+		TechName = "Self Healing Nanotech",
+		TechInfo = "Increases Health of Units by 10%",
 		TimeToResearchSec = 20,
 		canBeReseached = false,
 		isBuildingTech = false,
@@ -174,9 +174,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology unitTechAttackRangeOne = new Technology
 	{
-		TechName = "UnitTech RangeOne",
-		TechInfo = "Increases Range by 100M",
-		TimeToResearchSec = 20,
+		TechName = "Additional Sensors",
+		TechInfo = "Increases Range of Units by 100M",
+		TimeToResearchSec = 150,
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
@@ -187,9 +187,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology unitTechAttackDamageOne = new Technology
 	{
-		TechName = "UnitTech DamageOne",
-		TechInfo = "Increases Damage by 5%",
-		TimeToResearchSec = 15,
+		TechName = "Depleted Uranium Rounds",
+		TechInfo = "Increases Damage of Units by 5%",
+		TimeToResearchSec = 150,
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
@@ -200,9 +200,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology unitTechAttackRangeTwo = new Technology
 	{
-		TechName = "UnitTech RangeTwo",
-		TechInfo = "Increases Range by 100M",
-		TimeToResearchSec = 15,
+		TechName = "Thermal And Night Vision Sensors",
+		TechInfo = "Increases Range of Units by 100M",
+		TimeToResearchSec = 300,
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
@@ -213,9 +213,9 @@ public class TechTreeManager : MonoBehaviour
 	};
 	Technology unitTechAttackDamageTwo = new Technology
 	{
-		TechName = "UnitTech DamageTwo",
-		TechInfo = "Increases Damage by 10%",
-		TimeToResearchSec = 15,
+		TechName = "Ai Assisted Targeting",
+		TechInfo = "Increases Damage of Units by 10%",
+		TimeToResearchSec = 300,
 		canBeReseached = false,
 		isBuildingTech = false,
 		hasResearched = false,
@@ -304,15 +304,22 @@ public class TechTreeManager : MonoBehaviour
 		TitleText.text = tech.TechName;
 		TitleText.color = new Color(0.8f, 0, 0, 1);
 
-		Text infoText = obj.transform.GetChild(1).GetComponent<Text>();
-		infoText.text = tech.TechInfo + "\n Research Cost: \n" + tech.techCostMoney + " Money, " + 
-			tech.techCostAlloys + " Alloys, " + tech.techCostCrystals + " Crystals";
-		infoText.color = new Color(0.8f, 0, 0, 1);
+		int min = (int)(tech.TimeToResearchSec / 60);
+		int sec = (int)(tech.TimeToResearchSec % 60);
+
+		Text costText = obj.transform.GetChild(1).GetComponent<Text>();
+		costText.text = "Research Cost:\nMoney: " + tech.techCostMoney + "\nAlloys: " + tech.techCostAlloys + "\nCrystals: " + tech.techCostCrystals;
+		costText.color = new Color(0.8f, 0, 0, 1);
+
+		ToolTips toolTip = obj.GetComponent<ToolTips>();
+		toolTip.tipToShow = tech.TechInfo + "\n Time To Research: " + min + "m";
+		if (sec != 0)
+			toolTip.tipToShow += sec + "s";
 
 		if (tech.canBeReseached)
 		{
 			TitleText.color = new Color(0.8f, 0.8f, 0, 1);
-			infoText.color = new Color(0.8f, 0.8f, 0, 1);
+			costText.color = new Color(0.8f, 0.8f, 0, 1);
 		}
 
 		obj.transform.GetChild(2).GetComponent<Button>().onClick.AddListener(delegate { SetUpReseachButton(tech, index, obj); });
@@ -358,6 +365,7 @@ public class TechTreeManager : MonoBehaviour
 		GameManager.Instance.playerNotifsManager.DisplayNotifisMessage(techList[index].TechName + " Researched", 3f);
 		UiElement.transform.GetChild(0).GetComponent<Text>().color = new Color(0, 0.8f, 0, 1);
 		UiElement.transform.GetChild(1).GetComponent<Text>().color = new Color(0, 0.8f, 0, 1);
+		UiElement.transform.GetChild(1).GetComponent<Text>().text = "Research Completed";
 
 		CompleteResearch(techList, index);
 		UnlockNextResearch(techList, index);
